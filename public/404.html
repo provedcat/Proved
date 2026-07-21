@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Proved</title>
+    <script>
+      const base = '/proved/';
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+      if (path.startsWith(base)) {
+        const route = path.slice(base.length);
+        window.location.replace(base + '?p=/' + route + search.replace(/^\?/, '&') + hash);
+      } else {
+        window.location.replace(base);
+      }
+    </script>
+  </head>
+  <body>Proved로 이동 중입니다.</body>
+</html>
