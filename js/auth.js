@@ -14,6 +14,10 @@ function setAuthMessage(message, tone = 'gray') {
   msg.textContent = message;
   msg.className = `text-xs font-bold ${tone === 'red' ? 'text-red-400' : tone === 'blue' ? 'text-blue-400' : 'text-gray-400'}`;
   msg.classList.toggle('hidden', !message);
+
+  if (typeof provedSetEntryAuthMessage === 'function') {
+    provedSetEntryAuthMessage(message, tone);
+  }
 }
 
 function openAuthSheet() {
@@ -86,7 +90,7 @@ async function handleKakaoOAuthLogin() {
   });
 
   if (error) {
-    setAuthMessage(`카카오 로그인 시작 실패: ${error.message}`, 'red');
+    setAuthMessage('카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'red');
   }
 }
 
@@ -101,7 +105,7 @@ async function handleGoogleOAuthLogin() {
   });
 
   if (error) {
-    setAuthMessage(`Google 로그인 시작 실패: ${error.message}`, 'red');
+    setAuthMessage('Google 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'red');
   }
 }
 
@@ -129,10 +133,14 @@ async function handleLogout() {
     return;
   }
 
-  state.currentUser = null;
-  state.selectedSavedCatId = null;
-  state.selectedTrendCatId = null;
-  state.lastSavedResultKey = null;
+  if (typeof provedResetAccountState === 'function') {
+    provedResetAccountState();
+  } else {
+    state.currentUser = null;
+    state.selectedSavedCatId = null;
+    state.selectedTrendCatId = null;
+    state.lastSavedResultKey = null;
+  }
 
   setAuthMessage('', 'gray');
   await refreshAuthUI();

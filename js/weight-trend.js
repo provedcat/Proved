@@ -118,7 +118,13 @@ async function loadTrendCats() {
 
     closeTrendCatMenus();
     const cat = list._trendCats.find(item => String(item.id) === String(button.dataset.catId));
-    if (cat) selectTrendCat(cat);
+    if (cat) {
+      if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
+        setActivePet({ ...cat, species: 'cat' }, { route: 'weight' });
+      } else {
+        selectTrendCat(cat);
+      }
+    }
   };
 
   setWeightTrendMessage('체중 추이를 확인할 고양이를 선택해주세요.', 'gray');
@@ -202,6 +208,10 @@ async function selectTrendCat(cat) {
   }
 
   state.selectedTrendCatId = cat.id;
+  if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
+    await setActivePet({ ...cat, species: 'cat' }, { route: 'weight', syncTrend: false });
+    return;
+  }
   if (typeof provedSetLastActivePet === 'function') provedSetLastActivePet({ ...cat, species: 'cat' });
   setWeightTrendMessage(`${cat.name || '선택한 고양이'}의 체중 기록을 불러오는 중입니다...`, 'blue');
   setTrendEmptyMessage('');

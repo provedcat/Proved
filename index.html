@@ -385,7 +385,7 @@
 
 <div id="provedPetSelectorModal" class="proved-pet-modal hidden" aria-hidden="true">
   <button type="button" class="proved-pet-modal__backdrop" aria-label="반려동물 선택 닫기" onclick="closePetSelectorModal()"></button>
-  <section class="proved-pet-modal__panel" role="dialog" aria-modal="true" aria-labelledby="provedPetSelectorTitle">
+  <section class="proved-pet-modal__panel" role="dialog" aria-modal="true" aria-labelledby="provedPetSelectorTitle" tabindex="-1">
     <div class="flex items-start justify-between gap-3">
       <div>
         <p class="text-xs font-black text-blue-400 tracking-widest">PROVED PETS</p>
@@ -601,6 +601,10 @@ let state = {
 // 페이지 전환
 // -----------------------------------------------
 function showPage(pageName) {
+  if (state.selectedPetSpecies === 'dog' && pageName !== 'dogReadyPage') {
+    pageName = 'dogReadyPage';
+  }
+
   if (
     pageName === 'wetFoodBetaPage' &&
     window.wetBetaAccessGranted !== true
@@ -635,7 +639,7 @@ function showPage(pageName) {
     button.classList.toggle('text-gray-400', !active);
   });
 
-  if (pageName === 'weightTrendPage' && typeof refreshWeightTrendPage === 'function') {
+  if (pageName === 'weightTrendPage' && typeof refreshWeightTrendPage === 'function' && !state.isApplyingActivePet) {
     refreshWeightTrendPage();
   }
 }
@@ -648,7 +652,14 @@ window.addEventListener('DOMContentLoaded', () => {
   provedShowEntry('start');
   showPage('calculatorPage');
   refreshAuthUI().then(() => { if (state.currentUser) provedResolveLoginDestination(); });
-  sb.auth.onAuthStateChange(async (event, session) => { await refreshAuthUI(); if (session?.user) provedResolveLoginDestination(); });
+  sb.auth.onAuthStateChange((event, session) => {
+    state.currentUser = session?.user || null;
+    if (session?.user) {
+      provedScheduleLoginDestination(session.user);
+      return;
+    }
+    setTimeout(() => refreshAuthUI(), 0);
+  });
   addWetSlot();
 
   const feedUploadForm = document.getElementById('feedUploadForm');
