@@ -1,0 +1,92 @@
+const CACHE_NAME = 'provedcat-pwa-v33';
+const CORE_ASSETS = [
+  './',
+  './manifest.json',
+  './service-worker.js',
+  './css/styles.css',
+  './js/pwa-install.js',
+  './js/calculator.js',
+  './js/feed-search.js',
+  './js/saved-cats.js',
+  './js/auth.js',
+  './js/share-card.js',
+  './js/weight-trend.js',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png'
+];
+
+const IMAGE_DESTINATIONS = new Set(['image']);
+const NETWORK_FIRST_DESTINATIONS = new Set(['document', 'script', 'style']);
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => Promise.all(
+        CORE_ASSETS.map((asset) => cache.add(asset).catch(() => null))
+      ))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+function shouldCacheResponse(response) {
+  return response && response.status === 200 && response.type === 'basic';
+}
+
+async function cacheResponse(request, response) {
+  if (!shouldCacheResponse(response)) return;
+
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(request, response.clone());
+}
+
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    await cacheResponse(request, networkResponse);
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) return cachedResponse;
+    throw error;
+  }
+}
+
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) return cachedResponse;
+
+  const networkResponse = await fetch(request);
+  await cacheResponse(request, networkResponse);
+  return networkResponse;
+}
+
+self.addEventListener('fetch', (event) => {
+  const requestUrl = new URL(event.request.url);
+
+  if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  if (event.request.mode === 'navigate' || NETWORK_FIRST_DESTINATIONS.has(event.request.destination)) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
+
+  if (IMAGE_DESTINATIONS.has(event.request.destination)) {
+    event.respondWith(cacheFirst(event.request));
+    return;
+  }
+
+  event.respondWith(networkFirst(event.request));
+});
