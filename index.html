@@ -651,14 +651,24 @@ function showPage(pageName) {
 window.addEventListener('DOMContentLoaded', () => {
   provedShowEntry('start');
   showPage('calculatorPage');
-  refreshAuthUI().then(() => { if (state.currentUser) provedResolveLoginDestination(); });
   sb.auth.onAuthStateChange((event, session) => {
     state.currentUser = session?.user || null;
-    if (session?.user) {
-      provedScheduleLoginDestination(session.user);
+
+    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      if (session?.user) {
+        provedScheduleLoginDestination(session.user);
+      } else {
+        setTimeout(() => refreshAuthUI(), 0);
+      }
       return;
     }
-    setTimeout(() => refreshAuthUI(), 0);
+
+    if (event === 'SIGNED_OUT') {
+      if (typeof provedCancelScheduledLoginDestination === 'function') {
+        provedCancelScheduledLoginDestination();
+      }
+      setTimeout(() => refreshAuthUI(), 0);
+    }
   });
   addWetSlot();
 

@@ -137,11 +137,12 @@ async function loadMyCats() {
 
 async function selectSavedCat(cat) {
   state.selectedSavedCatId = cat.id;
-  if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
-    await setActivePet({ ...cat, species: 'cat' }, { route: 'calculator', syncCalculator: false });
-    return;
+  const shouldSyncSharedPet = !state.isApplyingActivePet;
+  if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
+    provedApplyCurrentPetState({ ...cat, species: 'cat' });
+  } else if (typeof provedSetLastActivePet === 'function') {
+    provedSetLastActivePet({ ...cat, species: 'cat' });
   }
-  if (typeof provedSetLastActivePet === 'function') provedSetLastActivePet({ ...cat, species: 'cat' });
   state.isApplyingSavedCat = true;
 
   try {
@@ -181,6 +182,20 @@ async function selectSavedCat(cat) {
 
   updateCalorie();
   updateSaveFeedingButtonVisibility();
+
+  if (
+    shouldSyncSharedPet &&
+    !state.isSyncingDirectPetSelection &&
+    state.currentUser &&
+    typeof selectTrendCat === 'function'
+  ) {
+    state.isSyncingDirectPetSelection = true;
+    try {
+      await selectTrendCat({ ...cat, species: 'cat' });
+    } finally {
+      state.isSyncingDirectPetSelection = false;
+    }
+  }
 }
 
 function updateSaveFeedingButtonVisibility() {

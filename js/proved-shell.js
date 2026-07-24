@@ -1,6 +1,8 @@
 const PROVED_LAST_ACTIVE_KEY = 'proved:last_active_pet';
 let provedLastFocus = null;
 let provedAuthDestinationScheduled = false;
+let provedAuthDestinationTimer = null;
+let provedAuthDestinationUserId = null;
 
 function provedGetLastActivePet() {
   try {
@@ -25,6 +27,17 @@ function provedSetLastActivePet(pet) {
   }));
   state.lastActivePetId = pet.id;
   state.selectedPetSpecies = pet.species || 'cat';
+}
+
+function provedApplyCurrentPetState(pet) {
+  if (!pet) return;
+
+  const normalizedPet = { ...pet, species: pet.species || 'cat' };
+  state.activePet = normalizedPet;
+  state.selectedPetSpecies = normalizedPet.species;
+  if (normalizedPet.id) provedSetLastActivePet(normalizedPet);
+  provedUpdateCurrentPetLabel(normalizedPet);
+  provedSetDogMode(normalizedPet.species === 'dog');
 }
 
 function provedSetEntryAuthMessage(message, tone = 'gray') {
@@ -176,32 +189,50 @@ async function provedResolveLoginDestination() {
   openPetSelectorModal('calculator');
 }
 
+function provedCancelScheduledLoginDestination() {
+  if (provedAuthDestinationTimer) {
+    clearTimeout(provedAuthDestinationTimer);
+  }
+  provedAuthDestinationTimer = null;
+  provedAuthDestinationScheduled = false;
+  provedAuthDestinationUserId = null;
+}
+
 function provedScheduleLoginDestination(sessionUser) {
-  if (!sessionUser || provedAuthDestinationScheduled) return;
+  if (!sessionUser?.id) return;
+
+  if (
+    provedAuthDestinationScheduled &&
+    provedAuthDestinationUserId === sessionUser.id
+  ) {
+    return;
+  }
+
+  if (provedAuthDestinationTimer) {
+    clearTimeout(provedAuthDestinationTimer);
+  }
+
   provedAuthDestinationScheduled = true;
+  provedAuthDestinationUserId = sessionUser.id;
   state.currentUser = sessionUser;
-  setTimeout(async () => {
+
+  provedAuthDestinationTimer = setTimeout(async () => {
+    provedAuthDestinationTimer = null;
     try {
       await refreshAuthUI();
       await provedResolveLoginDestination();
     } finally {
       provedAuthDestinationScheduled = false;
+      provedAuthDestinationUserId = null;
     }
   }, 0);
 }
 
+
 async function setActivePet(pet, options = {}) {
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
-  state.activePet = normalizedPet;
-  state.selectedPetSpecies = normalizedPet.species;
-
-  if (normalizedPet.id) {
-    provedSetLastActivePet(normalizedPet);
-  }
-
   provedHideEntry();
-  provedUpdateCurrentPetLabel(normalizedPet);
-  provedSetDogMode(normalizedPet.species === 'dog');
+  provedApplyCurrentPetState(normalizedPet);
 
   if (normalizedPet.species === 'dog') {
     state.selectedSavedCatId = null;
@@ -299,8 +330,9 @@ async function openPetSelectorModal(context) {
   } catch (error) {
     msg.textContent = `불러오기 실패: ${error.message}`;
   } finally {
-    const focusable = provedGetFocusableElements(modal);
-    (focusable[0] || modal).focus();
+    const panel = modal.querySelector('.proved-pet-modal__panel');
+    const focusable = provedGetFocusableElements(panel || modal);
+    (focusable[0] || panel || modal).focus();
   }
 }
 
@@ -314,6 +346,7 @@ function closePetSelectorModal() {
 }
 
 function provedResetAccountState() {
+  provedCancelScheduledLoginDestination();
   closePetSelectorModal();
   provedClearLastActivePet();
   state.currentUser = null;
@@ -358,10 +391,11 @@ document.addEventListener('keydown', event => {
 
   if (event.key !== 'Tab') return;
 
-  const focusable = provedGetFocusableElements(modal);
+  const panel = modal.querySelector('.proved-pet-modal__panel');
+  const focusable = provedGetFocusableElements(panel || modal);
   if (!focusable.length) {
     event.preventDefault();
-    modal.focus();
+    (panel || modal).focus();
     return;
   }
 
@@ -385,5 +419,7 @@ window.provedSetEntryAuthMessage = provedSetEntryAuthMessage;
 window.openPetSelectorModal = openPetSelectorModal;
 window.closePetSelectorModal = closePetSelectorModal;
 window.provedSetLastActivePet = provedSetLastActivePet;
+window.provedApplyCurrentPetState = provedApplyCurrentPetState;
+window.provedCancelScheduledLoginDestination = provedCancelScheduledLoginDestination;
 window.provedResetAccountState = provedResetAccountState;
 window.setActivePet = setActivePet;
