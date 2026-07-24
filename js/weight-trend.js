@@ -202,6 +202,7 @@ async function selectTrendCat(cat) {
   }
 
   state.selectedTrendCatId = cat.id;
+  if (typeof provedSetLastActivePet === 'function') provedSetLastActivePet({ ...cat, species: 'cat' });
   setWeightTrendMessage(`${cat.name || '선택한 고양이'}의 체중 기록을 불러오는 중입니다...`, 'blue');
   setTrendEmptyMessage('');
 

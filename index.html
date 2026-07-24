@@ -16,8 +16,16 @@
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css?v=20260701-ui-refresh-2">
+  <link rel="stylesheet" href="css/proved-shell.css?v=20260724-proved-shell">
 </head>
 <body class="flex justify-center">
+<div id="provedEntry" class="proved-entry" aria-label="Proved 시작 화면">
+  <div class="proved-entry__inner">
+    <div class="proved-wordmark">PROVED</div>
+    <div id="provedEntryMain"></div>
+  </div>
+</div>
+
 <div class="pc-app-shell w-full max-w-[640px] min-h-screen bg-white shadow-sm overflow-x-hidden">
 
   <!-- 헤더 -->
@@ -29,10 +37,15 @@
     </button>
   </header>
 
-  <nav id="mainNav" class="pc-tabs px-6 pb-4 grid grid-cols-2 gap-2">
+  <div class="proved-shell-bar">
+    <p id="provedCurrentPetName" class="proved-shell-current">반려동물을 선택해 주세요</p>
+    <button type="button" class="proved-load-pet-btn" onclick="openPetSelectorModal()">반려동물 불러오기</button>
+  </div>
+
+  <nav id="mainNav" class="pc-tabs px-6 pb-4 grid grid-cols-3 gap-2">
     <button id="navCalculator" onclick="showPage('calculatorPage')"
       class="py-3 rounded-2xl text-sm font-black bg-[#2d7dd2] text-white shadow-sm">
-      급여 계산
+      통합 계산기
     </button>
     <button id="navWeightTrend" onclick="showPage('weightTrendPage')"
       class="py-3 rounded-2xl text-sm font-black bg-gray-100 text-gray-400">
@@ -40,7 +53,7 @@
     </button>
     <button id="navWetFoodBeta" onclick="showPage('wetFoodBetaPage')"
       class="hidden py-3 rounded-2xl text-sm font-black bg-gray-100 text-gray-400">
-      습식 후보
+      습식 탐험
     </button>
   </nav>
 
@@ -57,7 +70,7 @@
             <p class="text-sm font-black text-gray-800">내 고양이 불러오기</p>
             <p class="text-xs font-bold text-blue-400 mt-0.5">저장된 기본 정보와 최신 체중을 입력합니다.</p>
           </div>
-          <button onclick="loadMyCats()"
+          <button onclick="openPetSelectorModal('calculator')"
             class="shrink-0 px-4 py-2 bg-[#2d7dd2] text-white text-xs font-black rounded-xl shadow-sm">
             불러오기
           </button>
@@ -282,6 +295,15 @@
     </section>
 
 
+    <section id="dogReadyPage" class="hidden space-y-5">
+      <div class="proved-dog-ready">
+        <p class="text-4xl mb-3">🐶</p>
+        <h2 class="text-2xl font-black">ProvedDog는 준비 중입니다.</h2>
+        <p class="mt-3 text-sm font-bold text-gray-500 leading-relaxed">강아지 계산식과 데이터는 임의로 연결하지 않았습니다. 현재 통합 계산기는 고양이(ProvedCat) 기능만 실제 계산을 지원합니다.</p>
+        <button type="button" class="mt-5 px-5 py-3 bg-[#2d7dd2] text-white rounded-2xl text-sm font-black" onclick="provedShowEntry('pet')">다시 선택하기</button>
+      </div>
+    </section>
+
     <section id="wetFoodBetaPage" class="hidden space-y-5">
       <div class="pc-info-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
         <p class="text-xs font-black text-blue-400 tracking-widest">RULE-BASED BETA</p>
@@ -318,8 +340,13 @@
       <div id="weightTrendContent" class="hidden space-y-5">
         <section class="pc-trend-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
           <div>
-            <h3 class="text-base font-black text-gray-800">고양이 선택</h3>
-            <p class="mt-1 text-xs font-bold text-gray-400">체중 추이를 확인할 고양이를 선택하세요.</p>
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-black text-gray-800">고양이 선택</h3>
+                <p class="mt-1 text-xs font-bold text-gray-400">체중 추이를 확인할 고양이를 선택하세요.</p>
+              </div>
+              <button type="button" class="proved-load-pet-btn" onclick="openPetSelectorModal('weight')">불러오기</button>
+            </div>
           </div>
           <div id="trendCatList" class="grid grid-cols-1 gap-2"></div>
           <p id="trendCatMsg" class="hidden text-xs font-bold text-gray-400"></p>
@@ -354,6 +381,22 @@
     </section>
 
   </main>
+</div>
+
+<div id="provedPetSelectorModal" class="proved-pet-modal hidden" aria-hidden="true">
+  <button type="button" class="proved-pet-modal__backdrop" aria-label="반려동물 선택 닫기" onclick="closePetSelectorModal()"></button>
+  <section class="proved-pet-modal__panel" role="dialog" aria-modal="true" aria-labelledby="provedPetSelectorTitle">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <p class="text-xs font-black text-blue-400 tracking-widest">PROVED PETS</p>
+        <h2 id="provedPetSelectorTitle" class="mt-1 text-xl font-black text-gray-800">반려동물 불러오기</h2>
+        <p class="mt-1 text-xs font-bold text-gray-400">현재 저장된 고양이 프로필을 공통으로 불러옵니다.</p>
+      </div>
+      <button type="button" data-modal-close onclick="closePetSelectorModal()" class="shrink-0 w-9 h-9 rounded-full bg-gray-50 border border-gray-100 text-gray-400 font-black" aria-label="닫기">×</button>
+    </div>
+    <div id="provedPetSelectorList" class="mt-5"></div>
+    <p id="provedPetSelectorMsg" class="mt-3 text-xs font-bold text-gray-400"></p>
+  </section>
 </div>
 
 <div id="pwaInstallPrompt" class="pwa-install-prompt hidden" aria-live="polite">
@@ -568,7 +611,8 @@ function showPage(pageName) {
   const pages = {
     calculatorPage: document.getElementById('calculatorPage'),
     weightTrendPage: document.getElementById('weightTrendPage'),
-    wetFoodBetaPage: document.getElementById('wetFoodBetaPage')
+    wetFoodBetaPage: document.getElementById('wetFoodBetaPage'),
+    dogReadyPage: document.getElementById('dogReadyPage')
   };
   const buttons = {
     calculatorPage: document.getElementById('navCalculator'),
@@ -601,9 +645,10 @@ function showPage(pageName) {
 // 앱 시작
 // -----------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
+  provedShowEntry('start');
   showPage('calculatorPage');
-  refreshAuthUI();
-  sb.auth.onAuthStateChange(() => refreshAuthUI());
+  refreshAuthUI().then(() => { if (state.currentUser) provedResolveLoginDestination(); });
+  sb.auth.onAuthStateChange(async (event, session) => { await refreshAuthUI(); if (session?.user) provedResolveLoginDestination(); });
   addWetSlot();
 
   const feedUploadForm = document.getElementById('feedUploadForm');
@@ -646,6 +691,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
+<script src="js/proved-shell.js?v=20260724-proved-shell"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
 <script src="js/calculator.js?v=20260712-feed-picker"></script>
 <script src="js/feed-search.js?v=20260712-feed-picker"></script>

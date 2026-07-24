@@ -131,6 +131,7 @@ async function loadMyCats() {
 
 async function selectSavedCat(cat) {
   state.selectedSavedCatId = cat.id;
+  if (typeof provedSetLastActivePet === 'function') provedSetLastActivePet({ ...cat, species: 'cat' });
   state.isApplyingSavedCat = true;
 
   try {
