@@ -1,0 +1,561 @@
+    :root { --brand:#2d7dd2; --dry:#f4a44a; --wet:#4a9af4; }
+    body { font-size:16px; background:#f3f4f6; word-break:keep-all; font-family:-apple-system,sans-serif; }
+    input,select { outline:none; }
+    input[type=range] { -webkit-appearance:none; background:#e5e7eb; height:8px; border-radius:4px; width:100%; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:var(--brand); border-radius:50%; cursor:pointer; border:4px solid white; box-shadow:0 2px 4px rgba(0,0,0,.15); }
+    .autocomplete-item:hover { background:#f0f7ff; }
+
+    /* -----------------------------------------------
+       공유 카드 모달 스타일
+       역할: 결과 이미지 카드를 보여주는 전체화면 레이어
+    ----------------------------------------------- */
+    #shareModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.8);
+      overflow-y: auto;
+      padding: 24px 16px 48px;
+      -webkit-overflow-scrolling: touch;
+    }
+    #shareModal.open { display: block; }
+
+    /* 모달 내부 컨텐츠 박스 */
+    .share-modal-inner {
+      max-width: 360px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* 닫기 버튼 */
+    .share-close-btn {
+      align-self: flex-end;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* -----------------------------------------------
+       공유 카드 본체 (콘텐츠 높이에 따라 자연 확장)
+       역할: 이 div 전체가 png 이미지로 캡처됩니다
+    ----------------------------------------------- */
+    #shareCard {
+      width: 360px;
+      max-width: 100%;
+      height: auto;
+      min-height: 640px;
+      box-sizing: border-box;
+      transform: none;
+      zoom: 1;
+      background: #0d1e36;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, sans-serif;
+    }
+
+    /* 배경 장식 그라데이션 원 */
+    #shareCard::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(45,125,210,0.22) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    #shareCard::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(74,154,244,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* 카드 헤더: 브랜드명 + 고양이 이름 */
+    .sc-header {
+      padding: 26px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+    }
+    .sc-brand { font-size:14px; font-weight:900; color:#5ba3e8; font-style:italic; letter-spacing:-0.02em; }
+    .sc-cat-name { font-size:22px; font-weight:900; color:#fff; line-height:1.1; text-align:right; letter-spacing:-0.03em; }
+    .sc-cat-sub { font-size:10px; color:rgba(255,255,255,0.38); text-align:right; margin-top:3px; font-weight:700; }
+
+    /* 칼로리 블록 */
+    .sc-kcal-block {
+      padding: 18px 24px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+    }
+    .sc-kcal-label { font-size:9px; font-weight:900; color:#5ba3e8; letter-spacing:0.18em; margin-bottom:4px; }
+    .sc-kcal-row { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; }
+    .sc-kcal-value { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+    .sc-kcal-num { display:block; font-size:54px; font-weight:900; color:#fff; line-height:0.95; letter-spacing:-0.04em; }
+    .sc-kcal-unit { display:block; font-size:12px; line-height:1.25; color:rgba(255,255,255,0.35); font-weight:700; margin-top:4px; }
+    .sc-ratio-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; padding-bottom:4px; }
+    .sc-ratio-bar { width:84px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; display:flex; }
+    .sc-dry-seg { background:#f4a44a; }
+    .sc-wet-seg { background:#4a9af4; flex:1; }
+    .sc-ratio-txt { font-size:9px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.07em; }
+
+    /* 사료 급여량 목록 */
+    .sc-feeds {
+      padding: 14px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+    }
+    .sc-feeds-title { font-size:9px; font-weight:900; color:rgba(255,255,255,0.25); letter-spacing:0.15em; margin-bottom:2px; }
+    .sc-feed-row {
+      display:flex; align-items:center; gap:9px;
+      padding:10px 12px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:13px;
+    }
+    .sc-feed-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .sc-feed-info { flex:1; min-width:0; }
+    .sc-feed-type { font-size:8px; font-weight:900; letter-spacing:0.12em; opacity:0.45; color:#fff; }
+    .sc-feed-name { font-size:11px; font-weight:700; color:rgba(255,255,255,0.85); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+    .sc-feed-right { text-align:right; flex-shrink:0; }
+    .sc-feed-g { font-size:20px; font-weight:900; color:#fff; line-height:1; letter-spacing:-0.03em; }
+    .sc-feed-kcal { font-size:9px; color:rgba(255,255,255,0.3); font-weight:700; }
+
+    /* 영양 분석 섹션 */
+    .sc-analysis {
+      padding: 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      position: relative;
+      flex: 1;
+    }
+    .sc-analysis-title { font-size:9px; font-weight:900; color:rgba(255,255,255,0.25); letter-spacing:0.15em; }
+    .sc-an-card {
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:14px;
+      padding:12px 14px;
+      box-sizing:border-box;
+    }
+    .sc-an-label { font-size:9px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.1em; margin-bottom:7px; line-height:1.25; }
+    .sc-an-main-row { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
+    .sc-an-val { font-size:24px; font-weight:900; line-height:1.1; letter-spacing:-0.03em; }
+    .sc-an-sub { font-size:10px; font-weight:700; margin-top:4px; line-height:1.35; }
+
+    /* Ca:P 칼슘/인 용량 상세 */
+    .sc-cap-detail { display:flex; gap:10px; margin-top:8px; }
+    .sc-cap-item { flex:1; background:rgba(255,255,255,0.05); border-radius:9px; padding:7px 9px; text-align:center; }
+    .sc-cap-item-label { font-size:8px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.1em; }
+    .sc-cap-item-val { font-size:15px; font-weight:900; color:#fff; margin-top:2px; line-height:1; }
+    .sc-cap-item-unit { font-size:8px; color:rgba(255,255,255,0.3); font-weight:700; }
+
+    /* 수분 게이지 */
+    .sc-water-card { display:flex; flex-direction:column; gap:7px; }
+    .sc-water-main-row { align-items:flex-start; }
+    .sc-water-ml { display:block; flex:1; min-width:0; overflow-wrap:anywhere; }
+    .sc-water-pct { flex-shrink:0; margin-top:3px; text-align:right; }
+    .sc-water-gauge-track { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; margin-top:2px; flex-shrink:0; }
+    .sc-water-gauge-fill { height:7px; border-radius:4px; }
+    .sc-water-nums { display:flex; justify-content:space-between; gap:10px; margin-top:0; font-size:8px; line-height:1.25; font-weight:700; color:rgba(255,255,255,0.25); }
+    .sc-water-nums span:last-child { text-align:right; }
+
+    /* 상태 색상 */
+    .color-ok   { color: #4ade80; }
+    .color-warn { color: #fbbf24; }
+
+    /* 카드 푸터 */
+    .sc-footer {
+      padding: 10px 24px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .sc-footer-url { font-size:9px; font-weight:900; color:rgba(255,255,255,0.2); letter-spacing:0.04em; }
+    .sc-footer-date { font-size:9px; font-weight:700; color:rgba(255,255,255,0.2); }
+
+    /* 저장/공유 버튼 */
+    .share-btn-row { display:flex; gap:10px; }
+    .share-btn-save {
+      flex:1; padding:15px;
+      background:#2d7dd2; color:#fff;
+      font-size:14px; font-weight:900;
+      border:none; border-radius:16px; cursor:pointer;
+    }
+    .share-btn-kakao {
+      flex:1; padding:15px;
+      background:#FEE500; color:#3C1E1E;
+      font-size:14px; font-weight:900;
+      border:none; border-radius:16px; cursor:pointer;
+    }
+    .share-btn-save:active, .share-btn-kakao:active { opacity:0.8; }
+
+/* 모바일 PWA 설치 안내 */
+.pwa-install-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 9997;
+  width: min(92vw, 320px);
+  transform: translateX(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.pwa-install-prompt:not(.hidden) {
+  display: flex;
+}
+
+.pwa-install-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.pwa-install-btn {
+  padding: 8px 13px;
+  border: 1px solid rgba(45, 125, 210, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  color: rgba(45, 125, 210, 0.78);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.pwa-install-dismiss-btn {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: rgba(100, 116, 139, 0.72);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 16px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+}
+
+.pwa-install-dismiss-btn:active {
+  transform: translateY(1px);
+  opacity: 0.82;
+}
+
+.pwa-install-btn:active {
+  transform: translateY(1px);
+  opacity: 0.82;
+}
+
+.pwa-install-msg {
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(17, 24, 39, 0.82);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .pwa-install-prompt:not(.hidden) {
+    display: none;
+  }
+}
+
+/* -----------------------------------------------
+   Figma-inspired mobile app refresh (2026)
+   Scope: visual overrides only; preserve existing IDs/JS behavior.
+----------------------------------------------- */
+:root {
+  --background: #F5F7FA;
+  --foreground: #1A1A2E;
+  --card: #FFFFFF;
+  --primary: #2d7dd2;
+  --primary-strong: #236fbf;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EEF4FF;
+  --muted: #F0F2F5;
+  --muted-foreground: #9CA3AF;
+  --accent: #FFF8F0;
+  --dry: #f4a44a;
+  --wet: #4a9af4;
+  --border: #E5E7EB;
+  --destructive: #E74C3C;
+  --nutrition: #5a9e6f;
+  --success: #5a9e6f;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+  --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-button: 0 8px 18px rgba(41, 121, 255, 0.28);
+  --brand: var(--primary);
+}
+
+html { background: var(--background); }
+body {
+  background: var(--background) !important;
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.pc-app-shell {
+  background: var(--background) !important;
+  box-shadow: none !important;
+}
+header { padding: 18px 10px 14px !important; }
+#authOpenBtn {
+  border: 0 !important;
+  background: rgba(255,255,255,0.58) !important;
+  color: #6B7280 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+.pc-tabs {
+  padding: 0 6px 26px !important;
+  gap: 0 !important;
+  border-radius: 18px;
+}
+#navCalculator,
+#navWeightTrend {
+  min-height: 48px;
+  border-radius: 999px !important;
+  background: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+  box-shadow: none !important;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+#navCalculator.bg-\[\#2d7dd2\],
+#navWeightTrend.bg-\[\#2d7dd2\] {
+  background: linear-gradient(135deg, #3a8ee8 0%, var(--primary) 100%) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: var(--shadow-button) !important;
+}
+main { padding: 0 16px 28px !important; }
+#calculatorPage { gap: 24px !important; }
+.pc-ratio-card,
+.pc-trend-card,
+#weightTrendLoginNotice,
+#calBox,
+#capResult > div,
+#waterResult > div {
+  border: 1px solid var(--border) !important;
+  background: var(--card) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+.pc-info-card {
+  padding: 0 !important;
+  overflow: visible;
+  gap: 16px !important;
+  border: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.pc-section-title,
+.pc-upload-section h2 {
+  color: #05051F !important;
+  letter-spacing: -0.04em;
+}
+.pc-info-card > .pc-section-title {
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#catName, #catWeight, #catBirth, #catNeutered,
+.pc-info-card label {
+  border: 1px solid var(--border) !important;
+  border-radius: 1rem !important;
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  box-shadow: none !important;
+}
+#catName { margin-top: 0 !important; }
+#catWeight { border-top: 1px solid var(--border) !important; }
+#savedCatLoadBox {
+  background: #eff6ff !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 1rem !important;
+}
+#catName::placeholder,
+#catWeight::placeholder,
+#catBirth,
+#catNeutered,
+#dryInput1::placeholder,
+#dryInput2::placeholder,
+#wetSlots input::placeholder { color: #8D99AE; }
+#isDiet { accent-color: var(--primary); }
+#calBox {
+  margin: 14px !important;
+  background: var(--secondary) !important;
+}
+.pc-ratio-card {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-soft) !important;
+  padding: 18px 16px !important;
+}
+#dryPct { color: var(--dry); font-size: 34px; line-height: 1; }
+#wetPct { color: var(--wet); font-size: 34px; line-height: 1; }
+#ratioSlider { height: 10px; background: #D1D5DB; }
+#ratioSlider::-webkit-slider-thumb {
+  width: 20px; height: 20px; border: 0; background: var(--primary); box-shadow: none;
+}
+#ratioSlider::-moz-range-thumb {
+  width: 20px; height: 20px; border: 0; background: var(--primary); border-radius: 50%;
+}
+#dryInput1, #dryInput2, #wetSlots input[type="text"] {
+  min-height: 48px;
+  font-size: 15px;
+}
+#dryInput1, #dryInput2 { background: var(--accent) !important; }
+#dryInput1:focus, #dryInput2:focus { box-shadow: inset 0 0 0 1px rgba(245,146,30,.24); }
+#dryList1, #dryList2, [id^="wetList_"] {
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 34px rgba(15,23,42,.14) !important;
+}
+.autocomplete-item { background: #fff; }
+.autocomplete-item:hover { background: var(--secondary); }
+#addWetBtn {
+  background: rgba(255,255,255,.72) !important;
+  border-color: var(--border) !important;
+  color: #667085 !important;
+  border-radius: 999px !important;
+}
+.pc-calculate-btn {
+  background: linear-gradient(180deg, #3a8ee8 0%, var(--primary) 100%) !important;
+  border-radius: 16px !important;
+  min-height: 58px;
+  box-shadow: 0 12px 22px rgba(45, 125, 210, .28) !important;
+}
+
+.pc-result-hero {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.18) !important;
+  color: #FFFFFF !important;
+}
+.pc-result-hero #resDER { color: #FFFFFF !important; }
+.pc-result-label { color: #8EC5FF !important; }
+.pc-result-unit { color: #B7C0CC !important; }
+#resultArea > p { color: #9CA3AF !important; }
+#capBtn { background: var(--nutrition) !important; }
+#waterBtn { background: #38A8C5 !important; }
+#openShareModalBtn { border-radius: 16px !important; }
+.pc-upload-section {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding-top: 0 !important;
+}
+.pc-upload-section h2 {
+  font-size: 22px !important;
+  color: #05051F !important;
+}
+.pc-upload-section label > div {
+  background: var(--secondary);
+  border-color: var(--primary) !important;
+  border-style: solid !important;
+  color: var(--primary);
+}
+#upDryBtn, #upWetBtn {
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.72) !important;
+}
+
+/* Weight trend page */
+#weightTrendPage { gap: 16px !important; }
+.pc-trend-hero {
+  background: #EAF2FF !important;
+  border: 0 !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: none !important;
+  padding: 26px 20px !important;
+}
+.pc-trend-card {
+  padding: 18px 16px !important;
+}
+#trendCatList [data-cat-id] {
+  background: #FAFAFB !important;
+  border-color: var(--border) !important;
+  border-radius: 22px !important;
+  min-height: 64px;
+}
+#trendCatList [data-cat-id].border-\[\#2d7dd2\] {
+  background: var(--secondary) !important;
+  border-color: var(--primary) !important;
+  border-width: 2px !important;
+}
+#trendCatList [data-cat-menu-button] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #B8C0CC !important;
+}
+#weightTrendChart { width: 100% !important; }
+#trendSummaryBox { gap: 10px !important; }
+#trendSummaryBox > div {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-soft) !important;
+  text-align: left !important;
+  padding: 16px !important;
+}
+.pc-summary-label { color: var(--primary) !important; }
+#trendLatestWeight, #trendStartWeight, #trendWeightDelta {
+  color: #05051F;
+  font-size: 22px !important;
+  letter-spacing: -0.04em;
+}
+#trendWeightDelta.text-blue-500 { color: var(--primary) !important; }
+#weightTrendLoginNotice button,
+#authSheet button.bg-\[\#2d7dd2\] {
+  background: var(--primary) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-button) !important;
+}
+@media (max-width: 430px) {
+  main { padding-left: 16px !important; padding-right: 16px !important; }
+  header { padding-left: 10px !important; padding-right: 10px !important; }
+  #trendSummaryBox > div { padding: 14px 16px !important; }
+}
