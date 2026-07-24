@@ -196,8 +196,7 @@ function provedGetLoginDestinationKey(sessionOrUser) {
   const user = sessionOrUser?.user || sessionOrUser;
   if (!user?.id) return null;
 
-  const token = sessionOrUser?.access_token || '';
-  return token ? `${user.id}:${token}` : `${user.id}:cycle-${provedAuthGeneration}`;
+  return `${user.id}:cycle-${provedAuthGeneration}`;
 }
 
 function provedCancelScheduledLoginDestination({ resetCompleted = false } = {}) {
