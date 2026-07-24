@@ -123,7 +123,13 @@ async function loadMyCats() {
     const button = e.target.closest('[data-cat-id]');
     if (!button) return;
     const cat = list._cats.find(item => item.id === button.dataset.catId);
-    if (cat) selectSavedCat(cat);
+    if (cat) {
+      if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
+        setActivePet({ ...cat, species: 'cat' }, { route: 'calculator' });
+      } else {
+        selectSavedCat(cat);
+      }
+    }
   };
   list.classList.remove('hidden');
   setSavedCatLoadMessage('불러올 고양이를 선택해주세요.', 'gray');
@@ -131,6 +137,12 @@ async function loadMyCats() {
 
 async function selectSavedCat(cat) {
   state.selectedSavedCatId = cat.id;
+  const shouldSyncSharedPet = !state.isApplyingActivePet;
+  if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
+    provedApplyCurrentPetState({ ...cat, species: 'cat' });
+  } else if (typeof provedSetLastActivePet === 'function') {
+    provedSetLastActivePet({ ...cat, species: 'cat' });
+  }
   state.isApplyingSavedCat = true;
 
   try {
@@ -170,6 +182,20 @@ async function selectSavedCat(cat) {
 
   updateCalorie();
   updateSaveFeedingButtonVisibility();
+
+  if (
+    shouldSyncSharedPet &&
+    !state.isSyncingDirectPetSelection &&
+    state.currentUser &&
+    typeof selectTrendCat === 'function'
+  ) {
+    state.isSyncingDirectPetSelection = true;
+    try {
+      await selectTrendCat({ ...cat, species: 'cat' });
+    } finally {
+      state.isSyncingDirectPetSelection = false;
+    }
+  }
 }
 
 function updateSaveFeedingButtonVisibility() {

@@ -1,40 +1,40 @@
 {
-  "name": "ProvedCat - 고양이 영양 설계",
-  "short_name": "ProvedCat",
+  "name": "Proved - 반려동물 영양 설계",
+  "short_name": "Proved",
   "description": "고양이 체중과 식단 비율에 맞춰 하루 급여량을 계산하는 ProvedCat 계산기입니다.",
-  "id": "/catfoodcalculator/",
-  "start_url": "/catfoodcalculator/",
-  "scope": "/catfoodcalculator/",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2d7dd2",
   "icons": [
     {
-      "src": "/catfoodcalculator/icons/icon-192.png",
+      "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/catfoodcalculator/icons/icon-192.png",
+      "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/catfoodcalculator/icons/icon-512.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/catfoodcalculator/icons/icon-512.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/catfoodcalculator/icons/apple-touch-icon.png",
+      "src": "./icons/apple-touch-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"

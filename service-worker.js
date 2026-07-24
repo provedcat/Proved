@@ -1,9 +1,11 @@
-const CACHE_NAME = 'provedcat-pwa-v33';
+const CACHE_NAME = 'proved-pwa-v35';
 const CORE_ASSETS = [
   './',
   './manifest.json',
   './service-worker.js',
   './css/styles.css',
+  './css/proved-shell.css',
+  './js/proved-shell.js',
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',

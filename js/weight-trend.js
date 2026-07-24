@@ -118,7 +118,13 @@ async function loadTrendCats() {
 
     closeTrendCatMenus();
     const cat = list._trendCats.find(item => String(item.id) === String(button.dataset.catId));
-    if (cat) selectTrendCat(cat);
+    if (cat) {
+      if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
+        setActivePet({ ...cat, species: 'cat' }, { route: 'weight' });
+      } else {
+        selectTrendCat(cat);
+      }
+    }
   };
 
   setWeightTrendMessage('체중 추이를 확인할 고양이를 선택해주세요.', 'gray');
@@ -202,6 +208,12 @@ async function selectTrendCat(cat) {
   }
 
   state.selectedTrendCatId = cat.id;
+  const shouldSyncSharedPet = !state.isApplyingActivePet;
+  if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
+    provedApplyCurrentPetState({ ...cat, species: 'cat' });
+  } else if (typeof provedSetLastActivePet === 'function') {
+    provedSetLastActivePet({ ...cat, species: 'cat' });
+  }
   setWeightTrendMessage(`${cat.name || '선택한 고양이'}의 체중 기록을 불러오는 중입니다...`, 'blue');
   setTrendEmptyMessage('');
 
@@ -220,10 +232,22 @@ async function selectTrendCat(cat) {
   if (!records.length) {
     setWeightTrendMessage('', 'gray');
     setTrendEmptyMessage('아직 저장된 체중 기록이 없습니다. 급여 계산 결과를 저장하면 체중 기록이 쌓입니다.');
-    return;
+  } else {
+    setWeightTrendMessage(`${records.length}개의 체중 기록을 표시 중입니다.`, 'gray');
   }
 
-  setWeightTrendMessage(`${records.length}개의 체중 기록을 표시 중입니다.`, 'gray');
+  if (
+    shouldSyncSharedPet &&
+    !state.isSyncingDirectPetSelection &&
+    typeof selectSavedCat === 'function'
+  ) {
+    state.isSyncingDirectPetSelection = true;
+    try {
+      await selectSavedCat({ ...cat, species: 'cat' });
+    } finally {
+      state.isSyncingDirectPetSelection = false;
+    }
+  }
 }
 
 async function loadWeightRecordsForCat(catId) {
