@@ -652,11 +652,12 @@ window.addEventListener('DOMContentLoaded', () => {
   provedShowEntry('start');
   showPage('calculatorPage');
   sb.auth.onAuthStateChange((event, session) => {
+    const previousUser = state.currentUser;
     state.currentUser = session?.user || null;
 
     if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
       if (session?.user) {
-        provedScheduleLoginDestination(session.user);
+        provedScheduleLoginDestination(session);
       } else {
         setTimeout(() => refreshAuthUI(), 0);
       }
@@ -665,9 +666,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (event === 'SIGNED_OUT') {
       if (typeof provedCancelScheduledLoginDestination === 'function') {
-        provedCancelScheduledLoginDestination();
+        provedCancelScheduledLoginDestination({ resetCompleted: true });
       }
-      setTimeout(() => refreshAuthUI(), 0);
+      if (!state.isLoggingOut && (previousUser || state.activePet)) {
+        provedResetAccountState();
+      } else {
+        setTimeout(() => refreshAuthUI(), 0);
+      }
     }
   });
   addWetSlot();

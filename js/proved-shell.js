@@ -3,6 +3,9 @@ let provedLastFocus = null;
 let provedAuthDestinationScheduled = false;
 let provedAuthDestinationTimer = null;
 let provedAuthDestinationUserId = null;
+let provedAuthDestinationKey = null;
+let provedCompletedLoginDestinationKey = null;
+let provedAuthGeneration = 0;
 
 function provedGetLastActivePet() {
   try {
@@ -189,21 +192,40 @@ async function provedResolveLoginDestination() {
   openPetSelectorModal('calculator');
 }
 
-function provedCancelScheduledLoginDestination() {
+function provedGetLoginDestinationKey(sessionOrUser) {
+  const user = sessionOrUser?.user || sessionOrUser;
+  if (!user?.id) return null;
+
+  const token = sessionOrUser?.access_token || '';
+  return token ? `${user.id}:${token}` : `${user.id}:cycle-${provedAuthGeneration}`;
+}
+
+function provedCancelScheduledLoginDestination({ resetCompleted = false } = {}) {
+  provedAuthGeneration += 1;
   if (provedAuthDestinationTimer) {
     clearTimeout(provedAuthDestinationTimer);
   }
   provedAuthDestinationTimer = null;
   provedAuthDestinationScheduled = false;
   provedAuthDestinationUserId = null;
+  provedAuthDestinationKey = null;
+  if (resetCompleted) {
+    provedCompletedLoginDestinationKey = null;
+  }
 }
 
-function provedScheduleLoginDestination(sessionUser) {
-  if (!sessionUser?.id) return;
+function provedScheduleLoginDestination(sessionOrUser) {
+  const user = sessionOrUser?.user || sessionOrUser;
+  const destinationKey = provedGetLoginDestinationKey(sessionOrUser);
+  if (!user?.id || !destinationKey) return;
+
+  if (provedCompletedLoginDestinationKey === destinationKey) {
+    return;
+  }
 
   if (
     provedAuthDestinationScheduled &&
-    provedAuthDestinationUserId === sessionUser.id
+    provedAuthDestinationKey === destinationKey
   ) {
     return;
   }
@@ -213,17 +235,42 @@ function provedScheduleLoginDestination(sessionUser) {
   }
 
   provedAuthDestinationScheduled = true;
-  provedAuthDestinationUserId = sessionUser.id;
-  state.currentUser = sessionUser;
+  provedAuthDestinationUserId = user.id;
+  provedAuthDestinationKey = destinationKey;
+  state.currentUser = user;
 
+  const scheduledGeneration = provedAuthGeneration;
   provedAuthDestinationTimer = setTimeout(async () => {
     provedAuthDestinationTimer = null;
     try {
+      if (
+        scheduledGeneration !== provedAuthGeneration ||
+        state.currentUser?.id !== user.id ||
+        provedAuthDestinationKey !== destinationKey
+      ) {
+        return;
+      }
+
       await refreshAuthUI();
+
+      if (
+        scheduledGeneration !== provedAuthGeneration ||
+        state.currentUser?.id !== user.id ||
+        provedAuthDestinationKey !== destinationKey
+      ) {
+        return;
+      }
+
       await provedResolveLoginDestination();
+      provedCompletedLoginDestinationKey = destinationKey;
+    } catch (error) {
+      console.error('Login destination resolution failed:', error);
     } finally {
-      provedAuthDestinationScheduled = false;
-      provedAuthDestinationUserId = null;
+      if (provedAuthDestinationKey === destinationKey) {
+        provedAuthDestinationScheduled = false;
+        provedAuthDestinationUserId = null;
+        provedAuthDestinationKey = null;
+      }
     }
   }, 0);
 }
@@ -346,7 +393,7 @@ function closePetSelectorModal() {
 }
 
 function provedResetAccountState() {
-  provedCancelScheduledLoginDestination();
+  provedCancelScheduledLoginDestination({ resetCompleted: true });
   closePetSelectorModal();
   provedClearLastActivePet();
   state.currentUser = null;

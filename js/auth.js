@@ -119,6 +119,7 @@ async function handleLogout() {
   }
 
   setAuthMessage('로그아웃 중입니다...', 'blue');
+  state.isLoggingOut = true;
 
   const { error } = await sb.auth.signOut();
 
@@ -126,12 +127,16 @@ async function handleLogout() {
     console.error('Logout failed:', error);
     setAuthMessage(`로그아웃 실패: ${error.message}`, 'red');
 
+    state.isLoggingOut = false;
+
     if (logoutButton) {
       logoutButton.disabled = false;
       logoutButton.textContent = originalText || '로그아웃';
     }
     return;
   }
+
+  state.isLoggingOut = false;
 
   if (typeof provedResetAccountState === 'function') {
     provedResetAccountState();
