@@ -44,6 +44,45 @@
   margin-top: 22px;
 }
 
+.proved-home-button {
+  appearance: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -7px 0;
+  padding: 7px 8px 7px 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.proved-wordmark--header {
+  font-size: 24px;
+}
+
+.proved-wordmark--header::after {
+  width: 44px;
+  height: 2px;
+  margin-top: 5px;
+}
+
+.proved-home-button:hover {
+  background: #eff6ff;
+}
+
+.proved-home-button:active {
+  background: #dbeafe;
+  transform: translateY(1px);
+}
+
+.proved-home-button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
 .proved-entry__main {
   flex: 1;
   display: flex;
