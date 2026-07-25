@@ -6,6 +6,8 @@ let provedAuthDestinationUserId = null;
 let provedAuthDestinationKey = null;
 let provedCompletedLoginDestinationKey = null;
 let provedAuthGeneration = 0;
+let provedRememberedCat = null;
+let provedHomeReturnPage = 'calculatorPage';
 
 function provedGetLastActivePet() {
   try {
@@ -38,9 +40,51 @@ function provedApplyCurrentPetState(pet) {
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
   state.activePet = normalizedPet;
   state.selectedPetSpecies = normalizedPet.species;
+  if (normalizedPet.species === 'cat') provedRememberedCat = normalizedPet;
   if (normalizedPet.id) provedSetLastActivePet(normalizedPet);
   provedUpdateCurrentPetLabel(normalizedPet);
   provedSetDogMode(normalizedPet.species === 'dog');
+}
+
+function provedGetVisibleServicePage() {
+  return ['calculatorPage', 'weightTrendPage', 'wetFoodBetaPage', 'dogReadyPage'].find(id => {
+    const page = document.getElementById(id);
+    return page && !page.classList.contains('hidden');
+  }) || 'calculatorPage';
+}
+
+function provedGoHome() {
+  // During INITIAL_SESSION, null does not yet mean "signed out". Wait for the
+  // existing auth listener rather than starting another auth request or route.
+  if (!state.authInitialized) return;
+
+  provedHomeReturnPage = provedGetVisibleServicePage();
+  provedShowEntry(state.currentUser ? 'pet' : 'start');
+}
+
+function provedChooseSpecies(species) {
+  if (species === 'dog') {
+    return setActivePet({ species: 'dog' }, { route: 'dog' });
+  }
+
+  const rememberedCat = provedRememberedCat;
+  if (rememberedCat) {
+    provedHideEntry();
+    provedApplyCurrentPetState(rememberedCat);
+    const returnPage = provedHomeReturnPage === 'dogReadyPage'
+      ? 'calculatorPage'
+      : provedHomeReturnPage;
+    const previousApplying = state.isApplyingActivePet;
+    state.isApplyingActivePet = true;
+    try {
+      showPage(returnPage);
+    } finally {
+      state.isApplyingActivePet = previousApplying;
+    }
+    return;
+  }
+
+  return setActivePet({ species: 'cat' }, { route: 'calculator' });
 }
 
 function provedSetEntryAuthMessage(message, tone = 'gray') {
@@ -125,8 +169,8 @@ function provedRenderEntry(step) {
           <div class="proved-choice-grid">
             <button class="proved-choice proved-choice--muted" type="button" onclick="provedRenderEntry('login')">로그인</button>
             <button class="proved-choice" type="button">로그인 없이</button>
-            <button class="proved-choice" type="button" onclick="setActivePet({ species: 'cat' }, { route: 'calculator' })">고양이와</button>
-            <button class="proved-choice" type="button" onclick="setActivePet({ species: 'dog' }, { route: 'dog' })">강아지와</button>
+            <button class="proved-choice" type="button" onclick="provedChooseSpecies('cat')">고양이와</button>
+            <button class="proved-choice" type="button" onclick="provedChooseSpecies('dog')">강아지와</button>
           </div>
           <p class="proved-entry__hint" style="margin-top:34px">함께할 반려동물을 선택해 주세요.</p>
           <button class="proved-back" onclick="provedRenderEntry('start')">이전 단계로</button>
@@ -395,6 +439,7 @@ function provedResetAccountState() {
   provedCancelScheduledLoginDestination({ resetCompleted: true });
   closePetSelectorModal();
   provedClearLastActivePet();
+  provedRememberedCat = null;
   state.currentUser = null;
   state.activePet = null;
   state.selectedSavedCatId = null;
@@ -457,6 +502,8 @@ document.addEventListener('keydown', event => {
 });
 
 window.provedShowEntry = provedShowEntry;
+window.provedGoHome = provedGoHome;
+window.provedChooseSpecies = provedChooseSpecies;
 window.provedRenderEntry = provedRenderEntry;
 window.provedEnterPet = provedEnterPet;
 window.provedResolveLoginDestination = provedResolveLoginDestination;

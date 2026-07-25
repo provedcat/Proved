@@ -16,7 +16,7 @@
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css?v=20260701-ui-refresh-2">
-  <link rel="stylesheet" href="css/proved-shell.css?v=20260724-proved-shell">
+  <link rel="stylesheet" href="css/proved-shell.css?v=20260725-logo-home">
 </head>
 <body class="flex justify-center">
 <div id="provedEntry" class="proved-entry" aria-label="Proved 시작 화면">
@@ -30,7 +30,9 @@
 
   <!-- 헤더 -->
   <header class="px-6 pt-10 pb-4 flex items-center justify-between">
-    <h1 class="text-2xl font-black tracking-tighter text-[#2d7dd2] italic">ProvedCat</h1>
+    <button type="button" class="proved-home-button" aria-label="Proved 홈으로 이동" onclick="provedGoHome()">
+      <span class="proved-wordmark proved-wordmark--header" aria-hidden="true">PROVED</span>
+    </button>
     <button id="authOpenBtn" type="button" onclick="openAuthSheet()"
       class="px-3 py-2 rounded-full bg-gray-50 border border-gray-100 text-xs font-black text-gray-500">
       로그인
@@ -594,7 +596,8 @@ let state = {
   selectedSavedCatId: null,
   isSavingFeedingRecord: false,
   isApplyingSavedCat: false,
-  lastSavedResultKey: null
+  lastSavedResultKey: null,
+  authInitialized: false
 };
 
 // -----------------------------------------------
@@ -654,6 +657,7 @@ window.addEventListener('DOMContentLoaded', () => {
   sb.auth.onAuthStateChange((event, session) => {
     const previousUser = state.currentUser;
     state.currentUser = session?.user || null;
+    state.authInitialized = true;
 
     if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
       if (session?.user) {
@@ -717,7 +721,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
-<script src="js/proved-shell.js?v=20260724-proved-shell"></script>
+<script src="js/proved-shell.js?v=20260725-logo-home"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
 <script src="js/calculator.js?v=20260712-feed-picker"></script>
 <script src="js/feed-search.js?v=20260712-feed-picker"></script>
