@@ -42,13 +42,13 @@ async function refreshAuthUI() {
   const loggedInAuth = document.getElementById('loggedInAuth');
   const userIdentifier = document.getElementById('userIdentifier');
   const authOpenBtn = document.getElementById('authOpenBtn');
-  if (!box || !loggedOutAuth || !loggedInAuth || !userIdentifier) return;
+  if (!loggedOutAuth || !loggedInAuth || !userIdentifier) return;
 
   const user = await getCurrentUser();
   if (!user) {
     state.currentUser = null;
     state.selectedSavedCatId = null;
-    box.classList.add('hidden');
+    box?.classList.add('hidden');
     loggedOutAuth.classList.remove('hidden');
     loggedInAuth.classList.add('hidden');
     userIdentifier.textContent = '';
@@ -66,7 +66,7 @@ async function refreshAuthUI() {
   // Do not expose provider metadata or the internal Supabase UUID in the UI.
   userIdentifier.textContent = '로그인됨';
   if (authOpenBtn) authOpenBtn.textContent = '로그인됨';
-  box.classList.remove('hidden');
+  box?.classList.remove('hidden');
   updateSaveFeedingButtonVisibility();
   if (typeof window.updateWetFoodBetaAccess === 'function') {
     await window.updateWetFoodBetaAccess(user);

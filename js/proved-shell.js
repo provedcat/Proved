@@ -126,15 +126,18 @@ function provedHideEntry() {
 
 function provedUpdateCurrentPetLabel(pet = null) {
   const currentName = document.getElementById('provedCurrentPetName');
+  const weightDate = document.getElementById('provedCurrentPetWeightDate');
   if (!currentName) return;
 
   if (!pet) {
     currentName.textContent = '반려동물을 선택해 주세요';
+    weightDate?.classList.add('hidden');
     return;
   }
 
   const speciesLabel = (pet.species || 'cat') === 'dog' ? '강아지' : '고양이';
   currentName.textContent = pet.name ? `${pet.name} · ${speciesLabel}` : `게스트 ${speciesLabel}`;
+  weightDate?.classList.add('hidden');
 }
 
 function provedSetDogMode(enabled) {

@@ -598,3 +598,121 @@ html, body, .pc-app-shell { max-width: 100%; overflow-x: clip; background: var(-
 @media(max-width:360px){main{padding-inline:12px!important}.pc-segmented-option{padding-inline:6px;font-size:11px}.pc-result-actions{grid-template-columns:1fr}.pc-feed-heading{align-items:flex-start;flex-direction:column}.pc-feed-panel,.pc-ratio-card,.pc-result-panel{padding:16px!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 .sc-energy-details{display:flex;gap:8px;padding:10px 24px;border-bottom:1px solid var(--result-divider);position:relative}.sc-energy-details>div{flex:1;padding:9px 10px;border-radius:12px;background:var(--result-surface);color:var(--result-text-secondary);font-size:9px}.sc-energy-details span{display:block;font-weight:800;margin-bottom:3px}.sc-energy-details strong{color:var(--result-text);font-size:16px}.sc-energy-details small{font-weight:700}
+
+/* 2026 calculator visual system: bright workflow, compact corners */
+:root {
+  --brand-blue: #2F6FED;
+  --brand-blue-pressed: #234FB8;
+  --page-background: #F6F7F8;
+  --surface: #FFFFFF;
+  --snack-surface: #ECEAE6;
+  --text-primary: #222222;
+  --text-secondary: #6B7280;
+  --border-neutral: #E1E5EA;
+  --cat-dry: #FF9F43;
+  --cat-dry-strong: #C98245;
+  --cat-dry-light: #FFF7ED;
+  --cat-wet: #3D8BFF;
+  --cat-wet-strong: #416A86;
+  --cat-wet-light: #EDF5FF;
+  --analysis-green: #5A9E6F;
+  --analysis-water: #3FAAC6;
+  --modal-background: #101B33;
+  --modal-surface: #172440;
+  --modal-text: #FFFFFF;
+  --modal-text-secondary: #C7D0DF;
+  --modal-divider: #2A3855;
+  --border: var(--border-neutral);
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-result: 14px;
+  --radius-sheet: 16px;
+}
+
+#calculatorPage { gap: 48px !important; }
+.pc-step-section { gap: 24px; }
+.pc-field + .pc-field { margin-top: 0; }
+.pc-field-label { font-size: 16px; }
+.pc-choice-chip { border-radius:10px; }
+.pc-field input[type=text], .pc-field input[type=date], .pc-field input[type=number],
+.pc-feed-input-row input[type=text] { min-height: 48px; border-color: var(--border-neutral) !important; border-radius: 12px !important; }
+.proved-shell-current { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0; }
+.proved-shell-weight-date { color:var(--text-secondary); font-size:13px; font-weight:500; }
+#navCalculator, #navWeightTrend, #navWetFoodBeta { border-radius:10px !important; }
+
+.pc-feed-panel, .pc-ratio-card { padding:24px !important; border-radius:16px !important; }
+.pc-feed-panel--dry { background:var(--cat-dry-light); border-color:var(--cat-dry); }
+.pc-feed-panel--wet { background:var(--cat-wet-light); border-color:var(--cat-wet); }
+.pc-feed-panel--dry .pc-feed-input-row input,
+.pc-feed-panel--wet .pc-feed-input-row input { background:#fff !important; }
+.pc-feed-picker-button { width:auto; align-self:flex-start; min-height:40px; margin-top:12px; padding:8px 18px; border:0; border-radius:10px; color:#fff; font-size:13px; font-weight:700; }
+.pc-feed-panel--dry .pc-feed-picker-button { background:var(--cat-dry); }
+.pc-feed-panel--dry .pc-feed-picker-button:active { background:var(--cat-dry-strong); }
+.pc-feed-panel--wet .pc-feed-picker-button { background:var(--cat-wet); }
+.pc-feed-panel--wet .pc-feed-picker-button:active { background:var(--cat-wet-strong); }
+#addWetBtn { margin-top:0; background:#fff !important; border:1px solid var(--border-neutral) !important; color:var(--cat-wet-strong) !important; border-radius:10px !important; }
+.pc-selected-feed { margin-top:12px; overflow-wrap:anywhere; }
+.pc-feed-panel--dry .pc-selected-feed { color:var(--cat-dry-strong); }
+.pc-feed-panel--wet .pc-selected-feed { color:var(--cat-wet-strong); }
+.pc-search-list { border-radius:12px; }
+.pc-ratio-card { border-color:var(--border-neutral) !important; box-shadow:0 2px 8px rgba(16,27,51,.04) !important; }
+.pc-ratio-values strong { font-size:16px; }
+#dryPct { color:var(--cat-dry); }
+#wetPct { color:var(--cat-wet); }
+.pc-primary-button { min-height:52px; border-radius:14px; }
+
+.pc-result-panel { padding:0; border-radius:0; background:transparent; color:var(--text-primary); box-shadow:none; }
+.pc-result-panel:not(.hidden) { gap:24px; }
+.pc-result-panel > .pc-section-title { font-size:22px; color:var(--text-primary) !important; }
+.pc-result-panel h2 { color:var(--text-primary); }
+.pc-result-summary { border-color:var(--border-neutral); border-radius:14px; background:#fff; }
+.pc-result-summary > div { padding:16px 20px; border-color:var(--border-neutral); }
+.pc-result-summary > div:first-child { border-top:3px solid var(--brand-blue); }
+.pc-result-summary span { color:var(--text-secondary); }
+.pc-result-summary strong, .pc-result-summary strong span { color:var(--text-primary); }
+.pc-result-summary > div:first-child strong,
+.pc-result-summary > div:first-child strong span { color:var(--brand-blue); font-size:24px; }
+.pc-result-card { border:1px solid var(--border-neutral); border-left-width:4px; border-radius:14px; background:#fff; color:var(--text-primary); }
+.pc-result-card h3 { color:var(--text-primary); overflow-wrap:anywhere; }
+.pc-result-card p { color:var(--text-secondary); }
+.pc-result-card--dry { border-left-color:var(--cat-dry); }
+.pc-result-card--wet { border-left-color:var(--cat-wet); }
+.pc-result-card--dry > div:first-child > span,
+.pc-result-card--dry strong { color:var(--cat-dry-strong); }
+.pc-result-card--wet > div:first-child > span,
+.pc-result-card--wet strong { color:var(--cat-wet-strong); }
+.pc-result-actions .pc-secondary-button { min-height:44px; border-radius:10px; padding:10px 12px; color:#fff; border:0; font-size:14px; }
+#capBtn { background:var(--analysis-green) !important; }
+#waterBtn { background:var(--analysis-water) !important; }
+#openShareModalBtn { color:var(--brand-blue); background:#fff; border:1px solid var(--brand-blue); border-radius:10px !important; }
+.pc-result-disclaimer { color:var(--text-secondary); }
+
+#capResult > div, #waterResult > div { padding:20px !important; border:1px solid var(--border-neutral) !important; border-radius:14px !important; background:#fff !important; color:var(--text-primary) !important; box-shadow:none !important; }
+#capResult > div { border-top:3px solid var(--analysis-green) !important; }
+#waterResult > div { border-top:3px solid var(--analysis-water) !important; }
+#capResult .bg-white, #waterResult .bg-white { background:var(--page-background) !important; border-radius:10px !important; }
+#capResult .text-gray-800, #waterResult .text-gray-800,
+#capResult .text-gray-600, #waterResult .text-gray-600 { color:var(--text-primary) !important; }
+#capResult .text-gray-400, #waterResult .text-gray-400 { color:var(--text-secondary) !important; }
+#capResult .text-green-500 { color:var(--analysis-green) !important; }
+#waterResult .text-\[\#38a8c5\] { color:var(--analysis-water) !important; }
+
+#shareModal { background:rgba(16,27,51,.55); }
+.share-modal-inner { color:var(--modal-text); }
+#shareCard { background:var(--modal-background); border-radius:16px; }
+.sc-feed-row, .sc-an-card, .sc-energy-details > div { background:var(--modal-surface); border-color:var(--modal-divider); }
+.share-btn-save { background:var(--brand-blue); border-radius:10px; }
+.share-btn-kakao { border-radius:10px; }
+
+:where(button, input, select, [tabindex]):focus-visible { outline:3px solid rgba(47,111,237,.45) !important; outline-offset:2px; }
+
+@media(max-width:520px) {
+  .pc-feed-panel, .pc-ratio-card { padding:20px !important; }
+  .pc-result-actions { grid-template-columns:1fr 1fr; }
+  #openShareModalBtn { grid-column:1 / -1; }
+}
+@media(max-width:360px) {
+  .pc-result-panel { padding:0 !important; }
+  .pc-result-actions { grid-template-columns:1fr; }
+  #openShareModalBtn { grid-column:auto; }
+}
