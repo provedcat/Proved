@@ -6,7 +6,7 @@ let provedAuthDestinationUserId = null;
 let provedAuthDestinationKey = null;
 let provedCompletedLoginDestinationKey = null;
 let provedAuthGeneration = 0;
-let provedRememberedCat = null;
+let provedRememberedCatState = null;
 let provedHomeReturnPage = 'calculatorPage';
 
 function provedGetLastActivePet() {
@@ -40,7 +40,14 @@ function provedApplyCurrentPetState(pet) {
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
   state.activePet = normalizedPet;
   state.selectedPetSpecies = normalizedPet.species;
-  if (normalizedPet.species === 'cat') provedRememberedCat = normalizedPet;
+  if (normalizedPet.species === 'cat') {
+    provedRememberedCatState = {
+      pet: normalizedPet,
+      userId: state.currentUser?.id || null,
+      selectedSavedCatId: state.selectedSavedCatId ?? null,
+      selectedTrendCatId: state.selectedTrendCatId ?? null
+    };
+  }
   if (normalizedPet.id) provedSetLastActivePet(normalizedPet);
   provedUpdateCurrentPetLabel(normalizedPet);
   provedSetDogMode(normalizedPet.species === 'dog');
@@ -58,6 +65,15 @@ function provedGoHome() {
   // existing auth listener rather than starting another auth request or route.
   if (!state.authInitialized) return;
 
+  const currentUserId = state.currentUser?.id || null;
+  if (
+    state.activePet?.species === 'cat' &&
+    provedRememberedCatState?.userId === currentUserId
+  ) {
+    provedRememberedCatState.selectedSavedCatId = state.selectedSavedCatId ?? null;
+    provedRememberedCatState.selectedTrendCatId = state.selectedTrendCatId ?? null;
+  }
+
   provedHomeReturnPage = provedGetVisibleServicePage();
   provedShowEntry(state.currentUser ? 'pet' : 'start');
 }
@@ -67,10 +83,13 @@ function provedChooseSpecies(species) {
     return setActivePet({ species: 'dog' }, { route: 'dog' });
   }
 
-  const rememberedCat = provedRememberedCat;
-  if (rememberedCat) {
+  const rememberedState = provedRememberedCatState;
+  const currentUserId = state.currentUser?.id || null;
+  if (rememberedState && rememberedState.userId === currentUserId) {
     provedHideEntry();
-    provedApplyCurrentPetState(rememberedCat);
+    provedApplyCurrentPetState(rememberedState.pet);
+    state.selectedSavedCatId = rememberedState.selectedSavedCatId;
+    state.selectedTrendCatId = rememberedState.selectedTrendCatId;
     const returnPage = provedHomeReturnPage === 'dogReadyPage'
       ? 'calculatorPage'
       : provedHomeReturnPage;
@@ -439,7 +458,7 @@ function provedResetAccountState() {
   provedCancelScheduledLoginDestination({ resetCompleted: true });
   closePetSelectorModal();
   provedClearLastActivePet();
-  provedRememberedCat = null;
+  provedRememberedCatState = null;
   state.currentUser = null;
   state.activePet = null;
   state.selectedSavedCatId = null;
