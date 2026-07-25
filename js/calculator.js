@@ -56,6 +56,35 @@ function updateCalorie() {
   document.getElementById('calBox')?.classList.add('hidden');
 }
 
+function markCalculationDirty() {
+  if (!state.lastResult) return;
+  state.isCalculationDirty = true;
+  updateResultActionState();
+}
+
+function markCalculationFresh() {
+  state.isCalculationDirty = false;
+  updateResultActionState();
+}
+
+function updateResultActionState() {
+  const hasResult = !!state.lastResult;
+  const isFresh = hasResult && !state.isCalculationDirty;
+  const shareOpenButton = document.getElementById('openShareModalBtn');
+  if (shareOpenButton) {
+    shareOpenButton.disabled = !isFresh;
+    shareOpenButton.setAttribute('aria-disabled', String(!isFresh));
+    shareOpenButton.classList.toggle('opacity-50', !isFresh);
+    shareOpenButton.classList.toggle('cursor-not-allowed', !isFresh);
+  }
+  document.querySelectorAll('.share-btn-save, .share-btn-kakao').forEach(button => {
+    button.disabled = !isFresh;
+    button.setAttribute('aria-disabled', String(!isFresh));
+  });
+  updateSaveFeedingButtonVisibility();
+  document.getElementById('resultDirtyNotice')?.classList.toggle('hidden', !state.isCalculationDirty);
+}
+
 function initializeCalculatorChoices() {
   const neuteredInput = document.getElementById('catNeutered');
   const buttons = document.querySelectorAll('[data-neutered]');
@@ -105,6 +134,7 @@ function toggleDrySwitching() {
     document.getElementById('dryInput2').value = '';
     document.getElementById('drySelected2').classList.add('hidden');
   }
+  markCalculationDirty();
 }
 
 // -----------------------------------------------
@@ -150,6 +180,11 @@ function addWetSlot() {
   const input = document.getElementById(`wetInput_${slotId}`);
   input.addEventListener('input', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
   input.addEventListener('focus', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
+  const wetRatioInput = document.getElementById(`wetPct_${slotId}`);
+  if (wetRatioInput) {
+    wetRatioInput.addEventListener('input', markCalculationDirty);
+    wetRatioInput.addEventListener('change', markCalculationDirty);
+  }
 
   if (state.wetSlotIds.length >= 3) {
     document.getElementById('addWetBtn').classList.add('hidden');
@@ -161,13 +196,14 @@ function removeWetSlot(slotId) {
   delete state.wetFeedMap[slotId];
   state.wetSlotIds = state.wetSlotIds.filter(id => id !== slotId);
   document.getElementById('addWetBtn').classList.remove('hidden');
+  markCalculationDirty();
 }
 
 // -----------------------------------------------
 // 급여량 계산
 // -----------------------------------------------
 function clearCalculatorErrors() {
-  document.querySelectorAll('.pc-inline-error').forEach(el => { el.textContent = ''; el.classList.add('hidden'); });
+  document.querySelectorAll('.pc-inline-error:not(#resultDirtyNotice)').forEach(el => { el.textContent = ''; el.classList.add('hidden'); });
   document.querySelectorAll('[aria-invalid="true"]').forEach(el => el.removeAttribute('aria-invalid'));
 }
 
@@ -204,6 +240,20 @@ function calculate() {
   if (dryRatio > 0 && !state.dryFeeds[0]) firstErrors.push(showCalculatorError('dryFeedError', '건사료 비율이 있으므로 건사료를 선택해 주세요.', 'dryInput1'));
   const wetEntries = state.wetSlotIds.map(sid => ({ sid, feed: state.wetFeedMap[sid] })).filter(entry => entry.feed);
   if (wetRatio > 0 && wetEntries.length === 0) firstErrors.push(showCalculatorError('wetFeedError', '습식사료 비율이 있으므로 습식사료를 선택해 주세요.', `wetInput_${state.wetSlotIds[0]}`));
+  const wetRatioValues = wetEntries.slice(1).map(entry => ({
+    entry,
+    input: document.getElementById(`wetPct_${entry.sid}`),
+    rawValue: document.getElementById(`wetPct_${entry.sid}`)?.value ?? '',
+    value: Number(document.getElementById(`wetPct_${entry.sid}`)?.value)
+  }));
+  const invalidWetRatio = wetRatioValues.find(({ rawValue, value }) => rawValue.trim() === '' || !Number.isFinite(value) || value < 0 || value > 100);
+  if (invalidWetRatio) {
+    firstErrors.push(showCalculatorError('wetRatioError', '습식사료별 비율은 0% 이상 100% 이하의 숫자로 입력해 주세요.', `wetPct_${invalidWetRatio.entry.sid}`));
+  }
+  const additionalWetPct = wetRatioValues.reduce((sum, { value }) => sum + (Number.isFinite(value) ? value : 0), 0);
+  if (!invalidWetRatio && wetEntries.length > 1 && additionalWetPct > 100) {
+    firstErrors.push(showCalculatorError('wetRatioError', '추가한 습식사료의 비율 합계는 100%를 넘을 수 없습니다.', `wetPct_${wetEntries[1].sid}`));
+  }
   const firstError = firstErrors.find(Boolean);
   if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
 
@@ -224,13 +274,11 @@ function calculate() {
     const grams = Math.round(kcal / (feed.kcal / 1000));
     resultData.건사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
-  wetEntries.forEach(({ sid, feed }) => {
-    const pctEl = document.getElementById(`wetPct_${sid}`);
-    let subPct = 1;
-    if (wetEntries.length > 1) {
-      if (sid !== wetEntries[0].sid && pctEl) subPct = (Number(pctEl.value) || 0) / 100;
-      else subPct = Math.max(0, 100 - wetEntries.slice(1).reduce((sum, entry) => sum + (Number(document.getElementById(`wetPct_${entry.sid}`)?.value) || 0), 0)) / 100;
-    }
+  wetEntries.forEach(({ sid, feed }, index) => {
+    let subPct;
+    if (wetEntries.length === 1) subPct = 1;
+    else if (index === 0) subPct = (100 - additionalWetPct) / 100;
+    else subPct = Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100;
     const kcal = foodKcal * wetRatio * subPct;
     const grams = Math.round(kcal / (feed.kcal / 1000));
     resultData.습식사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
@@ -246,6 +294,7 @@ function calculate() {
   document.getElementById('capResult').classList.add('hidden');
   document.getElementById('waterResult').classList.add('hidden');
   state.lastResult = { DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
+  markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
   const resultArea = document.getElementById('resultArea');

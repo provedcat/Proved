@@ -84,13 +84,13 @@
         <div id="dryArea2" class="hidden relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput2">새 건사료 검색</label><input type="text" id="dryInput2" placeholder="새 건사료 검색..." oninput="searchFeed('dry',this.value,'dryList2',1)" onfocus="searchFeed('dry',this.value,'dryList2',1)"><div class="pc-subratio"><input aria-label="새 건사료 비율" type="number" id="drySwPct2" value="30" min="0" max="100"><span>%</span></div></div><div id="dryList2" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',1)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected2" class="pc-selected-feed hidden"></p></div>
         <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
       </section>
-      <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">+ 추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p></section>
+      <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">+ 추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p><p id="wetRatioError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></section>
       <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">30</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">70</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="30" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
       <button type="button" onclick="calculate()" class="pc-primary-button">급여량 계산하기</button>
     </section>
 
     <!-- 3단계: 결과 -->
-    <section id="resultArea" class="pc-result-panel hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-result-eyebrow">3단계. 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><div class="pc-result-summary"><div><span>하루 필요 칼로리</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><div class="pc-result-actions"><button id="capBtn" onclick="analyzeCaP()" class="pc-secondary-button">칼슘:인 분석하기</button><button id="waterBtn" onclick="analyzeWater()" class="pc-secondary-button">수분 섭취량 분석하기</button><button id="openShareModalBtn" onclick="openShareModal()" class="pc-secondary-button">결과 이미지 저장·공유</button></div><div id="capResult" class="hidden"></div><div id="waterResult" class="hidden"></div><p class="pc-result-disclaimer">※ 참고용 계산값입니다. 질환이 있는 경우 수의사와 상담하세요.</p></section>
+    <section id="resultArea" class="pc-result-panel hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-result-eyebrow">3단계. 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><div class="pc-result-summary"><div><span>하루 필요 칼로리</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-result-actions"><button id="capBtn" onclick="analyzeCaP()" class="pc-secondary-button">칼슘:인 분석하기</button><button id="waterBtn" onclick="analyzeWater()" class="pc-secondary-button">수분 섭취량 분석하기</button><button id="openShareModalBtn" onclick="openShareModal()" class="pc-secondary-button">결과 이미지 저장·공유</button></div><div id="capResult" class="hidden"></div><div id="waterResult" class="hidden"></div><p class="pc-result-disclaimer">※ 참고용 계산값입니다. 질환이 있는 경우 수의사와 상담하세요.</p></section>
 
 
     <!-- 제품 목록 바텀시트 -->
@@ -458,6 +458,7 @@ let state = {
   wetSlotIds: [],
   uploadType: 'dry',
   lastResult: null,
+  isCalculationDirty: false,
   currentUser: null,
   selectedSavedCatId: null,
   isSavingFeedingRecord: false,
@@ -548,6 +549,19 @@ window.addEventListener('DOMContentLoaded', () => {
   addWetSlot();
   initializeCalculatorChoices();
 
+  [
+    'catName', 'catBirth', 'catWeight', 'catNeutered', 'isDiet',
+    'isPregnant', 'isLactating', 'drySwitching', 'drySwPct1', 'drySwPct2'
+  ].forEach(id => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.addEventListener('input', markCalculationDirty);
+    element.addEventListener('change', markCalculationDirty);
+  });
+  document.querySelectorAll('input[name="treatReservePct"]')
+    .forEach(input => input.addEventListener('change', markCalculationDirty));
+  document.getElementById('ratioSlider')?.addEventListener('input', markCalculationDirty);
+
   const feedUploadForm = document.getElementById('feedUploadForm');
   if (feedUploadForm) {
     feedUploadForm.addEventListener('submit', function (event) {
@@ -590,12 +604,12 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="js/proved-shell.js?v=20260725-logo-home"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
-<script src="js/calculator.js?v=20260725-feeding-flow"></script>
-<script src="js/feed-search.js?v=20260725-feeding-flow"></script>
-<script src="js/saved-cats.js?v=20260725-feeding-flow"></script>
+<script src="js/calculator.js?v=20260725-feeding-flow-2"></script>
+<script src="js/feed-search.js?v=20260725-feeding-flow-2"></script>
+<script src="js/saved-cats.js?v=20260725-feeding-flow-2"></script>
 <script src="js/auth.js?v=20260710-wet-beta-access"></script>
 <script src="js/wet-beta-access.js?v=20260710-wet-beta-access"></script>
-<script src="js/share-card.js?v=20260725-feeding-flow"></script>
+<script src="js/share-card.js?v=20260725-feeding-flow-2"></script>
 <script src="js/weight-trend.js?v=20260701-ui-refresh-2"></script>
 </body>
 </html>

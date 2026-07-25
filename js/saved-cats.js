@@ -207,7 +207,7 @@ function updateSaveFeedingButtonVisibility() {
   const isSaving = !!state.isSavingFeedingRecord;
   const currentSaveKey = getFeedingRecordSaveKey(state.selectedSavedCatId, state.lastResult);
   const isAlreadySaved = !!(hasResult && currentSaveKey && currentSaveKey === state.lastSavedResultKey);
-  const canClick = hasResult && !isSaving && !isAlreadySaved;
+  const canClick = hasResult && !state.isCalculationDirty && !isSaving && !isAlreadySaved;
 
   button.classList.toggle('hidden', !hasResult);
   button.disabled = !canClick;
@@ -415,6 +415,12 @@ async function handleSaveFeedingRecord() {
   let shouldCloseShareModal = false;
 
   try {
+    if (state.isCalculationDirty) {
+      finalMessage = '입력값이 변경되었습니다. 다시 계산한 후 저장해 주세요.';
+      finalTone = 'red';
+      return;
+    }
+
     const { data: { user } } = await sb.auth.getUser();
     state.currentUser = user || null;
 

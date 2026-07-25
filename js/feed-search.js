@@ -83,6 +83,7 @@ function selectFeed(type, slotId, feedData, listId) {
   }
 
   document.getElementById(listId)?.classList.add('hidden');
+  markCalculationDirty();
 }
 
 document.addEventListener('click', e => {
