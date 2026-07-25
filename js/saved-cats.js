@@ -156,6 +156,7 @@ async function selectSavedCat(cat) {
 
   const weightInput = document.getElementById('catWeight');
   weightInput.value = '';
+  document.getElementById('provedCurrentPetWeightDate')?.classList.add('hidden');
   setSavedCatLoadMessage(`${cat.name || '선택한 고양이'}의 최신 체중을 불러오는 중입니다...`, 'blue');
 
   const { data, error } = await sb
@@ -174,10 +175,16 @@ async function selectSavedCat(cat) {
   }
 
   const latestWeight = data?.[0];
+  const headerWeightDate = document.getElementById('provedCurrentPetWeightDate');
   if (latestWeight) {
     weightInput.value = latestWeight.weight_kg;
+    if (headerWeightDate) {
+      headerWeightDate.textContent = `최근 체중 ${latestWeight.recorded_date.replaceAll('-', '.')} 기준`;
+      headerWeightDate.classList.remove('hidden');
+    }
     setSavedCatLoadMessage(`${cat.name || '선택한 고양이'} 정보를 불러왔습니다. 최신 체중 기준일: ${latestWeight.recorded_date}`, 'blue');
   } else {
+    headerWeightDate?.classList.add('hidden');
     setSavedCatLoadMessage(`${cat.name || '선택한 고양이'} 정보를 불러왔습니다. 저장된 체중 기록은 없습니다.`, 'gray');
   }
 
