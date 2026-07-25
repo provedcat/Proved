@@ -37,6 +37,11 @@ function fillShareCard() {
   document.getElementById('sc_catName').textContent = catName;
   document.getElementById('sc_catSub').textContent  = subTxt;
   document.getElementById('sc_der').textContent     = result.DER;
+  document.getElementById('sc_foodKcal').textContent = result.foodKcal ?? result.DER;
+  const treatBlock = document.getElementById('sc_treatBlock');
+  treatBlock.style.display = result.treatKcal > 0 ? '' : 'none';
+  document.getElementById('sc_treatKcal').textContent = result.treatKcal || 0;
+  document.getElementById('sc_treatPct').textContent = ` kcal · ${Math.round((result.treatReservePct || 0) * 100)}%`;
 
   // 비율 바
   const dryPct = Math.round((result.dryRatio || 0) * 100);
@@ -46,8 +51,8 @@ function fillShareCard() {
 
   // 사료 목록
   const allFeeds = [
-    ...(result.건사료_결과 || []).map(f => ({ ...f, 종류: 'DRY', 색상: '#f4a44a' })),
-    ...(result.습식사료_결과 || []).map(f => ({ ...f, 종류: 'WET', 색상: '#4a9af4' }))
+    ...(result.건사료_결과 || []).map(f => ({ ...f, 종류: 'DRY', 색상: '#FF9F43' })),
+    ...(result.습식사료_결과 || []).map(f => ({ ...f, 종류: 'WET', 색상: '#3D8BFF' }))
   ];
 
   document.getElementById('sc_feedList').innerHTML = allFeeds.map(f => `
