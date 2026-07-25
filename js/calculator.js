@@ -238,6 +238,12 @@ function calculate() {
   if (!['true', 'false'].includes(neuteredValue)) firstErrors.push(showCalculatorError('catNeuteredError', '중성화 여부를 선택해 주세요.', 'catNeutered'));
   if (pregnant || lactating) firstErrors.push(showCalculatorError('lifeStageError', '임신·수유 중 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
   if (dryRatio > 0 && !state.dryFeeds[0]) firstErrors.push(showCalculatorError('dryFeedError', '건사료 비율이 있으므로 건사료를 선택해 주세요.', 'dryInput1'));
+  const firstWetSlotId = state.wetSlotIds[0];
+  const firstWetFeed = state.wetFeedMap[firstWetSlotId];
+  const hasAdditionalWetFeed = state.wetSlotIds.slice(1).some(slotId => state.wetFeedMap[slotId]);
+  if (wetRatio > 0 && hasAdditionalWetFeed && !firstWetFeed) {
+    firstErrors.push(showCalculatorError('wetFeedError', '첫 번째 습식사료를 먼저 선택해 주세요.', `wetInput_${firstWetSlotId}`));
+  }
   const wetEntries = state.wetSlotIds.map(sid => ({ sid, feed: state.wetFeedMap[sid] })).filter(entry => entry.feed);
   if (wetRatio > 0 && wetEntries.length === 0) firstErrors.push(showCalculatorError('wetFeedError', '습식사료 비율이 있으므로 습식사료를 선택해 주세요.', `wetInput_${state.wetSlotIds[0]}`));
   const wetRatioValues = wetEntries.slice(1).map(entry => ({
