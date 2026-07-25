@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="./icons/apple-touch-icon.png">
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#2d7dd2">
+  <meta name="theme-color" content="#2F6FED">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/styles.css?v=20260701-ui-refresh-2">
+  <link rel="stylesheet" href="css/styles.css?v=20260725-feeding-flow">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260725-logo-home">
 </head>
 <body class="flex justify-center">
@@ -46,7 +46,7 @@
 
   <nav id="mainNav" class="pc-tabs px-6 pb-4 grid grid-cols-3 gap-2">
     <button id="navCalculator" onclick="showPage('calculatorPage')"
-      class="py-3 rounded-2xl text-sm font-black bg-[#2d7dd2] text-white shadow-sm">
+      class="py-3 rounded-2xl text-sm font-black bg-[#2F6FED] text-white shadow-sm">
       통합 계산기
     </button>
     <button id="navWeightTrend" onclick="showPage('weightTrendPage')"
@@ -64,135 +64,34 @@
     <section id="calculatorPage" class="space-y-10">
 
     <!-- 1단계: 고양이 정보 -->
-    <section class="pc-info-card space-y-4">
-      <h2 class="pc-section-title text-xl font-black text-gray-800">1단계. 정보 입력</h2>
-      <div id="savedCatLoadBox" class="hidden p-4 bg-blue-50 rounded-2xl border border-blue-100 space-y-3">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <p class="text-sm font-black text-gray-800">내 고양이 불러오기</p>
-            <p class="text-xs font-bold text-blue-400 mt-0.5">저장된 기본 정보와 최신 체중을 입력합니다.</p>
-          </div>
-          <button onclick="openPetSelectorModal('calculator')"
-            class="shrink-0 px-4 py-2 bg-[#2d7dd2] text-white text-xs font-black rounded-xl shadow-sm">
-            불러오기
-          </button>
-        </div>
-        <div id="myCatList" class="hidden space-y-2"></div>
-        <p id="savedCatLoadMsg" class="hidden text-xs font-bold text-gray-400"></p>
-      </div>
-      <input type="text" id="catName" placeholder="고양이 이름"
-        class="w-full p-5 bg-gray-50 rounded-2xl font-bold border border-gray-100">
-      <div class="relative">
-        <input type="number" id="catWeight" placeholder="0.0" step="0.1" min="0.5" max="20"
-          class="w-full p-5 bg-gray-50 rounded-2xl font-bold text-right pr-10 border border-gray-100">
-        <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm">kg</span>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <input type="date" id="catBirth"
-          class="p-4 bg-gray-50 rounded-2xl font-bold text-sm border border-gray-100">
-        <select id="catNeutered"
-          class="p-4 bg-gray-50 rounded-2xl font-bold text-sm border border-gray-100">
-          <option value="true">중성화 O</option>
-          <option value="false">중성화 X</option>
-        </select>
-      </div>
-      <label class="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl cursor-pointer border border-gray-100">
-        <input type="checkbox" id="isDiet" class="w-5 h-5 accent-[#2d7dd2]">
-        <div>
-          <p class="font-bold text-sm text-gray-700">다이어트 모드</p>
-          <p class="text-xs text-gray-400">성장기에는 감량보다 체중관리 기준으로 계산</p>
-        </div>
-      </label>
-      <div id="calBox" class="hidden p-6 bg-blue-50 rounded-2xl text-center">
-        <p class="text-xs font-bold text-blue-400 mb-1">하루 필요 칼로리</p>
-        <p class="text-4xl font-black text-[#2d7dd2]" id="derVal">0</p>
-        <p class="text-xs text-gray-400 mt-1" id="derDetail"></p>
-        <p class="hidden text-xs font-bold text-blue-500 mt-3 leading-relaxed" id="dietNotice"></p>
-      </div>
+    <section class="pc-step-section" aria-labelledby="step1Title">
+      <h2 id="step1Title" class="pc-section-title">1단계. 정보 입력</h2>
+      <div id="savedCatLoadBox" class="hidden pc-field"><div class="flex items-center justify-between gap-3"><div><p class="font-black">내 고양이 불러오기</p><p class="pc-help">저장된 기본 정보와 최신 체중을 입력합니다.</p></div><button type="button" onclick="openPetSelectorModal('calculator')" class="pc-secondary-button">불러오기</button></div><div id="myCatList" class="hidden"></div><p id="savedCatLoadMsg" class="hidden pc-help"></p></div>
+      <div class="pc-field"><label class="pc-field-label" for="catName">고양이 이름</label><input type="text" id="catName" autocomplete="name" placeholder="이름을 입력해 주세요"><p id="catNameError" class="pc-inline-error hidden" role="alert"></p></div>
+      <div class="pc-field"><label class="pc-field-label" for="catBirth">생년월일</label><input type="date" id="catBirth"><p id="catBirthError" class="pc-inline-error hidden" role="alert"></p></div>
+      <div class="pc-field"><label class="pc-field-label" for="catWeight">현재 체중</label><div class="pc-input-unit"><input type="number" id="catWeight" placeholder="0.0" step="0.1" min="0.5" max="20"><span>kg</span></div><p id="catWeightError" class="pc-inline-error hidden" role="alert"></p></div>
+      <fieldset class="pc-field"><legend class="pc-field-label">중성화 여부</legend><input type="hidden" id="catNeutered" value=""><div class="pc-segmented" role="radiogroup" aria-label="중성화 여부"><button type="button" class="pc-segmented-option" data-neutered="true" role="radio" aria-checked="false">중성화했어요</button><button type="button" class="pc-segmented-option" data-neutered="false" role="radio" aria-checked="false">중성화하지 않았어요</button></div><p id="catNeuteredError" class="pc-inline-error hidden" role="alert"></p></fieldset>
+      <fieldset class="pc-field"><legend class="pc-field-label">해당하는 경우만 선택</legend><div class="pc-chip-row"><label class="pc-choice-chip"><input type="checkbox" id="isDiet"><span>다이어트</span></label><label class="pc-choice-chip"><input type="checkbox" id="isPregnant"><span>임신 중</span></label><label class="pc-choice-chip"><input type="checkbox" id="isLactating"><span>수유 중</span></label></div><p id="lifeStageError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></fieldset>
+      <fieldset class="pc-field"><legend class="pc-field-label">간식도 급여하나요?</legend><div class="pc-segmented" role="radiogroup" aria-label="간식 열량 예약"><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="0" checked><span>급여하지 않음</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="5"><span>5% 남기기</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="10"><span>10% 남기기</span></label></div></fieldset>
+      <div id="calBox" class="hidden" aria-hidden="true"><span id="derVal"></span><span id="derDetail"></span><span id="dietNotice"></span></div>
     </section>
 
     <!-- 2단계: 식단 구성 -->
-    <section class="pc-diet-section space-y-6">
-      <h2 class="pc-section-title text-xl font-black text-gray-800">2단계. 식단 구성</h2>
-      <div class="pc-ratio-card p-6 bg-gray-50 rounded-3xl space-y-4 border border-gray-100">
-        <div class="flex justify-between items-center font-black">
-          <div>
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">DRY</p>
-            <p class="text-2xl text-[#f4a44a]"><span id="dryPct">30</span><span class="text-sm">%</span></p>
-          </div>
-          <div class="text-gray-200 text-xl">:</div>
-          <div class="text-right">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">WET</p>
-            <p class="text-2xl text-[#4a9af4]"><span id="wetPct">70</span><span class="text-sm">%</span></p>
-          </div>
-        </div>
-        <input type="range" id="ratioSlider" min="0" max="100" value="30" oninput="updateRatio(this.value)">
-        <div class="flex justify-between text-[10px] text-gray-300 font-bold">
-          <span>← 습식 100%</span><span>건사료 100% →</span>
-        </div>
-      </div>
-
-      <!-- 건사료 검색 -->
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <p class="text-xs font-black text-[#f4a44a] tracking-widest italic">DRY FOOD</p>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" id="drySwitching" onchange="toggleDrySwitching()" class="w-4 h-4 accent-[#f4a44a]">
-            <span class="text-xs font-bold text-gray-400">교체 중</span>
-          </label>
-        </div>
-        <div class="relative">
-          <div class="flex items-center bg-orange-50 rounded-2xl border border-orange-100 overflow-hidden">
-            <input type="text" id="dryInput1" placeholder="건사료 검색..."
-              oninput="searchFeed('dry',this.value,'dryList1',0)"
-              onfocus="searchFeed('dry',this.value,'dryList1',0)"
-              class="flex-1 p-4 bg-transparent font-bold text-sm">
-            <div id="drySwPctWrap1" class="hidden items-center bg-orange-100 px-3 h-14">
-              <input type="number" id="drySwPct1" value="70" min="0" max="100"
-                class="w-10 bg-transparent text-center font-black text-orange-600 text-sm">
-              <span class="text-xs font-black text-orange-400">%</span>
-            </div>
-          </div>
-          <div id="dryList1" class="absolute left-0 right-0 z-50 bg-white border border-gray-100 rounded-2xl shadow-xl mt-1 max-h-48 overflow-y-auto hidden"></div>
-          <button type="button" onclick="openFeedPicker('dry', 0)"
-            class="mt-2 text-xs font-black text-orange-500 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
-            제품 목록에서 찾기
-          </button>
-          <p id="drySelected1" class="text-xs text-orange-400 font-bold mt-1 px-1 hidden"></p>
-        </div>
-        <div id="dryArea2" class="hidden relative">
-          <div class="flex items-center bg-orange-50 rounded-2xl border border-dashed border-orange-200 overflow-hidden">
-            <input type="text" id="dryInput2" placeholder="새 건사료 검색..."
-              oninput="searchFeed('dry',this.value,'dryList2',1)"
-              onfocus="searchFeed('dry',this.value,'dryList2',1)"
-              class="flex-1 p-4 bg-transparent font-bold text-sm">
-            <div class="flex items-center bg-orange-100 px-3 h-14">
-              <input type="number" id="drySwPct2" value="30" min="0" max="100"
-                class="w-10 bg-transparent text-center font-black text-orange-600 text-sm">
-              <span class="text-xs font-black text-orange-400">%</span>
-            </div>
-          </div>
-          <div id="dryList2" class="absolute left-0 right-0 z-50 bg-white border border-gray-100 rounded-2xl shadow-xl mt-1 max-h-48 overflow-y-auto hidden"></div>
-          <button type="button" onclick="openFeedPicker('dry', 1)"
-            class="mt-2 text-xs font-black text-orange-500 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
-            제품 목록에서 찾기
-          </button>
-          <p id="drySelected2" class="text-xs text-orange-400 font-bold mt-1 px-1 hidden"></p>
-        </div>
-      </div>
-
-      <!-- 습식사료 검색 -->
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <p class="text-xs font-black text-[#4a9af4] tracking-widest italic">WET FOOD</p>
-          <button type="button" onclick="addWetSlot()" id="addWetBtn"
-            class="text-xs font-bold text-blue-400 border border-blue-200 rounded-xl px-3 py-1">
-            + 추가 (최대 3개)
-          </button>
-        </div>
-        <div id="wetSlots" class="space-y-2"></div>
-      </div>
+    <section class="pc-step-section" aria-labelledby="step2Title">
+      <h2 id="step2Title" class="pc-section-title">2단계. 식단 구성</h2>
+      <section class="pc-feed-panel pc-feed-panel--dry"><div class="pc-feed-heading"><h3>건사료 검색</h3><label class="pc-switch"><input type="checkbox" id="drySwitching" onchange="toggleDrySwitching()"><span>건사료 교체 중</span></label></div>
+        <div class="relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput1">건사료 검색</label><input type="text" id="dryInput1" placeholder="건사료 검색..." oninput="searchFeed('dry',this.value,'dryList1',0)" onfocus="searchFeed('dry',this.value,'dryList1',0)"><div id="drySwPctWrap1" class="hidden pc-subratio"><input aria-label="기존 건사료 비율" type="number" id="drySwPct1" value="70" min="0" max="100"><span>%</span></div></div><div id="dryList1" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',0)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected1" class="pc-selected-feed hidden"></p></div>
+        <div id="dryArea2" class="hidden relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput2">새 건사료 검색</label><input type="text" id="dryInput2" placeholder="새 건사료 검색..." oninput="searchFeed('dry',this.value,'dryList2',1)" onfocus="searchFeed('dry',this.value,'dryList2',1)"><div class="pc-subratio"><input aria-label="새 건사료 비율" type="number" id="drySwPct2" value="30" min="0" max="100"><span>%</span></div></div><div id="dryList2" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',1)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected2" class="pc-selected-feed hidden"></p></div>
+        <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
+      </section>
+      <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">+ 추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p><p id="wetRatioError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></section>
+      <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">30</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">70</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="30" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
+      <button type="button" onclick="calculate()" class="pc-primary-button">급여량 계산하기</button>
     </section>
+
+    <!-- 3단계: 결과 -->
+    <section id="resultArea" class="pc-result-panel hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-result-eyebrow">3단계. 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><div class="pc-result-summary"><div><span>하루 필요 칼로리</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-result-actions"><button id="capBtn" onclick="analyzeCaP()" class="pc-secondary-button">칼슘:인 분석하기</button><button id="waterBtn" onclick="analyzeWater()" class="pc-secondary-button">수분 섭취량 분석하기</button><button id="openShareModalBtn" onclick="openShareModal()" class="pc-secondary-button">결과 이미지 저장·공유</button></div><div id="capResult" class="hidden"></div><div id="waterResult" class="hidden"></div><p class="pc-result-disclaimer">※ 참고용 계산값입니다. 질환이 있는 경우 수의사와 상담하세요.</p></section>
+
 
     <!-- 제품 목록 바텀시트 -->
     <div id="feedPickerModal" class="fixed inset-0 z-[100] hidden" aria-hidden="true">
@@ -201,7 +100,7 @@
         class="absolute left-1/2 -translate-x-1/2 bottom-0 w-full max-w-[640px] max-h-[90vh] bg-white rounded-t-[2rem] shadow-2xl pt-5 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] flex flex-col overflow-hidden">
         <div class="flex items-start justify-between gap-3 pb-4">
           <div>
-            <p class="text-xs font-black text-[#2d7dd2] tracking-widest">PRODUCT LIST</p>
+            <p class="text-xs font-black text-[#2F6FED] tracking-widest">PRODUCT LIST</p>
             <h2 id="feedPickerTitle" class="text-xl font-black text-gray-800 mt-1">제품 목록</h2>
           </div>
           <button type="button" onclick="closeFeedPicker()" aria-label="제품 목록 닫기"
@@ -214,7 +113,7 @@
           <p class="text-xs font-black text-gray-400 mb-2">정렬</p>
           <div class="grid grid-cols-2 gap-2">
             <button type="button" id="feedPickerSortManufacturer" onclick="setFeedPickerSort('manufacturer')"
-              class="py-3 rounded-2xl text-sm font-black bg-[#2d7dd2] text-white">제조사순</button>
+              class="py-3 rounded-2xl text-sm font-black bg-[#2F6FED] text-white">제조사순</button>
             <button type="button" id="feedPickerSortProduct" onclick="setFeedPickerSort('product')"
               class="py-3 rounded-2xl text-sm font-black bg-gray-100 text-gray-400">제품명순</button>
           </div>
@@ -225,44 +124,6 @@
       </section>
     </div>
 
-    <!-- 계산 버튼 -->
-    <button onclick="calculate()"
-      class="pc-calculate-btn w-full py-5 bg-[#2d7dd2] text-white font-black text-lg rounded-3xl shadow-lg">
-      급여량 계산하기
-    </button>
-
-    <!-- 결과 영역 -->
-    <div id="resultArea" class="hidden space-y-4">
-      <div class="pc-result-hero p-6 bg-gray-900 rounded-3xl text-white text-center">
-        <p class="pc-result-label text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Daily Feeding Plan</p>
-        <p class="text-5xl font-black text-white" id="resDER">0</p>
-        <p class="pc-result-unit text-xs text-gray-400 mt-1">kcal / day</p>
-      </div>
-      <div id="resItems" class="space-y-2"></div>
-      <p class="text-xs text-gray-300 text-center leading-relaxed">
-        ※ 참고용 계산값입니다. 질환이 있는 경우 수의사와 상담하세요.
-      </p>
-
-    </div>
-
-    <!-- 칼슘/인 분석 버튼 -->
-    <button id="capBtn" onclick="analyzeCaP()" class="hidden w-full py-5 bg-[#5a9e6f] text-white font-black text-lg rounded-3xl shadow-lg">
-      📊 칼슘 · 인 분석하기
-    </button>
-    <div id="capResult" class="hidden space-y-3"></div>
-
-    <!-- 수분 섭취량 분석 버튼 -->
-    <button id="waterBtn" onclick="analyzeWater()" class="hidden w-full py-5 bg-[#38a8c5] text-white font-black text-lg rounded-3xl shadow-lg">
-      💧 수분 섭취량 분석하기
-    </button>
-    <div id="waterResult" class="hidden space-y-3"></div>
-
-    <!-- 이미지 저장/공유 버튼 -->
-    <button id="openShareModalBtn" onclick="openShareModal()"
-      class="hidden w-full py-4 bg-gray-800 text-white font-black text-base rounded-2xl flex items-center justify-center gap-2">
-      🖼️ 결과 이미지 저장 / 공유
-    </button>
-
     <!-- 사료 추가 업로드 -->
     <section class="pc-upload-section space-y-4 pt-4 border-t border-gray-100">
       <h2 class="text-lg font-black text-gray-700">사료가 없나요?</h2>
@@ -272,7 +133,7 @@
       </p>
       <div class="flex gap-2">
         <button onclick="setUploadType('dry')" id="upDryBtn"
-          class="flex-1 py-3 rounded-2xl text-sm font-black border-2 border-[#f4a44a] text-[#f4a44a]">
+          class="flex-1 py-3 rounded-2xl text-sm font-black border-2 border-[#FF9F43] text-[#FF9F43]">
           건사료 추가
         </button>
         <button onclick="setUploadType('wet')" id="upWetBtn"
@@ -281,14 +142,14 @@
         </button>
       </div>
       <label class="block w-full">
-        <div class="w-full py-6 border-2 border-dashed border-gray-200 rounded-2xl text-center cursor-pointer hover:border-[#2d7dd2] transition-colors">
+        <div class="w-full py-6 border-2 border-dashed border-gray-200 rounded-2xl text-center cursor-pointer hover:border-[#2F6FED] transition-colors">
           <p class="text-2xl mb-1">📷</p>
           <p class="text-sm font-bold text-gray-400">사진을 선택하세요</p>
           <p class="text-xs text-gray-300 mt-1">JPG, PNG · 1장 · 10MB 이하</p>
         </div>
         <input type="file" id="uploadInput" accept="image/*" class="hidden" onchange="handleUploadFileChange(this)">
       </label>
-      <button id="uploadFeedBtn" type="button" class="w-full py-4 bg-[#2d7dd2] text-white font-black text-base rounded-2xl shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+      <button id="uploadFeedBtn" type="button" class="w-full py-4 bg-[#2F6FED] text-white font-black text-base rounded-2xl shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
         이미지 분석하기
       </button>
       <div id="uploadMsg"></div>
@@ -334,7 +195,7 @@
           </p>
         </div>
         <button type="button" onclick="openAuthSheet()"
-          class="w-full py-4 bg-[#2d7dd2] text-white text-sm font-black rounded-2xl shadow-sm">
+          class="w-full py-4 bg-[#2F6FED] text-white text-sm font-black rounded-2xl shadow-sm">
           로그인하기
         </button>
       </div>
@@ -493,6 +354,11 @@
         </div>
       </div>
 
+      <div class="sc-energy-details">
+        <div><span>식사 배정</span><strong id="sc_foodKcal">—</strong><small> kcal</small></div>
+        <div id="sc_treatBlock"><span>간식 예약</span><strong id="sc_treatKcal">—</strong><small id="sc_treatPct"></small></div>
+      </div>
+
       <!-- 사료별 급여량 -->
       <div class="sc-feeds">
         <div class="sc-feeds-title">FEEDING PLAN</div>
@@ -560,7 +426,7 @@
     </div>
     <div class="mt-3 space-y-2">
       <button id="saveFeedingRecordBtn" onclick="handleSaveFeedingRecord()"
-        class="hidden w-full py-4 bg-[#2d7dd2] text-white font-black text-base rounded-2xl">
+        class="hidden w-full py-4 bg-[#2F6FED] text-white font-black text-base rounded-2xl">
         💾 이 계산 결과 저장하기
       </button>
       <p id="saveFeedingRecordMsg" class="hidden text-xs font-bold text-blue-400 text-center"></p>
@@ -592,6 +458,7 @@ let state = {
   wetSlotIds: [],
   uploadType: 'dry',
   lastResult: null,
+  isCalculationDirty: false,
   currentUser: null,
   selectedSavedCatId: null,
   isSavingFeedingRecord: false,
@@ -635,7 +502,7 @@ function showPage(pageName) {
   Object.entries(buttons).forEach(([key, button]) => {
     if (!button) return;
     const active = key === pageName;
-    button.classList.toggle('bg-[#2d7dd2]', active);
+    button.classList.toggle('bg-[#2F6FED]', active);
     button.classList.toggle('text-white', active);
     button.classList.toggle('shadow-sm', active);
     button.classList.toggle('bg-gray-100', !active);
@@ -680,6 +547,20 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
   addWetSlot();
+  initializeCalculatorChoices();
+
+  [
+    'catName', 'catBirth', 'catWeight', 'catNeutered', 'isDiet',
+    'isPregnant', 'isLactating', 'drySwitching', 'drySwPct1', 'drySwPct2'
+  ].forEach(id => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.addEventListener('input', markCalculationDirty);
+    element.addEventListener('change', markCalculationDirty);
+  });
+  document.querySelectorAll('input[name="treatReservePct"]')
+    .forEach(input => input.addEventListener('change', markCalculationDirty));
+  document.getElementById('ratioSlider')?.addEventListener('input', markCalculationDirty);
 
   const feedUploadForm = document.getElementById('feedUploadForm');
   if (feedUploadForm) {
@@ -723,12 +604,12 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="js/proved-shell.js?v=20260725-logo-home"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
-<script src="js/calculator.js?v=20260712-feed-picker"></script>
-<script src="js/feed-search.js?v=20260712-feed-picker"></script>
-<script src="js/saved-cats.js?v=20260701-ui-refresh-2"></script>
+<script src="js/calculator.js?v=20260725-feeding-flow-3"></script>
+<script src="js/feed-search.js?v=20260725-feeding-flow-2"></script>
+<script src="js/saved-cats.js?v=20260725-feeding-flow-2"></script>
 <script src="js/auth.js?v=20260710-wet-beta-access"></script>
 <script src="js/wet-beta-access.js?v=20260710-wet-beta-access"></script>
-<script src="js/share-card.js?v=20260701-ui-refresh-2"></script>
+<script src="js/share-card.js?v=20260725-feeding-flow-2"></script>
 <script src="js/weight-trend.js?v=20260701-ui-refresh-2"></script>
 </body>
 </html>

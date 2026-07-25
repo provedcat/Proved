@@ -111,7 +111,7 @@ async function loadMyCats() {
 
   list.innerHTML = cats.map(cat => `
     <button type="button" data-cat-id="${escapeHtml(cat.id)}"
-      class="w-full p-3 bg-white border border-blue-100 rounded-xl text-left hover:border-[#2d7dd2] transition-colors">
+      class="w-full p-3 bg-white border border-blue-100 rounded-xl text-left hover:border-[#2F6FED] transition-colors">
       <span class="block text-sm font-black text-gray-800">${escapeHtml(cat.name || '이름 없음')}</span>
       <span class="block text-xs font-bold text-gray-400 mt-0.5">
         ${escapeHtml(cat.birth_date || '생년월일 없음')} · ${cat.neutered ? '중성화 O' : '중성화 X'}
@@ -149,6 +149,7 @@ async function selectSavedCat(cat) {
     document.getElementById('catName').value = cat.name || '';
     document.getElementById('catBirth').value = cat.birth_date || '';
     document.getElementById('catNeutered').value = cat.neutered ? 'true' : 'false';
+    document.getElementById('catNeutered').dispatchEvent(new Event('change', { bubbles: true }));
   } finally {
     state.isApplyingSavedCat = false;
   }
@@ -206,11 +207,11 @@ function updateSaveFeedingButtonVisibility() {
   const isSaving = !!state.isSavingFeedingRecord;
   const currentSaveKey = getFeedingRecordSaveKey(state.selectedSavedCatId, state.lastResult);
   const isAlreadySaved = !!(hasResult && currentSaveKey && currentSaveKey === state.lastSavedResultKey);
-  const canClick = hasResult && !isSaving && !isAlreadySaved;
+  const canClick = hasResult && !state.isCalculationDirty && !isSaving && !isAlreadySaved;
 
   button.classList.toggle('hidden', !hasResult);
   button.disabled = !canClick;
-  button.classList.toggle('bg-[#2d7dd2]', canClick);
+  button.classList.toggle('bg-[#2F6FED]', canClick);
   button.classList.toggle('text-white', canClick);
   button.classList.toggle('bg-gray-200', !canClick);
   button.classList.toggle('text-gray-400', !canClick);
@@ -414,6 +415,12 @@ async function handleSaveFeedingRecord() {
   let shouldCloseShareModal = false;
 
   try {
+    if (state.isCalculationDirty) {
+      finalMessage = '입력값이 변경되었습니다. 다시 계산한 후 저장해 주세요.';
+      finalTone = 'red';
+      return;
+    }
+
     const { data: { user } } = await sb.auth.getUser();
     state.currentUser = user || null;
 

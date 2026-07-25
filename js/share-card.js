@@ -6,6 +6,10 @@
 // 모달 열기 — 계산 결과를 카드에 채워 넣고 모달 표시
 // -----------------------------------------------
 function openShareModal() {
+  if (!state.lastResult || state.isCalculationDirty) {
+    alert('입력값이 변경되었습니다. 다시 계산한 후 저장하거나 공유해 주세요.');
+    return;
+  }
   if (!fillShareCard()) return;
 
   document.getElementById('shareModal').classList.add('open');
@@ -37,6 +41,11 @@ function fillShareCard() {
   document.getElementById('sc_catName').textContent = catName;
   document.getElementById('sc_catSub').textContent  = subTxt;
   document.getElementById('sc_der').textContent     = result.DER;
+  document.getElementById('sc_foodKcal').textContent = result.foodKcal ?? result.DER;
+  const treatBlock = document.getElementById('sc_treatBlock');
+  treatBlock.style.display = result.treatKcal > 0 ? '' : 'none';
+  document.getElementById('sc_treatKcal').textContent = result.treatKcal || 0;
+  document.getElementById('sc_treatPct').textContent = ` kcal · ${Math.round((result.treatReservePct || 0) * 100)}%`;
 
   // 비율 바
   const dryPct = Math.round((result.dryRatio || 0) * 100);
@@ -46,8 +55,8 @@ function fillShareCard() {
 
   // 사료 목록
   const allFeeds = [
-    ...(result.건사료_결과 || []).map(f => ({ ...f, 종류: 'DRY', 색상: '#f4a44a' })),
-    ...(result.습식사료_결과 || []).map(f => ({ ...f, 종류: 'WET', 색상: '#4a9af4' }))
+    ...(result.건사료_결과 || []).map(f => ({ ...f, 종류: 'DRY', 색상: '#FF9F43' })),
+    ...(result.습식사료_결과 || []).map(f => ({ ...f, 종류: 'WET', 색상: '#3D8BFF' }))
   ];
 
   document.getElementById('sc_feedList').innerHTML = allFeeds.map(f => `
@@ -182,6 +191,10 @@ async function captureShareCardCanvas() {
 // html2canvas로 카드를 PNG로 캡처해서 다운로드
 // -----------------------------------------------
 async function shareCard_save() {
+  if (!state.lastResult || state.isCalculationDirty) {
+    alert('입력값이 변경되었습니다. 다시 계산한 후 저장하거나 공유해 주세요.');
+    return;
+  }
   const btn = document.querySelector('.share-btn-save');
   const 원래텍스트 = btn.textContent;
   btn.textContent = '⏳ 생성 중...';
@@ -201,7 +214,7 @@ async function shareCard_save() {
   }
 
   btn.textContent = 원래텍스트;
-  btn.disabled = false;
+  updateResultActionState();
 }
 
 // -----------------------------------------------
@@ -210,6 +223,10 @@ async function shareCard_save() {
 // 앱 키 설정 후: 카카오 피드 공유
 // -----------------------------------------------
 async function shareCard_kakao() {
+  if (!state.lastResult || state.isCalculationDirty) {
+    alert('입력값이 변경되었습니다. 다시 계산한 후 저장하거나 공유해 주세요.');
+    return;
+  }
   const btn = document.querySelector('.share-btn-kakao');
   const 원래텍스트 = btn.textContent;
   btn.textContent = '⏳ 이미지 생성 중...';
@@ -246,5 +263,5 @@ async function shareCard_kakao() {
   }
 
   btn.textContent = 원래텍스트;
-  btn.disabled = false;
+  updateResultActionState();
 }

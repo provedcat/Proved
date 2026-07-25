@@ -52,22 +52,59 @@ if (typeof module !== 'undefined') {
 }
 
 function updateCalorie() {
-  const weight   = parseFloat(document.getElementById('catWeight').value);
-  const birthStr = document.getElementById('catBirth').value;
-  if (!weight || !birthStr) return;
+  // DER preview is intentionally reserved for the result step.
+  document.getElementById('calBox')?.classList.add('hidden');
+}
 
-  const neutered = document.getElementById('catNeutered').value === 'true';
-  const diet     = document.getElementById('isDiet').checked;
-  const plan     = getCaloriePlan(weight, birthStr, neutered, diet);
+function markCalculationDirty() {
+  if (!state.lastResult) return;
+  state.isCalculationDirty = true;
+  updateResultActionState();
+}
 
-  document.getElementById('derVal').textContent = plan.DER;
-  document.getElementById('derDetail').textContent = plan.detail;
-  const noticeEl = document.getElementById('dietNotice');
-  if (noticeEl) {
-    noticeEl.textContent = plan.dietNotice;
-    noticeEl.classList.toggle('hidden', !plan.dietNotice);
+function markCalculationFresh() {
+  state.isCalculationDirty = false;
+  updateResultActionState();
+}
+
+function updateResultActionState() {
+  const hasResult = !!state.lastResult;
+  const isFresh = hasResult && !state.isCalculationDirty;
+  const shareOpenButton = document.getElementById('openShareModalBtn');
+  if (shareOpenButton) {
+    shareOpenButton.disabled = !isFresh;
+    shareOpenButton.setAttribute('aria-disabled', String(!isFresh));
+    shareOpenButton.classList.toggle('opacity-50', !isFresh);
+    shareOpenButton.classList.toggle('cursor-not-allowed', !isFresh);
   }
-  document.getElementById('calBox').classList.remove('hidden');
+  document.querySelectorAll('.share-btn-save, .share-btn-kakao').forEach(button => {
+    button.disabled = !isFresh;
+    button.setAttribute('aria-disabled', String(!isFresh));
+  });
+  updateSaveFeedingButtonVisibility();
+  document.getElementById('resultDirtyNotice')?.classList.toggle('hidden', !state.isCalculationDirty);
+}
+
+function initializeCalculatorChoices() {
+  const neuteredInput = document.getElementById('catNeutered');
+  const buttons = document.querySelectorAll('[data-neutered]');
+  const syncNeutered = () => buttons.forEach(button => {
+    const selected = button.dataset.neutered === neuteredInput.value;
+    button.setAttribute('aria-checked', String(selected));
+    button.classList.toggle('is-selected', selected);
+  });
+  buttons.forEach(button => button.addEventListener('click', () => {
+    neuteredInput.value = button.dataset.neutered;
+    syncNeutered();
+    neuteredInput.dispatchEvent(new Event('change', { bubbles: true }));
+  }));
+  neuteredInput.addEventListener('change', syncNeutered);
+  syncNeutered();
+
+  const pregnant = document.getElementById('isPregnant');
+  const lactating = document.getElementById('isLactating');
+  pregnant.addEventListener('change', () => { if (pregnant.checked) lactating.checked = false; });
+  lactating.addEventListener('change', () => { if (lactating.checked) pregnant.checked = false; });
 }
 
 // -----------------------------------------------
@@ -97,6 +134,7 @@ function toggleDrySwitching() {
     document.getElementById('dryInput2').value = '';
     document.getElementById('drySelected2').classList.add('hidden');
   }
+  markCalculationDirty();
 }
 
 // -----------------------------------------------
@@ -111,30 +149,30 @@ function addWetSlot() {
 
   const slot = document.createElement('div');
   slot.id        = `wetSlot_${slotId}`;
-  slot.className = 'relative';
+  slot.className = 'relative pc-wet-slot';
 
   slot.innerHTML = `
-    <div class="flex items-center bg-blue-50 rounded-2xl border border-blue-100 overflow-hidden">
+    <div class="pc-feed-input-row">
       <input type="text" id="wetInput_${slotId}" placeholder="습식사료 검색..."
-        class="flex-1 p-4 bg-transparent font-bold text-sm">
+        class="flex-1">
       ${!isFirst ? `
-        <div class="flex items-center bg-blue-100 px-3 h-14">
+        <div class="pc-subratio">
           <input type="number" id="wetPct_${slotId}" value="50" min="0" max="100"
-            class="w-10 bg-transparent text-center font-black text-blue-600 text-sm">
-          <span class="text-xs font-black text-blue-400">%</span>
+            class="pc-subratio-input">
+          <span >%</span>
         </div>
         <button type="button" onclick="removeWetSlot(${slotId})"
-          class="px-3 h-14 bg-blue-100 text-blue-300 font-black text-lg">✕</button>
+          class="pc-remove-feed" aria-label="습식사료 삭제">✕</button>
       ` : ''}
     </div>
     <button type="button" onclick="openFeedPicker('wet', ${slotId})"
-      class="mt-2 text-xs font-black text-blue-500 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+      class="pc-feed-picker-button">
       제품 목록에서 찾기
     </button>
     <div id="wetList_${slotId}"
-      class="absolute left-0 right-0 z-50 bg-white border border-gray-100 rounded-2xl shadow-xl mt-1 max-h-48 overflow-y-auto hidden">
+      class="pc-search-list hidden">
     </div>
-    <p id="wetSelected_${slotId}" class="text-xs text-blue-400 font-bold mt-1 px-1 hidden"></p>
+    <p id="wetSelected_${slotId}" class="pc-selected-feed hidden"></p>
   `;
 
   document.getElementById('wetSlots').appendChild(slot);
@@ -142,6 +180,11 @@ function addWetSlot() {
   const input = document.getElementById(`wetInput_${slotId}`);
   input.addEventListener('input', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
   input.addEventListener('focus', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
+  const wetRatioInput = document.getElementById(`wetPct_${slotId}`);
+  if (wetRatioInput) {
+    wetRatioInput.addEventListener('input', markCalculationDirty);
+    wetRatioInput.addEventListener('change', markCalculationDirty);
+  }
 
   if (state.wetSlotIds.length >= 3) {
     document.getElementById('addWetBtn').classList.add('hidden');
@@ -153,126 +196,116 @@ function removeWetSlot(slotId) {
   delete state.wetFeedMap[slotId];
   state.wetSlotIds = state.wetSlotIds.filter(id => id !== slotId);
   document.getElementById('addWetBtn').classList.remove('hidden');
+  markCalculationDirty();
 }
 
 // -----------------------------------------------
 // 급여량 계산
 // -----------------------------------------------
+function clearCalculatorErrors() {
+  document.querySelectorAll('.pc-inline-error:not(#resultDirtyNotice)').forEach(el => { el.textContent = ''; el.classList.add('hidden'); });
+  document.querySelectorAll('[aria-invalid="true"]').forEach(el => el.removeAttribute('aria-invalid'));
+}
+
+function showCalculatorError(id, message, focusId) {
+  const error = document.getElementById(id);
+  if (!error) return null;
+  error.textContent = message;
+  error.classList.remove('hidden');
+  const focusTarget = document.getElementById(focusId) || error.closest('.pc-field, .pc-feed-panel');
+  focusTarget?.setAttribute('aria-invalid', 'true');
+  return focusTarget;
+}
+
 function calculate() {
-  const weight   = parseFloat(document.getElementById('catWeight').value);
+  clearCalculatorErrors();
+  const name = document.getElementById('catName').value.trim();
+  const weight = Number(document.getElementById('catWeight').value);
   const birthStr = document.getElementById('catBirth').value;
+  const neuteredValue = document.getElementById('catNeutered').value;
+  const pregnant = document.getElementById('isPregnant').checked;
+  const lactating = document.getElementById('isLactating').checked;
+  const dryRatio = Number(document.getElementById('ratioSlider').value) / 100;
+  const wetRatio = 1 - dryRatio;
+  const firstErrors = [];
 
-  if (!weight || !birthStr) {
-    alert('체중과 생년월일을 입력해주세요.');
-    return;
+  if (!name) firstErrors.push(showCalculatorError('catNameError', '고양이 이름을 입력해 주세요.', 'catName'));
+  const birth = birthStr ? new Date(`${birthStr}T00:00:00`) : null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if (!birthStr) firstErrors.push(showCalculatorError('catBirthError', '생년월일을 입력해 주세요.', 'catBirth'));
+  else if (birth > today) firstErrors.push(showCalculatorError('catBirthError', '미래 날짜는 생년월일로 선택할 수 없습니다.', 'catBirth'));
+  if (!Number.isFinite(weight) || weight < 0.5 || weight > 20) firstErrors.push(showCalculatorError('catWeightError', '체중은 0.5kg 이상 20kg 이하로 입력해 주세요.', 'catWeight'));
+  if (!['true', 'false'].includes(neuteredValue)) firstErrors.push(showCalculatorError('catNeuteredError', '중성화 여부를 선택해 주세요.', 'catNeutered'));
+  if (pregnant || lactating) firstErrors.push(showCalculatorError('lifeStageError', '임신·수유 중 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
+  if (dryRatio > 0 && !state.dryFeeds[0]) firstErrors.push(showCalculatorError('dryFeedError', '건사료 비율이 있으므로 건사료를 선택해 주세요.', 'dryInput1'));
+  const firstWetSlotId = state.wetSlotIds[0];
+  const firstWetFeed = state.wetFeedMap[firstWetSlotId];
+  const hasAdditionalWetFeed = state.wetSlotIds.slice(1).some(slotId => state.wetFeedMap[slotId]);
+  if (wetRatio > 0 && hasAdditionalWetFeed && !firstWetFeed) {
+    firstErrors.push(showCalculatorError('wetFeedError', '첫 번째 습식사료를 먼저 선택해 주세요.', `wetInput_${firstWetSlotId}`));
   }
+  const wetEntries = state.wetSlotIds.map(sid => ({ sid, feed: state.wetFeedMap[sid] })).filter(entry => entry.feed);
+  if (wetRatio > 0 && wetEntries.length === 0) firstErrors.push(showCalculatorError('wetFeedError', '습식사료 비율이 있으므로 습식사료를 선택해 주세요.', `wetInput_${state.wetSlotIds[0]}`));
+  const wetRatioValues = wetEntries.slice(1).map(entry => ({
+    entry,
+    input: document.getElementById(`wetPct_${entry.sid}`),
+    rawValue: document.getElementById(`wetPct_${entry.sid}`)?.value ?? '',
+    value: Number(document.getElementById(`wetPct_${entry.sid}`)?.value)
+  }));
+  const invalidWetRatio = wetRatioValues.find(({ rawValue, value }) => rawValue.trim() === '' || !Number.isFinite(value) || value < 0 || value > 100);
+  if (invalidWetRatio) {
+    firstErrors.push(showCalculatorError('wetRatioError', '습식사료별 비율은 0% 이상 100% 이하의 숫자로 입력해 주세요.', `wetPct_${invalidWetRatio.entry.sid}`));
+  }
+  const additionalWetPct = wetRatioValues.reduce((sum, { value }) => sum + (Number.isFinite(value) ? value : 0), 0);
+  if (!invalidWetRatio && wetEntries.length > 1 && additionalWetPct > 100) {
+    firstErrors.push(showCalculatorError('wetRatioError', '추가한 습식사료의 비율 합계는 100%를 넘을 수 없습니다.', `wetPct_${wetEntries[1].sid}`));
+  }
+  const firstError = firstErrors.find(Boolean);
+  if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
 
-  const neutered = document.getElementById('catNeutered').value === 'true';
-  const diet     = document.getElementById('isDiet').checked;
-  const { DER }  = getCaloriePlan(weight, birthStr, neutered, diet);
-
-  const dryRatio  = parseInt(document.getElementById('dryPct').textContent) / 100;
-  const wetRatio  = parseInt(document.getElementById('wetPct').textContent) / 100;
+  const diet = document.getElementById('isDiet').checked;
+  const { DER } = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet);
+  const selectedTreatReservePct = document.querySelector('input[name="treatReservePct"]:checked')?.value || '0';
+  const treatReservePct = Number(selectedTreatReservePct) / 100;
+  const treatKcal = Math.round(DER * treatReservePct);
+  const foodKcal = DER - treatKcal;
   const switching = document.getElementById('drySwitching').checked;
-
-  let html = '';
   const resultData = { 건사료_결과: [], 습식사료_결과: [] };
-
-  // 건사료 계산
-  const dryFeeds = switching
-    ? state.dryFeeds.filter(Boolean)
-    : [state.dryFeeds[0]].filter(Boolean);
-
-  const totalDrySubPct = switching
-    ? dryFeeds.reduce((sum, _, i) => {
-        const el = document.getElementById(`drySwPct${i + 1}`);
-        return sum + (el ? parseInt(el.value) || 0 : 0);
-      }, 0)
-    : 100;
-
-  dryFeeds.forEach((f, i) => {
-    const subPct = switching
-      ? (parseInt(document.getElementById(`drySwPct${i + 1}`)?.value) || 0) / (totalDrySubPct || 100)
-      : 1;
-    const kcal  = DER * dryRatio * subPct;
-    const grams = Math.round(kcal / (f.kcal / 1000));
-    html += `
-      <div class="flex justify-between items-center p-4 bg-orange-50 rounded-2xl border border-orange-100">
-        <div>
-          <span class="text-[10px] font-black text-orange-400 uppercase">DRY</span>
-          <p class="font-bold text-sm text-gray-800 mt-0.5">${f.name}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-2xl font-black text-gray-900">${grams}g</p>
-          <p class="text-xs text-gray-400">${Math.round(kcal)} kcal</p>
-        </div>
-      </div>`;
-    resultData.건사료_결과.push({
-      이름: f.name, 급여량_g: grams, 담당칼로리: Math.round(kcal),
-      에너지기준_칼슘: f.ebCa, 에너지기준_인: f.ebP, 수분_pct: f.moisture
-    });
+  const resultCards = [];
+  const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
+  const totalDrySubPct = switching ? dryFeeds.reduce((sum, _, i) => sum + (Number(document.getElementById(`drySwPct${i + 1}`)?.value) || 0), 0) : 100;
+  dryFeeds.forEach((feed, index) => {
+    const subPct = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1;
+    const kcal = foodKcal * dryRatio * subPct;
+    const grams = Math.round(kcal / (feed.kcal / 1000));
+    resultData.건사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
-
-  // 습식사료 계산
-  const wetEntries = state.wetSlotIds
-    .map(sid => ({ sid, feed: state.wetFeedMap[sid] }))
-    .filter(e => e.feed);
-  const wetCount = wetEntries.length;
-
-  wetEntries.forEach(({ sid, feed: f }) => {
-    const isFirstWet = (sid === state.wetSlotIds[0]);
-    const pctEl = document.getElementById(`wetPct_${sid}`);
-
+  wetEntries.forEach(({ sid, feed }, index) => {
     let subPct;
-    if (wetCount === 1) {
-      subPct = 1;
-    } else if (!isFirstWet && pctEl) {
-      subPct = (parseInt(pctEl.value) || 0) / 100;
-    } else {
-      const otherSum = wetEntries.reduce((sum, e) => {
-        if (e.sid === sid) return sum;
-        const el = document.getElementById(`wetPct_${e.sid}`);
-        return sum + (el ? parseInt(el.value) || 0 : 0);
-      }, 0);
-      subPct = Math.max(0, 100 - otherSum) / 100;
-    }
-
-    const kcal  = DER * wetRatio * subPct;
-    const grams = Math.round(kcal / (f.kcal / 1000));
-    html += `
-      <div class="flex justify-between items-center p-4 bg-blue-50 rounded-2xl border border-blue-100">
-        <div>
-          <span class="text-[10px] font-black text-blue-400 uppercase">WET</span>
-          <p class="font-bold text-sm text-gray-800 mt-0.5">${f.name}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-2xl font-black text-gray-900">${grams}g</p>
-          <p class="text-xs text-gray-400">${Math.round(kcal)} kcal</p>
-        </div>
-      </div>`;
-    resultData.습식사료_결과.push({
-      이름: f.name, 급여량_g: grams, 담당칼로리: Math.round(kcal),
-      에너지기준_칼슘: f.ebCa, 에너지기준_인: f.ebP, 수분_pct: f.moisture
-    });
+    if (wetEntries.length === 1) subPct = 1;
+    else if (index === 0) subPct = (100 - additionalWetPct) / 100;
+    else subPct = Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100;
+    const kcal = foodKcal * wetRatio * subPct;
+    const grams = Math.round(kcal / (feed.kcal / 1000));
+    resultData.습식사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
-
-  if (!html) {
-    html = '<p class="text-center text-gray-400 text-sm py-4">사료를 선택해주세요</p>';
-  }
-
+  [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach(item => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><div><span>${item.type}</span><h3>${item.이름}</h3><p>전체 식단의 ${item.비율}%</p></div><div><strong>${item.급여량_g}g</strong><p>${item.담당칼로리} kcal</p></div></article>`));
+  document.getElementById('resCatName').textContent = name;
   document.getElementById('resDER').textContent = DER;
-  document.getElementById('resItems').innerHTML  = html;
+  document.getElementById('resFoodKcal').textContent = foodKcal;
+  document.getElementById('resTreatKcal').textContent = treatKcal;
+  document.getElementById('resTreatRow').classList.toggle('hidden', treatKcal === 0);
+  document.getElementById('resItems').innerHTML = resultCards.join('');
   document.getElementById('resultArea').classList.remove('hidden');
-  document.getElementById('capBtn').classList.remove('hidden');
-  document.getElementById('waterBtn').classList.remove('hidden');
-  document.getElementById('openShareModalBtn').classList.remove('hidden');
   document.getElementById('capResult').classList.add('hidden');
   document.getElementById('waterResult').classList.add('hidden');
-
-  state.lastResult = { DER, dryRatio, wetRatio, ...resultData };
+  state.lastResult = { DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
+  markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
-  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+  const resultArea = document.getElementById('resultArea');
+  resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  resultArea.focus({ preventScroll: true });
 }
 
 // -----------------------------------------------
@@ -416,7 +449,7 @@ function analyzeWater() {
       ${결과목록.length > 0 ? `<div class="space-y-2">
         ${결과목록.map(s => {
           const barW     = 총수분_ml > 0 ? Math.round((s.water_ml / 총수분_ml) * 100) : 0;
-          const barColor = s.종류 === '습식사료' ? '#4a9af4' : '#f4a44a';
+          const barColor = s.종류 === '습식사료' ? '#3D8BFF' : '#FF9F43';
           return `
           <div class="bg-white p-4 rounded-2xl">
             <div class="flex justify-between items-center mb-2">

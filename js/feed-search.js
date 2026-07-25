@@ -83,6 +83,7 @@ function selectFeed(type, slotId, feedData, listId) {
   }
 
   document.getElementById(listId)?.classList.add('hidden');
+  markCalculationDirty();
 }
 
 document.addEventListener('click', e => {
@@ -237,7 +238,7 @@ function renderFeedPickerSortButtons() {
   const productBtn = document.getElementById('feedPickerSortProduct');
   if (!manufacturerBtn || !productBtn) return;
 
-  const activeClass = 'py-3 rounded-2xl text-sm font-black bg-[#2d7dd2] text-white';
+  const activeClass = 'py-3 rounded-2xl text-sm font-black bg-[#2F6FED] text-white';
   const inactiveClass = 'py-3 rounded-2xl text-sm font-black bg-gray-100 text-gray-400';
   manufacturerBtn.className = feedPickerState.sortBy === 'manufacturer' ? activeClass : inactiveClass;
   productBtn.className = feedPickerState.sortBy === 'product' ? activeClass : inactiveClass;
@@ -308,11 +309,11 @@ function setUploadType(type) {
   state.uploadType = type;
   document.getElementById('upDryBtn').className =
     `flex-1 py-3 rounded-2xl text-sm font-black border-2 ${type === 'dry'
-      ? 'border-[#f4a44a] text-[#f4a44a]'
+      ? 'border-[#FF9F43] text-[#FF9F43]'
       : 'border-gray-200 text-gray-400'}`;
   document.getElementById('upWetBtn').className =
     `flex-1 py-3 rounded-2xl text-sm font-black border-2 ${type === 'wet'
-      ? 'border-[#4a9af4] text-[#4a9af4]'
+      ? 'border-[#3D8BFF] text-[#3D8BFF]'
       : 'border-gray-200 text-gray-400'}`;
 }
 
