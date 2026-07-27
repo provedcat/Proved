@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-v39';
+const CACHE_NAME = 'proved-pwa-v40';
 const CORE_ASSETS = [
   './',
   './manifest.json',
