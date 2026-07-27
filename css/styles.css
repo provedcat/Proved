@@ -580,6 +580,8 @@ html, body, .pc-app-shell { max-width: 100%; overflow-x: clip; background: var(-
 .pc-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .pc-field + .pc-field { margin-top: 4px; }
 .pc-field-label { color: var(--text-primary); font-size: 14px; font-weight: 800; }
+fieldset.pc-field > legend ~ .pc-segmented,
+fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 .pc-help { color: var(--text-secondary); font-size: 12px; font-weight: 600; }
 .pc-field input[type=text], .pc-field input[type=date], .pc-field input[type=number],
 .pc-feed-input-row input[type=text] { width: 100%; min-width: 0; min-height: 52px; padding: 0 16px; border: 1px solid var(--border) !important; border-radius: var(--radius-control) !important; background: var(--surface) !important; box-shadow: none !important; color: var(--text-primary); }
