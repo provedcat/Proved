@@ -29,19 +29,9 @@
 }
 
 .proved-wordmark {
-  font-weight: 900;
-  letter-spacing: .18em;
-  color: var(--proved-blue);
-  font-size: 30px;
-}
-
-.proved-wordmark::after {
-  content: "";
   display: block;
-  width: 56px;
-  height: 3px;
-  background: var(--proved-blue);
-  margin-top: 22px;
+  width: 118px;
+  height: auto;
 }
 
 .proved-home-button {
@@ -60,13 +50,7 @@
 }
 
 .proved-wordmark--header {
-  font-size: 24px;
-}
-
-.proved-wordmark--header::after {
-  width: 44px;
-  height: 2px;
-  margin-top: 5px;
+  width: 100px;
 }
 
 .proved-home-button:hover {
