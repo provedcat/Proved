@@ -38,6 +38,7 @@ function closeAuthSheet() {
 
 async function refreshAuthUI() {
   const box = document.getElementById('savedCatLoadBox');
+  const calculatorPetLoadButton = document.getElementById('calculatorPetLoadButton');
   const loggedOutAuth = document.getElementById('loggedOutAuth');
   const loggedInAuth = document.getElementById('loggedInAuth');
   const userIdentifier = document.getElementById('userIdentifier');
@@ -50,6 +51,7 @@ async function refreshAuthUI() {
     state.currentUser = null;
     state.selectedSavedCatId = null;
     box?.classList.add('hidden');
+    calculatorPetLoadButton?.classList.add('hidden');
     loggedOutAuth.classList.remove('hidden');
     loggedInAuth.classList.add('hidden');
     userIdentifier.textContent = '';
@@ -68,6 +70,7 @@ async function refreshAuthUI() {
   userIdentifier.textContent = '로그인됨';
   if (authOpenBtn) authOpenBtn.textContent = '로그인됨';
   box?.classList.remove('hidden');
+  calculatorPetLoadButton?.classList.remove('hidden');
   updateSaveFeedingButtonVisibility();
   if (typeof window.updateWetFoodBetaAccess === 'function') {
     await window.updateWetFoodBetaAccess(user);

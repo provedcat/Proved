@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260728-entry-polish';
+const CACHE_NAME = 'proved-pwa-20260728-calculator-pet-load';
 const CORE_ASSETS = [
   './',
   './manifest.json',
