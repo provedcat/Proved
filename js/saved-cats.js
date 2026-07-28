@@ -241,7 +241,7 @@ function updateSaveFeedingButtonVisibility() {
     return;
   }
 
-  button.textContent = '💾 이 계산 결과 저장하기';
+  button.textContent = '이 계산 결과 저장하기';
 
   if (!hasResult) {
     setSaveFeedingRecordMessage('먼저 급여량을 계산해 주세요.', 'gray');

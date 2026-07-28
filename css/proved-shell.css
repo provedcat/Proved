@@ -314,3 +314,26 @@
     transition: none !important;
   }
 }
+
+/* Landing page aligned with the shared Proved design system */
+.proved-entry { background:var(--page-background, #F5F6F8); color:var(--text-primary, #20242C); }
+.proved-entry__inner { max-width:720px; padding:32px 24px 48px; }
+.proved-entry__main { justify-content:flex-start; gap:24px; padding-top:72px; }
+.proved-entry__title { text-align:left; font-size:28px; letter-spacing:-.03em; }
+.proved-choice-grid { gap:16px; padding:0; border:0; }
+.proved-choice { min-height:104px; padding:20px; border:1px solid var(--border-subtle, #E4E7EC); border-radius:var(--radius-card, 12px); background:#fff; color:var(--text-primary, #20242C); font-size:18px; text-align:left; box-shadow:none; }
+.proved-choice::after { left:20px; right:auto; top:0; bottom:auto; width:48px; height:3px; background:var(--brand-primary, #3568FF); }
+.proved-choice strong,.proved-choice span { display:block; }
+.proved-choice span { margin-top:8px; color:var(--text-secondary, #5F6673); font-size:13px; line-height:1.45; font-weight:600; }
+.proved-choice:hover { border-color:var(--brand-primary, #3568FF); background:rgba(53,104,255,.04); }
+.proved-choice:nth-last-child(1)::after { background:var(--dog-wet-ink, #388255); }
+.proved-choice:nth-last-child(1):hover { border-color:var(--dog-wet-ink, #388255); background:rgba(56,130,85,.05); }
+.proved-choice--muted,.proved-choice[disabled] { color:var(--text-secondary, #5F6673); background:#F0F2F5; }
+.proved-entry__hint { margin-top:20px!important; text-align:left; color:var(--text-secondary, #5F6673); font-size:14px; }
+.proved-login-list { display:grid; grid-template-columns:1fr 1fr; gap:12px; border:0; }
+.proved-login-button { min-height:48px; justify-content:center; padding:10px 16px; border:1px solid var(--border-default, #D9DDE5)!important; border-radius:var(--radius-button, 9px); font-size:14px; text-align:center; }
+.proved-login-guest,.proved-back { min-height:44px; color:var(--text-secondary, #5F6673); }
+.proved-steps { margin-top:auto; }
+.proved-step { height:3px; background:var(--border-default, #D9DDE5); }
+.proved-step.active { background:var(--brand-primary, #3568FF); }
+@media(max-width:600px){.proved-entry__inner{padding:24px 16px 36px}.proved-entry__main{padding-top:48px}.proved-choice-grid,.proved-login-list{grid-template-columns:1fr}.proved-choice{min-height:88px}}

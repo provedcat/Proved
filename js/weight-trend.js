@@ -298,16 +298,16 @@ function renderWeightTrendChart(records) {
       datasets: [{
         label: '체중(kg)',
         data: weights,
-        borderColor: '#2d7dd2',
-        backgroundColor: 'rgba(45, 125, 210, 0.12)',
+        borderColor: '#3568FF',
+        backgroundColor: 'transparent',
         borderWidth: 3,
-        pointBackgroundColor: '#2d7dd2',
+        pointBackgroundColor: '#3568FF',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointRadius: records.length === 1 ? 6 : 4,
         pointHoverRadius: 7,
         tension: 0.35,
-        fill: true
+        fill: false
       }]
     },
     options: {
@@ -339,7 +339,7 @@ function renderWeightTrendChart(records) {
             display: false
           },
           ticks: {
-            color: '#9ca3af',
+            color: '#5F6673',
             font: {
               weight: 'bold'
             }
@@ -349,14 +349,14 @@ function renderWeightTrendChart(records) {
           suggestedMin: Math.max(0, minWeight - padding),
           suggestedMax: maxWeight + padding,
           ticks: {
-            color: '#9ca3af',
+            color: '#5F6673',
             callback: value => `${Number(value).toFixed(1)}kg`,
             font: {
               weight: 'bold'
             }
           },
           grid: {
-            color: '#f3f4f6'
+            color: '#E4E7EC'
           }
         }
       }
