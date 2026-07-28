@@ -772,7 +772,10 @@ body { display:block!important; }
 .proved-shell-current { color:var(--text-primary)!important; }
 .proved-load-pet-btn { min-height:44px; padding:0 12px!important; border:1px solid var(--border-default)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--brand-primary)!important; }
 .pc-tabs { margin-top:12px; padding-bottom:0!important; }
-#navCalculator,#navWeightTrend,#navWetFoodBeta { min-height:46px; border-radius:var(--radius-button)!important; box-shadow:none!important; }
+#navCalculator,#navWeightTrend,#navWetFoodBeta { min-height:46px; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--text-secondary)!important; box-shadow:none!important; }
+#navCalculator:hover,#navWeightTrend:hover,#navWetFoodBeta:hover { background:rgba(53,104,255,.04)!important; }
+#navCalculator.is-active,#navWeightTrend.is-active,#navWetFoodBeta.is-active { border-color:rgba(53,104,255,.24)!important; background:rgba(53,104,255,.08)!important; color:var(--brand-primary)!important; }
+#navCalculator:disabled,#navWeightTrend:disabled,#navWetFoodBeta:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; }
 .pc-section-card,.pc-trend-card,.pc-trend-hero,#weightTrendLoginNotice { padding:24px!important; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-card)!important; background:var(--surface-primary)!important; box-shadow:none!important; }
 #calculatorPage { gap:16px!important; }
 .pc-step-section { gap:20px!important; }
@@ -809,7 +812,10 @@ input::placeholder { color:var(--text-placeholder); }
 .pc-trend-hero { padding:0!important; border:0!important; background:transparent!important; }
 .pc-trend-hero h2 { font-size:28px!important; color:var(--text-primary)!important; }
 #weightTrendContent { gap:16px!important; }
-#trendSummaryBox { order:-1; display:grid; grid-template-columns:2fr 1fr 1fr; gap:0!important; padding:24px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:#fff; }
+#trendSummaryBox { display:grid; grid-template-columns:2fr 1fr 1fr; gap:0!important; padding:24px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:#fff; }
+#trendCatList > .relative { min-width:0; }
+#trendCatList [data-cat-id] { padding-right:76px!important; }
+#trendCatList [data-cat-menu-button] { min-height:44px; box-shadow:none!important; }
 #trendSummaryBox > div { padding:0 18px!important; border:0!important; border-left:1px solid var(--border-subtle)!important; border-radius:0!important; box-shadow:none!important; background:#fff!important; }
 #trendSummaryBox > div:first-child { padding-left:0!important; border-left:0!important; }
 #trendLatestWeight { font-size:34px!important; }
