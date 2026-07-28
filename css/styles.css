@@ -70,7 +70,7 @@
       position: absolute;
       top: -80px; right: -80px;
       width: 280px; height: 280px;
-      background: radial-gradient(circle, rgba(45,125,210,0.22) 0%, transparent 70%);
+      background: transparent;
       border-radius: 50%;
       pointer-events: none;
     }
@@ -79,7 +79,7 @@
       position: absolute;
       bottom: -60px; left: -60px;
       width: 200px; height: 200px;
-      background: radial-gradient(circle, rgba(74,154,244,0.12) 0%, transparent 70%);
+      background: transparent;
       border-radius: 50%;
       pointer-events: none;
     }
@@ -360,7 +360,7 @@ header { padding: 18px 10px 14px !important; }
 }
 #navCalculator.bg-\[\#2F6FED\],
 #navWeightTrend.bg-\[\#2F6FED\] {
-  background: linear-gradient(135deg, #3a8ee8 0%, var(--primary) 100%) !important;
+  background: var(--brand-primary);
   color: var(--primary-foreground) !important;
   box-shadow: var(--shadow-button) !important;
 }
@@ -461,7 +461,7 @@ main { padding: 0 16px 28px !important; }
   border-radius: 999px !important;
 }
 .pc-calculate-btn {
-  background: linear-gradient(180deg, #3a8ee8 0%, var(--primary) 100%) !important;
+  background: var(--brand-primary);
   border-radius: 16px !important;
   min-height: 58px;
   box-shadow: 0 12px 22px rgba(45, 125, 210, .28) !important;
@@ -722,4 +722,115 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 }
 @media(max-width:360px) {
   .pc-result-panel { padding:0 !important; }
+}
+
+/* Unified Proved UI system — landing, calculator and weight trend */
+:root {
+  --brand-primary: #3568FF;
+  --brand-primary-pressed: #234FC7;
+  --page-background: #F5F6F8;
+  --surface-primary: #FFFFFF;
+  --text-primary: #20242C;
+  --text-secondary: #5F6673;
+  --text-placeholder: #8A919E;
+  --border-default: #D9DDE5;
+  --border-subtle: #E4E7EC;
+  --cat-wet-ink: #1F5CC4;
+  --cat-dry-ink: #B85A00;
+  --dog-wet-ink: #388255;
+  --dog-dry-ink: #9A5B34;
+  --calcium-ink: #5D537F;
+  --water-ink: #3E7C7B;
+  --cat-wet-soft: rgba(31, 92, 196, .08);
+  --cat-dry-soft: rgba(184, 90, 0, .08);
+  --dog-soft: rgba(56, 130, 85, .08);
+  --calcium-soft: rgba(93, 83, 127, .08);
+  --water-soft: rgba(62, 124, 123, .08);
+  --radius-card: 12px;
+  --radius-input: 9px;
+  --radius-button: 9px;
+  --radius-tag: 7px;
+  --brand-blue: var(--brand-primary);
+  --brand-blue-pressed: var(--brand-primary-pressed);
+  --surface: var(--surface-primary);
+  --text-secondary: #5F6673;
+  --border: var(--border-default);
+  --border-neutral: var(--border-default);
+  --cat-dry-strong: var(--cat-dry-ink);
+  --cat-wet-strong: var(--cat-wet-ink);
+}
+html, body { background:var(--page-background)!important; color:var(--text-primary); }
+body { display:block!important; }
+.pc-app-shell { max-width:none; background:var(--page-background)!important; box-shadow:none!important; }
+.pc-app-header { height:64px; padding:0 24px!important; border-bottom:1px solid var(--border-subtle); background:var(--surface-primary); }
+.pc-app-header > * { max-height:46px; }
+.pc-page-container, .proved-shell-bar, .pc-tabs { width:min(100% - 48px, 720px); margin-inline:auto; padding-inline:0!important; }
+.pc-page-container { padding-top:24px; display:block; }
+.pc-page-container > section { margin:0; }
+.pc-page-container > section:not(.hidden) { display:flex; flex-direction:column; gap:16px!important; }
+.proved-shell-bar { margin-top:24px; min-height:56px; padding:10px 14px!important; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-card)!important; background:var(--surface-primary)!important; box-shadow:none!important; }
+.proved-shell-current { color:var(--text-primary)!important; }
+.proved-load-pet-btn { min-height:44px; padding:0 12px!important; border:1px solid var(--border-default)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--brand-primary)!important; }
+.pc-tabs { margin-top:12px; padding-bottom:0!important; }
+#navCalculator,#navWeightTrend,#navWetFoodBeta { min-height:46px; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--text-secondary)!important; box-shadow:none!important; }
+#navCalculator:hover,#navWeightTrend:hover,#navWetFoodBeta:hover { background:rgba(53,104,255,.04)!important; }
+#navCalculator.is-active,#navWeightTrend.is-active,#navWetFoodBeta.is-active { border-color:rgba(53,104,255,.24)!important; background:rgba(53,104,255,.08)!important; color:var(--brand-primary)!important; }
+#navCalculator:disabled,#navWeightTrend:disabled,#navWetFoodBeta:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; }
+.pc-section-card,.pc-trend-card,.pc-trend-hero,#weightTrendLoginNotice { padding:24px!important; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-card)!important; background:var(--surface-primary)!important; box-shadow:none!important; }
+#calculatorPage { gap:16px!important; }
+.pc-step-section { gap:20px!important; }
+.pc-section-heading { margin-bottom:2px; }
+.pc-section-heading p,.pc-trend-hero p,.pc-trend-card p { margin-top:6px; color:var(--text-secondary)!important; font-size:14px; line-height:1.5; }
+.pc-section-title { font-size:20px!important; line-height:1.35; }
+.pc-section-title > span { margin-right:8px; color:var(--brand-primary)!important; font-variant-numeric:tabular-nums; }
+.pc-field-label { font-size:14px!important; font-weight:700!important; }
+.pc-field input[type=text],.pc-field input[type=date],.pc-field input[type=number],.pc-feed-input-row input[type=text] { height:48px; min-height:48px; border-radius:var(--radius-input)!important; }
+input::placeholder { color:var(--text-placeholder); }
+.pc-segmented { padding:3px; border:1px solid var(--border-default); border-radius:var(--radius-input); background:var(--page-background); }
+.pc-segmented-option { min-height:42px; border:0!important; border-radius:7px; }
+.pc-segmented-option.is-selected,.pc-segmented-option:has(input:checked) { background:rgba(53,104,255,.09); color:var(--brand-primary); }
+.pc-segmented-option.is-selected::before,.pc-segmented-option:has(input:checked)::before,.pc-choice-chip:has(input:checked)::before { content:none!important; }
+.pc-choice-chip { border-radius:var(--radius-button); font-weight:700; }
+.pc-choice-chip:has(input:checked) { border:1px solid var(--brand-primary); background:rgba(53,104,255,.09); }
+.pc-feed-panel,.pc-ratio-card { padding:16px!important; border-radius:var(--radius-input)!important; box-shadow:none!important; }
+.pc-feed-panel--dry { border-color:rgba(184,90,0,.2); background:var(--cat-dry-soft); color:var(--cat-dry-ink); }
+.pc-feed-panel--wet { border-color:rgba(31,92,196,.2); background:var(--cat-wet-soft); color:var(--cat-wet-ink); }
+.pc-feed-picker-button { min-height:44px; border:1px solid currentColor!important; border-radius:var(--radius-button)!important; background:transparent!important; color:inherit!important; }
+.pc-feed-panel--dry .pc-feed-picker-button,.pc-feed-panel--wet .pc-feed-picker-button { background:rgba(255,255,255,.45)!important; }
+.pc-ratio-values,#dryPct,#wetPct { font-variant-numeric:tabular-nums; }
+#ratioSlider { accent-color:var(--brand-primary); }
+.pc-primary-button { min-height:50px; border-radius:var(--radius-button); background:var(--brand-primary); }
+.pc-primary-button:hover,.pc-primary-button:active { background:var(--brand-primary-pressed); }
+.pc-result-panel { gap:20px!important; color:var(--text-primary); }
+.pc-result-summary { border-color:var(--border-subtle); border-radius:var(--radius-input); }
+.pc-result-summary strong,.pc-result-summary span,.pc-result-card strong { font-variant-numeric:tabular-nums; }
+.pc-result-card { border-color:var(--border-subtle)!important; border-radius:var(--radius-input); padding:18px; }
+.pc-result-card strong { font-size:32px; line-height:1; }
+#capBtn,#waterBtn { min-height:46px; border:1px solid currentColor!important; border-radius:var(--radius-button)!important; }
+#capBtn { color:var(--calcium-ink)!important; background:var(--calcium-soft)!important; }
+#waterBtn { color:var(--water-ink)!important; background:var(--water-soft)!important; }
+.pc-trend-hero { padding:0!important; border:0!important; background:transparent!important; }
+.pc-trend-hero h2 { font-size:28px!important; color:var(--text-primary)!important; }
+#weightTrendContent { gap:16px!important; }
+#trendSummaryBox { display:grid; grid-template-columns:2fr 1fr 1fr; gap:0!important; padding:24px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:#fff; }
+#trendCatList > .relative { min-width:0; }
+#trendCatList [data-cat-id] { padding-right:76px!important; }
+#trendCatList [data-cat-menu-button] { min-height:44px; box-shadow:none!important; }
+#trendSummaryBox > div { padding:0 18px!important; border:0!important; border-left:1px solid var(--border-subtle)!important; border-radius:0!important; box-shadow:none!important; background:#fff!important; }
+#trendSummaryBox > div:first-child { padding-left:0!important; border-left:0!important; }
+#trendLatestWeight { font-size:34px!important; }
+#trendLatestWeight,#trendStartWeight,#trendWeightDelta { font-variant-numeric:tabular-nums; }
+#weightTrendChart { max-width:100%; font-variant-numeric:tabular-nums; }
+#trendCatList [data-cat-id] { border-radius:var(--radius-button)!important; }
+:where(button,input,select,[tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(53,104,255,.28)!important; outline-offset:2px; }
+button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }
+@media (max-width:600px) {
+  .pc-app-header { padding-inline:16px!important; }
+  .pc-page-container,.proved-shell-bar,.pc-tabs { width:calc(100% - 32px); }
+  .pc-section-card,.pc-trend-card,#weightTrendLoginNotice { padding:18px!important; }
+  #trendSummaryBox { grid-template-columns:1fr; gap:16px!important; padding:18px; }
+  #trendSummaryBox > div { padding:16px 0 0!important; border-left:0!important; border-top:1px solid var(--border-subtle)!important; }
+  #trendSummaryBox > div:first-child { padding-top:0!important; border-top:0!important; }
+  .pc-result-card strong { font-size:30px; }
+  .pc-feed-heading { align-items:flex-start; }
 }

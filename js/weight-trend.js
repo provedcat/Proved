@@ -98,11 +98,11 @@ async function loadTrendCats() {
         </span>
       </button>
       <button type="button" data-cat-menu-button="${escapeHtml(cat.id)}" onclick="event.stopPropagation(); toggleTrendCatMenu(this.dataset.catMenuButton)"
-        class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 shadow-sm hover:text-[#2d7dd2] hover:border-[#2d7dd2] transition-all"
-        aria-label="고양이 메뉴 열기">
-        …
+        class="absolute right-3 top-1/2 -translate-y-1/2 flex min-h-[44px] items-center justify-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-bold text-gray-500 hover:text-[#3568FF] hover:border-[#3568FF] transition-colors"
+        aria-label="${escapeHtml(cat.name || '고양이')} 관리 메뉴" aria-expanded="false" aria-controls="trendCatMenu-${escapeHtml(cat.id)}">
+        관리
       </button>
-      <div data-cat-menu="${escapeHtml(cat.id)}" class="hidden absolute right-3 top-12 z-20 min-w-[120px] rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+      <div id="trendCatMenu-${escapeHtml(cat.id)}" data-cat-menu="${escapeHtml(cat.id)}" class="hidden absolute right-3 top-14 z-20 min-w-[120px] rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
         <button type="button" data-cat-delete="${escapeHtml(cat.id)}" onclick="event.stopPropagation(); deleteTrendCat(this.dataset.catDelete)"
           class="w-full rounded-lg px-3 py-2 text-left text-xs font-black text-red-500 hover:bg-red-50 transition-colors">
           삭제하기
@@ -134,6 +134,9 @@ function closeTrendCatMenus() {
   document.querySelectorAll('[data-cat-menu]').forEach(menu => {
     menu.classList.add('hidden');
   });
+  document.querySelectorAll('[data-cat-menu-button]').forEach(button => {
+    button.setAttribute('aria-expanded', 'false');
+  });
 }
 
 function toggleTrendCatMenu(catId) {
@@ -144,6 +147,9 @@ function toggleTrendCatMenu(catId) {
   const shouldOpen = menu.classList.contains('hidden');
   closeTrendCatMenus();
   menu.classList.toggle('hidden', !shouldOpen);
+  const button = Array.from(document.querySelectorAll('[data-cat-menu-button]'))
+    .find(item => String(item.dataset.catMenuButton) === String(catId));
+  button?.setAttribute('aria-expanded', String(shouldOpen));
 }
 
 async function deleteTrendCat(catId) {
@@ -298,16 +304,16 @@ function renderWeightTrendChart(records) {
       datasets: [{
         label: '체중(kg)',
         data: weights,
-        borderColor: '#2d7dd2',
-        backgroundColor: 'rgba(45, 125, 210, 0.12)',
+        borderColor: '#3568FF',
+        backgroundColor: 'transparent',
         borderWidth: 3,
-        pointBackgroundColor: '#2d7dd2',
+        pointBackgroundColor: '#3568FF',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointRadius: records.length === 1 ? 6 : 4,
         pointHoverRadius: 7,
         tension: 0.35,
-        fill: true
+        fill: false
       }]
     },
     options: {
@@ -339,7 +345,7 @@ function renderWeightTrendChart(records) {
             display: false
           },
           ticks: {
-            color: '#9ca3af',
+            color: '#5F6673',
             font: {
               weight: 'bold'
             }
@@ -349,14 +355,14 @@ function renderWeightTrendChart(records) {
           suggestedMin: Math.max(0, minWeight - padding),
           suggestedMax: maxWeight + padding,
           ticks: {
-            color: '#9ca3af',
+            color: '#5F6673',
             callback: value => `${Number(value).toFixed(1)}kg`,
             font: {
               weight: 'bold'
             }
           },
           grid: {
-            color: '#f3f4f6'
+            color: '#E4E7EC'
           }
         }
       }

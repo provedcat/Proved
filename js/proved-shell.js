@@ -172,8 +172,8 @@ function provedRenderEntry(step) {
           </div>
           <p class="proved-entry__hint" style="margin:34px 0 20px">로그인 방법을 선택해 주세요.</p>
           <div class="proved-login-list">
-            <button class="proved-login-button" onclick="provedHandleEntryOAuthLogin('google')"><span class="proved-login-icon">G</span><span>Google로 계속하기</span></button>
-            <button class="proved-login-button" onclick="provedHandleEntryOAuthLogin('kakao')"><span class="proved-login-icon" style="font-size:14px">TALK</span><span>카카오로 계속하기</span></button>
+            <button class="proved-login-button" onclick="provedHandleEntryOAuthLogin('google')">Google로 계속하기</button>
+            <button class="proved-login-button" onclick="provedHandleEntryOAuthLogin('kakao')">카카오로 계속하기</button>
           </div>
           <p id="provedEntryAuthMsg" class="proved-entry-auth-msg hidden" role="status" aria-live="polite"></p>
           <button class="proved-login-guest" onclick="provedRenderEntry('pet')">로그인 없이 시작하기</button>
@@ -191,8 +191,8 @@ function provedRenderEntry(step) {
           <div class="proved-choice-grid">
             <button class="proved-choice proved-choice--muted" type="button" onclick="provedRenderEntry('login')">로그인</button>
             <button class="proved-choice" type="button">로그인 없이</button>
-            <button class="proved-choice" type="button" onclick="provedChooseSpecies('cat')">고양이와</button>
-            <button class="proved-choice" type="button" onclick="provedChooseSpecies('dog')">강아지와</button>
+            <button class="proved-choice proved-choice--cat" type="button" onclick="provedChooseSpecies('cat')"><strong>고양이</strong><span>고양이 식단과 건강 기록 관리</span></button>
+            <button class="proved-choice proved-choice--dog" type="button" onclick="provedChooseSpecies('dog')"><strong>강아지</strong><span>강아지 식단과 건강 기록 관리</span></button>
           </div>
           <p class="proved-entry__hint" style="margin-top:34px">함께할 반려동물을 선택해 주세요.</p>
           <button class="proved-back" onclick="provedRenderEntry('start')">이전 단계로</button>
@@ -209,8 +209,8 @@ function provedRenderEntry(step) {
         <div class="proved-choice-grid">
           <button class="proved-choice" type="button" onclick="provedRenderEntry('login')">로그인</button>
           <button class="proved-choice" type="button" onclick="provedRenderEntry('pet')">로그인 없이</button>
-          <button class="proved-choice" type="button" disabled>고양이와</button>
-          <button class="proved-choice" type="button" disabled>강아지와</button>
+          <button class="proved-choice proved-choice--cat" type="button" disabled><strong>고양이</strong><span>고양이 식단과 건강 기록 관리</span></button>
+          <button class="proved-choice proved-choice--dog" type="button" disabled><strong>강아지</strong><span>강아지 식단과 건강 기록 관리</span></button>
         </div>
         <p class="proved-entry__hint" style="margin-top:34px">로그인 없이 시작하면 선택할 수 있어요.</p>
       </div>
