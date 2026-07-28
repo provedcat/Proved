@@ -29,17 +29,18 @@ async function loadRecentFeedsForCat(catId) {
   if (!user?.id || !catId || state.selectedPetSpecies === 'dog') return;
   const requestId = recentFeedRequestId;
   const { data, error } = await sb.from('feeding_records')
-    .select('dry_feed_name, wet_feeds, calculated_at')
+    .select('result_data, created_at')
     .eq('user_id', user.id).eq('cat_id', catId)
-    .order('calculated_at', { ascending: false }).limit(1).maybeSingle();
+    .order('created_at', { ascending: false }).limit(1).maybeSingle();
   if (error) {
     console.warn('최근 사용 사료를 불러오지 못했습니다.', error);
     return;
   }
   if (requestId !== recentFeedRequestId || state.selectedSavedCatId !== catId || state.currentUser?.id !== user.id) return;
-  setRecentFeedButton('dry', normalizeRecentFeedName(data?.dry_feed_name));
-  const firstWetFeed = Array.isArray(data?.wet_feeds) ? data.wet_feeds[0] : null;
-  setRecentFeedButton('wet', normalizeRecentFeedName(firstWetFeed));
+  const dryName = data?.result_data?.건사료_결과?.[0]?.이름 || '';
+  const wetName = data?.result_data?.습식사료_결과?.[0]?.이름 || '';
+  setRecentFeedButton('dry', normalizeRecentFeedName(dryName));
+  setRecentFeedButton('wet', normalizeRecentFeedName(wetName));
 }
 
 async function selectRecentFeed(type) {

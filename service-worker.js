@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-v41-recent-feed';
+const CACHE_NAME = 'proved-pwa-v42-recent-feed-fix';
 const CORE_ASSETS = [
   './',
   './manifest.json',

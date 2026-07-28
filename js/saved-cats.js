@@ -473,6 +473,7 @@ async function handleSaveFeedingRecord() {
       finalMessage = '계산 결과가 저장되었습니다.';
     }
 
+    await loadRecentFeedsForCat(catId);
     finalTone = 'blue';
     shouldCloseShareModal = true;
   } catch (error) {
