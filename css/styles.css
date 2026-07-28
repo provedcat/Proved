@@ -780,6 +780,24 @@ body { display:block!important; }
 #calculatorPage { gap:16px!important; }
 .pc-step-section { gap:20px!important; }
 .pc-section-heading { margin-bottom:2px; }
+.pc-section-heading--with-action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pc-compact-load-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(53, 104, 255, 0.28);
+  border-radius: 8px;
+  background: #fff;
+  color: #3568FF;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
 .pc-section-heading p,.pc-trend-hero p,.pc-trend-card p { margin-top:6px; color:var(--text-secondary)!important; font-size:14px; line-height:1.5; }
 .pc-section-title { font-size:20px!important; line-height:1.35; }
 .pc-section-title > span { margin-right:8px; color:var(--brand-primary)!important; font-variant-numeric:tabular-nums; }
