@@ -165,10 +165,11 @@ function addWetSlot() {
           class="pc-remove-feed" aria-label="습식사료 삭제">✕</button>
       ` : ''}
     </div>
-    <button type="button" onclick="openFeedPicker('wet', ${slotId})"
-      class="pc-feed-picker-button">
-      제품 목록에서 찾기
-    </button>
+    <div class="pc-feed-action-row">
+      <button type="button" onclick="openFeedPicker('wet', ${slotId})"
+        class="pc-feed-picker-button">제품 목록에서 찾기</button>
+      ${isFirst ? '<button type="button" id="recentWetFeedButton" class="pc-recent-feed-button hidden" onclick="selectRecentFeed(\'wet\')"></button>' : ''}
+    </div>
     <div id="wetList_${slotId}"
       class="pc-search-list hidden">
     </div>

@@ -655,6 +655,12 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 .pc-selected-feed { margin-top:12px; overflow-wrap:anywhere; }
 .pc-feed-panel--dry .pc-selected-feed { color:var(--cat-dry-strong); }
 .pc-feed-panel--wet .pc-selected-feed { color:var(--cat-wet-strong); }
+
+.pc-feed-action-row { display:flex;align-items:center;gap:8px;margin-top:12px;min-width:0;max-width:100%; }
+.pc-feed-action-row .pc-feed-picker-button { flex:0 0 auto;margin-top:0; }
+.pc-recent-feed-button { flex:1 1 auto;min-width:0;min-height:40px;padding:8px 14px;border:0;border-radius:10px;background:#fff;color:#4b5563;box-shadow:none;font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;text-align:left; }
+.pc-recent-feed-button:hover { background:#f3f4f6; }
+.pc-recent-feed-button:active { background:#e5e7eb; }
 .pc-search-list { border-radius:12px; }
 .pc-ratio-card { border-color:var(--border-neutral) !important; box-shadow:0 2px 8px rgba(16,27,51,.04) !important; }
 .pc-ratio-values strong { font-size:16px; }

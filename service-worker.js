@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-v40';
+const CACHE_NAME = 'proved-pwa-v41-recent-feed';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -9,6 +9,7 @@ const CORE_ASSETS = [
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',
+  './js/recent-feed.js',
   './js/saved-cats.js',
   './js/auth.js',
   './js/share-card.js',

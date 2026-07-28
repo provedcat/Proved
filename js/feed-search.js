@@ -97,6 +97,7 @@ document.addEventListener('click', e => {
 const feedPickerState = {
   type: null,
   slotId: null,
+  nameFilter: '',
   sortBy: 'manufacturer',
   cache: {
     dry: null,
@@ -139,6 +140,7 @@ function setFeedPickerBodyScrollLock(isLocked) {
 }
 
 function openFeedPicker(type, slotId) {
+  feedPickerState.nameFilter = '';
   feedPickerState.type = type;
   feedPickerState.slotId = slotId;
   feedPickerState.error[type] = null;
@@ -219,7 +221,10 @@ function setFeedPickerSort(sortBy) {
 }
 
 function getSortedFeedPickerFeeds() {
-  const feeds = feedPickerState.cache[feedPickerState.type] || [];
+  const filter = feedPickerState.nameFilter.trim().toLocaleLowerCase('ko');
+  const feeds = (feedPickerState.cache[feedPickerState.type] || []).filter(feed =>
+    !filter || String(feed.제품명 || '').toLocaleLowerCase('ko').includes(filter)
+  );
   const sorted = feeds.slice();
 
   if (feedPickerState.sortBy === 'product') {

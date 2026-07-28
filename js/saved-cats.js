@@ -136,7 +136,9 @@ async function loadMyCats() {
 }
 
 async function selectSavedCat(cat) {
+  resetRecentFeedButtons();
   state.selectedSavedCatId = cat.id;
+  const recentFeedsPromise = loadRecentFeedsForCat(cat.id);
   const shouldSyncSharedPet = !state.isApplyingActivePet;
   if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
     provedApplyCurrentPetState({ ...cat, species: 'cat' });
@@ -171,6 +173,7 @@ async function selectSavedCat(cat) {
     setSavedCatLoadMessage(`체중 불러오기 실패: ${error.message}`, 'red');
     updateCalorie();
     updateSaveFeedingButtonVisibility();
+    await recentFeedsPromise;
     return;
   }
 
@@ -190,6 +193,7 @@ async function selectSavedCat(cat) {
 
   updateCalorie();
   updateSaveFeedingButtonVisibility();
+  await recentFeedsPromise;
 
   if (
     shouldSyncSharedPet &&
