@@ -203,18 +203,16 @@ function provedRenderEntry(step) {
   }
 
   root.innerHTML = `
-    <div class="proved-entry__main">
+    <div class="proved-entry__main proved-entry__main--start">
       <h2 class="proved-entry__title">어떻게 시작할까요?</h2>
-      <div>
-        <div class="proved-choice-grid">
-          <button class="proved-choice" type="button" onclick="provedRenderEntry('login')">로그인</button>
-          <button class="proved-choice" type="button" onclick="provedRenderEntry('pet')">로그인 없이</button>
-          <button class="proved-choice proved-choice--cat" type="button" disabled><strong>고양이</strong><span>고양이 식단과 건강 기록 관리</span></button>
-          <button class="proved-choice proved-choice--dog" type="button" disabled><strong>강아지</strong><span>강아지 식단과 건강 기록 관리</span></button>
+      <div class="proved-start-options">
+        <div class="proved-choice-grid proved-choice-grid--start">
+          <button class="proved-choice proved-start-choice" type="button" onclick="provedRenderEntry('login')">로그인</button>
+          <button class="proved-choice proved-start-choice" type="button" onclick="provedRenderEntry('pet')">로그인 없이</button>
+          <button class="proved-choice proved-start-choice" type="button" disabled>고양이</button>
+          <button class="proved-choice proved-start-choice" type="button" disabled>강아지</button>
         </div>
-        <p class="proved-entry__hint" style="margin-top:34px">로그인 없이 시작하면 선택할 수 있어요.</p>
       </div>
-      ${steps(1)}
     </div>`;
 }
 
