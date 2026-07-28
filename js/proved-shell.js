@@ -343,6 +343,7 @@ function provedScheduleLoginDestination(sessionOrUser) {
 
 async function setActivePet(pet, options = {}) {
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
+  resetRecentFeedButtons();
   provedHideEntry();
   provedApplyCurrentPetState(normalizedPet);
 
@@ -458,6 +459,7 @@ function closePetSelectorModal() {
 }
 
 function provedResetAccountState() {
+  resetRecentFeedButtons();
   provedCancelScheduledLoginDestination({ resetCompleted: true });
   closePetSelectorModal();
   provedClearLastActivePet();

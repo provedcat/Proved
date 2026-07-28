@@ -46,6 +46,7 @@ async function refreshAuthUI() {
 
   const user = await getCurrentUser();
   if (!user) {
+    resetRecentFeedButtons();
     state.currentUser = null;
     state.selectedSavedCatId = null;
     box?.classList.add('hidden');

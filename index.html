@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/styles.css?v=20260727-field-spacing">
+  <link rel="stylesheet" href="css/styles.css?v=20260728-recent-feed-fix">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260727-shell-spacing">
 </head>
 <body class="flex justify-center">
@@ -79,7 +79,7 @@
     <section class="pc-step-section" aria-labelledby="step2Title">
       <h2 id="step2Title" class="pc-section-title">2단계. 식단 구성</h2>
       <section class="pc-feed-panel pc-feed-panel--dry"><div class="pc-feed-heading"><h3>건사료 검색</h3><label class="pc-switch"><input type="checkbox" id="drySwitching" onchange="toggleDrySwitching()"><span>건사료 교체 중</span></label></div>
-        <div class="relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput1">건사료 검색</label><input type="text" id="dryInput1" placeholder="건사료 검색..." oninput="searchFeed('dry',this.value,'dryList1',0)" onfocus="searchFeed('dry',this.value,'dryList1',0)"><div id="drySwPctWrap1" class="hidden pc-subratio"><input aria-label="기존 건사료 비율" type="number" id="drySwPct1" value="70" min="0" max="100"><span>%</span></div></div><div id="dryList1" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',0)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected1" class="pc-selected-feed hidden"></p></div>
+        <div class="relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput1">건사료 검색</label><input type="text" id="dryInput1" placeholder="건사료 검색..." oninput="searchFeed('dry',this.value,'dryList1',0)" onfocus="searchFeed('dry',this.value,'dryList1',0)"><div id="drySwPctWrap1" class="hidden pc-subratio"><input aria-label="기존 건사료 비율" type="number" id="drySwPct1" value="70" min="0" max="100"><span>%</span></div></div><div id="dryList1" class="pc-search-list hidden"></div><div class="pc-feed-action-row"><button type="button" onclick="openFeedPicker('dry',0)" class="pc-feed-picker-button">제품 목록에서 찾기</button><button type="button" id="recentDryFeedButton" class="pc-recent-feed-button hidden" onclick="selectRecentFeed('dry')"></button></div><p id="drySelected1" class="pc-selected-feed hidden"></p></div>
         <div id="dryArea2" class="hidden relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput2">새 건사료 검색</label><input type="text" id="dryInput2" placeholder="새 건사료 검색..." oninput="searchFeed('dry',this.value,'dryList2',1)" onfocus="searchFeed('dry',this.value,'dryList2',1)"><div class="pc-subratio"><input aria-label="새 건사료 비율" type="number" id="drySwPct2" value="30" min="0" max="100"><span>%</span></div></div><div id="dryList2" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',1)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected2" class="pc-selected-feed hidden"></p></div>
         <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
       </section>
@@ -586,6 +586,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const resetSelectedCatOnManualEdit = () => {
       if (state.isApplyingSavedCat) return;
       state.selectedSavedCatId = null;
+      resetRecentFeedButtons();
       updateSaveFeedingButtonVisibility();
     };
 
@@ -605,7 +606,8 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
 <script src="js/calculator.js?v=20260725-feeding-flow-3"></script>
 <script src="js/feed-search.js?v=20260725-feeding-flow-2"></script>
-<script src="js/saved-cats.js?v=20260725-feeding-flow-2"></script>
+<script src="js/recent-feed.js?v=20260728-recent-feed-fix"></script>
+<script src="js/saved-cats.js?v=20260728-recent-feed-fix"></script>
 <script src="js/auth.js?v=20260710-wet-beta-access"></script>
 <script src="js/wet-beta-access.js?v=20260710-wet-beta-access"></script>
 <script src="js/share-card.js?v=20260725-feeding-flow-2"></script>
