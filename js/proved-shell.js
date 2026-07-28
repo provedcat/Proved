@@ -168,21 +168,30 @@ function provedRenderEntry(step) {
   const option = (label, modifier, attributes = '') =>
     `<button class="proved-entry-option proved-entry-option--${modifier}" type="button" ${attributes}>${label}</button>`;
 
+  const speciesOptions = isLogin ? '' : `
+      ${option(step === 'pet' ? '고양이와' : '고양이', step === 'pet' ? 'active proved-entry-option--cat' : 'muted proved-entry-option--cat', step === 'pet' ? "onclick=\"provedChooseSpecies('cat')\"" : 'disabled')}
+      ${option(step === 'pet' ? '강아지와' : '강아지', step === 'pet' ? 'active proved-entry-option--dog' : 'muted proved-entry-option--dog', step === 'pet' ? "onclick=\"provedChooseSpecies('dog')\"" : 'disabled')}`;
+
   const options = `
     <div class="proved-entry-options">
       ${option('로그인', isLogin || isStart ? 'active proved-entry-option--login' : 'muted proved-entry-option--login', isLogin ? '' : "onclick=\"provedRenderEntry('login')\"")}
       ${option('로그인 없이', isStart || step === 'pet' ? 'active proved-entry-option--guest' : 'muted proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
       <div class="proved-entry-divider" aria-hidden="true"></div>
-      ${option('고양이', step === 'pet' ? 'cat' : 'muted proved-entry-option--cat', step === 'pet' ? "onclick=\"provedChooseSpecies('cat')\"" : 'disabled')}
-      ${option('강아지', step === 'pet' ? 'dog' : 'muted proved-entry-option--dog', step === 'pet' ? "onclick=\"provedChooseSpecies('dog')\"" : 'disabled')}
+      ${speciesOptions}
     </div>`;
 
   const detail = isLogin ? `
     <div class="proved-login-area">
       <p class="proved-entry__hint">로그인 방법을 선택해 주세요.</p>
       <div class="proved-login-list">
-        <button class="proved-login-button" type="button" onclick="provedHandleEntryOAuthLogin('google')">Google로 계속하기</button>
-        <button class="proved-login-button" type="button" onclick="provedHandleEntryOAuthLogin('kakao')">카카오로 계속하기</button>
+        <button class="proved-login-button" type="button" onclick="provedHandleEntryOAuthLogin('google')">
+          <span class="proved-login-provider-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3.1l5.7-5.7A19.9 19.9 0 0 0 24 4C13 4 4 13 4 24s9 20 20 20c11 0 20-9 20-20 0-1.2-.1-2.4-.4-3.5z"/></svg></span>
+          <span>Google로 계속하기</span>
+        </button>
+        <button class="proved-login-button" type="button" onclick="provedHandleEntryOAuthLogin('kakao')">
+          <span class="proved-login-provider-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M24 6C12.95 6 4 13.16 4 22c0 5.72 3.75 10.74 9.39 13.57l-2.4 8.82a1 1 0 0 0 1.48 1.1l10.53-6.7c.33.02.66.03 1 .03 11.05 0 20-7.16 20-16S35.05 6 24 6zm-9.1 12.08h-3.13V28h-2.5v-9.92H6.14V16h8.76v2.08zM23.72 28h-2.56l-.77-2.33h-3.61L16.02 28h-2.55l4.12-12h2.04l4.09 12zm8.03 0h-7.24V16h2.5v9.92h4.74V28zm9.45 0h-2.93l-3.16-4.9-.94 1.14V28h-2.5V16h2.5v5.02L38.11 16h2.98l-4.31 5.24L41.2 28zm-23.74-4.42h2.25l-1.11-3.55-1.14 3.55z"/></svg></span>
+          <span>카카오로 계속하기</span>
+        </button>
       </div>
       <p id="provedEntryAuthMsg" class="proved-entry-auth-msg hidden" role="status" aria-live="polite"></p>
       <button class="proved-login-guest" type="button" onclick="provedRenderEntry('pet')">로그인 없이 시작하기</button>
