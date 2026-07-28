@@ -298,8 +298,14 @@ function calculate() {
   document.getElementById('resTreatRow').classList.toggle('hidden', treatKcal === 0);
   document.getElementById('resItems').innerHTML = resultCards.join('');
   document.getElementById('resultArea').classList.remove('hidden');
-  document.getElementById('capResult').classList.add('hidden');
-  document.getElementById('waterResult').classList.add('hidden');
+  const capResult = document.getElementById('capResult');
+  const waterResult = document.getElementById('waterResult');
+  capResult.classList.add('hidden');
+  capResult.innerHTML = '';
+  waterResult.classList.add('hidden');
+  waterResult.innerHTML = '';
+  document.getElementById('capBtn').setAttribute('aria-expanded', 'false');
+  document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
   state.lastResult = { DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
   markCalculationFresh();
   state.lastSavedResultKey = null;
@@ -376,7 +382,8 @@ function analyzeCaP() {
 
   document.getElementById('capResult').innerHTML = html;
   document.getElementById('capResult').classList.remove('hidden');
-  document.getElementById('capResult').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('capBtn').setAttribute('aria-expanded', 'true');
+  document.getElementById('capResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // -----------------------------------------------
@@ -478,5 +485,6 @@ function analyzeWater() {
 
   document.getElementById('waterResult').innerHTML = html;
   document.getElementById('waterResult').classList.remove('hidden');
-  document.getElementById('waterResult').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('waterBtn').setAttribute('aria-expanded', 'true');
+  document.getElementById('waterResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
