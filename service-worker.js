@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-v43-analysis-flow';
+const CACHE_NAME = 'proved-pwa-20260728-entry-flow';
 const CORE_ASSETS = [
   './',
   './manifest.json',
