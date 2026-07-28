@@ -1,7 +1,7 @@
 {
   "name": "Proved - 반려동물 영양 설계",
   "short_name": "Proved",
-  "description": "고양이 체중과 식단 비율에 맞춰 하루 급여량을 계산하는 ProvedCat 계산기입니다.",
+  "description": "반려동물 체중과 식단 비율에 맞춰 하루 급여량을 계산합니다.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
