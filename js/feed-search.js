@@ -312,14 +312,12 @@ window.selectFeedFromPicker = selectFeedFromPicker;
 
 function setUploadType(type) {
   state.uploadType = type;
-  document.getElementById('upDryBtn').className =
-    `flex-1 py-3 rounded-2xl text-sm font-black border-2 ${type === 'dry'
-      ? 'border-[#FF9F43] text-[#FF9F43]'
-      : 'border-gray-200 text-gray-400'}`;
-  document.getElementById('upWetBtn').className =
-    `flex-1 py-3 rounded-2xl text-sm font-black border-2 ${type === 'wet'
-      ? 'border-[#3D8BFF] text-[#3D8BFF]'
-      : 'border-gray-200 text-gray-400'}`;
+  const dryButton = document.getElementById('upDryBtn');
+  const wetButton = document.getElementById('upWetBtn');
+  dryButton.classList.toggle('is-active', type === 'dry');
+  dryButton.setAttribute('aria-pressed', String(type === 'dry'));
+  wetButton.classList.toggle('is-active', type === 'wet');
+  wetButton.setAttribute('aria-pressed', String(type === 'wet'));
 }
 
 
