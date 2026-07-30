@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/styles.css?v=20260728-calculator-pet-load">
+  <link rel="stylesheet" href="css/styles.css?v=20260730-dog-ratio-slider">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260728-entry-polish">
 </head>
 <body class="flex justify-center">
@@ -98,7 +98,7 @@
         <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
       </section>
       <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p><p id="wetRatioError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></section>
-      <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="60" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
+      <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="40" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
       <button type="button" onclick="calculate()" class="pc-primary-button">급여량 계산하기</button>
     </section>
 
@@ -596,7 +596,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="js/proved-shell.js?v=20260728-entry-polish"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
-<script src="js/calculator.js?v=20260730-dog-calculator"></script>
+<script src="js/calculator.js?v=20260730-dog-ratio-slider"></script>
 <script src="js/feed-search.js?v=20260730-dog-calculator"></script>
 <script src="js/recent-feed.js?v=20260728-recent-feed-fix"></script>
 <script src="js/saved-cats.js?v=20260728-recent-feed-fix"></script>
