@@ -238,8 +238,8 @@ function initializeCalculatorChoices() {
 // 비율 슬라이더
 // -----------------------------------------------
 function updateRatio(v) {
-  const dryPercent = Number(v);
-  const wetPercent = 100 - dryPercent;
+  const wetPercent = Number(v);
+  const dryPercent = 100 - wetPercent;
   document.getElementById('dryPct').textContent = dryPercent;
   document.getElementById('wetPct').textContent = wetPercent;
   document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${wetPercent}%`);
@@ -356,8 +356,8 @@ function calculate() {
   const neuteredValue = document.getElementById('catNeutered').value;
   const pregnant = document.getElementById('isPregnant').checked;
   const lactating = document.getElementById('isLactating').checked;
-  const dryRatio = Number(document.getElementById('ratioSlider').value) / 100;
-  const wetRatio = 1 - dryRatio;
+  const wetRatio = Number(document.getElementById('ratioSlider').value) / 100;
+  const dryRatio = 1 - wetRatio;
   const firstErrors = [];
   const species = state.selectedPetSpecies || 'cat';
   const speciesLabel = species === 'dog' ? '강아지' : '고양이';
