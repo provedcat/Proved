@@ -1,26 +1,86 @@
 function getAgeMonths(birth, today = new Date()) {
-  return (today.getFullYear() - birth.getFullYear()) * 12
-       + (today.getMonth() - birth.getMonth());
+  const monthDelta = (today.getFullYear() - birth.getFullYear()) * 12
+    + (today.getMonth() - birth.getMonth());
+  const dayFraction = (today.getDate() - birth.getDate()) / 30.4375;
+  return Math.max(0, monthDelta + dayFraction);
 }
 
-function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), species = 'cat') {
+function getDogAdultTransitionMonths(expectedAdultWeight) {
+  if (expectedAdultWeight <= 10) return 10;
+  if (expectedAdultWeight <= 25) return 12;
+  if (expectedAdultWeight <= 45) return 15;
+  return 18;
+}
+
+function getDogGrowthFactor(weightRatio, ageProgress) {
+  if (weightRatio < 0.5) return { factor: 3.0, stage: '성장 초기' };
+  if (weightRatio < 0.8) return { factor: 2.5, stage: '성장 중기' };
+  if (ageProgress < 0.9) return { factor: 2.0, stage: '성장 후기' };
+  return { factor: 1.8, stage: '성견 전환기' };
+}
+
+function getDogCaloriePlan(weight, birthStr, neutered, options = {}, today = new Date()) {
+  const birth = new Date(`${birthStr}T00:00:00`);
+  const months = getAgeMonths(birth, today);
+  const ageDays = Math.max(0, Math.floor((today - birth) / 86400000));
+  const RER = 70 * Math.pow(weight, 0.75);
+  const expectedAdultWeight = Number(options.expectedAdultWeight) || null;
+  const transitionMonths = expectedAdultWeight ? getDogAdultTransitionMonths(expectedAdultWeight) : 12;
+  const isGrowing = months < transitionMonths;
+  const weightRatio = expectedAdultWeight ? Math.min(weight / expectedAdultWeight, 1.5) : null;
+  const ageProgress = Math.min(months / transitionMonths, 1);
+  let factor;
+  let label;
+  let stage = '';
+
+  if (options.lactating) {
+    factor = 3.0;
+    label = '수유 상태 반영';
+    stage = '수유기';
+  } else if (options.pregnant) {
+    factor = 2.0;
+    label = '임신 상태 반영';
+    stage = '임신기';
+  } else if (options.diet) {
+    factor = 1.0;
+    label = '체중 감량';
+    stage = '감량 모드';
+  } else if (isGrowing && expectedAdultWeight) {
+    const growth = getDogGrowthFactor(weightRatio, ageProgress);
+    factor = growth.factor;
+    label = `${growth.stage} · 예상 성견 체중 ${expectedAdultWeight}kg`;
+    stage = growth.stage;
+  } else if (isGrowing) {
+    factor = months < 4 ? 3.0 : 2.0;
+    label = months < 4 ? '생후 4개월 미만 성장기' : '성장기';
+    stage = '성장기';
+  } else {
+    const base = neutered ? 1.6 : 1.8;
+    const activityAdjustment = { low: -0.2, normal: 0, high: 0.4 }[options.activity] || 0;
+    factor = Number(Math.max(1.2, base + activityAdjustment).toFixed(2));
+    label = `${neutered ? '중성화' : '비중성화'} 성견 · 활동량 ${options.activity === 'low' ? '적음' : options.activity === 'high' ? '많음' : '보통'}`;
+    stage = '성견';
+  }
+
+  const DER = Math.round(RER * factor);
+  return {
+    DER, RER, months, ageDays, factor, label, stage, isGrowing, expectedAdultWeight,
+    weightRatio, transitionMonths,
+    detail: `RER ${Math.round(RER)} × ${factor.toFixed(2)} (${label})`,
+    dietNotice: options.diet ? '감량은 현재 체중의 RER을 시작값으로 사용합니다. 체중 감소 속도를 확인하며 조정하세요.' : ''
+  };
+}
+
+function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), species = 'cat', options = {}) {
+  if (species === 'dog') {
+    return getDogCaloriePlan(weight, birthStr, neutered, { ...options, diet }, today);
+  }
   const birth  = new Date(birthStr);
   const months = getAgeMonths(birth, today);
   const RER    = 70 * Math.pow(weight, 0.75);
   let f_age, label;
 
-  if (species === 'dog') {
-    if (months < 4) {
-      f_age = 3.0;
-      label = '생후 4개월 미만 성장기';
-    } else if (months < 12) {
-      f_age = 2.0;
-      label = '생후 4~12개월 성장기';
-    } else {
-      f_age = neutered ? 1.6 : 1.8;
-      label = neutered ? '중성화 성견' : '비중성화 성견';
-    }
-  } else if (months < 4) {
+  if (months < 4) {
     f_age = 2.75; label = '초기 성장기';
   } else if (months < 9) {
     f_age = 2.1; label = '중기 성장기';
@@ -33,9 +93,9 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), sp
     label = neutered ? '중성화 성묘' : '비중성화 성묘';
   }
 
-  const isLateGrowth = species === 'cat' && months >= 9 && months < 12;
-  const f_neuter = species === 'cat' && months < 12 && neutered ? 0.85 : 1.0;
-  const f_diet = diet ? (species === 'dog' ? 1 / f_age : 0.9) : 1.0;
+  const isLateGrowth = months >= 9 && months < 12;
+  const f_neuter = months < 12 && neutered ? 0.85 : 1.0;
+  const f_diet = diet ? 0.9 : 1.0;
 
   let DER;
   let detail;
@@ -45,10 +105,7 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), sp
     let finalFactor;
     let finalLabel;
 
-    if (species === 'dog') {
-      finalFactor = 1.0;
-      finalLabel = '체중관리';
-    } else if (isLateGrowth && neutered) {
+    if (isLateGrowth && neutered) {
       finalFactor = 1.25;
       finalLabel = '후기 성장기 · 중성화 · 체중관리';
       dietNotice = '후기 성장기 고양이는 성장에 필요한 에너지가 남아 있어, 다이어트 모드에서는 성장기 계수를 그대로 곱하지 않고 체중관리 기준으로 계산합니다.';
@@ -69,7 +126,7 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), sp
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAgeMonths, getCaloriePlan };
+  module.exports = { getAgeMonths, getDogAdultTransitionMonths, getDogGrowthFactor, getDogCaloriePlan, getCaloriePlan };
 }
 
 function updateCalorie() {
@@ -85,9 +142,21 @@ function updateCalculatorSpeciesCopy(species = state.selectedPetSpecies || 'cat'
 
   if (nameLabel) nameLabel.textContent = `${speciesLabel} 이름`;
   if (weightInput) weightInput.max = isDog ? '150' : '20';
+  document.getElementById('dogActivityField')?.classList.toggle('hidden', !isDog);
   document.querySelectorAll('[data-pet-species-copy]').forEach(element => {
     element.textContent = speciesLabel;
   });
+  updateDogConditionalFields();
+}
+
+function updateDogConditionalFields() {
+  const isDog = (state.selectedPetSpecies || 'cat') === 'dog';
+  const birthValue = document.getElementById('catBirth')?.value;
+  const birth = birthValue ? new Date(`${birthValue}T00:00:00`) : null;
+  const months = birth && !Number.isNaN(birth.getTime()) ? getAgeMonths(birth) : null;
+  const expectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value) || 25;
+  const growthLimit = getDogAdultTransitionMonths(expectedAdultWeight);
+  document.getElementById('dogAdultWeightField')?.classList.toggle('hidden', !(isDog && months !== null && months < growthLimit));
 }
 
 function markCalculationDirty() {
@@ -139,14 +208,41 @@ function initializeCalculatorChoices() {
   const lactating = document.getElementById('isLactating');
   pregnant.addEventListener('change', () => { if (pregnant.checked) lactating.checked = false; });
   lactating.addEventListener('change', () => { if (lactating.checked) pregnant.checked = false; });
+  [pregnant, lactating, document.getElementById('catBirth'), document.getElementById('dogExpectedAdultWeight')]
+    .forEach(element => element?.addEventListener('change', updateDogConditionalFields));
+
+  const expectedAdultWeightInput = document.getElementById('dogExpectedAdultWeight');
+  const expectedAdultWeightButtons = [...document.querySelectorAll('[data-adult-weight]')];
+  const syncExpectedAdultWeightButtons = () => {
+    const inputValue = Number(expectedAdultWeightInput?.value);
+    expectedAdultWeightButtons.forEach(button => {
+      const selected = expectedAdultWeightInput?.value !== ''
+        && inputValue === Number(button.dataset.adultWeight);
+      button.classList.toggle('is-selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  };
+  expectedAdultWeightButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      expectedAdultWeightInput.value = button.dataset.adultWeight;
+      expectedAdultWeightInput.dispatchEvent(new Event('input', { bubbles: true }));
+      expectedAdultWeightInput.dispatchEvent(new Event('change', { bubbles: true }));
+      expectedAdultWeightInput.focus();
+    });
+  });
+  expectedAdultWeightInput?.addEventListener('input', syncExpectedAdultWeightButtons);
+  syncExpectedAdultWeightButtons();
 }
 
 // -----------------------------------------------
 // 비율 슬라이더
 // -----------------------------------------------
 function updateRatio(v) {
-  document.getElementById('dryPct').textContent = v;
-  document.getElementById('wetPct').textContent = 100 - v;
+  const dryPercent = Number(v);
+  const wetPercent = 100 - dryPercent;
+  document.getElementById('dryPct').textContent = dryPercent;
+  document.getElementById('wetPct').textContent = wetPercent;
+  document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${wetPercent}%`);
 }
 
 // -----------------------------------------------
@@ -274,7 +370,17 @@ function calculate() {
   else if (birth > today) firstErrors.push(showCalculatorError('catBirthError', '미래 날짜는 생년월일로 선택할 수 없습니다.', 'catBirth'));
   if (!Number.isFinite(weight) || weight < 0.5 || weight > maxWeight) firstErrors.push(showCalculatorError('catWeightError', `체중은 0.5kg 이상 ${maxWeight}kg 이하로 입력해 주세요.`, 'catWeight'));
   if (!['true', 'false'].includes(neuteredValue)) firstErrors.push(showCalculatorError('catNeuteredError', '중성화 여부를 선택해 주세요.', 'catNeutered'));
-  if (pregnant || lactating) firstErrors.push(showCalculatorError('lifeStageError', '임신·수유 중 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
+  const dogExpectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value);
+  const dogAgeMonths = birth ? getAgeMonths(birth, today) : null;
+  const dogNeedsAdultWeight = species === 'dog' && dogAgeMonths !== null &&
+    dogAgeMonths < getDogAdultTransitionMonths(dogExpectedAdultWeight || 25);
+  if (dogNeedsAdultWeight && (!Number.isFinite(dogExpectedAdultWeight) || dogExpectedAdultWeight < weight || dogExpectedAdultWeight > 150)) {
+    firstErrors.push(showCalculatorError('dogAdultWeightError', '예상 성견 체중은 현재 체중 이상, 150kg 이하로 입력해 주세요.', 'dogExpectedAdultWeight'));
+  }
+  if (species === 'cat' && (pregnant || lactating)) firstErrors.push(showCalculatorError('lifeStageError', '고양이 임신·수유 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
+  if (species === 'dog' && document.getElementById('isDiet').checked && (pregnant || lactating || dogNeedsAdultWeight)) {
+    firstErrors.push(showCalculatorError('lifeStageError', '성장기·임신·수유 중에는 체중 감량 모드를 함께 사용할 수 없습니다.', 'isDiet'));
+  }
   if (dryRatio > 0 && !state.dryFeeds[0]) firstErrors.push(showCalculatorError('dryFeedError', '건사료 비율이 있으므로 건사료를 선택해 주세요.', 'dryInput1'));
   const firstWetSlotId = state.wetSlotIds[0];
   const firstWetFeed = state.wetFeedMap[firstWetSlotId];
@@ -302,7 +408,13 @@ function calculate() {
   if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
 
   const diet = document.getElementById('isDiet').checked;
-  const { DER } = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet, new Date(), species);
+  const caloriePlan = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet, new Date(), species, {
+    activity: document.querySelector('input[name="dogActivity"]:checked')?.value || 'normal',
+    expectedAdultWeight: dogExpectedAdultWeight,
+    pregnant,
+    lactating
+  });
+  const { DER } = caloriePlan;
   const selectedTreatReservePct = document.querySelector('input[name="treatReservePct"]:checked')?.value || '0';
   const treatReservePct = Number(selectedTreatReservePct) / 100;
   const treatKcal = Math.round(DER * treatReservePct);
@@ -334,6 +446,7 @@ function calculate() {
   document.getElementById('resTreatKcal').textContent = treatKcal;
   document.getElementById('resTreatRow').classList.toggle('hidden', treatKcal === 0);
   document.getElementById('resItems').innerHTML = resultCards.join('');
+  renderDogCalculationContext(species, caloriePlan, [...dryFeeds, ...wetEntries.map(entry => entry.feed)]);
   document.getElementById('resultArea').classList.remove('hidden');
   const capResult = document.getElementById('capResult');
   const waterResult = document.getElementById('waterResult');
@@ -343,13 +456,44 @@ function calculate() {
   waterResult.innerHTML = '';
   document.getElementById('capBtn').setAttribute('aria-expanded', 'false');
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
-  state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
+  state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, caloriePlan, ...resultData };
   markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
   const resultArea = document.getElementById('resultArea');
   resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
   resultArea.focus({ preventScroll: true });
+}
+
+function renderDogCalculationContext(species, plan, selectedFeeds) {
+  const lead = document.getElementById('resultLead');
+  const basis = document.getElementById('dogCalculationBasis');
+  const basisContent = document.getElementById('dogCalculationBasisContent');
+  const warnings = document.getElementById('dogConditionalWarnings');
+  const isDog = species === 'dog';
+
+  lead.classList.toggle('hidden', !isDog);
+  basis.classList.toggle('hidden', !isDog);
+  warnings.classList.add('hidden');
+  warnings.innerHTML = '';
+  if (!isDog) return;
+
+  lead.textContent = '현재 나이와 체중, 성장 상태를 반영한 하루 시작 열량입니다.';
+  const ratioCopy = plan.weightRatio == null ? '' : ` · 현재 체중은 예상 성견 체중의 ${Math.round(plan.weightRatio * 100)}%`;
+  basisContent.innerHTML = `<p><strong>${plan.label}</strong>${ratioCopy}</p><p>정확한 월령 ${plan.months.toFixed(1)}개월 · 현재 체중 기준 RER ${Math.round(plan.RER)} kcal · 적용 계수 ${plan.factor.toFixed(2)}</p>${plan.dietNotice ? `<p>${plan.dietNotice}</p>` : ''}`;
+
+  const warningItems = [];
+  if (plan.isGrowing && (plan.expectedAdultWeight || 0) >= 25) {
+    warningItems.push('대형견 성장기에는 칼슘을 임의로 추가하지 말고, 대형견 성장기용 완전사료의 권장 급여량을 우선 확인하세요.');
+  }
+  const rawOrBone = selectedFeeds.some(feed => /생식|raw|뼈|bone/i.test(`${feed.name || ''} ${feed.ingredients || ''}`));
+  if (rawOrBone) {
+    warningItems.push('생식 또는 뼈 포함 가능성이 있는 식단입니다. 칼슘·인 수치는 제품 자료를 확인하고, 뼈나 칼슘제를 별도로 더하지 마세요.');
+  }
+  if (warningItems.length) {
+    warnings.innerHTML = warningItems.map(item => `<p>${item}</p>`).join('');
+    warnings.classList.remove('hidden');
+  }
 }
 
 // -----------------------------------------------

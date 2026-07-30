@@ -23,7 +23,7 @@ async function searchFeed(type, query, listId, slotId) {
 
   const { data, error } = await sb
     .from(getActiveFeedTable())
-    .select('제품명, 제조사, final_me, eb_칼슘, eb_인, 수분')
+    .select('제품명, 제조사, final_me, eb_칼슘, eb_인, 수분, 전성분, 완전식여부')
     .eq('type', type)
     .eq('verified', true)
     .gt('final_me', 0)
@@ -69,7 +69,9 @@ function selectFeed(type, slotId, feedData, listId) {
     kcal:     feedData.final_me,
     ebCa:     feedData.eb_칼슘  || 0,
     ebP:      feedData.eb_인    || 0,
-    moisture: feedData.수분     ?? null
+    moisture: feedData.수분     ?? null,
+    ingredients: feedData.전성분 || '',
+    complete: feedData.완전식여부 || ''
   };
 
   if (type === 'dry') {
@@ -189,7 +191,7 @@ function closeFeedPicker() {
 async function fetchFeedPickerFeeds(type) {
   const { data, error } = await sb
     .from(getActiveFeedTable())
-    .select('제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분')
+    .select('제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부')
     .eq('type', type)
     .eq('verified', true)
     .gt('final_me', 0)
