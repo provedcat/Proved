@@ -210,14 +210,39 @@ function initializeCalculatorChoices() {
   lactating.addEventListener('change', () => { if (lactating.checked) pregnant.checked = false; });
   [pregnant, lactating, document.getElementById('catBirth'), document.getElementById('dogExpectedAdultWeight')]
     .forEach(element => element?.addEventListener('change', updateDogConditionalFields));
+
+  const expectedAdultWeightInput = document.getElementById('dogExpectedAdultWeight');
+  const expectedAdultWeightButtons = [...document.querySelectorAll('[data-adult-weight]')];
+  const syncExpectedAdultWeightButtons = () => {
+    const inputValue = Number(expectedAdultWeightInput?.value);
+    expectedAdultWeightButtons.forEach(button => {
+      const selected = expectedAdultWeightInput?.value !== ''
+        && inputValue === Number(button.dataset.adultWeight);
+      button.classList.toggle('is-selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  };
+  expectedAdultWeightButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      expectedAdultWeightInput.value = button.dataset.adultWeight;
+      expectedAdultWeightInput.dispatchEvent(new Event('input', { bubbles: true }));
+      expectedAdultWeightInput.dispatchEvent(new Event('change', { bubbles: true }));
+      expectedAdultWeightInput.focus();
+    });
+  });
+  expectedAdultWeightInput?.addEventListener('input', syncExpectedAdultWeightButtons);
+  syncExpectedAdultWeightButtons();
 }
 
 // -----------------------------------------------
 // 비율 슬라이더
 // -----------------------------------------------
 function updateRatio(v) {
-  document.getElementById('dryPct').textContent = v;
-  document.getElementById('wetPct').textContent = 100 - v;
+  const dryPercent = Number(v);
+  const wetPercent = 100 - dryPercent;
+  document.getElementById('dryPct').textContent = dryPercent;
+  document.getElementById('wetPct').textContent = wetPercent;
+  document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${wetPercent}%`);
 }
 
 // -----------------------------------------------
