@@ -19,6 +19,16 @@ function getDogGrowthFactor(weightRatio, ageProgress) {
   return { factor: 1.8, stage: '성견 전환기' };
 }
 
+function getFediafPuppyEnergy(weight, expectedAdultWeight) {
+  const weightRatio = Math.min(weight / expectedAdultWeight, 1);
+  const coefficient = Math.max(119.1, 254.1 - (135 * weightRatio));
+  return {
+    DER: Math.round(coefficient * Math.pow(weight, 0.75)),
+    coefficient,
+    weightRatio
+  };
+}
+
 function getDogCaloriePlan(weight, birthStr, neutered, options = {}, today = new Date()) {
   const birth = new Date(`${birthStr}T00:00:00`);
   const months = getAgeMonths(birth, today);
@@ -47,7 +57,8 @@ function getDogCaloriePlan(weight, birthStr, neutered, options = {}, today = new
     stage = '감량 모드';
   } else if (isGrowing && expectedAdultWeight) {
     const growth = getDogGrowthFactor(weightRatio, ageProgress);
-    factor = growth.factor;
+    const fediaf = getFediafPuppyEnergy(weight, expectedAdultWeight);
+    factor = fediaf.coefficient / 70;
     label = `${growth.stage} · 예상 성견 체중 ${expectedAdultWeight}kg`;
     stage = growth.stage;
   } else if (isGrowing) {
@@ -62,11 +73,15 @@ function getDogCaloriePlan(weight, birthStr, neutered, options = {}, today = new
     stage = '성견';
   }
 
-  const DER = Math.round(RER * factor);
+  const DER = isGrowing && expectedAdultWeight && !options.lactating && !options.pregnant && !options.diet
+    ? getFediafPuppyEnergy(weight, expectedAdultWeight).DER
+    : Math.round(RER * factor);
   return {
     DER, RER, months, ageDays, factor, label, stage, isGrowing, expectedAdultWeight,
     weightRatio, transitionMonths,
-    detail: `RER ${Math.round(RER)} × ${factor.toFixed(2)} (${label})`,
+    detail: isGrowing && expectedAdultWeight && !options.lactating && !options.pregnant && !options.diet
+      ? `FEDIAF 성장기 공식 · 현재 체중 ${weight}kg ÷ 예상 성견 체중 ${expectedAdultWeight}kg (${label})`
+      : `RER ${Math.round(RER)} × ${factor.toFixed(2)} (${label})`,
     dietNotice: options.diet ? '감량은 현재 체중의 RER을 시작값으로 사용합니다. 체중 감소 속도를 확인하며 조정하세요.' : ''
   };
 }
@@ -126,7 +141,7 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), sp
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAgeMonths, getDogAdultTransitionMonths, getDogGrowthFactor, getDogCaloriePlan, getCaloriePlan, getMealRatios };
+  module.exports = { getAgeMonths, getDogAdultTransitionMonths, getDogGrowthFactor, getFediafPuppyEnergy, getDogCaloriePlan, getCaloriePlan, getMealRatios };
 }
 
 function updateCalorie() {
@@ -213,24 +228,38 @@ function initializeCalculatorChoices() {
 
   const expectedAdultWeightInput = document.getElementById('dogExpectedAdultWeight');
   const expectedAdultWeightButtons = [...document.querySelectorAll('[data-adult-weight]')];
+  const expectedAdultWeightUnknownButton = document.querySelector('[data-adult-weight-unknown]');
   const syncExpectedAdultWeightButtons = () => {
     const inputValue = Number(expectedAdultWeightInput?.value);
+    const isUnknown = expectedAdultWeightInput?.dataset.unknown === 'true';
     expectedAdultWeightButtons.forEach(button => {
-      const selected = expectedAdultWeightInput?.value !== ''
+      const selected = !isUnknown && expectedAdultWeightInput?.value !== ''
         && inputValue === Number(button.dataset.adultWeight);
       button.classList.toggle('is-selected', selected);
       button.setAttribute('aria-pressed', String(selected));
     });
+    expectedAdultWeightUnknownButton?.classList.toggle('is-selected', isUnknown);
+    expectedAdultWeightUnknownButton?.setAttribute('aria-pressed', String(isUnknown));
   };
   expectedAdultWeightButtons.forEach(button => {
     button.addEventListener('click', () => {
+      delete expectedAdultWeightInput.dataset.unknown;
       expectedAdultWeightInput.value = button.dataset.adultWeight;
       expectedAdultWeightInput.dispatchEvent(new Event('input', { bubbles: true }));
       expectedAdultWeightInput.dispatchEvent(new Event('change', { bubbles: true }));
       expectedAdultWeightInput.focus();
     });
   });
-  expectedAdultWeightInput?.addEventListener('input', syncExpectedAdultWeightButtons);
+  expectedAdultWeightUnknownButton?.addEventListener('click', () => {
+    expectedAdultWeightInput.value = '';
+    expectedAdultWeightInput.dataset.unknown = 'true';
+    expectedAdultWeightInput.dispatchEvent(new Event('input', { bubbles: true }));
+    expectedAdultWeightInput.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  expectedAdultWeightInput?.addEventListener('input', () => {
+    if (expectedAdultWeightInput.value !== '') delete expectedAdultWeightInput.dataset.unknown;
+    syncExpectedAdultWeightButtons();
+  });
   syncExpectedAdultWeightButtons();
 }
 
@@ -379,11 +408,12 @@ function calculate() {
   if (!Number.isFinite(weight) || weight < 0.5 || weight > maxWeight) firstErrors.push(showCalculatorError('catWeightError', `체중은 0.5kg 이상 ${maxWeight}kg 이하로 입력해 주세요.`, 'catWeight'));
   if (!['true', 'false'].includes(neuteredValue)) firstErrors.push(showCalculatorError('catNeuteredError', '중성화 여부를 선택해 주세요.', 'catNeutered'));
   const dogExpectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value);
+  const dogAdultWeightUnknown = document.getElementById('dogExpectedAdultWeight')?.dataset.unknown === 'true';
   const dogAgeMonths = birth ? getAgeMonths(birth, today) : null;
   const dogNeedsAdultWeight = species === 'dog' && dogAgeMonths !== null &&
     dogAgeMonths < getDogAdultTransitionMonths(dogExpectedAdultWeight || 25);
-  if (dogNeedsAdultWeight && (!Number.isFinite(dogExpectedAdultWeight) || dogExpectedAdultWeight < weight || dogExpectedAdultWeight > 150)) {
-    firstErrors.push(showCalculatorError('dogAdultWeightError', '예상 성견 체중은 현재 체중 이상, 150kg 이하로 입력해 주세요.', 'dogExpectedAdultWeight'));
+  if (dogNeedsAdultWeight && !dogAdultWeightUnknown && (!Number.isFinite(dogExpectedAdultWeight) || dogExpectedAdultWeight < weight || dogExpectedAdultWeight > 150)) {
+    firstErrors.push(showCalculatorError('dogAdultWeightError', '예상 성견 체중을 선택·입력하거나 ‘모르겠어요’를 눌러 주세요.', 'dogExpectedAdultWeight'));
   }
   if (species === 'cat' && (pregnant || lactating)) firstErrors.push(showCalculatorError('lifeStageError', '고양이 임신·수유 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
   if (species === 'dog' && document.getElementById('isDiet').checked && (pregnant || lactating || dogNeedsAdultWeight)) {
@@ -418,7 +448,7 @@ function calculate() {
   const diet = document.getElementById('isDiet').checked;
   const caloriePlan = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet, new Date(), species, {
     activity: document.querySelector('input[name="dogActivity"]:checked')?.value || 'normal',
-    expectedAdultWeight: dogExpectedAdultWeight,
+    expectedAdultWeight: dogAdultWeightUnknown ? null : dogExpectedAdultWeight,
     pregnant,
     lactating
   });
@@ -488,7 +518,10 @@ function renderDogCalculationContext(species, plan, selectedFeeds) {
 
   lead.textContent = '현재 나이와 체중, 성장 상태를 반영한 하루 시작 열량입니다.';
   const ratioCopy = plan.weightRatio == null ? '' : ` · 현재 체중은 예상 성견 체중의 ${Math.round(plan.weightRatio * 100)}%`;
-  basisContent.innerHTML = `<p><strong>${plan.label}</strong>${ratioCopy}</p><p>정확한 월령 ${plan.months.toFixed(1)}개월 · 현재 체중 기준 RER ${Math.round(plan.RER)} kcal · 적용 계수 ${plan.factor.toFixed(2)}</p>${plan.dietNotice ? `<p>${plan.dietNotice}</p>` : ''}`;
+  const calculationCopy = plan.expectedAdultWeight
+    ? `FEDIAF 성장기 공식 · 현재 체중 기준 계수 ${plan.factor.toFixed(2)}`
+    : `예상 성견 체중 미확인 · 월령 기준 임시 계수 ${plan.factor.toFixed(2)}`;
+  basisContent.innerHTML = `<p><strong>${plan.label}</strong>${ratioCopy}</p><p>정확한 월령 ${plan.months.toFixed(1)}개월 · 현재 체중 기준 RER ${Math.round(plan.RER)} kcal · ${calculationCopy}</p>${plan.dietNotice ? `<p>${plan.dietNotice}</p>` : ''}`;
 
   const warningItems = [];
   if (plan.isGrowing && (plan.expectedAdultWeight || 0) >= 25) {

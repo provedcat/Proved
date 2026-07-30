@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260730-pet-ratio-slider';
+const CACHE_NAME = 'proved-pwa-20260730-dog-growth-formula';
 const CORE_ASSETS = [
   './',
   './manifest.json',

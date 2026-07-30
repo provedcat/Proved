@@ -3,6 +3,7 @@ const {
   getAgeMonths,
   getDogAdultTransitionMonths,
   getDogGrowthFactor,
+  getFediafPuppyEnergy,
   getDogCaloriePlan,
   getMealRatios
 } = require('../js/calculator.js');
@@ -19,15 +20,17 @@ assert.deepEqual(getDogGrowthFactor(0.4, 0.4), { factor: 3, stage: '성장 초�
 assert.deepEqual(getDogGrowthFactor(0.65, 0.6), { factor: 2.5, stage: '성장 중기' });
 assert.deepEqual(getDogGrowthFactor(0.85, 0.8), { factor: 2, stage: '성장 후기' });
 assert.deepEqual(getDogGrowthFactor(0.95, 0.95), { factor: 1.8, stage: '성견 전환기' });
+assert.equal(getFediafPuppyEnergy(1, 3).DER, 209);
+assert.equal(getFediafPuppyEnergy(1, 40).DER, 251);
 
 const puppy = getDogCaloriePlan(8, '2026-01-15', false, {
   expectedAdultWeight: 20,
   activity: 'normal'
 }, today);
 assert.equal(puppy.stage, '성장 초기');
-assert.equal(puppy.factor, 3);
+assert.ok(Math.abs(puppy.factor - ((254.1 - (135 * (8 / 20))) / 70)) < 0.0001);
 assert.equal(puppy.transitionMonths, 12);
-assert.equal(puppy.DER, Math.round(70 * Math.pow(8, 0.75) * 3));
+assert.equal(puppy.DER, getFediafPuppyEnergy(8, 20).DER);
 
 for (const expectedAdultWeight of [3, 7, 11, 20, 30, 40, 50]) {
   const presetPlan = getDogCaloriePlan(2, '2026-05-01', false, {
@@ -35,11 +38,8 @@ for (const expectedAdultWeight of [3, 7, 11, 20, 30, 40, 50]) {
     activity: 'normal'
   }, today);
   assert.equal(presetPlan.expectedAdultWeight, expectedAdultWeight);
-  const expectedGrowth = getDogGrowthFactor(
-    Math.min(2 / expectedAdultWeight, 1.5),
-    Math.min(presetPlan.months / presetPlan.transitionMonths, 1)
-  );
-  assert.equal(presetPlan.factor, expectedGrowth.factor);
+  const expectedGrowth = getDogGrowthFactor(Math.min(2 / expectedAdultWeight, 1.5), Math.min(presetPlan.months / presetPlan.transitionMonths, 1));
+  assert.equal(presetPlan.DER, getFediafPuppyEnergy(2, expectedAdultWeight).DER);
   assert.equal(presetPlan.stage, expectedGrowth.stage);
 }
 
@@ -48,7 +48,14 @@ const directlyEditedAdultWeight = getDogCaloriePlan(4, '2026-05-01', false, {
   activity: 'normal'
 }, today);
 assert.equal(directlyEditedAdultWeight.expectedAdultWeight, 23.5);
-assert.equal(directlyEditedAdultWeight.factor, 3);
+assert.equal(directlyEditedAdultWeight.DER, getFediafPuppyEnergy(4, 23.5).DER);
+
+const unknownAdultWeight = getDogCaloriePlan(1, '2026-05-01', false, {
+  expectedAdultWeight: null,
+  activity: 'normal'
+}, today);
+assert.equal(unknownAdultWeight.expectedAdultWeight, null);
+assert.equal(unknownAdultWeight.stage, '성장기');
 
 const neuteredLowActivityAdult = getDogCaloriePlan(20, '2023-01-01', true, {
   activity: 'low'
