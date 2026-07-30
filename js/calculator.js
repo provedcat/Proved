@@ -126,7 +126,7 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), sp
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAgeMonths, getDogAdultTransitionMonths, getDogGrowthFactor, getDogCaloriePlan, getCaloriePlan };
+  module.exports = { getAgeMonths, getDogAdultTransitionMonths, getDogGrowthFactor, getDogCaloriePlan, getCaloriePlan, getMealRatios };
 }
 
 function updateCalorie() {
@@ -237,12 +237,19 @@ function initializeCalculatorChoices() {
 // -----------------------------------------------
 // 비율 슬라이더
 // -----------------------------------------------
+function getMealRatios(sliderValue) {
+  const dryPercent = Math.min(100, Math.max(0, Number(sliderValue)));
+  return {
+    dryPercent,
+    wetPercent: 100 - dryPercent
+  };
+}
+
 function updateRatio(v) {
-  const dryPercent = Number(v);
-  const wetPercent = 100 - dryPercent;
+  const { dryPercent, wetPercent } = getMealRatios(v);
   document.getElementById('dryPct').textContent = dryPercent;
   document.getElementById('wetPct').textContent = wetPercent;
-  document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${wetPercent}%`);
+  document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${dryPercent}%`);
 }
 
 // -----------------------------------------------
@@ -356,8 +363,9 @@ function calculate() {
   const neuteredValue = document.getElementById('catNeutered').value;
   const pregnant = document.getElementById('isPregnant').checked;
   const lactating = document.getElementById('isLactating').checked;
-  const dryRatio = Number(document.getElementById('ratioSlider').value) / 100;
-  const wetRatio = 1 - dryRatio;
+  const mealRatios = getMealRatios(document.getElementById('ratioSlider').value);
+  const dryRatio = mealRatios.dryPercent / 100;
+  const wetRatio = mealRatios.wetPercent / 100;
   const firstErrors = [];
   const species = state.selectedPetSpecies || 'cat';
   const speciesLabel = species === 'dog' ? '강아지' : '고양이';
