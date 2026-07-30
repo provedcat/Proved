@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260730-pets-dog-feeds';
+const CACHE_NAME = 'proved-pwa-20260730-dog-calculator';
 const CORE_ASSETS = [
   './',
   './manifest.json',

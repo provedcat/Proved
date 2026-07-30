@@ -68,7 +68,11 @@
       <div class="pc-field"><label class="pc-field-label" for="catBirth">생년월일</label><input type="date" id="catBirth"><p id="catBirthError" class="pc-inline-error hidden" role="alert"></p></div>
       <div class="pc-field"><label class="pc-field-label" for="catWeight">현재 체중</label><div class="pc-input-unit"><input type="number" id="catWeight" placeholder="0.0" step="0.1" min="0.5" max="20"><span>kg</span></div><p id="catWeightError" class="pc-inline-error hidden" role="alert"></p></div>
       <fieldset class="pc-field"><legend class="pc-field-label">중성화 여부</legend><input type="hidden" id="catNeutered" value=""><div class="pc-segmented" role="radiogroup" aria-label="중성화 여부"><button type="button" class="pc-segmented-option" data-neutered="true" role="radio" aria-checked="false">중성화했어요</button><button type="button" class="pc-segmented-option" data-neutered="false" role="radio" aria-checked="false">중성화하지 않았어요</button></div><p id="catNeuteredError" class="pc-inline-error hidden" role="alert"></p></fieldset>
+      <fieldset id="dogActivityField" class="pc-field hidden"><legend class="pc-field-label">평소 활동량</legend><div class="pc-segmented" role="radiogroup" aria-label="강아지 활동량"><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="low"><span>적은 편</span></label><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="normal" checked><span>보통</span></label><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="high"><span>많은 편</span></label></div></fieldset>
+      <div id="dogAdultWeightField" class="pc-field hidden"><label class="pc-field-label" for="dogExpectedAdultWeight">예상 성견 체중</label><div class="pc-input-unit"><input type="number" id="dogExpectedAdultWeight" placeholder="성견이 되었을 때 예상 체중" step="0.1" min="1" max="150"><span>kg</span></div><p class="pc-help">성장기 강아지일 때만 입력해 주세요. 품종의 일반적인 성견 체중이나 병원에서 안내받은 값을 사용할 수 있습니다.</p><p id="dogAdultWeightError" class="pc-inline-error hidden" role="alert"></p></div>
       <fieldset class="pc-field"><legend class="pc-field-label">해당하는 경우만 선택</legend><div class="pc-chip-row"><label class="pc-choice-chip"><input type="checkbox" id="isDiet"><span>다이어트</span></label><label class="pc-choice-chip"><input type="checkbox" id="isPregnant"><span>임신 중</span></label><label class="pc-choice-chip"><input type="checkbox" id="isLactating"><span>수유 중</span></label></div><p id="lifeStageError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></fieldset>
+      <div id="dogPregnancyField" class="pc-field hidden"><label class="pc-field-label" for="dogPregnancyWeek">임신 주차</label><select id="dogPregnancyWeek"><option value="1">1~4주</option><option value="5">5주</option><option value="6">6주</option><option value="7">7주</option><option value="8">8주</option><option value="9">9주</option></select></div>
+      <div id="dogLactationFields" class="pc-conditional-grid hidden"><div class="pc-field"><label class="pc-field-label" for="dogLactationWeek">수유 주차</label><select id="dogLactationWeek"><option value="1">1주</option><option value="2">2주</option><option value="3">3주</option><option value="4">4주 이상</option></select></div><div class="pc-field"><label class="pc-field-label" for="dogPuppyCount">수유 중인 새끼 수</label><div class="pc-input-unit"><input type="number" id="dogPuppyCount" value="1" min="1" max="12" step="1"><span>마리</span></div></div></div>
       <fieldset class="pc-field"><legend class="pc-field-label">간식도 급여하나요?</legend><div class="pc-segmented" role="radiogroup" aria-label="간식 열량 예약"><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="0" checked><span>급여하지 않음</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="5"><span>5% 남기기</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="10"><span>10% 남기기</span></label></div></fieldset>
       <div id="calBox" class="hidden" aria-hidden="true"><span id="derVal"></span><span id="derDetail"></span><span id="dietNotice"></span></div>
     </section>
@@ -87,7 +91,7 @@
     </section>
 
     <!-- 3단계: 결과 -->
-    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><div class="pc-result-summary"><div><span>하루 필요 칼로리</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 참고용 계산값입니다. 질환이 있는 경우 수의사와 상담하세요.</p></section>
+    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p></section>
 
 
     <!-- 제품 목록 바텀시트 -->
@@ -523,7 +527,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   [
     'catName', 'catBirth', 'catWeight', 'catNeutered', 'isDiet',
-    'isPregnant', 'isLactating', 'drySwitching', 'drySwPct1', 'drySwPct2'
+    'isPregnant', 'isLactating', 'dogExpectedAdultWeight', 'dogPregnancyWeek',
+    'dogLactationWeek', 'dogPuppyCount', 'drySwitching', 'drySwPct1', 'drySwPct2'
   ].forEach(id => {
     const element = document.getElementById(id);
     if (!element) return;
@@ -531,6 +536,8 @@ window.addEventListener('DOMContentLoaded', () => {
     element.addEventListener('change', markCalculationDirty);
   });
   document.querySelectorAll('input[name="treatReservePct"]')
+    .forEach(input => input.addEventListener('change', markCalculationDirty));
+  document.querySelectorAll('input[name="dogActivity"]')
     .forEach(input => input.addEventListener('change', markCalculationDirty));
   document.getElementById('ratioSlider')?.addEventListener('input', markCalculationDirty);
 
@@ -577,8 +584,8 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="js/proved-shell.js?v=20260728-entry-polish"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
-<script src="js/calculator.js?v=20260728-analysis-flow"></script>
-<script src="js/feed-search.js?v=20260725-feeding-flow-2"></script>
+<script src="js/calculator.js?v=20260730-dog-calculator"></script>
+<script src="js/feed-search.js?v=20260730-dog-calculator"></script>
 <script src="js/recent-feed.js?v=20260728-recent-feed-fix"></script>
 <script src="js/saved-cats.js?v=20260728-recent-feed-fix"></script>
 <script src="js/auth.js?v=20260728-calculator-pet-load"></script>
