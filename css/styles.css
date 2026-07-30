@@ -823,8 +823,10 @@ input::placeholder { color:var(--text-placeholder); }
 .pc-feed-panel--wet { border-color:rgba(31,92,196,.2); background:var(--cat-wet-soft); color:var(--cat-wet-ink); }
 .proved-dog-mode .pc-feed-panel--dry { border-color:rgba(154,91,52,.22); background:rgba(154,91,52,.08); color:var(--dog-dry-ink); }
 .proved-dog-mode .pc-feed-panel--wet { border-color:rgba(56,130,85,.22); background:var(--dog-soft); color:var(--dog-wet-ink); }
-.proved-dog-mode .pc-dry-text { color:var(--dog-dry-ink)!important; }
-.proved-dog-mode .pc-wet-text { color:var(--dog-wet-ink)!important; }
+.proved-dog-mode .pc-dry-text,
+.proved-dog-mode #dryPct { color:var(--dog-dry-ink)!important; }
+.proved-dog-mode .pc-wet-text,
+.proved-dog-mode #wetPct { color:var(--dog-wet-ink)!important; }
 .proved-dog-mode .pc-upload-type-button--dry { color:var(--dog-dry-ink); }
 .proved-dog-mode .pc-upload-type-button--wet { color:var(--dog-wet-ink); }
 .proved-dog-mode .pc-upload-type-button--dry.is-active { border-color:rgba(154,91,52,.35); background:rgba(154,91,52,.08); }
