@@ -287,7 +287,7 @@
   font-weight: 900;
 }
 
-.proved-dog-blocked .pc-tabs button[aria-disabled="true"] {
+.proved-dog-mode .pc-tabs button[aria-disabled="true"] {
   opacity: .55;
   pointer-events: none;
 }

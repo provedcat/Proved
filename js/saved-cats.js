@@ -58,7 +58,7 @@ function isValidCatInput(catInput) {
     typeof catInput.neutered === 'boolean' &&
     Number.isFinite(catInput.weightKg) &&
     catInput.weightKg >= 0.5 &&
-    catInput.weightKg <= 20
+    catInput.weightKg <= (state.selectedPetSpecies === 'dog' ? 150 : 20)
   );
 }
 
@@ -69,8 +69,8 @@ function getFeedingRecordSaveKey(catId, currentResult) {
 
 async function fetchMyCats(userId) {
   const { data, error } = await sb
-    .from('cats')
-    .select('id, name, birth_date, neutered')
+    .from('pets')
+    .select('id, name, birth_date, neutered, species')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -86,7 +86,7 @@ async function loadMyCats() {
   state.currentUser = user || null;
 
   if (!user) {
-    setSavedCatLoadMessage('로그인하면 저장된 고양이 프로필을 불러올 수 있습니다.', 'gray');
+    setSavedCatLoadMessage('로그인하면 저장된 반려동물 프로필을 불러올 수 있습니다.', 'gray');
     openAuthSheet?.();
     updateSaveFeedingButtonVisibility();
     return;
@@ -105,7 +105,7 @@ async function loadMyCats() {
   }
 
   if (!cats || cats.length === 0) {
-    setSavedCatLoadMessage('저장된 고양이가 없습니다. 현재 입력값으로 계산 결과를 저장할 수 있습니다.', 'gray');
+    setSavedCatLoadMessage('저장된 반려동물이 없습니다. 현재 입력값으로 계산 결과를 저장할 수 있습니다.', 'gray');
     return;
   }
 
@@ -125,14 +125,14 @@ async function loadMyCats() {
     const cat = list._cats.find(item => item.id === button.dataset.catId);
     if (cat) {
       if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
-        setActivePet({ ...cat, species: 'cat' }, { route: 'calculator' });
+        setActivePet(cat, { route: 'calculator' });
       } else {
         selectSavedCat(cat);
       }
     }
   };
   list.classList.remove('hidden');
-  setSavedCatLoadMessage('불러올 고양이를 선택해주세요.', 'gray');
+  setSavedCatLoadMessage('불러올 반려동물을 선택해주세요.', 'gray');
 }
 
 async function selectSavedCat(cat) {
@@ -141,9 +141,9 @@ async function selectSavedCat(cat) {
   const recentFeedsPromise = loadRecentFeedsForCat(cat.id);
   const shouldSyncSharedPet = !state.isApplyingActivePet;
   if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
-    provedApplyCurrentPetState({ ...cat, species: 'cat' });
+    provedApplyCurrentPetState(cat);
   } else if (typeof provedSetLastActivePet === 'function') {
-    provedSetLastActivePet({ ...cat, species: 'cat' });
+    provedSetLastActivePet(cat);
   }
   state.isApplyingSavedCat = true;
 
@@ -164,7 +164,7 @@ async function selectSavedCat(cat) {
   const { data, error } = await sb
     .from('weight_records')
     .select('weight_kg, recorded_date')
-    .eq('cat_id', cat.id)
+    .eq('pet_id', cat.id)
     .eq('user_id', state.currentUser.id)
     .order('recorded_date', { ascending: false })
     .limit(1);
@@ -203,7 +203,7 @@ async function selectSavedCat(cat) {
   ) {
     state.isSyncingDirectPetSelection = true;
     try {
-      await selectTrendCat({ ...cat, species: 'cat' });
+      await selectTrendCat(cat);
     } finally {
       state.isSyncingDirectPetSelection = false;
     }
@@ -250,17 +250,18 @@ function updateSaveFeedingButtonVisibility() {
   } else if (state.selectedSavedCatId) {
     setSaveFeedingRecordMessage('', 'gray');
   } else {
-    setSaveFeedingRecordMessage('현재 입력값으로 새 고양이 프로필을 만들고 계산 결과를 저장할 수 있습니다.', 'gray');
+    setSaveFeedingRecordMessage('현재 입력값으로 새 반려동물 프로필을 만들고 계산 결과를 저장할 수 있습니다.', 'gray');
   }
 }
 
-const DUPLICATE_CAT_NAME_BIRTH_DATE_MESSAGE = '같은 이름의 고양이가 이미 있습니다. 생년월일이 다르면 이름을 다르게 입력해 주세요.';
+const DUPLICATE_CAT_NAME_BIRTH_DATE_MESSAGE = '같은 이름의 반려동물이 이미 있습니다. 생년월일이 다르면 이름을 다르게 입력해 주세요.';
 
 async function findExistingCatByName(userId, catInput) {
   const { data, error } = await sb
-    .from('cats')
+    .from('pets')
     .select('id, neutered, birth_date')
     .eq('user_id', userId)
+    .eq('species', state.selectedPetSpecies || 'cat')
     .eq('name', catInput.name)
     .order('created_at', { ascending: true })
     .limit(1);
@@ -271,7 +272,7 @@ async function findExistingCatByName(userId, catInput) {
 
 async function updateCatMutableFields(catId, userId, catInput) {
   const { data: cats, error: selectError } = await sb
-    .from('cats')
+    .from('pets')
     .select('id, neutered, birth_date')
     .eq('id', catId)
     .eq('user_id', userId)
@@ -281,7 +282,7 @@ async function updateCatMutableFields(catId, userId, catInput) {
 
   const cat = cats?.[0];
   if (!cat?.id) {
-    throw new Error('고양이 프로필을 찾을 수 없습니다.');
+    throw new Error('반려동물 프로필을 찾을 수 없습니다.');
   }
 
   const updates = {};
@@ -296,7 +297,7 @@ async function updateCatMutableFields(catId, userId, catInput) {
   if (Object.keys(updates).length === 0) return cat;
 
   const { data: updatedCats, error: updateError } = await sb
-    .from('cats')
+    .from('pets')
     .update(updates)
     .eq('id', catId)
     .eq('user_id', userId)
@@ -320,28 +321,30 @@ async function createCatFromCurrentInput(userId, catInput) {
   }
 
   const { count, error: countError } = await sb
-    .from('cats')
+    .from('pets')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('species', state.selectedPetSpecies || 'cat');
 
   if (countError) throw countError;
   if ((count || 0) >= 20) {
-    throw new Error('현재 계정에는 고양이를 최대 20마리까지 저장할 수 있습니다.');
+    throw new Error('현재 계정에는 같은 종의 반려동물을 최대 20마리까지 저장할 수 있습니다.');
   }
 
   const { data, error } = await sb
-    .from('cats')
+    .from('pets')
     .insert({
       user_id: userId,
       name: catInput.name,
       birth_date: catInput.birthDate,
-      neutered: catInput.neutered
+      neutered: catInput.neutered,
+      species: state.selectedPetSpecies || 'cat'
     })
     .select('id')
     .single();
 
   if (error) throw error;
-  if (!data?.id) throw new Error('고양이 프로필 생성 결과를 확인할 수 없습니다.');
+  if (!data?.id) throw new Error('반려동물 프로필 생성 결과를 확인할 수 없습니다.');
 
   await upsertWeightRecord(data.id, userId, catInput.weightKg);
   return { id: data.id, reusedExisting: false };
@@ -350,7 +353,7 @@ async function createCatFromCurrentInput(userId, catInput) {
 async function upsertWeightRecord(catId, userId, weightKg) {
   const recordedDate = getTodayDateString();
   const payload = {
-    cat_id: catId,
+    pet_id: catId,
     user_id: userId,
     weight_kg: weightKg,
     recorded_date: recordedDate
@@ -358,14 +361,14 @@ async function upsertWeightRecord(catId, userId, weightKg) {
 
   const { error: upsertError } = await sb
     .from('weight_records')
-    .upsert(payload, { onConflict: 'cat_id,recorded_date' });
+    .upsert(payload, { onConflict: 'pet_id,recorded_date' });
 
   if (!upsertError) return;
 
   const { data: existingRows, error: selectError } = await sb
     .from('weight_records')
-    .select('cat_id')
-    .eq('cat_id', catId)
+    .select('pet_id')
+    .eq('pet_id', catId)
     .eq('user_id', userId)
     .eq('recorded_date', recordedDate)
     .limit(1);
@@ -376,7 +379,7 @@ async function upsertWeightRecord(catId, userId, weightKg) {
     const { error: updateError } = await sb
       .from('weight_records')
       .update({ weight_kg: weightKg })
-      .eq('cat_id', catId)
+      .eq('pet_id', catId)
       .eq('user_id', userId)
       .eq('recorded_date', recordedDate);
 
@@ -406,7 +409,7 @@ async function saveFeedingRecord(catId, currentResult) {
     .from('feeding_records')
     .insert({
       user_id: userId,
-      cat_id: catId,
+      pet_id: catId,
       recorded_date: recordedDate,
       result_data: currentResult
     });
@@ -450,7 +453,7 @@ async function handleSaveFeedingRecord() {
 
     const catInput = getCurrentCatInput();
     if (!isValidCatInput(catInput)) {
-      finalMessage = '고양이 이름, 생년월일, 중성화 여부, 체중을 확인해 주세요.';
+      finalMessage = '반려동물 이름, 생년월일, 중성화 여부, 체중을 확인해 주세요.';
       finalTone = 'red';
       return;
     }
@@ -464,8 +467,8 @@ async function handleSaveFeedingRecord() {
       await saveFeedingRecord(catId, state.lastResult);
       state.lastSavedResultKey = getFeedingRecordSaveKey(catId, state.lastResult);
       finalMessage = catSaveResult.reusedExisting
-        ? '기존 고양이 프로필을 찾아 계산 결과를 저장했습니다.'
-        : '현재 입력값으로 고양이 프로필을 만들고 계산 결과를 저장했습니다.';
+        ? '기존 반려동물 프로필을 찾아 계산 결과를 저장했습니다.'
+        : '현재 입력값으로 반려동물 프로필을 만들고 계산 결과를 저장했습니다.';
     } else {
       await updateCatMutableFields(catId, user.id, catInput);
       await saveFeedingRecord(catId, state.lastResult);

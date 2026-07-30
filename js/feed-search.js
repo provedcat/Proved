@@ -6,6 +6,10 @@ function buildFeedSearchPattern(query) {
   return quotePostgrestFilterValue(`*${query}*`);
 }
 
+function getActiveFeedTable() {
+  return state.selectedPetSpecies === 'dog' ? 'dog_feeds' : 'feeds';
+}
+
 async function searchFeed(type, query, listId, slotId) {
   const list = document.getElementById(listId);
   if (!list) return;
@@ -18,7 +22,7 @@ async function searchFeed(type, query, listId, slotId) {
   }
 
   const { data, error } = await sb
-    .from('feeds')
+    .from(getActiveFeedTable())
     .select('제품명, 제조사, final_me, eb_칼슘, eb_인, 수분')
     .eq('type', type)
     .eq('verified', true)
@@ -117,6 +121,24 @@ const feedPickerState = {
   }
 };
 
+function resetFeedSearchForSpecies() {
+  state.dryFeeds = [null, null];
+  state.wetFeedMap = {};
+  feedPickerState.cache = { dry: null, wet: null };
+  feedPickerState.requests = { dry: null, wet: null };
+  feedPickerState.error = { dry: null, wet: null };
+
+  document.querySelectorAll('[id^="dryInput"], [id^="wetInput_"]').forEach(input => {
+    input.value = '';
+  });
+  document.querySelectorAll('[id^="drySelected"], [id^="wetSelected_"]').forEach(item => {
+    item.textContent = '';
+    item.classList.add('hidden');
+  });
+  if (typeof resetRecentFeedButtons === 'function') resetRecentFeedButtons();
+  if (typeof markCalculationDirty === 'function') markCalculationDirty();
+}
+
 function escapeFeedPickerHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -166,7 +188,7 @@ function closeFeedPicker() {
 
 async function fetchFeedPickerFeeds(type) {
   const { data, error } = await sb
-    .from('feeds')
+    .from(getActiveFeedTable())
     .select('제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분')
     .eq('type', type)
     .eq('verified', true)
@@ -237,6 +259,9 @@ function getSortedFeedPickerFeeds() {
     return compareFeedText(a.제품명, b.제품명);
   });
 }
+
+window.getActiveFeedTable = getActiveFeedTable;
+window.resetFeedSearchForSpecies = resetFeedSearchForSpecies;
 
 function renderFeedPickerSortButtons() {
   const manufacturerBtn = document.getElementById('feedPickerSortManufacturer');

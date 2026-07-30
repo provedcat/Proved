@@ -21,7 +21,8 @@ function fillShareCard() {
   if (!result) { alert('먼저 급여량을 계산해주세요.'); return false; }
 
   // 고양이 기본 정보
-  const catName  = document.getElementById('catName').value || '내 고양이';
+  const isDog = state.selectedPetSpecies === 'dog';
+  const catName  = document.getElementById('catName').value || (isDog ? '내 강아지' : '내 고양이');
   const weight   = parseFloat(document.getElementById('catWeight').value) || 0;
   const birthStr = document.getElementById('catBirth').value;
   const neutered = document.getElementById('catNeutered').value === 'true';
@@ -40,6 +41,8 @@ function fillShareCard() {
 
   document.getElementById('sc_catName').textContent = catName;
   document.getElementById('sc_catSub').textContent  = subTxt;
+  const brand = document.querySelector('.sc-brand');
+  if (brand) brand.textContent = isDog ? 'ProvedDog' : 'ProvedCat';
   document.getElementById('sc_der').textContent     = result.DER;
   document.getElementById('sc_foodKcal').textContent = result.foodKcal ?? result.DER;
   const treatBlock = document.getElementById('sc_treatBlock');
@@ -205,7 +208,7 @@ async function shareCard_save() {
 
     const link = document.createElement('a');
     const catName = document.getElementById('catName').value || 'cat';
-    link.download = `provedcat_${catName}.png`;
+    link.download = `${state.selectedPetSpecies === 'dog' ? 'proveddog' : 'provedcat'}_${catName}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
 
@@ -238,22 +241,23 @@ async function shareCard_kakao() {
     // Blob으로 변환
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     const catName = document.getElementById('catName').value || 'cat';
-    const file = new File([blob], `provedcat_${catName}.png`, { type: 'image/png' });
+    const brandName = state.selectedPetSpecies === 'dog' ? 'ProvedDog' : 'ProvedCat';
+    const file = new File([blob], `${brandName.toLowerCase()}_${catName}.png`, { type: 'image/png' });
 
     // Web Share API (모바일 기기 공유 시트 — 카카오톡 포함)
     if (navigator.share && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: `${catName}의 급여 플랜`,
-        text: `ProvedCat으로 계산한 ${catName}의 하루 급여 플랜이에요 🐱`
+        text: `${brandName}으로 계산한 ${catName}의 하루 급여 플랜이에요`
       });
     } else {
       // Web Share API 미지원 환경(PC 등) → 이미지 다운로드로 대체
       const link = document.createElement('a');
-      link.download = `provedcat_${catName}.png`;
+      link.download = `${brandName.toLowerCase()}_${catName}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      alert('PC에서는 이미지를 저장 후 카카오톡에 직접 올려주세요 😺');
+      alert('PC에서는 이미지를 저장 후 카카오톡에 직접 올려주세요.');
     }
 
   } catch (err) {

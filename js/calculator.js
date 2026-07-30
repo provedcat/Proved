@@ -3,21 +3,39 @@ function getAgeMonths(birth, today = new Date()) {
        + (today.getMonth() - birth.getMonth());
 }
 
-function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date()) {
+function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date(), species = 'cat') {
   const birth  = new Date(birthStr);
   const months = getAgeMonths(birth, today);
   const RER    = 70 * Math.pow(weight, 0.75);
   let f_age, label;
 
-  if      (months < 4)    { f_age = 2.75; label = '초기 성장기'; }
-  else if (months < 9)    { f_age = 2.1;  label = '중기 성장기'; }
-  else if (months < 12)   { f_age = 1.9;  label = '후기 성장기'; }
-  else if (months >= 132) { f_age = 1.1;  label = '노령묘'; }
-  else { f_age = neutered ? 1.2 : 1.4; label = neutered ? '중성화 성묘' : '비중성화 성묘'; }
+  if (species === 'dog') {
+    if (months < 4) {
+      f_age = 3.0;
+      label = '생후 4개월 미만 성장기';
+    } else if (months < 12) {
+      f_age = 2.0;
+      label = '생후 4~12개월 성장기';
+    } else {
+      f_age = neutered ? 1.6 : 1.8;
+      label = neutered ? '중성화 성견' : '비중성화 성견';
+    }
+  } else if (months < 4) {
+    f_age = 2.75; label = '초기 성장기';
+  } else if (months < 9) {
+    f_age = 2.1; label = '중기 성장기';
+  } else if (months < 12) {
+    f_age = 1.9; label = '후기 성장기';
+  } else if (months >= 132) {
+    f_age = 1.1; label = '노령묘';
+  } else {
+    f_age = neutered ? 1.2 : 1.4;
+    label = neutered ? '중성화 성묘' : '비중성화 성묘';
+  }
 
-  const isLateGrowth = months >= 9 && months < 12;
-  const f_neuter = (months < 12 && neutered) ? 0.85 : 1.0;
-  const f_diet   = diet ? 0.9 : 1.0;
+  const isLateGrowth = species === 'cat' && months >= 9 && months < 12;
+  const f_neuter = species === 'cat' && months < 12 && neutered ? 0.85 : 1.0;
+  const f_diet = diet ? (species === 'dog' ? 1 / f_age : 0.9) : 1.0;
 
   let DER;
   let detail;
@@ -27,7 +45,10 @@ function getCaloriePlan(weight, birthStr, neutered, diet, today = new Date()) {
     let finalFactor;
     let finalLabel;
 
-    if (isLateGrowth && neutered) {
+    if (species === 'dog') {
+      finalFactor = 1.0;
+      finalLabel = '체중관리';
+    } else if (isLateGrowth && neutered) {
       finalFactor = 1.25;
       finalLabel = '후기 성장기 · 중성화 · 체중관리';
       dietNotice = '후기 성장기 고양이는 성장에 필요한 에너지가 남아 있어, 다이어트 모드에서는 성장기 계수를 그대로 곱하지 않고 체중관리 기준으로 계산합니다.';
@@ -54,6 +75,19 @@ if (typeof module !== 'undefined') {
 function updateCalorie() {
   // DER preview is intentionally reserved for the result step.
   document.getElementById('calBox')?.classList.add('hidden');
+}
+
+function updateCalculatorSpeciesCopy(species = state.selectedPetSpecies || 'cat') {
+  const isDog = species === 'dog';
+  const speciesLabel = isDog ? '강아지' : '고양이';
+  const nameLabel = document.querySelector('label[for="catName"]');
+  const weightInput = document.getElementById('catWeight');
+
+  if (nameLabel) nameLabel.textContent = `${speciesLabel} 이름`;
+  if (weightInput) weightInput.max = isDog ? '150' : '20';
+  document.querySelectorAll('[data-pet-species-copy]').forEach(element => {
+    element.textContent = speciesLabel;
+  });
 }
 
 function markCalculationDirty() {
@@ -229,13 +263,16 @@ function calculate() {
   const dryRatio = Number(document.getElementById('ratioSlider').value) / 100;
   const wetRatio = 1 - dryRatio;
   const firstErrors = [];
+  const species = state.selectedPetSpecies || 'cat';
+  const speciesLabel = species === 'dog' ? '강아지' : '고양이';
+  const maxWeight = species === 'dog' ? 150 : 20;
 
-  if (!name) firstErrors.push(showCalculatorError('catNameError', '고양이 이름을 입력해 주세요.', 'catName'));
+  if (!name) firstErrors.push(showCalculatorError('catNameError', `${speciesLabel} 이름을 입력해 주세요.`, 'catName'));
   const birth = birthStr ? new Date(`${birthStr}T00:00:00`) : null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   if (!birthStr) firstErrors.push(showCalculatorError('catBirthError', '생년월일을 입력해 주세요.', 'catBirth'));
   else if (birth > today) firstErrors.push(showCalculatorError('catBirthError', '미래 날짜는 생년월일로 선택할 수 없습니다.', 'catBirth'));
-  if (!Number.isFinite(weight) || weight < 0.5 || weight > 20) firstErrors.push(showCalculatorError('catWeightError', '체중은 0.5kg 이상 20kg 이하로 입력해 주세요.', 'catWeight'));
+  if (!Number.isFinite(weight) || weight < 0.5 || weight > maxWeight) firstErrors.push(showCalculatorError('catWeightError', `체중은 0.5kg 이상 ${maxWeight}kg 이하로 입력해 주세요.`, 'catWeight'));
   if (!['true', 'false'].includes(neuteredValue)) firstErrors.push(showCalculatorError('catNeuteredError', '중성화 여부를 선택해 주세요.', 'catNeutered'));
   if (pregnant || lactating) firstErrors.push(showCalculatorError('lifeStageError', '임신·수유 중 급여 기준은 현재 준비 중입니다.', pregnant ? 'isPregnant' : 'isLactating'));
   if (dryRatio > 0 && !state.dryFeeds[0]) firstErrors.push(showCalculatorError('dryFeedError', '건사료 비율이 있으므로 건사료를 선택해 주세요.', 'dryInput1'));
@@ -265,7 +302,7 @@ function calculate() {
   if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
 
   const diet = document.getElementById('isDiet').checked;
-  const { DER } = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet);
+  const { DER } = getCaloriePlan(weight, birthStr, neuteredValue === 'true', diet, new Date(), species);
   const selectedTreatReservePct = document.querySelector('input[name="treatReservePct"]:checked')?.value || '0';
   const treatReservePct = Number(selectedTreatReservePct) / 100;
   const treatKcal = Math.round(DER * treatReservePct);
@@ -306,7 +343,7 @@ function calculate() {
   waterResult.innerHTML = '';
   document.getElementById('capBtn').setAttribute('aria-expanded', 'false');
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
-  state.lastResult = { DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
+  state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, ...resultData };
   markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
@@ -321,7 +358,9 @@ function calculate() {
 function analyzeCaP() {
   if (!state.lastResult) return;
 
-  const NRC = { 칼슘_권장: 280, 인_권장: 250, 비율_최소: 1.0, 비율_상한: 2.0 };
+  const NRC = state.selectedPetSpecies === 'dog'
+    ? { 칼슘_권장: 1250, 인_권장: 1000, 비율_최소: 1.0, 비율_상한: 2.0, 기준: 'NRC 성견' }
+    : { 칼슘_권장: 280, 인_권장: 250, 비율_최소: 1.0, 비율_상한: 2.0, 기준: 'NRC 성묘' };
   const 모든사료 = [
     ...state.lastResult.건사료_결과.map(s => ({ ...s, 종류: '건사료' })),
     ...state.lastResult.습식사료_결과.map(s => ({ ...s, 종류: '습식사료' }))
@@ -377,13 +416,17 @@ function analyzeCaP() {
           <span class="text-gray-400">Ca ${s.ca_mg}mg · P ${s.p_mg}mg</span>
         </div>`).join('')}
       ${제외목록.length ? `<p class="text-xs text-gray-300">※ 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
-      <p class="text-xs text-gray-300 leading-relaxed">※ NRC 성묘 기준 참고값입니다.</p>
+      <p class="text-xs text-gray-300 leading-relaxed">※ ${NRC.기준} 기준 참고값입니다.</p>
     </div>`;
 
   document.getElementById('capResult').innerHTML = html;
   document.getElementById('capResult').classList.remove('hidden');
   document.getElementById('capBtn').setAttribute('aria-expanded', 'true');
   document.getElementById('capResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+if (typeof window !== 'undefined') {
+  window.updateCalculatorSpeciesCopy = updateCalculatorSpeciesCopy;
 }
 
 // -----------------------------------------------
