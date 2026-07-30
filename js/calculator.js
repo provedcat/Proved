@@ -34,16 +34,12 @@ function getDogCaloriePlan(weight, birthStr, neutered, options = {}, today = new
   let stage = '';
 
   if (options.lactating) {
-    const week = Math.max(1, Math.min(4, Number(options.lactationWeek) || 1));
-    const puppies = Math.max(1, Math.min(12, Number(options.puppyCount) || 1));
-    const weekFactor = [0, 0.75, 1.1, 1.4, 1.2][week];
-    factor = Math.min(6, 1.6 + weekFactor * Math.min(puppies, 8));
-    label = `수유 ${week}주 · ${puppies}마리`;
+    factor = 3.0;
+    label = '수유 상태 반영';
     stage = '수유기';
   } else if (options.pregnant) {
-    const week = Math.max(1, Math.min(9, Number(options.pregnancyWeek) || 1));
-    factor = week <= 4 ? 1.8 : 1.8 * (1 + 0.1 * (week - 4));
-    label = `임신 ${week <= 4 ? '1~4' : week}주`;
+    factor = 2.0;
+    label = '임신 상태 반영';
     stage = '임신기';
   } else if (options.diet) {
     factor = 1.0;
@@ -161,8 +157,6 @@ function updateDogConditionalFields() {
   const expectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value) || 25;
   const growthLimit = getDogAdultTransitionMonths(expectedAdultWeight);
   document.getElementById('dogAdultWeightField')?.classList.toggle('hidden', !(isDog && months !== null && months < growthLimit));
-  document.getElementById('dogPregnancyField')?.classList.toggle('hidden', !(isDog && document.getElementById('isPregnant')?.checked));
-  document.getElementById('dogLactationFields')?.classList.toggle('hidden', !(isDog && document.getElementById('isLactating')?.checked));
 }
 
 function markCalculationDirty() {
@@ -393,10 +387,7 @@ function calculate() {
     activity: document.querySelector('input[name="dogActivity"]:checked')?.value || 'normal',
     expectedAdultWeight: dogExpectedAdultWeight,
     pregnant,
-    pregnancyWeek: document.getElementById('dogPregnancyWeek')?.value,
-    lactating,
-    lactationWeek: document.getElementById('dogLactationWeek')?.value,
-    puppyCount: document.getElementById('dogPuppyCount')?.value
+    lactating
   });
   const { DER } = caloriePlan;
   const selectedTreatReservePct = document.querySelector('input[name="treatReservePct"]:checked')?.value || '0';

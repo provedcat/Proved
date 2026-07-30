@@ -42,18 +42,17 @@ assert.equal(weightLoss.factor, 1);
 assert.equal(weightLoss.stage, '감량 모드');
 
 const pregnant = getDogCaloriePlan(20, '2023-01-01', false, {
-  pregnant: true,
-  pregnancyWeek: 7
+  pregnant: true
 }, today);
 assert.equal(pregnant.stage, '임신기');
-assert.ok(pregnant.factor > 1.8);
+assert.equal(pregnant.factor, 2);
+assert.equal(pregnant.label, '임신 상태 반영');
 
 const lactating = getDogCaloriePlan(20, '2023-01-01', false, {
-  lactating: true,
-  lactationWeek: 3,
-  puppyCount: 4
+  lactating: true
 }, today);
 assert.equal(lactating.stage, '수유기');
-assert.ok(lactating.factor > pregnant.factor);
+assert.equal(lactating.factor, 3);
+assert.equal(lactating.label, '수유 상태 반영');
 
 console.log('dog calculator tests passed');
