@@ -28,6 +28,27 @@ assert.equal(puppy.factor, 3);
 assert.equal(puppy.transitionMonths, 12);
 assert.equal(puppy.DER, Math.round(70 * Math.pow(8, 0.75) * 3));
 
+for (const expectedAdultWeight of [3, 7, 11, 20, 30, 40, 50]) {
+  const presetPlan = getDogCaloriePlan(2, '2026-05-01', false, {
+    expectedAdultWeight,
+    activity: 'normal'
+  }, today);
+  assert.equal(presetPlan.expectedAdultWeight, expectedAdultWeight);
+  const expectedGrowth = getDogGrowthFactor(
+    Math.min(2 / expectedAdultWeight, 1.5),
+    Math.min(presetPlan.months / presetPlan.transitionMonths, 1)
+  );
+  assert.equal(presetPlan.factor, expectedGrowth.factor);
+  assert.equal(presetPlan.stage, expectedGrowth.stage);
+}
+
+const directlyEditedAdultWeight = getDogCaloriePlan(4, '2026-05-01', false, {
+  expectedAdultWeight: 23.5,
+  activity: 'normal'
+}, today);
+assert.equal(directlyEditedAdultWeight.expectedAdultWeight, 23.5);
+assert.equal(directlyEditedAdultWeight.factor, 3);
+
 const neuteredLowActivityAdult = getDogCaloriePlan(20, '2023-01-01', true, {
   activity: 'low'
 }, today);
