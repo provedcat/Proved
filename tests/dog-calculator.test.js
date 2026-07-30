@@ -3,7 +3,8 @@ const {
   getAgeMonths,
   getDogAdultTransitionMonths,
   getDogGrowthFactor,
-  getDogCaloriePlan
+  getDogCaloriePlan,
+  getMealRatios
 } = require('../js/calculator.js');
 
 const today = new Date('2026-07-30T00:00:00');
@@ -75,5 +76,9 @@ const lactating = getDogCaloriePlan(20, '2023-01-01', false, {
 assert.equal(lactating.stage, '수유기');
 assert.equal(lactating.factor, 3);
 assert.equal(lactating.label, '수유 상태 반영');
+
+assert.deepEqual(getMealRatios(60), { dryPercent: 60, wetPercent: 40 });
+assert.deepEqual(getMealRatios(0), { dryPercent: 0, wetPercent: 100 });
+assert.deepEqual(getMealRatios(100), { dryPercent: 100, wetPercent: 0 });
 
 console.log('dog calculator tests passed');
