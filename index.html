@@ -69,7 +69,21 @@
       <div class="pc-field"><label class="pc-field-label" for="catWeight">현재 체중</label><div class="pc-input-unit"><input type="number" id="catWeight" placeholder="0.0" step="0.1" min="0.5" max="20"><span>kg</span></div><p id="catWeightError" class="pc-inline-error hidden" role="alert"></p></div>
       <fieldset class="pc-field"><legend class="pc-field-label">중성화 여부</legend><input type="hidden" id="catNeutered" value=""><div class="pc-segmented" role="radiogroup" aria-label="중성화 여부"><button type="button" class="pc-segmented-option" data-neutered="true" role="radio" aria-checked="false">중성화했어요</button><button type="button" class="pc-segmented-option" data-neutered="false" role="radio" aria-checked="false">중성화하지 않았어요</button></div><p id="catNeuteredError" class="pc-inline-error hidden" role="alert"></p></fieldset>
       <fieldset id="dogActivityField" class="pc-field hidden"><legend class="pc-field-label">평소 활동량</legend><div class="pc-segmented" role="radiogroup" aria-label="강아지 활동량"><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="low"><span>적은 편</span></label><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="normal" checked><span>보통</span></label><label class="pc-segmented-option"><input type="radio" name="dogActivity" value="high"><span>많은 편</span></label></div></fieldset>
-      <div id="dogAdultWeightField" class="pc-field hidden"><label class="pc-field-label" for="dogExpectedAdultWeight">예상 성견 체중</label><div class="pc-input-unit"><input type="number" id="dogExpectedAdultWeight" placeholder="성견이 되었을 때 예상 체중" step="0.1" min="1" max="150"><span>kg</span></div><p class="pc-help">성장기 강아지일 때만 입력해 주세요. 품종의 일반적인 성견 체중이나 병원에서 안내받은 값을 사용할 수 있습니다.</p><p id="dogAdultWeightError" class="pc-inline-error hidden" role="alert"></p></div>
+      <div id="dogAdultWeightField" class="pc-field hidden">
+        <label class="pc-field-label" for="dogExpectedAdultWeight">예상 성견 체중</label>
+        <div class="pc-adult-weight-presets" aria-label="예상 성견 체중 빠른 선택">
+          <button type="button" data-adult-weight="3" aria-pressed="false"><strong>3kg</strong><span>예: 치와와</span></button>
+          <button type="button" data-adult-weight="7" aria-pressed="false"><strong>7kg</strong><span>예: 미니어처 슈나우저</span></button>
+          <button type="button" data-adult-weight="11" aria-pressed="false"><strong>11kg</strong><span>예: 비글</span></button>
+          <button type="button" data-adult-weight="20" aria-pressed="false"><strong>20kg</strong><span>예: 보더콜리</span></button>
+          <button type="button" data-adult-weight="30" aria-pressed="false"><strong>30kg</strong><span>예: 골든리트리버</span></button>
+          <button type="button" data-adult-weight="40" aria-pressed="false"><strong>40kg</strong><span>예: 저먼 셰퍼드</span></button>
+          <button type="button" data-adult-weight="50" aria-pressed="false"><strong>50kg 이상</strong><span>예: 그레이트데인</span></button>
+        </div>
+        <div class="pc-input-unit"><input type="number" id="dogExpectedAdultWeight" placeholder="직접 입력하거나 위에서 선택" step="0.1" min="1" max="150"><span>kg</span></div>
+        <p class="pc-help">선택값은 입력을 돕는 예시입니다. 정확한 예상 체중을 안다면 직접 수정해 주세요.</p>
+        <p id="dogAdultWeightError" class="pc-inline-error hidden" role="alert"></p>
+      </div>
       <fieldset class="pc-field"><legend class="pc-field-label">해당하는 경우만 선택</legend><div class="pc-chip-row"><label class="pc-choice-chip"><input type="checkbox" id="isDiet"><span>다이어트</span></label><label class="pc-choice-chip"><input type="checkbox" id="isPregnant"><span>임신 중</span></label><label class="pc-choice-chip"><input type="checkbox" id="isLactating"><span>수유 중</span></label></div><p id="lifeStageError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></fieldset>
       <fieldset class="pc-field"><legend class="pc-field-label">간식도 급여하나요?</legend><div class="pc-segmented" role="radiogroup" aria-label="간식 열량 예약"><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="0" checked><span>급여하지 않음</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="5"><span>5% 남기기</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="10"><span>10% 남기기</span></label></div></fieldset>
       <div id="calBox" class="hidden" aria-hidden="true"><span id="derVal"></span><span id="derDetail"></span><span id="dietNotice"></span></div>
