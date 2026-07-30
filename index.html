@@ -61,7 +61,7 @@
     <!-- 1단계: 고양이 정보 -->
     <section class="pc-step-section pc-section-card" aria-labelledby="step1Title">
       <div class="pc-section-heading pc-section-heading--with-action">
-        <div><h2 id="step1Title" class="pc-section-title"><span>01</span> 정보 입력</h2><p>고양이의 현재 상태를 입력해 주세요.</p></div>
+        <div><h2 id="step1Title" class="pc-section-title"><span>01</span> 정보 입력</h2><p><span data-pet-species-copy>고양이</span>의 현재 상태를 입력해 주세요.</p></div>
         <button id="calculatorPetLoadButton" type="button" class="pc-compact-load-button hidden" onclick="openPetSelectorModal('calculator')">반려동물 불러오기</button>
       </div>
       <div class="pc-field"><label class="pc-field-label" for="catName">고양이 이름</label><input type="text" id="catName" autocomplete="name" placeholder="이름을 입력해 주세요"><p id="catNameError" class="pc-inline-error hidden" role="alert"></p></div>
@@ -153,14 +153,6 @@
     </section>
 
 
-    <section id="dogReadyPage" class="hidden space-y-5">
-      <div class="proved-dog-ready">
-        <h2 class="text-2xl font-black">ProvedDog는 준비 중입니다.</h2>
-        <p class="mt-3 text-sm font-bold text-gray-500 leading-relaxed">강아지 계산식과 데이터는 임의로 연결하지 않았습니다. 현재 통합 계산기는 고양이(ProvedCat) 기능만 실제 계산을 지원합니다.</p>
-        <button type="button" class="mt-5 px-5 py-3 bg-[#2d7dd2] text-white rounded-2xl text-sm font-black" onclick="provedShowEntry('pet')">다시 선택하기</button>
-      </div>
-    </section>
-
     <section id="wetFoodBetaPage" class="hidden space-y-5">
       <div class="pc-info-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
         <p class="text-xs font-black text-blue-400 tracking-widest">RULE-BASED BETA</p>
@@ -183,7 +175,7 @@
         <div>
           <p class="text-lg font-black text-gray-800">로그인이 필요합니다</p>
           <p class="mt-2 text-sm font-bold text-gray-500 leading-relaxed">
-            내 고양이의 체중 기록과 변화 그래프를 보려면 로그인해 주세요.
+            내 반려동물의 체중 기록과 변화 그래프를 보려면 로그인해 주세요.
           </p>
         </div>
         <button type="button" onclick="openAuthSheet()"
@@ -195,8 +187,8 @@
       <div id="weightTrendContent" class="hidden space-y-5">
         <section class="pc-trend-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
           <div>
-            <h3 class="text-base font-black text-gray-800">고양이 선택</h3>
-            <p class="mt-1 text-xs font-bold text-gray-400">체중 추이를 확인할 고양이를 선택하세요.</p>
+            <h3 class="text-base font-black text-gray-800">반려동물 선택</h3>
+            <p class="mt-1 text-xs font-bold text-gray-400">체중 추이를 확인할 반려동물을 선택하세요.</p>
           </div>
           <div id="trendCatList" class="grid grid-cols-1 gap-2"></div>
           <p id="trendCatMsg" class="hidden text-xs font-bold text-gray-400"></p>
@@ -241,7 +233,7 @@
       <div>
         <p class="text-xs font-black text-blue-400 tracking-widest">PROVED PETS</p>
         <h2 id="provedPetSelectorTitle" class="mt-1 text-xl font-black text-gray-800">반려동물 불러오기</h2>
-        <p class="mt-1 text-xs font-bold text-gray-400">현재 저장된 고양이 프로필을 공통으로 불러옵니다.</p>
+        <p class="mt-1 text-xs font-bold text-gray-400">현재 저장된 고양이·강아지 프로필을 불러옵니다.</p>
       </div>
       <button type="button" data-modal-close onclick="closePetSelectorModal()" class="shrink-0 w-9 h-9 rounded-full bg-gray-50 border border-gray-100 text-gray-400 font-black" aria-label="닫기">닫기</button>
     </div>
@@ -266,7 +258,7 @@
     <div class="flex items-start justify-between gap-4">
       <div>
         <p class="text-lg font-black text-gray-800">계정</p>
-        <p class="mt-1 text-sm font-bold text-gray-400">내 고양이 기록을 저장하려면 로그인하세요.</p>
+        <p class="mt-1 text-sm font-bold text-gray-400">내 반려동물 기록을 저장하려면 로그인하세요.</p>
       </div>
       <button type="button" onclick="closeAuthSheet()"
         class="shrink-0 w-9 h-9 rounded-full bg-gray-50 border border-gray-100 text-gray-400 font-black">
@@ -459,10 +451,6 @@ let state = {
 // 페이지 전환
 // -----------------------------------------------
 function showPage(pageName) {
-  if (state.selectedPetSpecies === 'dog' && pageName !== 'dogReadyPage') {
-    pageName = 'dogReadyPage';
-  }
-
   if (
     pageName === 'wetFoodBetaPage' &&
     window.wetBetaAccessGranted !== true
@@ -473,8 +461,7 @@ function showPage(pageName) {
   const pages = {
     calculatorPage: document.getElementById('calculatorPage'),
     weightTrendPage: document.getElementById('weightTrendPage'),
-    wetFoodBetaPage: document.getElementById('wetFoodBetaPage'),
-    dogReadyPage: document.getElementById('dogReadyPage')
+    wetFoodBetaPage: document.getElementById('wetFoodBetaPage')
   };
   const buttons = {
     calculatorPage: document.getElementById('navCalculator'),

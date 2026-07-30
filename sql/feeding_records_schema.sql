@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.feeding_records (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
-  cat_id uuid NOT NULL,
+  pet_id uuid NOT NULL,
   recorded_date date NOT NULL DEFAULT current_date,
   result_data jsonb NOT NULL,
   created_at timestamptz DEFAULT now()

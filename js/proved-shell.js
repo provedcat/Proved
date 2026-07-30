@@ -37,6 +37,7 @@ function provedSetLastActivePet(pet) {
 function provedApplyCurrentPetState(pet) {
   if (!pet) return;
 
+  const previousSpecies = state.selectedPetSpecies || null;
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
   state.activePet = normalizedPet;
   state.selectedPetSpecies = normalizedPet.species;
@@ -51,10 +52,18 @@ function provedApplyCurrentPetState(pet) {
   if (normalizedPet.id) provedSetLastActivePet(normalizedPet);
   provedUpdateCurrentPetLabel(normalizedPet);
   provedSetDogMode(normalizedPet.species === 'dog');
+  if (typeof updateCalculatorSpeciesCopy === 'function') {
+    updateCalculatorSpeciesCopy(normalizedPet.species);
+  }
+  if (previousSpecies && previousSpecies !== normalizedPet.species) {
+    if (typeof resetFeedSearchForSpecies === 'function') {
+      resetFeedSearchForSpecies();
+    }
+  }
 }
 
 function provedGetVisibleServicePage() {
-  return ['calculatorPage', 'weightTrendPage', 'wetFoodBetaPage', 'dogReadyPage'].find(id => {
+  return ['calculatorPage', 'weightTrendPage', 'wetFoodBetaPage'].find(id => {
     const page = document.getElementById(id);
     return page && !page.classList.contains('hidden');
   }) || 'calculatorPage';
@@ -90,9 +99,7 @@ function provedChooseSpecies(species) {
     provedApplyCurrentPetState(rememberedState.pet);
     state.selectedSavedCatId = rememberedState.selectedSavedCatId;
     state.selectedTrendCatId = rememberedState.selectedTrendCatId;
-    const returnPage = provedHomeReturnPage === 'dogReadyPage'
-      ? 'calculatorPage'
-      : provedHomeReturnPage;
+    const returnPage = provedHomeReturnPage;
     const previousApplying = state.isApplyingActivePet;
     state.isApplyingActivePet = true;
     try {
@@ -141,8 +148,8 @@ function provedUpdateCurrentPetLabel(pet = null) {
 }
 
 function provedSetDogMode(enabled) {
-  document.body.classList.toggle('proved-dog-blocked', enabled);
-  ['navCalculator', 'navWeightTrend', 'navWetFoodBeta'].forEach(id => {
+  document.body.classList.toggle('proved-dog-mode', enabled);
+  ['navWetFoodBeta'].forEach(id => {
     const button = document.getElementById(id);
     if (!button) return;
     button.disabled = enabled;
@@ -220,8 +227,7 @@ async function provedFetchPets() {
   }
   if (!state.currentUser) return [];
 
-  const cats = typeof fetchMyCats === 'function' ? await fetchMyCats(state.currentUser.id) : [];
-  return cats.map(cat => ({ ...cat, species: 'cat' }));
+  return typeof fetchMyCats === 'function' ? await fetchMyCats(state.currentUser.id) : [];
 }
 
 async function provedResolveLoginDestination() {
@@ -233,7 +239,9 @@ async function provedResolveLoginDestination() {
   }
 
   const last = provedGetLastActivePet();
-  const match = last && pets.find(pet => String(pet.id) === String(last.id) && last.species !== 'dog');
+  const match = last && pets.find(pet =>
+    String(pet.id) === String(last.id) && pet.species === last.species
+  );
   if (match) {
     await setActivePet(match, { route: 'calculator' });
     return;
@@ -337,13 +345,6 @@ async function setActivePet(pet, options = {}) {
   provedHideEntry();
   provedApplyCurrentPetState(normalizedPet);
 
-  if (normalizedPet.species === 'dog') {
-    state.selectedSavedCatId = null;
-    state.selectedTrendCatId = null;
-    showPage('dogReadyPage');
-    return;
-  }
-
   const syncCalculator = options.syncCalculator !== false;
   const syncTrend = options.syncTrend !== false;
   const previousApplying = state.isApplyingActivePet;
@@ -370,7 +371,7 @@ async function setActivePet(pet, options = {}) {
 }
 
 async function provedEnterPet(pet) {
-  await setActivePet(pet, { route: pet.species === 'dog' ? 'dog' : 'calculator' });
+  await setActivePet(pet, { route: 'calculator' });
 }
 
 function provedGetFocusableElements(container) {
@@ -407,7 +408,7 @@ async function openPetSelectorModal(context) {
     const pets = await provedFetchPets();
 
     if (!pets.length) {
-      msg.textContent = '저장된 고양이가 없습니다.';
+      msg.textContent = '저장된 반려동물이 없습니다.';
       return;
     }
 
@@ -415,7 +416,7 @@ async function openPetSelectorModal(context) {
     list.innerHTML = pets.map(pet => `
       <button type="button" class="proved-pet-row ${active && String(active.id) === String(pet.id) ? 'is-active' : ''}" data-pet-id="${escapeHtml(pet.id)}">
         <strong>${escapeHtml(pet.name || '이름 없음')}</strong><br>
-        <small>${escapeHtml(pet.birth_date || '생년월일 없음')} · 고양이</small>
+        <small>${escapeHtml(pet.birth_date || '생년월일 없음')} · ${pet.species === 'dog' ? '강아지' : '고양이'}</small>
       </button>
     `).join('');
     list._pets = pets;

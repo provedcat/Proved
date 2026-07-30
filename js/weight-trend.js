@@ -19,7 +19,7 @@ function setTrendEmptyMessage(message) {
   msg.classList.toggle('hidden', !message);
 }
 
-function resetWeightTrendView(message = '고양이를 선택하면 체중 그래프가 표시됩니다.') {
+function resetWeightTrendView(message = '반려동물을 선택하면 체중 그래프가 표시됩니다.') {
   if (window.weightTrendChartInstance) {
     window.weightTrendChartInstance.destroy();
     window.weightTrendChartInstance = null;
@@ -47,7 +47,7 @@ async function refreshWeightTrendPage() {
     loginNotice.classList.remove('hidden');
     content.classList.add('hidden');
     setWeightTrendMessage('', 'gray');
-    resetWeightTrendView('로그인하면 내 고양이의 체중 추이를 확인할 수 있습니다.');
+    resetWeightTrendView('로그인하면 내 반려동물의 체중 추이를 확인할 수 있습니다.');
     return;
   }
 
@@ -62,7 +62,7 @@ async function loadTrendCats() {
 
   list.innerHTML = '';
   resetWeightTrendView();
-  setWeightTrendMessage('저장된 고양이를 불러오는 중입니다...', 'blue');
+  setWeightTrendMessage('저장된 반려동물을 불러오는 중입니다...', 'blue');
 
   let cats;
   try {
@@ -70,8 +70,8 @@ async function loadTrendCats() {
       cats = await fetchMyCats(state.currentUser.id);
     } else {
       const { data, error } = await sb
-        .from('cats')
-        .select('id, name, birth_date, neutered')
+        .from('pets')
+        .select('id, name, birth_date, neutered, species')
         .eq('user_id', state.currentUser.id)
         .order('created_at', { ascending: false });
 
@@ -79,12 +79,12 @@ async function loadTrendCats() {
       cats = data || [];
     }
   } catch (error) {
-    setWeightTrendMessage(`고양이 목록 불러오기 실패: ${error.message}`, 'red');
+    setWeightTrendMessage(`반려동물 목록 불러오기 실패: ${error.message}`, 'red');
     return;
   }
 
   if (!cats.length) {
-    setWeightTrendMessage('저장된 고양이가 없습니다. 급여 계산 결과를 저장하면 고양이별 체중 기록을 볼 수 있습니다.', 'gray');
+    setWeightTrendMessage('저장된 반려동물이 없습니다. 급여 계산 결과를 저장하면 반려동물별 체중 기록을 볼 수 있습니다.', 'gray');
     return;
   }
 
@@ -120,14 +120,14 @@ async function loadTrendCats() {
     const cat = list._trendCats.find(item => String(item.id) === String(button.dataset.catId));
     if (cat) {
       if (typeof setActivePet === 'function' && !state.isApplyingActivePet) {
-        setActivePet({ ...cat, species: 'cat' }, { route: 'weight' });
+        setActivePet(cat, { route: 'weight' });
       } else {
         selectTrendCat(cat);
       }
     }
   };
 
-  setWeightTrendMessage('체중 추이를 확인할 고양이를 선택해주세요.', 'gray');
+  setWeightTrendMessage('체중 추이를 확인할 반려동물을 선택해주세요.', 'gray');
 }
 
 function closeTrendCatMenus() {
@@ -158,11 +158,11 @@ async function deleteTrendCat(catId) {
     return;
   }
 
-  const confirmed = confirm('이 고양이 프로필과 연결된 체중 기록, 급여 기록이 함께 삭제됩니다. 정말 삭제할까요?');
+  const confirmed = confirm('이 반려동물 프로필과 연결된 체중 기록, 급여 기록이 함께 삭제됩니다. 정말 삭제할까요?');
   if (!confirmed) return;
 
   closeTrendCatMenus();
-  setWeightTrendMessage('고양이 기록을 삭제하는 중입니다...', 'blue');
+  setWeightTrendMessage('반려동물 기록을 삭제하는 중입니다...', 'blue');
 
   const userId = state.currentUser.id;
 
@@ -170,7 +170,7 @@ async function deleteTrendCat(catId) {
     const { error: feedingError } = await sb
       .from('feeding_records')
       .delete()
-      .eq('cat_id', catId)
+      .eq('pet_id', catId)
       .eq('user_id', userId);
 
     if (feedingError) throw new Error(`급여 기록 삭제 실패: ${feedingError.message}`);
@@ -178,27 +178,27 @@ async function deleteTrendCat(catId) {
     const { error: weightError } = await sb
       .from('weight_records')
       .delete()
-      .eq('cat_id', catId)
+      .eq('pet_id', catId)
       .eq('user_id', userId);
 
     if (weightError) throw new Error(`체중 기록 삭제 실패: ${weightError.message}`);
 
     const { error: catError } = await sb
-      .from('cats')
+      .from('pets')
       .delete()
       .eq('id', catId)
       .eq('user_id', userId);
 
-    if (catError) throw new Error(`고양이 프로필 삭제 실패: ${catError.message}`);
+    if (catError) throw new Error(`반려동물 프로필 삭제 실패: ${catError.message}`);
   } catch (error) {
     setWeightTrendMessage(`삭제 실패: ${error.message} 일부 기록이 이미 삭제되었을 수 있으니 새로고침 후 확인해 주세요.`, 'red');
     return;
   }
 
   state.selectedTrendCatId = null;
-  resetWeightTrendView('고양이를 선택하면 체중 그래프가 표시됩니다.');
+  resetWeightTrendView('반려동물을 선택하면 체중 그래프가 표시됩니다.');
   await loadTrendCats();
-  setWeightTrendMessage('고양이 프로필과 연결 기록을 삭제했습니다.', 'blue');
+  setWeightTrendMessage('반려동물 프로필과 연결 기록을 삭제했습니다.', 'blue');
 }
 
 async function selectTrendCat(cat) {
@@ -216,9 +216,9 @@ async function selectTrendCat(cat) {
   state.selectedTrendCatId = cat.id;
   const shouldSyncSharedPet = !state.isApplyingActivePet;
   if (typeof provedApplyCurrentPetState === 'function' && shouldSyncSharedPet) {
-    provedApplyCurrentPetState({ ...cat, species: 'cat' });
+    provedApplyCurrentPetState(cat);
   } else if (typeof provedSetLastActivePet === 'function') {
-    provedSetLastActivePet({ ...cat, species: 'cat' });
+    provedSetLastActivePet(cat);
   }
   setWeightTrendMessage(`${cat.name || '선택한 고양이'}의 체중 기록을 불러오는 중입니다...`, 'blue');
   setTrendEmptyMessage('');
@@ -249,7 +249,7 @@ async function selectTrendCat(cat) {
   ) {
     state.isSyncingDirectPetSelection = true;
     try {
-      await selectSavedCat({ ...cat, species: 'cat' });
+      await selectSavedCat(cat);
     } finally {
       state.isSyncingDirectPetSelection = false;
     }
@@ -261,7 +261,7 @@ async function loadWeightRecordsForCat(catId) {
     .from('weight_records')
     .select('weight_kg, recorded_date')
     .eq('user_id', state.currentUser.id)
-    .eq('cat_id', catId)
+    .eq('pet_id', catId)
     .order('recorded_date', { ascending: true });
 
   if (error) throw error;
