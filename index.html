@@ -55,12 +55,64 @@
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css?v=20260730-pet-ratio-slider">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260728-entry-polish">
+  <style>
+    .proved-seo-summary {
+      flex: 0 0 auto;
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid #edf0f4;
+      color: #9299a4;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.65;
+      letter-spacing: -0.01em;
+    }
+
+    .proved-seo-summary h1 {
+      margin: 0 0 7px;
+      color: #7c8490;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .proved-seo-summary p {
+      margin: 0;
+    }
+
+    .proved-seo-summary p + p {
+      margin-top: 5px;
+    }
+
+    .proved-entry__inner:has(.proved-entry__main:not(.proved-entry__main--start)) .proved-seo-summary {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .proved-seo-summary {
+        margin-top: 22px;
+        padding-top: 14px;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .proved-seo-summary h1 {
+        font-size: 11px;
+      }
+    }
+  </style>
 </head>
 <body class="flex justify-center">
 <div id="provedEntry" class="proved-entry" aria-label="Proved 시작 화면">
   <div class="proved-entry__inner">
     <img class="proved-wordmark" src="icons/proved-logo.svg" alt="Proved">
     <div id="provedEntryMain"></div>
+    <section class="proved-seo-summary" aria-labelledby="provedSeoTitle">
+      <h1 id="provedSeoTitle">고양이·강아지 사료 급여량 계산기</h1>
+      <p>Proved는 반려동물의 체중, 생년월일, 중성화 여부, 성장 단계, 활동량과 다이어트·임신·수유 상태를 반영해 하루 권장 칼로리를 계산합니다.</p>
+      <p>등록된 건사료와 습식사료를 검색하고 급여 비율을 조정하면 제품별 하루 급여량과 배정 칼로리를 확인할 수 있으며, 간식 급여를 위해 하루 열량의 5% 또는 10%를 남기는 식단도 계산할 수 있습니다.</p>
+      <p>선택한 사료의 영양정보를 바탕으로 칼슘·인 섭취량과 Ca:P 비율, 사료를 통한 예상 수분 섭취량을 분석합니다. 계산 결과는 체중과 체형 변화를 관찰하고 급여 계획을 세우기 위한 참고 기준이며 수의학적 진단이나 처방을 대신하지 않습니다.</p>
+    </section>
   </div>
 </div>
 
@@ -475,7 +527,7 @@
 // ⚙️ 설정
 // -----------------------------------------------
 const SUPABASE_URL  = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAjl2G-xZnbjiwt1JptMKLXSSDit6dgyOmpYoA84ViqhAUOx4YGtZkOptCgD7lQTECRw/exec';
 
 // ✅ 카카오 앱 키 — developers.kakao.com 에서 발급 후 입력
