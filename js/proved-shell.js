@@ -1,4 +1,18 @@
 const PROVED_LAST_ACTIVE_KEY = 'proved:last_active_pet';
+const PROVED_SPECIES_PATHS = {
+  cat: '/cat-food-calculator/',
+  dog: '/dog-food-calculator/'
+};
+
+function provedGetRequestedSpecies() {
+  const path = window.location.pathname.replace(/\/+$/, '/') || '/';
+  return Object.entries(PROVED_SPECIES_PATHS)
+    .find(([, speciesPath]) => path === speciesPath)?.[0] || null;
+}
+
+function provedGetSpeciesPath(species) {
+  return PROVED_SPECIES_PATHS[species === 'dog' ? 'dog' : 'cat'];
+}
 let provedLastFocus = null;
 let provedAuthDestinationScheduled = false;
 let provedAuthDestinationTimer = null;
@@ -70,6 +84,11 @@ function provedGetVisibleServicePage() {
 }
 
 function provedGoHome() {
+  if (window.location.pathname !== '/') {
+    window.location.assign('/');
+    return;
+  }
+
   // During INITIAL_SESSION, null does not yet mean "signed out". Wait for the
   // existing auth listener rather than starting another auth request or route.
   if (!state.authInitialized) return;
@@ -88,7 +107,14 @@ function provedGoHome() {
 }
 
 function provedChooseSpecies(species) {
-  if (species === 'dog') {
+  const normalizedSpecies = species === 'dog' ? 'dog' : 'cat';
+  const destination = provedGetSpeciesPath(normalizedSpecies);
+  if (window.location.pathname !== destination) {
+    window.location.assign(destination);
+    return;
+  }
+
+  if (normalizedSpecies === 'dog') {
     return setActivePet({ species: 'dog' }, { route: 'dog' });
   }
 
@@ -232,6 +258,26 @@ async function provedFetchPets() {
 
 async function provedResolveLoginDestination() {
   const pets = await provedFetchPets();
+  const requestedSpecies = provedGetRequestedSpecies();
+
+  if (requestedSpecies) {
+    const matchingPets = pets.filter(pet => (pet.species || 'cat') === requestedSpecies);
+    const last = provedGetLastActivePet();
+    const matchingLast = last && matchingPets.find(pet => String(pet.id) === String(last.id));
+
+    if (matchingLast) {
+      await setActivePet(matchingLast, { route: 'calculator' });
+      return;
+    }
+
+    if (matchingPets.length === 1) {
+      await setActivePet(matchingPets[0], { route: 'calculator' });
+      return;
+    }
+
+    await setActivePet({ species: requestedSpecies }, { route: 'calculator' });
+    return;
+  }
 
   if (!pets.length) {
     provedShowEntry('pet');
@@ -514,6 +560,17 @@ document.addEventListener('keydown', event => {
     event.preventDefault();
     first.focus();
   }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const requestedSpecies = provedGetRequestedSpecies();
+  if (!requestedSpecies) return;
+
+  setTimeout(() => {
+    if (!state.activePet || (state.activePet.species || 'cat') !== requestedSpecies) {
+      setActivePet({ species: requestedSpecies }, { route: 'calculator' });
+    }
+  }, 0);
 });
 
 window.provedShowEntry = provedShowEntry;
