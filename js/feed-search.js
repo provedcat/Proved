@@ -392,7 +392,8 @@ async function uploadFeedImageToAppsScript() {
       base64Data: base64,
       mimeType: file.type,
       fileName: file.name,
-      type: state.uploadType
+      type: state.uploadType,
+      species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat'
     })
   });
   const result = await resp.json();
