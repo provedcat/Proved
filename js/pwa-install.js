@@ -141,7 +141,7 @@
     if (!('serviceWorker' in navigator)) return;
 
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch((error) => {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch((error) => {
         console.warn('ProvedCat service worker registration failed:', error);
       });
     });
