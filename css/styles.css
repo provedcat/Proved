@@ -697,7 +697,7 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 .pc-result-disclaimer { color:var(--text-secondary); }
 
 #capResult > div, #waterResult > div { padding:20px !important; border-radius:14px !important; background:#fff !important; color:var(--text-primary) !important; box-shadow:none !important; }
-#capResult > div { border:1px solid var(--analysis-green) !important; }
+#capResult > div { border:1px solid var(--calcium-ink) !important; }
 #waterResult > div { border:1px solid var(--analysis-water) !important; }
 #capResult .bg-white, #waterResult .bg-white { background:var(--page-background) !important; border-radius:10px !important; }
 #capResult .text-gray-800, #waterResult .text-gray-800,
