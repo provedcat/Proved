@@ -545,9 +545,9 @@ async function handleTextFeedRequest() {
   isSubmittingTextFeed = true;
   if (button) {
     button.disabled = true;
-    button.textContent = '공식 자료 확인 중...';
+    button.textContent = '등록 요청 접수 중...';
   }
-  renderTextFeedRequestMessage('기존 제품과 공식 자료를 확인하고 있습니다.', 'info');
+  renderTextFeedRequestMessage('등록 요청을 접수하고 제품 자료를 확인하고 있습니다.', 'info');
 
   try {
     const response = await fetch(APPS_SCRIPT_URL, {
@@ -556,7 +556,8 @@ async function handleTextFeedRequest() {
         action: 'text_request',
         query,
         type: state.uploadType,
-        species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat'
+        species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat',
+        user_id: state.currentUser?.id || null
       })
     });
     const result = await parseAppsScriptResponse(response);
@@ -568,7 +569,13 @@ async function handleTextFeedRequest() {
     }
 
     if (!result.성공) {
-      renderTextFeedRequestMessage(result.안내 || result.오류 || '등록 요청을 처리하지 못했습니다.', 'error');
+      renderTextFeedRequestMessage('등록 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+      return;
+    }
+
+    if (result.요청접수 && result.검색완료 === false) {
+      renderTextFeedRequestMessage('등록 요청이 완료되었습니다. 자료 확인 후 제품 목록에 반영됩니다.', 'success');
+      if (input) input.value = '';
       return;
     }
 
@@ -581,7 +588,7 @@ async function handleTextFeedRequest() {
     if (input) input.value = '';
   } catch (error) {
     console.error('Text feed request failed:', error);
-    renderTextFeedRequestMessage(error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
+    renderTextFeedRequestMessage('등록 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
   } finally {
     isSubmittingTextFeed = false;
     if (button) {
