@@ -10,12 +10,24 @@ function getActiveFeedTable() {
   return state.selectedPetSpecies === 'dog' ? 'dog_feeds' : 'feeds';
 }
 
+function getFeedSearchColumns() {
+  return '제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부,verified,verification_status,searchable_before_review';
+}
+
+function isProvisionalFeed(feed) {
+  return feed?.verified !== true;
+}
+
+function getProvisionalBadgeHtml(feed) {
+  if (!isProvisionalFeed(feed)) return '';
+  return '<span class="pc-feed-review-badge">검수 전</span>';
+}
+
 async function searchFeed(type, query, listId, slotId) {
   const list = document.getElementById(listId);
   if (!list) return;
 
   const searchQuery = String(query || '').trim();
-
   if (searchQuery.length < 1) {
     list.classList.add('hidden');
     return;
@@ -23,104 +35,112 @@ async function searchFeed(type, query, listId, slotId) {
 
   const { data, error } = await sb
     .from(getActiveFeedTable())
-    .select('제품명, 제조사, final_me, eb_칼슘, eb_인, 수분, 전성분, 완전식여부')
+    .select(getFeedSearchColumns())
     .eq('type', type)
-    .eq('verified', true)
+    .or('verified.eq.true,searchable_before_review.eq.true')
     .gt('final_me', 0)
     .or(`제품명.ilike.${buildFeedSearchPattern(searchQuery)},제조사.ilike.${buildFeedSearchPattern(searchQuery)}`)
     .limit(10);
 
   if (error) {
-    list.innerHTML = `<div class="p-3 text-red-400 text-xs">${error.message}</div>`;
+    list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(error.message)}</div>`;
     list.classList.remove('hidden');
     return;
   }
 
-  if (!data || data.length === 0) {
-    list.innerHTML = `<div class="p-4 text-gray-400 text-xs text-center">검색 결과가 없습니다</div>`;
-    list.classList.remove('hidden');
-    return;
-  }
-
-  list.innerHTML = data.map((f, rowIdx) => {
-    const display = f.제조사 ? `${f.제조사} | ${f.제품명}` : f.제품명;
-    return `
-      <div class="autocomplete-item p-4 border-b border-gray-50 cursor-pointer" data-row="${rowIdx}">
-        <p class="font-bold text-sm text-gray-800">${display}</p>
-        <p class="text-xs text-gray-400 mt-0.5">${f.final_me} kcal/kg${f.수분 != null ? ` · 수분 ${f.수분}%` : ''}</p>
+  if (!data?.length) {
+    list.innerHTML = `
+      <div class="p-4 text-gray-400 text-xs text-center">
+        검색 결과가 없습니다.<br>
+        아래의 제품명 등록 요청을 이용해 주세요.
       </div>`;
+    list.classList.remove('hidden');
+    return;
+  }
+
+  list.innerHTML = data.map((feed, rowIdx) => {
+    const display = feed.제조사 ? `${feed.제조사} | ${feed.제품명}` : feed.제품명;
+    return `
+      <button type="button" class="autocomplete-item w-full p-4 border-b border-gray-50 text-left" data-row="${rowIdx}">
+        <span class="pc-feed-result-title">
+          <span>${escapeFeedPickerHtml(display)}</span>
+          ${getProvisionalBadgeHtml(feed)}
+        </span>
+        <span class="block text-xs text-gray-400 mt-1">
+          ${escapeFeedPickerHtml(feed.final_me)} kcal/kg${feed.수분 != null ? ` · 수분 ${escapeFeedPickerHtml(feed.수분)}%` : ''}
+        </span>
+      </button>`;
   }).join('');
 
   list._cache = { data, type, slotId, listId };
   list.classList.remove('hidden');
-
-  list.onclick = (e) => {
-    const item = e.target.closest('[data-row]');
+  list.onclick = event => {
+    const item = event.target.closest('[data-row]');
     if (!item) return;
-    const { data: cData, type: cType, slotId: cSlotId, listId: cListId } = list._cache;
-    selectFeed(cType, cSlotId, cData[parseInt(item.dataset.row)], cListId);
+    const cache = list._cache;
+    const feedData = cache?.data?.[Number(item.dataset.row)];
+    if (feedData) selectFeed(cache.type, cache.slotId, feedData, cache.listId);
   };
 }
 
 function selectFeed(type, slotId, feedData, listId) {
+  const provisional = isProvisionalFeed(feedData);
   const feed = {
-    name:     feedData.제품명,
-    display:  feedData.제조사 ? `${feedData.제조사} | ${feedData.제품명}` : feedData.제품명,
-    kcal:     feedData.final_me,
-    ebCa:     feedData.eb_칼슘  || 0,
-    ebP:      feedData.eb_인    || 0,
-    moisture: feedData.수분     ?? null,
+    name: feedData.제품명,
+    display: feedData.제조사 ? `${feedData.제조사} | ${feedData.제품명}` : feedData.제품명,
+    kcal: feedData.final_me,
+    ebCa: feedData.eb_칼슘 || 0,
+    ebP: feedData.eb_인 || 0,
+    moisture: feedData.수분 ?? null,
     ingredients: feedData.전성분 || '',
-    complete: feedData.완전식여부 || ''
+    complete: feedData.완전식여부 || '',
+    provisional,
+    verificationStatus: feedData.verification_status || (provisional ? 'pending_review' : 'approved')
   };
+  const suffix = provisional ? ' · 검수 전' : '';
 
   if (type === 'dry') {
     state.dryFeeds[slotId] = feed;
-    document.getElementById(`dryInput${slotId + 1}`).value = feed.display;
-    const sel = document.getElementById(`drySelected${slotId + 1}`);
-    sel.textContent = `✓ ${feed.name} (${feed.kcal} kcal/kg)`;
-    sel.classList.remove('hidden');
+    const input = document.getElementById(`dryInput${slotId + 1}`);
+    if (input) input.value = feed.display;
+    const selected = document.getElementById(`drySelected${slotId + 1}`);
+    if (selected) {
+      selected.textContent = `✓ ${feed.name} (${feed.kcal} kcal/kg)${suffix}`;
+      selected.classList.toggle('pc-selected-feed--provisional', provisional);
+      selected.classList.remove('hidden');
+    }
   } else {
     state.wetFeedMap[slotId] = feed;
-    document.getElementById(`wetInput_${slotId}`).value = feed.display;
-    const sel = document.getElementById(`wetSelected_${slotId}`);
-    sel.textContent = `✓ ${feed.name} (${feed.kcal} kcal/kg)`;
-    sel.classList.remove('hidden');
+    const input = document.getElementById(`wetInput_${slotId}`);
+    if (input) input.value = feed.display;
+    const selected = document.getElementById(`wetSelected_${slotId}`);
+    if (selected) {
+      selected.textContent = `✓ ${feed.name} (${feed.kcal} kcal/kg)${suffix}`;
+      selected.classList.toggle('pc-selected-feed--provisional', provisional);
+      selected.classList.remove('hidden');
+    }
   }
 
   document.getElementById(listId)?.classList.add('hidden');
   markCalculationDirty();
 }
 
-document.addEventListener('click', e => {
-  if (!e.target.closest('.relative')) {
+document.addEventListener('click', event => {
+  if (!event.target.closest('.relative')) {
     document.querySelectorAll('[id^="dryList"],[id*="wetList_"]')
-      .forEach(el => el.classList.add('hidden'));
+      .forEach(element => element.classList.add('hidden'));
   }
 });
-
 
 const feedPickerState = {
   type: null,
   slotId: null,
   nameFilter: '',
   sortBy: 'manufacturer',
-  cache: {
-    dry: null,
-    wet: null
-  },
-  loading: {
-    dry: false,
-    wet: false
-  },
-  error: {
-    dry: null,
-    wet: null
-  },
-  requests: {
-    dry: null,
-    wet: null
-  }
+  cache: { dry: null, wet: null },
+  loading: { dry: false, wet: false },
+  error: { dry: null, wet: null },
+  requests: { dry: null, wet: null }
 };
 
 function resetFeedSearchForSpecies() {
@@ -135,6 +155,7 @@ function resetFeedSearchForSpecies() {
   });
   document.querySelectorAll('[id^="drySelected"], [id^="wetSelected_"]').forEach(item => {
     item.textContent = '';
+    item.classList.remove('pc-selected-feed--provisional');
     item.classList.add('hidden');
   });
   if (typeof resetRecentFeedButtons === 'function') resetRecentFeedButtons();
@@ -191,9 +212,9 @@ function closeFeedPicker() {
 async function fetchFeedPickerFeeds(type) {
   const { data, error } = await sb
     .from(getActiveFeedTable())
-    .select('제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부')
+    .select(getFeedSearchColumns())
     .eq('type', type)
-    .eq('verified', true)
+    .or('verified.eq.true,searchable_before_review.eq.true')
     .gt('final_me', 0)
     .range(0, 999);
 
@@ -215,10 +236,7 @@ async function ensureFeedPickerFeeds(type) {
 
   feedPickerState.loading[type] = true;
   feedPickerState.error[type] = null;
-
-  if (feedPickerState.type === type) {
-    renderFeedPicker();
-  }
+  if (feedPickerState.type === type) renderFeedPicker();
 
   feedPickerState.requests[type] = fetchFeedPickerFeeds(type)
     .then(data => {
@@ -230,10 +248,7 @@ async function ensureFeedPickerFeeds(type) {
     .finally(() => {
       feedPickerState.loading[type] = false;
       feedPickerState.requests[type] = null;
-
-      if (feedPickerState.type === type) {
-        renderFeedPicker();
-      }
+      if (feedPickerState.type === type) renderFeedPicker();
     });
 
   await feedPickerState.requests[type];
@@ -246,9 +261,11 @@ function setFeedPickerSort(sortBy) {
 
 function getSortedFeedPickerFeeds() {
   const filter = feedPickerState.nameFilter.trim().toLocaleLowerCase('ko');
-  const feeds = (feedPickerState.cache[feedPickerState.type] || []).filter(feed =>
-    !filter || String(feed.제품명 || '').toLocaleLowerCase('ko').includes(filter)
-  );
+  const feeds = (feedPickerState.cache[feedPickerState.type] || []).filter(feed => {
+    if (!filter) return true;
+    return String(feed.제품명 || '').toLocaleLowerCase('ko').includes(filter)
+      || String(feed.제조사 || '').toLocaleLowerCase('ko').includes(filter);
+  });
   const sorted = feeds.slice();
 
   if (feedPickerState.sortBy === 'product') {
@@ -257,8 +274,7 @@ function getSortedFeedPickerFeeds() {
 
   return sorted.sort((a, b) => {
     const manufacturerOrder = compareFeedText(a.제조사, b.제조사);
-    if (manufacturerOrder !== 0) return manufacturerOrder;
-    return compareFeedText(a.제품명, b.제품명);
+    return manufacturerOrder !== 0 ? manufacturerOrder : compareFeedText(a.제품명, b.제품명);
   });
 }
 
@@ -266,14 +282,14 @@ window.getActiveFeedTable = getActiveFeedTable;
 window.resetFeedSearchForSpecies = resetFeedSearchForSpecies;
 
 function renderFeedPickerSortButtons() {
-  const manufacturerBtn = document.getElementById('feedPickerSortManufacturer');
-  const productBtn = document.getElementById('feedPickerSortProduct');
-  if (!manufacturerBtn || !productBtn) return;
+  const manufacturerButton = document.getElementById('feedPickerSortManufacturer');
+  const productButton = document.getElementById('feedPickerSortProduct');
+  if (!manufacturerButton || !productButton) return;
 
   const activeClass = 'py-3 rounded-2xl text-sm font-black bg-[#2F6FED] text-white';
   const inactiveClass = 'py-3 rounded-2xl text-sm font-black bg-gray-100 text-gray-400';
-  manufacturerBtn.className = feedPickerState.sortBy === 'manufacturer' ? activeClass : inactiveClass;
-  productBtn.className = feedPickerState.sortBy === 'product' ? activeClass : inactiveClass;
+  manufacturerButton.className = feedPickerState.sortBy === 'manufacturer' ? activeClass : inactiveClass;
+  productButton.className = feedPickerState.sortBy === 'product' ? activeClass : inactiveClass;
 }
 
 function renderFeedPicker() {
@@ -285,7 +301,6 @@ function renderFeedPicker() {
   const type = feedPickerState.type;
   const isLoading = feedPickerState.loading[type];
   const error = feedPickerState.error[type];
-
   title.textContent = type === 'wet' ? '습식사료 제품 목록' : '건사료 제품 목록';
   renderFeedPickerSortButtons();
 
@@ -316,11 +331,14 @@ function renderFeedPicker() {
   list.innerHTML = feeds.map((feed, index) => `
     <button type="button" onclick="selectFeedFromPicker(${index})"
       class="w-full min-h-[72px] text-left p-4 bg-gray-50 border border-gray-100 rounded-2xl active:bg-blue-50">
-      <p class="text-xs font-black text-gray-400">${escapeFeedPickerHtml(feed.제조사 || '제조사 정보 없음')}</p>
-      <p class="text-base font-black text-gray-800 mt-1 leading-snug">${escapeFeedPickerHtml(feed.제품명 || '제품명 정보 없음')}</p>
-      <p class="inline-block mt-2 px-2.5 py-1 bg-white rounded-full text-[11px] font-black text-blue-400 border border-blue-50">
+      <span class="pc-feed-result-title">
+        <span class="text-xs font-black text-gray-400">${escapeFeedPickerHtml(feed.제조사 || '제조사 정보 없음')}</span>
+        ${getProvisionalBadgeHtml(feed)}
+      </span>
+      <span class="block text-base font-black text-gray-800 mt-1 leading-snug">${escapeFeedPickerHtml(feed.제품명 || '제품명 정보 없음')}</span>
+      <span class="inline-block mt-2 px-2.5 py-1 bg-white rounded-full text-[11px] font-black text-blue-400 border border-blue-50">
         ${escapeFeedPickerHtml(getFeedPickerMainProtein(feed))}
-      </p>
+      </span>
     </button>
   `).join('');
 }
@@ -341,26 +359,22 @@ function setUploadType(type) {
   state.uploadType = type;
   const dryButton = document.getElementById('upDryBtn');
   const wetButton = document.getElementById('upWetBtn');
+  if (!dryButton || !wetButton) return;
   dryButton.classList.toggle('is-active', type === 'dry');
   dryButton.setAttribute('aria-pressed', String(type === 'dry'));
   wetButton.classList.toggle('is-active', type === 'wet');
   wetButton.setAttribute('aria-pressed', String(type === 'wet'));
 }
 
-
 let selectedFeedImageFile = null;
 let isUploadingFeedImage = false;
+let isSubmittingTextFeed = false;
 
 function handleUploadFileChange(input) {
-  if (!input.files?.length) {
-    selectedFeedImageFile = null;
-    return;
-  }
-
-  selectedFeedImageFile = input.files[0];
-  const msgEl = document.getElementById('uploadMsg');
-  if (msgEl) {
-    msgEl.innerHTML = `<p class="text-xs text-blue-400 font-bold mt-2">📷 선택됨: ${selectedFeedImageFile.name}</p>`;
+  selectedFeedImageFile = input.files?.[0] || null;
+  const message = document.getElementById('uploadMsg');
+  if (message && selectedFeedImageFile) {
+    message.innerHTML = `<p class="text-xs text-blue-400 font-bold mt-2">선택됨: ${escapeFeedPickerHtml(selectedFeedImageFile.name)}</p>`;
   }
 }
 
@@ -372,20 +386,17 @@ async function uploadFeedImageToAppsScript() {
     return;
   }
 
-  const msgEl = document.getElementById('uploadMsg');
-  if (msgEl) {
-    msgEl.innerHTML = `<p class="text-xs text-blue-400 font-bold mt-2">📡 분석 중... 잠시 기다려주세요</p>`;
-  }
+  const message = document.getElementById('uploadMsg');
+  if (message) message.innerHTML = '<p class="text-xs text-blue-400 font-bold mt-2">분석 중입니다.</p>';
 
-  const base64 = await new Promise(res => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result.split(',')[1]);
-    r.readAsDataURL(file);
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = event => resolve(event.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다.'));
+    reader.readAsDataURL(file);
   });
 
-  console.log('[feed-upload] sending Apps Script request');
-
-  const resp = await fetch(APPS_SCRIPT_URL, {
+  const response = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({
       action: 'upload',
@@ -396,43 +407,193 @@ async function uploadFeedImageToAppsScript() {
       species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat'
     })
   });
-  const result = await resp.json();
+  const result = await parseAppsScriptResponse(response);
+
   if (result.성공) {
-    if (msgEl) {
-      msgEl.innerHTML = `<p class="text-xs text-green-500 font-bold mt-2">✅ 전송 완료 — 검수 후 목록에 반영됩니다.</p>`;
-    }
+    if (message) message.innerHTML = '<p class="text-xs text-green-500 font-bold mt-2">임시 등록 완료 — 검수 전 표시로 검색할 수 있습니다.</p>';
     selectedFeedImageFile = null;
     if (input) input.value = '';
-  } else if (msgEl) {
-    msgEl.innerHTML = `<p class="text-xs text-orange-400 font-bold mt-2">⚠️ 실패: ${result.오류 || '알 수 없는 오류'}</p>`;
+    invalidateFeedPickerCache(state.uploadType);
+  } else if (message) {
+    message.innerHTML = `<p class="text-xs text-orange-400 font-bold mt-2">실패: ${escapeFeedPickerHtml(result.안내 || result.오류 || '알 수 없는 오류')}</p>`;
   }
 }
 
 async function handleFeedImageUpload(event) {
   event?.preventDefault();
-  console.log('[feed-upload] button clicked');
-
-  if (isUploadingFeedImage) {
-    console.warn('이미지 업로드가 이미 진행 중입니다. 중복 요청을 무시합니다.');
-    return;
-  }
-
+  if (isUploadingFeedImage) return;
   isUploadingFeedImage = true;
 
-  const uploadButton = document.getElementById('uploadFeedBtn');
-  if (uploadButton) uploadButton.disabled = true;
+  const button = document.getElementById('uploadFeedBtn');
+  if (button) button.disabled = true;
 
   try {
     await uploadFeedImageToAppsScript();
   } catch (error) {
     console.error('Feed image upload failed:', error);
-    alert('이미지 분석 중 오류가 발생했습니다.');
-    const msgEl = document.getElementById('uploadMsg');
-    if (msgEl) {
-      msgEl.innerHTML = `<p class="text-xs text-red-400 font-bold mt-2">❌ 오류: 네트워크 문제 또는 서버 응답 없음</p>`;
-    }
+    const message = document.getElementById('uploadMsg');
+    if (message) message.innerHTML = '<p class="text-xs text-red-400 font-bold mt-2">네트워크 또는 분석 서버 오류가 발생했습니다.</p>';
   } finally {
     isUploadingFeedImage = false;
-    if (uploadButton) uploadButton.disabled = false;
+    if (button) button.disabled = false;
   }
 }
+
+function injectFeedRegistrationStyles() {
+  if (document.getElementById('feedRegistrationStyles')) return;
+  const style = document.createElement('style');
+  style.id = 'feedRegistrationStyles';
+  style.textContent = `
+    .pc-text-feed-request { margin-top: 18px; padding: 18px; background: #f8fafc; border: 1px solid #e8edf5; border-radius: 18px; }
+    .pc-text-feed-request__label { display: block; margin-bottom: 8px; color: #374151; font-size: 14px; font-weight: 800; }
+    .pc-text-feed-request__input { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid #dfe5ee; border-radius: 14px; background: #fff; color: #1f2937; font-size: 16px; outline: none; }
+    .pc-text-feed-request__input:focus { border-color: #2F6FED; box-shadow: 0 0 0 3px rgba(47,111,237,.10); }
+    .pc-text-feed-request__button { width: 100%; min-height: 48px; margin-top: 10px; border-radius: 14px; background: #2F6FED; color: #fff; font-size: 14px; font-weight: 900; }
+    .pc-text-feed-request__button:disabled { opacity: .55; cursor: wait; }
+    .pc-text-feed-request__help { margin-top: 8px; color: #7b8492; font-size: 12px; font-weight: 650; line-height: 1.55; }
+    .pc-registration-divider { display: flex; align-items: center; gap: 10px; margin: 22px 0 16px; color: #9aa2ad; font-size: 11px; font-weight: 800; }
+    .pc-registration-divider::before, .pc-registration-divider::after { content: ''; flex: 1; height: 1px; background: #edf0f4; }
+    .pc-feed-result-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; font-size: 14px; color: #1f2937; }
+    .pc-feed-review-badge { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 22px; padding: 2px 8px; border: 1px solid #ead9ab; border-radius: 999px; background: #fffaf0; color: #9a6a00; font-size: 10px; font-weight: 900; }
+    .pc-selected-feed--provisional { color: #8a6400 !important; }
+  `;
+  document.head.appendChild(style);
+}
+
+function initializeTextFeedRegistration() {
+  const section = document.querySelector('.pc-upload-section');
+  const typeRow = section?.querySelector('.pc-upload-type-row');
+  const picker = section?.querySelector('.pc-upload-picker');
+  if (!section || !typeRow || !picker || document.getElementById('feedTextRequestInput')) return;
+
+  injectFeedRegistrationStyles();
+  const heading = section.querySelector('h2');
+  const description = section.querySelector('.pc-upload-description');
+  const note = section.querySelector('.pc-upload-note');
+  if (heading) heading.textContent = '사료가 없나요?';
+  if (description) description.innerHTML = '브랜드와 제품명을 입력하면 공식 자료를 찾아 임시 등록합니다.';
+  if (note) note.textContent = '검수 전 제품은 검색 결과에 표시되며, 최종 승인 후 표시가 사라집니다.';
+
+  const requestBox = document.createElement('div');
+  requestBox.className = 'pc-text-feed-request';
+  requestBox.innerHTML = `
+    <label class="pc-text-feed-request__label" for="feedTextRequestInput">브랜드와 제품명</label>
+    <input id="feedTextRequestInput" class="pc-text-feed-request__input" type="text" maxlength="120"
+      autocomplete="off" placeholder="예: 지위픽 고등어 앤 램 캔">
+    <button id="feedTextRequestBtn" type="button" class="pc-text-feed-request__button">제품명으로 등록 요청</button>
+    <p class="pc-text-feed-request__help">공식 제조사·수입사 자료를 우선 확인합니다. 국내 라벨이 없거나 자료가 충돌하면 Supabase 검수 대상으로 남습니다.</p>
+    <div id="feedTextRequestMsg" aria-live="polite"></div>`;
+  typeRow.insertAdjacentElement('afterend', requestBox);
+
+  const divider = document.createElement('div');
+  divider.className = 'pc-registration-divider';
+  divider.textContent = '또는 라벨 사진으로 등록';
+  picker.insertAdjacentElement('beforebegin', divider);
+
+  document.getElementById('feedTextRequestBtn')?.addEventListener('click', handleTextFeedRequest);
+  document.getElementById('feedTextRequestInput')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleTextFeedRequest();
+    }
+  });
+}
+
+function invalidateFeedPickerCache(type) {
+  if (type !== 'dry' && type !== 'wet') return;
+  feedPickerState.cache[type] = null;
+  feedPickerState.error[type] = null;
+  feedPickerState.requests[type] = null;
+}
+
+async function parseAppsScriptResponse(response) {
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    throw new Error(`분석 서버 응답을 읽지 못했습니다. HTTP ${response.status}`);
+  }
+  if (!response.ok) throw new Error(data.오류 || `HTTP ${response.status}`);
+  return data;
+}
+
+function renderTextFeedRequestMessage(message, tone) {
+  const container = document.getElementById('feedTextRequestMsg');
+  if (!container) return;
+  const toneClass = {
+    success: 'text-green-600',
+    warning: 'text-orange-500',
+    error: 'text-red-500',
+    info: 'text-blue-500'
+  }[tone] || 'text-gray-500';
+  container.innerHTML = `<p class="mt-3 text-xs font-bold leading-relaxed ${toneClass}">${escapeFeedPickerHtml(message)}</p>`;
+}
+
+async function handleTextFeedRequest() {
+  if (isSubmittingTextFeed) return;
+  const input = document.getElementById('feedTextRequestInput');
+  const button = document.getElementById('feedTextRequestBtn');
+  const query = String(input?.value || '').trim();
+
+  if (query.length < 2) {
+    renderTextFeedRequestMessage('브랜드와 제품명을 두 글자 이상 입력해 주세요.', 'warning');
+    input?.focus();
+    return;
+  }
+
+  isSubmittingTextFeed = true;
+  if (button) {
+    button.disabled = true;
+    button.textContent = '공식 자료 확인 중...';
+  }
+  renderTextFeedRequestMessage('기존 제품과 공식 자료를 확인하고 있습니다.', 'info');
+
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'text_request',
+        query,
+        type: state.uploadType,
+        species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat'
+      })
+    });
+    const result = await parseAppsScriptResponse(response);
+
+    if (result.중복) {
+      const status = result.verified ? '이미 등록된 제품입니다.' : '이미 등록 요청되어 자료 확인 중입니다.';
+      renderTextFeedRequestMessage(`${status} ${result.제품명 || ''}`.trim(), result.verified ? 'success' : 'warning');
+      return;
+    }
+
+    if (!result.성공) {
+      renderTextFeedRequestMessage(result.안내 || result.오류 || '등록 요청을 처리하지 못했습니다.', 'error');
+      return;
+    }
+
+    invalidateFeedPickerCache(state.uploadType);
+    const names = Array.isArray(result.제품명) ? result.제품명.join(', ') : (result.제품명 || query);
+    const message = result.검색가능 === false
+      ? `${names} 자료를 저장했습니다. 수치가 부족하거나 충돌해 Supabase 검수 후 검색에 표시됩니다.`
+      : `${names} 임시 등록 완료 — 검색 결과에서 ‘검수 전’ 표시로 사용할 수 있습니다.`;
+    renderTextFeedRequestMessage(message, result.검색가능 === false ? 'warning' : 'success');
+    if (input) input.value = '';
+  } catch (error) {
+    console.error('Text feed request failed:', error);
+    renderTextFeedRequestMessage(error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
+  } finally {
+    isSubmittingTextFeed = false;
+    if (button) {
+      button.disabled = false;
+      button.textContent = '제품명으로 등록 요청';
+    }
+  }
+}
+
+window.setUploadType = setUploadType;
+window.handleUploadFileChange = handleUploadFileChange;
+window.handleFeedImageUpload = handleFeedImageUpload;
+window.handleTextFeedRequest = handleTextFeedRequest;
+
+document.addEventListener('DOMContentLoaded', initializeTextFeedRegistration);
