@@ -16,6 +16,139 @@ function _handleTextFeedRequest(body) {
   const query = String(body.query || '').trim().slice(0, 120);
 
   if (!species || !type) {
+    return { 성공: false, 오류: '등록 요청 정보를 확인해 주세요.' };
+  }
+  if (query.length < 2) {
+    return { 성공: false, 오류: '브랜드와 제품명을 두 글자 이상 입력해 주세요.' };
+  }
+
+  const requestRow = _saveTextFeedRequest({
+    request_text: query,
+    species,
+    feed_type: type,
+    user_id: body.user_id
+  });
+  if (!requestRow?.id) {
+    return { 성공: false, 오류: '등록 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.' };
+  }
+
+  let result;
+  try {
+    result = _processTextFeedRequest(body);
+  } catch (error) {
+    const detail = error?.stack || error?.message || String(error);
+    Logger.log(`[텍스트 사료 처리 예외] request_id=${requestRow.id}, detail=${detail}`);
+    _updateTextFeedRequest(requestRow.id, 'needs_review', {
+      error_detail: detail.slice(0, 4000)
+    });
+    return {
+      성공: true,
+      요청접수: true,
+      검색완료: false,
+      request_id: requestRow.id
+    };
+  }
+
+  if (result?.성공) {
+    const status = result.중복 ? 'duplicate' : 'registered';
+    const resultIds = Array.isArray(result.등록ID)
+      ? result.등록ID.filter(Boolean)
+      : (result.등록ID ? [result.등록ID] : []);
+    _updateTextFeedRequest(requestRow.id, status, {
+      result_table: species === 'dog' ? 'dog_feeds' : 'feeds',
+      result_feed_ids: resultIds,
+      error_detail: null
+    });
+    return {
+      ...result,
+      요청접수: true,
+      검색완료: true,
+      request_id: requestRow.id
+    };
+  }
+
+  const internalError = String(result?.오류 || '제품 정보를 자동으로 확인하지 못했습니다.').slice(0, 4000);
+  _updateTextFeedRequest(requestRow.id, 'needs_review', {
+    error_detail: internalError
+  });
+  return {
+    성공: true,
+    요청접수: true,
+    검색완료: false,
+    request_id: requestRow.id
+  };
+}
+
+function _saveTextFeedRequest(values) {
+  const userId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    .test(String(values.user_id || '').trim())
+    ? String(values.user_id).trim()
+    : null;
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/feed_requests`;
+  const response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    headers: {
+      apikey: CONFIG.SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${CONFIG.SUPABASE_SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    payload: JSON.stringify({
+      request_text: values.request_text,
+      species: values.species,
+      feed_type: values.feed_type,
+      user_id: userId,
+      status: 'pending'
+    }),
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+  const responseBody = response.getContentText();
+  Logger.log(`[텍스트 사료 요청 저장] code=${code}, body=${responseBody.substring(0, 700)}`);
+  if (code !== 200 && code !== 201) return null;
+
+  try {
+    return JSON.parse(responseBody)?.[0] || null;
+  } catch (error) {
+    Logger.log(`[텍스트 사료 요청 응답 파싱 실패] ${error.message}`);
+    return null;
+  }
+}
+
+function _updateTextFeedRequest(requestId, status, details) {
+  if (!requestId) return false;
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/feed_requests?id=eq.${encodeURIComponent(requestId)}`;
+  const payload = {
+    status,
+    processed_at: new Date().toISOString(),
+    ...(details || {})
+  };
+  const response = UrlFetchApp.fetch(url, {
+    method: 'patch',
+    headers: {
+      apikey: CONFIG.SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${CONFIG.SUPABASE_SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal'
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  const code = response.getResponseCode();
+  if (code < 200 || code >= 300) {
+    Logger.log(`[텍스트 사료 요청 상태 저장 실패] request_id=${requestId}, code=${code}, body=${response.getContentText().substring(0, 700)}`);
+    return false;
+  }
+  return true;
+}
+
+function _processTextFeedRequest(body) {
+  const species = _normalizeSpecies(body.species);
+  const type = _normalizeFoodType(body.type);
+  const query = String(body.query || '').trim().slice(0, 120);
+
+  if (!species || !type) {
     return { 성공: false, 오류: 'species는 cat 또는 dog, type은 dry 또는 wet이어야 합니다.' };
   }
   if (query.length < 2) {
@@ -117,6 +250,7 @@ function _handleTextFeedRequest(body) {
     const saved = _saveTextFeedToDB(nutrition, metadata, species);
     if (saved) {
       savedProducts.push({
+        id: saved.id || null,
         제품명: nutrition.제품명,
         검색가능: Boolean(nutrition.final_me > 0 && metadata.verification_status !== 'conflict'),
         verification_status: metadata.verification_status
@@ -137,6 +271,7 @@ function _handleTextFeedRequest(body) {
     중복: false,
     등록수: savedProducts.length,
     제품명: savedProducts.map(item => item.제품명),
+    등록ID: savedProducts.map(item => item.id).filter(Boolean),
     검색가능: savedProducts.some(item => item.검색가능),
     검수상태: savedProducts.map(item => item.verification_status),
     중복제외수: duplicateProducts.length
@@ -149,7 +284,8 @@ function _duplicateTextFeedResponse(row) {
     중복: true,
     verified: row.verified === true,
     제품명: row.제조사 ? `${row.제조사} | ${row.제품명}` : row.제품명,
-    검수상태: row.verification_status || (row.verified ? 'approved' : 'pending_review')
+    검수상태: row.verification_status || (row.verified ? 'approved' : 'pending_review'),
+    등록ID: row.id || null
   };
 }
 
@@ -325,12 +461,20 @@ function _callGeminiTextTool(model, prompt, tools) {
     .join('\n')
     .trim();
 
+  if (!text) {
+    const finishReason = candidate?.finishReason || candidate?.finish_reason || 'unknown';
+    const blockReason = json.promptFeedback?.blockReason || json.prompt_feedback?.block_reason || 'none';
+    Logger.log(
+      `[텍스트 사료 Gemini 빈 응답] model=${model}, finishReason=${finishReason}, blockReason=${blockReason}, body=${response.body.substring(0, 2000)}`
+    );
+  }
+
   return {
     ok: Boolean(text),
     text,
     groundingUrls: _extractGeminiGroundingUrls(candidate),
     raw: json,
-    error: text ? null : 'Gemini가 텍스트 결과를 반환하지 않았습니다.'
+    error: text ? null : '제품 정보를 자동으로 확인하지 못했습니다.'
   };
 }
 
@@ -485,7 +629,13 @@ function _saveTextFeedToDB(nutrition, metadata, species) {
   const code = response.getResponseCode();
   const responseBody = response.getContentText();
   Logger.log(`[텍스트 사료 DB 저장] table=${table}, code=${code}, body=${responseBody.substring(0, 500)}`);
-  return code === 200 || code === 201;
+  if (code !== 200 && code !== 201) return null;
+  try {
+    return JSON.parse(responseBody)?.[0] || null;
+  } catch (error) {
+    Logger.log(`[텍스트 사료 DB 응답 파싱 실패] ${error.message}`);
+    return null;
+  }
 }
 
 function _findTextFeedDuplicate(species, type, rawQuery, manufacturer, productName) {
