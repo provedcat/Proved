@@ -76,6 +76,10 @@ function refineFeedRegistrationCopy() {
     help.textContent = '공식 제조사·수입사 자료를 우선 확인합니다. 국내 라벨이 없거나 자료가 충돌하면 별도 검수 후 반영됩니다.';
   }
 
+  const section = document.querySelector('.pc-upload-section');
+  const intro = section?.querySelector(':scope > .pc-upload-description');
+  if (intro) intro.remove();
+
   const divider = document.querySelector('.pc-registration-divider');
   const picker = document.querySelector('.pc-upload-picker');
   if (!divider || !picker || document.getElementById('feedPhotoUploadGuide')) return;
@@ -85,7 +89,7 @@ function refineFeedRegistrationCopy() {
   guide.className = 'pc-photo-upload-guide';
   guide.innerHTML = `
     <p class="pc-upload-description">
-      영양성분표가 모두 보이는 사진 <strong>1장</strong>을 올려주세요.<br>
+      제품명과 영양 성분, 재료가 모두 보이는 사진 <strong>1장</strong>을 올려주세요.<br>
       여러 장으로 나눠진 경우 <strong>한 장으로 만들어</strong> 업로드해주세요.
     </p>
     <p class="pc-upload-note">업로드 및 분석까지 최대 30초 걸릴 수 있습니다. 중복 업로드를 피해주세요.</p>`;
@@ -108,10 +112,10 @@ function getUploadTypePalette() {
 
 function applyUploadTypeButtonStyle(button, palette, active) {
   if (!button) return;
-  button.style.backgroundColor = active ? palette.strong : palette.soft;
+  button.style.backgroundColor = active ? palette.soft : '#FFFFFF';
   button.style.borderColor = active ? palette.strong : palette.soft;
-  button.style.color = active ? '#FFFFFF' : palette.ink;
-  button.style.boxShadow = active ? `0 5px 14px ${palette.strong}33` : 'none';
+  button.style.color = palette.ink;
+  button.style.boxShadow = active ? `0 4px 12px ${palette.strong}24` : 'none';
   button.style.transform = active ? 'translateY(-1px)' : 'none';
   button.style.fontWeight = '900';
   button.style.transition = 'background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease';
