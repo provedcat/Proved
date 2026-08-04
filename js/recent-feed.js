@@ -66,6 +66,151 @@ async function selectRecentFeed(type) {
   }
 }
 
+function removeInternalStorageName(message) {
+  return String(message || '').replace(/Supabase\s*/gi, '');
+}
+
+function refineFeedRegistrationCopy() {
+  const help = document.querySelector('.pc-text-feed-request__help');
+  if (help) {
+    help.textContent = '공식 제조사·수입사 자료를 우선 확인합니다. 국내 라벨이 없거나 자료가 충돌하면 별도 검수 후 반영됩니다.';
+  }
+
+  const divider = document.querySelector('.pc-registration-divider');
+  const picker = document.querySelector('.pc-upload-picker');
+  if (!divider || !picker || document.getElementById('feedPhotoUploadGuide')) return;
+
+  const guide = document.createElement('div');
+  guide.id = 'feedPhotoUploadGuide';
+  guide.className = 'pc-photo-upload-guide';
+  guide.innerHTML = `
+    <p class="pc-upload-description">
+      영양성분표가 모두 보이는 사진 <strong>1장</strong>을 올려주세요.<br>
+      여러 장으로 나눠진 경우 <strong>한 장으로 만들어</strong> 업로드해주세요.
+    </p>
+    <p class="pc-upload-note">업로드 및 분석까지 최대 30초 걸릴 수 있습니다. 중복 업로드를 피해주세요.</p>`;
+  divider.insertAdjacentElement('afterend', guide);
+}
+
+function getUploadTypePalette() {
+  if (state.selectedPetSpecies === 'dog') {
+    return {
+      dry: { strong: '#A66A3F', soft: '#F7EFEA', ink: '#6F5143' },
+      wet: { strong: '#58A66A', soft: '#EEF7F0', ink: '#388255' }
+    };
+  }
+
+  return {
+    dry: { strong: '#FF9F43', soft: '#FFF4E8', ink: '#B85A00' },
+    wet: { strong: '#3D8BFF', soft: '#EDF5FF', ink: '#1F5CC4' }
+  };
+}
+
+function applyUploadTypeButtonStyle(button, palette, active) {
+  if (!button) return;
+  button.style.backgroundColor = active ? palette.strong : palette.soft;
+  button.style.borderColor = active ? palette.strong : palette.soft;
+  button.style.color = active ? '#FFFFFF' : palette.ink;
+  button.style.boxShadow = active ? `0 5px 14px ${palette.strong}33` : 'none';
+  button.style.transform = active ? 'translateY(-1px)' : 'none';
+  button.style.fontWeight = '900';
+  button.style.transition = 'background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease';
+}
+
+function updateUploadTypeButtons() {
+  const dryButton = document.getElementById('upDryBtn');
+  const wetButton = document.getElementById('upWetBtn');
+  if (!dryButton || !wetButton) return;
+
+  const palette = getUploadTypePalette();
+  const activeType = state.uploadType === 'wet' ? 'wet' : 'dry';
+
+  dryButton.textContent = '건사료';
+  wetButton.textContent = '습식사료';
+  dryButton.setAttribute('aria-label', '건사료 등록 선택');
+  wetButton.setAttribute('aria-label', '습식사료 등록 선택');
+
+  applyUploadTypeButtonStyle(dryButton, palette.dry, activeType === 'dry');
+  applyUploadTypeButtonStyle(wetButton, palette.wet, activeType === 'wet');
+}
+
+function enhanceFeedTypeSelector() {
+  const typeRow = document.querySelector('.pc-upload-type-row');
+  if (!typeRow) return;
+
+  if (!document.getElementById('feedTypeSelectionGuide')) {
+    const guide = document.createElement('p');
+    guide.id = 'feedTypeSelectionGuide';
+    guide.className = 'pc-feed-type-selection-guide';
+    guide.innerHTML = '제품명 등록과 사진 업로드 전 <strong>건사료</strong> 또는 <strong>습식사료</strong>를 선택해 주세요.';
+    typeRow.insertAdjacentElement('beforebegin', guide);
+  }
+
+  if (!document.getElementById('feedTypeSelectionStyles')) {
+    const style = document.createElement('style');
+    style.id = 'feedTypeSelectionStyles';
+    style.textContent = `
+      .pc-feed-type-selection-guide {
+        margin: 18px 0 10px;
+        color: #4B5563;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+      .pc-feed-type-selection-guide strong {
+        color: #1F2937;
+        font-weight: 900;
+      }
+      .pc-upload-type-row {
+        gap: 10px;
+      }
+      .pc-upload-type-button {
+        min-height: 48px;
+        border-width: 1px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  updateUploadTypeButtons();
+}
+
+const originalRenderTextFeedRequestMessage = window.renderTextFeedRequestMessage;
+if (typeof originalRenderTextFeedRequestMessage === 'function') {
+  window.renderTextFeedRequestMessage = function (message, tone) {
+    return originalRenderTextFeedRequestMessage(removeInternalStorageName(message), tone);
+  };
+}
+
+const originalSetUploadType = window.setUploadType;
+if (typeof originalSetUploadType === 'function') {
+  window.setUploadType = function (type) {
+    const result = originalSetUploadType(type);
+    updateUploadTypeButtons();
+    return result;
+  };
+}
+
+const originalResetFeedSearchForSpecies = window.resetFeedSearchForSpecies;
+if (typeof originalResetFeedSearchForSpecies === 'function') {
+  window.resetFeedSearchForSpecies = function () {
+    const result = originalResetFeedSearchForSpecies();
+    requestAnimationFrame(updateUploadTypeButtons);
+    return result;
+  };
+}
+
 window.resetRecentFeedButtons = resetRecentFeedButtons;
 window.loadRecentFeedsForCat = loadRecentFeedsForCat;
 window.selectRecentFeed = selectRecentFeed;
+window.updateUploadTypeButtons = updateUploadTypeButtons;
+
+document.addEventListener('DOMContentLoaded', () => {
+  refineFeedRegistrationCopy();
+  enhanceFeedTypeSelector();
+  setTimeout(updateUploadTypeButtons, 300);
+});
+
+document.addEventListener('click', () => {
+  requestAnimationFrame(updateUploadTypeButtons);
+});
