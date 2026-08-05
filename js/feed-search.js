@@ -550,13 +550,25 @@ async function handleTextFeedRequest() {
   renderTextFeedRequestMessage('제품 자료를 검색하고 필요한 정보를 확인하고 있습니다.', 'info');
 
   try {
+    const species = state.selectedPetSpecies === 'dog' ? 'dog' : 'cat';
+    const { data: requestId, error: requestError } = await sb.rpc('create_feed_request', {
+      p_request_text: query,
+      p_species: species,
+      p_feed_type: state.uploadType
+    });
+
+    if (requestError || !requestId) {
+      throw new Error(requestError?.message || '등록 요청 기록을 만들지 못했습니다.');
+    }
+
     const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
         action: 'text_request',
+        request_id: requestId,
         query,
         type: state.uploadType,
-        species: state.selectedPetSpecies === 'dog' ? 'dog' : 'cat',
+        species,
         user_id: state.currentUser?.id || null
       })
     });
