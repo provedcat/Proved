@@ -52,7 +52,7 @@ async function searchFeed(type, query, listId, slotId) {
     list.innerHTML = `
       <div class="p-4 text-gray-400 text-xs text-center">
         검색 결과가 없습니다.<br>
-        아래의 제품명 등록 요청을 이용해 주세요.
+        아래의 제품명 등록을 이용해 주세요.
       </div>`;
     list.classList.remove('hidden');
     return;
@@ -480,7 +480,7 @@ function initializeTextFeedRegistration() {
     <label class="pc-text-feed-request__label" for="feedTextRequestInput">브랜드와 제품명</label>
     <input id="feedTextRequestInput" class="pc-text-feed-request__input" type="text" maxlength="120"
       autocomplete="off" placeholder="예: 지위픽 고등어 앤 램 캔">
-    <button id="feedTextRequestBtn" type="button" class="pc-text-feed-request__button">제품명으로 등록 요청</button>
+    <button id="feedTextRequestBtn" type="button" class="pc-text-feed-request__button">제품명으로 등록</button>
     <p class="pc-text-feed-request__help">공식 제조사·수입사 자료를 우선 확인합니다. 국내 라벨이 없거나 자료가 충돌하면 Supabase 검수 대상으로 남습니다.</p>
     <div id="feedTextRequestMsg" aria-live="polite"></div>`;
   typeRow.insertAdjacentElement('afterend', requestBox);
@@ -545,9 +545,9 @@ async function handleTextFeedRequest() {
   isSubmittingTextFeed = true;
   if (button) {
     button.disabled = true;
-    button.textContent = '등록 요청 접수 중...';
+    button.textContent = '제품 정보 검색 중...';
   }
-  renderTextFeedRequestMessage('등록 요청을 접수하고 제품 자료를 확인하고 있습니다.', 'info');
+  renderTextFeedRequestMessage('제품 자료를 검색하고 필요한 정보를 확인하고 있습니다.', 'info');
 
   try {
     const response = await fetch(APPS_SCRIPT_URL, {
@@ -563,19 +563,13 @@ async function handleTextFeedRequest() {
     const result = await parseAppsScriptResponse(response);
 
     if (result.중복) {
-      const status = result.verified ? '이미 등록된 제품입니다.' : '이미 등록 요청되어 자료 확인 중입니다.';
+      const status = result.verified ? '이미 등록된 제품입니다.' : '이미 검수 전 제품으로 등록되어 있습니다.';
       renderTextFeedRequestMessage(`${status} ${result.제품명 || ''}`.trim(), result.verified ? 'success' : 'warning');
       return;
     }
 
     if (!result.성공) {
-      renderTextFeedRequestMessage('등록 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
-      return;
-    }
-
-    if (result.요청접수 && result.검색완료 === false) {
-      renderTextFeedRequestMessage('등록 요청이 완료되었습니다. 자료 확인 후 제품 목록에 반영됩니다.', 'success');
-      if (input) input.value = '';
+      renderTextFeedRequestMessage(result.오류 || '제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
       return;
     }
 
@@ -588,12 +582,12 @@ async function handleTextFeedRequest() {
     if (input) input.value = '';
   } catch (error) {
     console.error('Text feed request failed:', error);
-    renderTextFeedRequestMessage('등록 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+    renderTextFeedRequestMessage('제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
   } finally {
     isSubmittingTextFeed = false;
     if (button) {
       button.disabled = false;
-      button.textContent = '제품명으로 등록 요청';
+      button.textContent = '제품명으로 등록';
     }
   }
 }
