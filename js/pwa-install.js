@@ -49,12 +49,12 @@
   initializeGoogleAnalytics();
   initializeNaverAnalytics();
 
-  const IOS_INSTALL_MESSAGE = 'Safari 공유 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
-  const FALLBACK_INSTALL_MESSAGE = '브라우저 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
-  const INSTALL_UNAVAILABLE_MESSAGE = '지금은 브라우저 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
+  const IOS_INSTALL_MESSAGE = 'Safari 하단의 공유 버튼을 누른 뒤 “홈 화면에 추가”를 선택해 주세요.';
+  const FALLBACK_INSTALL_MESSAGE = '브라우저 메뉴에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.';
+  const INSTALL_UNAVAILABLE_MESSAGE = '모바일 브라우저에서 접속하면 홈 화면에 추가할 수 있습니다.';
   const HIDE_STORAGE_KEY = 'provedcat:pwa-install-hidden-until';
   const HIDE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-  const MESSAGE_HIDE_DELAY_MS = 4000;
+  const MESSAGE_HIDE_DELAY_MS = 6500;
 
   let deferredInstallPrompt = null;
   let fallbackHideTimer = null;
@@ -78,11 +78,135 @@
   }
 
   function isIosSafari() {
-    const ua = window.navigator.userAgent;
-    const isIosDevice = /iPad|iPhone|iPod/.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+    const ua = window.navigator.userAgent || '';
+    const isIosDevice = /iPad|iPhone|iPod/.test(ua)
+      || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
     const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/.test(ua);
 
     return isIosDevice && isSafari;
+  }
+
+  function ensureInstallPromptMarkup() {
+    if (!document.body || document.getElementById('pwaInstallPrompt')) return;
+
+    if (!document.getElementById('provedPwaInstallStyles')) {
+      const style = document.createElement('style');
+      style.id = 'provedPwaInstallStyles';
+      style.textContent = `
+        .proved-pwa-install {
+          position: fixed;
+          z-index: 9999;
+          left: 12px;
+          right: 12px;
+          bottom: calc(12px + env(safe-area-inset-bottom));
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          width: min(620px, calc(100% - 24px));
+          margin: 0 auto;
+          padding: 12px;
+          border: 1px solid #dfe5ec;
+          border-radius: 14px;
+          background: rgba(255,255,255,.97);
+          box-shadow: 0 14px 38px rgba(31,41,55,.18);
+          backdrop-filter: blur(12px);
+          color: #263141;
+          font-family: inherit;
+        }
+        .proved-pwa-install.hidden { display: none !important; }
+        .proved-pwa-install__icon {
+          flex: 0 0 auto;
+          width: 42px;
+          height: 42px;
+          border-radius: 11px;
+          box-shadow: 0 3px 10px rgba(47,111,237,.14);
+        }
+        .proved-pwa-install__copy { min-width: 0; flex: 1 1 auto; }
+        .proved-pwa-install__copy strong {
+          display: block;
+          font-size: 13px;
+          font-weight: 900;
+          line-height: 1.35;
+          letter-spacing: -.02em;
+        }
+        .proved-pwa-install__copy span,
+        .proved-pwa-install__message {
+          display: block;
+          margin-top: 3px;
+          color: #727b89;
+          font-size: 11px;
+          font-weight: 650;
+          line-height: 1.45;
+        }
+        .proved-pwa-install__message { color: #315c9e; }
+        .proved-pwa-install__message.hidden { display: none !important; }
+        .proved-pwa-install__actions {
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          gap: 6px;
+        }
+        .proved-pwa-install__button {
+          min-height: 38px;
+          padding: 0 12px;
+          border: 0;
+          border-radius: 10px;
+          background: #2f6fed;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 900;
+          white-space: nowrap;
+          cursor: pointer;
+        }
+        .proved-pwa-install__dismiss {
+          width: 36px;
+          height: 36px;
+          border: 0;
+          border-radius: 50%;
+          background: #f1f3f6;
+          color: #7b8492;
+          font-size: 18px;
+          line-height: 1;
+          cursor: pointer;
+        }
+        @media (max-width: 420px) {
+          .proved-pwa-install { align-items: flex-start; gap: 9px; }
+          .proved-pwa-install__icon { width: 38px; height: 38px; }
+          .proved-pwa-install__actions { flex-direction: column-reverse; align-items: flex-end; }
+          .proved-pwa-install__button { min-height: 36px; padding-inline: 10px; }
+          .proved-pwa-install__dismiss { width: 30px; height: 30px; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const prompt = document.createElement('aside');
+    prompt.id = 'pwaInstallPrompt';
+    prompt.className = 'proved-pwa-install hidden';
+    prompt.setAttribute('aria-label', 'Proved 홈 화면 추가 안내');
+    prompt.innerHTML = `
+      <img class="proved-pwa-install__icon" src="/icons/icon-192.png" alt="" aria-hidden="true">
+      <div class="proved-pwa-install__copy">
+        <strong>Proved를 앱처럼 사용하세요</strong>
+        <span>홈 화면에 추가하면 계산기를 바로 열 수 있습니다.</span>
+        <p id="pwaInstallMsg" class="proved-pwa-install__message hidden" role="status" aria-live="polite"></p>
+      </div>
+      <div class="proved-pwa-install__actions">
+        <button id="pwaInstallBtn" class="proved-pwa-install__button" type="button">홈 화면에 추가</button>
+        <button id="pwaInstallDismissBtn" class="proved-pwa-install__dismiss" type="button" aria-label="설치 안내 닫기">×</button>
+      </div>
+    `;
+    document.body.appendChild(prompt);
+  }
+
+  function ensureGuideFooterLink() {
+    document.querySelectorAll('.proved-site-footer__nav').forEach((nav) => {
+      if (nav.querySelector('a[href="/guide/calculation-method/"]')) return;
+      const link = document.createElement('a');
+      link.href = '/guide/calculation-method/';
+      link.textContent = '계산 기준';
+      nav.appendChild(link);
+    });
   }
 
   function getHiddenUntil() {
@@ -124,7 +248,9 @@
     const promptEl = document.getElementById('pwaInstallPrompt');
     if (!promptEl) return;
 
-    const shouldShow = !isStandaloneMode() && !isTemporarilyHidden() && (deferredInstallPrompt || isMobileBrowser());
+    const shouldShow = !isStandaloneMode()
+      && !isTemporarilyHidden()
+      && (deferredInstallPrompt || isMobileBrowser());
     promptEl.classList.toggle('hidden', !shouldShow);
 
     if (!shouldShow) clearInstallMessage();
@@ -192,10 +318,12 @@
 
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch((error) => {
-        console.warn('ProvedCat service worker registration failed:', error);
+        console.warn('Proved service worker registration failed:', error);
       });
     });
   }
+
+  window.provedRequestInstall = handleInstallClick;
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
@@ -210,11 +338,11 @@
   });
 
   window.addEventListener('DOMContentLoaded', () => {
-    const installButton = document.getElementById('pwaInstallBtn');
-    const dismissButton = document.getElementById('pwaInstallDismissBtn');
+    ensureInstallPromptMarkup();
+    ensureGuideFooterLink();
 
-    if (installButton) installButton.addEventListener('click', handleInstallClick);
-    if (dismissButton) dismissButton.addEventListener('click', handleInstallDismiss);
+    document.getElementById('pwaInstallBtn')?.addEventListener('click', handleInstallClick);
+    document.getElementById('pwaInstallDismissBtn')?.addEventListener('click', handleInstallDismiss);
 
     updateInstallPromptVisibility();
   });
