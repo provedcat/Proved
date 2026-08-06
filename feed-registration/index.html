@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사료 등록하기 | Proved</title>
+  <meta name="description" content="목록에 없는 고양이·강아지 건사료와 습식사료를 제품명 또는 라벨 사진으로 등록합니다.">
+  <link rel="canonical" href="https://proved.kr/feed-registration/">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=20260806-feed-registration-flow">
+  <style>
+    body { min-height:100vh; background:#F6F7F8; color:#222; }
+    .registration-shell { width:min(100%,640px); min-height:100vh; margin:0 auto; padding:20px 20px 48px; }
+    .registration-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
+    .registration-header img { width:112px; height:auto; }
+    .registration-close { min-height:40px; padding:8px 13px; border:1px solid #E1E5EA; border-radius:10px; background:#fff; color:#6B7280; font-size:12px; font-weight:800; }
+    .registration-card { padding:22px; border:1px solid #E1E5EA; border-radius:12px; background:#fff; }
+    .registration-eyebrow { color:#2F6FED; font-size:12px; font-weight:900; letter-spacing:.08em; }
+    .registration-card h1 { margin-top:6px; font-size:25px; font-weight:900; letter-spacing:-.04em; }
+    .registration-lead { margin-top:8px; color:#6B7280; font-size:14px; line-height:1.6; }
+    .registration-choice { margin-top:22px; }
+    .registration-choice legend { margin-bottom:9px; font-size:14px; font-weight:900; }
+    .registration-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .registration-option { min-height:46px; border:1px solid #E1E5EA; border-radius:10px; background:#F8F9FA; color:#6B7280; font-size:14px; font-weight:850; }
+    .registration-option.is-active { border-color:#2F6FED; background:#EEF4FF; color:#2F6FED; box-shadow:inset 0 0 0 1px #2F6FED; }
+    .registration-form { margin-top:22px; padding-top:22px; border-top:1px solid #EDF0F4; }
+    .registration-form label { display:block; margin-bottom:8px; font-size:14px; font-weight:850; }
+    .registration-input { width:100%; min-height:50px; padding:0 14px; border:1px solid #DDE3EA; border-radius:10px; background:#fff; font-size:16px; outline:none; }
+    .registration-input:focus { border-color:#2F6FED; box-shadow:0 0 0 3px rgba(47,111,237,.1); }
+    .registration-help { margin-top:8px; color:#7B8492; font-size:12px; line-height:1.55; }
+    .registration-submit { width:100%; min-height:50px; margin-top:12px; border-radius:10px; background:#2F6FED; color:#fff; font-size:14px; font-weight:900; }
+    .registration-submit:disabled { opacity:.55; cursor:wait; }
+    .registration-divider { display:flex; align-items:center; gap:10px; margin:24px 0 18px; color:#9AA2AD; font-size:11px; font-weight:800; }
+    .registration-divider::before,.registration-divider::after { content:''; flex:1; height:1px; background:#E8ECF1; }
+    .registration-file { display:block; padding:22px 16px; border:1px dashed #BFC9D8; border-radius:10px; background:#FAFBFD; text-align:center; cursor:pointer; }
+    .registration-file strong { display:block; font-size:14px; }
+    .registration-file span { display:block; margin-top:5px; color:#8A94A3; font-size:11px; }
+    .registration-return { display:none; margin-top:14px; padding:13px 14px; border:1px solid #CFE0FF; border-radius:10px; background:#F3F7FF; color:#315C9E; font-size:12px; font-weight:750; line-height:1.55; }
+    .registration-return.is-visible { display:block; }
+    @media(max-width:420px) { .registration-shell { padding-inline:14px; } .registration-card { padding:18px; } }
+  </style>
+</head>
+<body>
+  <main class="registration-shell">
+    <header class="registration-header">
+      <a href="/" aria-label="Proved 홈"><img src="/icons/proved-logo.svg" alt="Proved"></a>
+      <button type="button" class="registration-close" onclick="window.close()">등록 창 닫기</button>
+    </header>
+
+    <section class="registration-card">
+      <p class="registration-eyebrow">FEED REGISTRATION</p>
+      <h1>사료 등록하기</h1>
+      <p class="registration-lead">목록에 없는 급여 사료를 제품명이나 라벨 사진으로 등록해 주세요.</p>
+
+      <fieldset class="registration-choice">
+        <legend>누구의 사료인가요?</legend>
+        <div class="registration-options">
+          <button id="speciesCat" class="registration-option" type="button" data-species="cat">고양이</button>
+          <button id="speciesDog" class="registration-option" type="button" data-species="dog">강아지</button>
+        </div>
+      </fieldset>
+      <fieldset class="registration-choice">
+        <legend>어떤 사료인가요?</legend>
+        <div class="registration-options">
+          <button id="typeDry" class="registration-option" type="button" data-type="dry">건사료</button>
+          <button id="typeWet" class="registration-option" type="button" data-type="wet">습식사료</button>
+        </div>
+      </fieldset>
+
+      <section class="registration-form" aria-labelledby="nameRegistrationTitle">
+        <label id="nameRegistrationTitle" for="feedTextRequestInput">브랜드와 제품명으로 등록</label>
+        <input id="feedTextRequestInput" class="registration-input" type="text" maxlength="120" autocomplete="off" placeholder="예: 조공 소피캣 닭">
+        <p class="registration-help">브랜드와 정확한 제품명을 함께 입력해 주세요.<br>실제 판매 제품 하나로 확인되는 경우 등록할 수 있습니다.</p>
+        <button id="feedTextRequestBtn" type="button" class="registration-submit">제품명으로 등록</button>
+        <div id="feedTextRequestMsg" aria-live="polite"></div>
+      </section>
+
+      <div class="registration-divider">또는 라벨 사진으로 등록</div>
+      <label class="registration-file">
+        <strong>라벨 사진을 선택하세요</strong>
+        <span>제품명·영양성분·원재료가 보이는 JPG 또는 PNG · 10MB 이하</span>
+        <input type="file" id="uploadInput" accept="image/*" class="hidden">
+      </label>
+      <button id="uploadFeedBtn" type="button" class="registration-submit">이미지 분석하기</button>
+      <div id="uploadMsg" aria-live="polite"></div>
+      <p id="registrationReturnNotice" class="registration-return">등록이 완료되었습니다. 기존 계산기 탭으로 돌아가 방금 등록한 제품명을 검색해 주세요.</p>
+    </section>
+  </main>
+  <script src="/js/feed-registration.js?v=20260806-feed-registration-flow"></script>
+</body>
+</html>
