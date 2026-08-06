@@ -935,6 +935,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
   padding: 24px 0 calc(28px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--border-subtle, #E4E7EC);
   color: var(--text-secondary, #5F6673);
+  text-align: center;
 }
 .proved-site-footer__title {
   margin: 0 0 12px;
@@ -946,6 +947,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .proved-site-footer__nav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 18px;
 }
 .proved-site-footer__nav a {
@@ -969,7 +971,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .proved-entry .proved-site-footer {
   flex: 0 0 auto;
   width: 100%;
-  margin-top: 28px;
+  margin-top: 56px;
 }
 .registration-shell + .proved-site-footer {
   margin-top: 0;
@@ -983,5 +985,8 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 16px;
+  }
+  .proved-entry .proved-site-footer {
+    margin-top: 48px;
   }
 }
