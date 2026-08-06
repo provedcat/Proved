@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260806-feed-registration-flow-v1';
+const CACHE_NAME = 'proved-pwa-20260806-registration-complete-guide-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
