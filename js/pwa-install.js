@@ -1,9 +1,10 @@
 (function () {
   const GA4_MEASUREMENT_ID = 'G-HV1TPVCQK7';
-  const GA4_HOSTS = new Set(['proved.kr', 'www.proved.kr']);
+  const NAVER_ANALYTICS_ID = '180a5406af05de0';
+  const ANALYTICS_HOSTS = new Set(['proved.kr', 'www.proved.kr']);
 
   function initializeGoogleAnalytics() {
-    if (!GA4_HOSTS.has(window.location.hostname) || window.__provedGa4Loaded) return;
+    if (!ANALYTICS_HOSTS.has(window.location.hostname) || window.__provedGa4Loaded) return;
 
     window.__provedGa4Loaded = true;
     window.dataLayer = window.dataLayer || [];
@@ -20,7 +21,33 @@
     document.head.appendChild(script);
   }
 
+  function initializeNaverAnalytics() {
+    if (!ANALYTICS_HOSTS.has(window.location.hostname) || window.__provedNaverAnalyticsLoaded) return;
+
+    window.__provedNaverAnalyticsLoaded = true;
+    window.wcs_add = window.wcs_add || {};
+    window.wcs_add.wa = NAVER_ANALYTICS_ID;
+
+    const trackPage = function () {
+      if (window.wcs && typeof window.wcs_do === 'function') {
+        window.wcs_do();
+      }
+    };
+
+    if (window.wcs && typeof window.wcs_do === 'function') {
+      trackPage();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://wcs.pstatic.net/wcslog.js';
+    script.onload = trackPage;
+    document.head.appendChild(script);
+  }
+
   initializeGoogleAnalytics();
+  initializeNaverAnalytics();
 
   const IOS_INSTALL_MESSAGE = 'Safari 공유 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
   const FALLBACK_INSTALL_MESSAGE = '브라우저 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
