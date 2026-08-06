@@ -20,17 +20,18 @@ function readCalculatorDraftFields() {
 
 function saveCalculatorDraft() {
   if (typeof state === 'undefined') return;
+  const wetFeeds = state.wetSlotIds.map(slotId => ({
+    slotId,
+    feed: state.wetFeedMap[slotId] || null,
+    input: document.getElementById(`wetInput_${slotId}`)?.value || '',
+    ratio: document.getElementById(`wetPct_${slotId}`)?.value || ''
+  })).filter((entry, index) => index === 0 || entry.feed || entry.input.trim());
   const draft = {
     version: 1,
     species: state.selectedPetSpecies || 'cat',
     fields: readCalculatorDraftFields(),
     dryFeeds: state.dryFeeds,
-    wetFeeds: state.wetSlotIds.map(slotId => ({
-      slotId,
-      feed: state.wetFeedMap[slotId] || null,
-      input: document.getElementById(`wetInput_${slotId}`)?.value || '',
-      ratio: document.getElementById(`wetPct_${slotId}`)?.value || ''
-    })),
+    wetFeeds,
     scrollY: window.scrollY,
     savedAt: Date.now()
   };
@@ -80,7 +81,8 @@ function restoreCalculatorDraft() {
     });
   }
 
-  const wetFeeds = Array.isArray(draft.wetFeeds) ? draft.wetFeeds : [];
+  const wetFeeds = (Array.isArray(draft.wetFeeds) ? draft.wetFeeds : [])
+    .filter((entry, index) => index === 0 || entry?.feed || String(entry?.input || '').trim());
   while (state.wetSlotIds.length < Math.min(wetFeeds.length, 3)) addWetSlot();
   wetFeeds.forEach((entry, index) => {
     const slotId = state.wetSlotIds[index];
