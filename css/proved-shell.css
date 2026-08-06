@@ -534,19 +534,19 @@
 
 .proved-entry .proved-entry-option:disabled {
   border: 0 !important;
-  border-bottom: 2px solid #e4e7ec !important;
+  border-bottom: 2px solid #eef0f3 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: #a1a7b2 !important;
+  color: #c7cbd2 !important;
   cursor: default;
 }
 
 .proved-entry .proved-entry-option:disabled:hover,
 .proved-entry .proved-entry-option:disabled:active {
-  border-bottom-color: #e4e7ec !important;
+  border-bottom-color: #eef0f3 !important;
   background: transparent !important;
-  color: #a1a7b2 !important;
+  color: #c7cbd2 !important;
   transform: none !important;
 }
 

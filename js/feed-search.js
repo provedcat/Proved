@@ -481,7 +481,7 @@ function initializeTextFeedRegistration() {
     <input id="feedTextRequestInput" class="pc-text-feed-request__input" type="text" maxlength="120"
       autocomplete="off" placeholder="예: 지위픽 고등어 앤 램 캔">
     <button id="feedTextRequestBtn" type="button" class="pc-text-feed-request__button">제품명으로 등록</button>
-    <p class="pc-text-feed-request__help">공식 제조사·수입사 자료를 우선 확인합니다. 국내 라벨이 없거나 자료가 충돌하면 Supabase 검수 대상으로 남습니다.</p>
+    <p class="pc-text-feed-request__help">브랜드와 정확한 제품명을 함께 입력해주세요.<br>예: 조공 소피캣 닭</p>
     <div id="feedTextRequestMsg" aria-live="polite"></div>`;
   typeRow.insertAdjacentElement('afterend', requestBox);
 
@@ -536,8 +536,9 @@ async function handleTextFeedRequest() {
   const button = document.getElementById('feedTextRequestBtn');
   const query = String(input?.value || '').trim();
 
-  if (query.length < 2) {
-    renderTextFeedRequestMessage('브랜드와 제품명을 두 글자 이상 입력해 주세요.', 'warning');
+  const queryParts = query.split(/\s+/).filter(Boolean);
+  if (queryParts.length < 2) {
+    renderTextFeedRequestMessage('브랜드와 정확한 제품명을 함께 입력해주세요. 예: 조공 소피캣 닭', 'warning');
     input?.focus();
     return;
   }
@@ -569,10 +570,32 @@ async function handleTextFeedRequest() {
         query,
         type: state.uploadType,
         species,
-        user_id: state.currentUser?.id || null
+        user_id: state.currentUser?.id || null,
+        identification_requirements: {
+          brand_and_product_confirmed: true,
+          single_product_identified: true,
+          trusted_source_confirmed: true
+        }
       })
     });
     const result = await parseAppsScriptResponse(response);
+
+    const validation = result.validation || result.제품식별검증 || {};
+    const needsMoreInfo =
+      result.needs_more_info === true ||
+      result.추가정보필요 === true ||
+      result.outcome === 'needs_more_info' ||
+      result.status === 'needs_more_info' ||
+      Object.values(validation).some(value => value === false);
+
+    if (needsMoreInfo) {
+      renderTextFeedRequestMessage(
+        result.안내 || '브랜드와 정확한 제품명을 함께 입력해주세요. 예: 조공 소피캣 닭',
+        'warning'
+      );
+      input?.focus();
+      return;
+    }
 
     if (result.중복) {
       const status = result.verified ? '이미 등록된 제품입니다.' : '이미 검수 전 제품으로 등록되어 있습니다.';

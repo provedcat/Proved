@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260805-request-result-v8';
+const CACHE_NAME = 'proved-pwa-20260806-entry-feed-validation-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',

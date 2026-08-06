@@ -233,7 +233,7 @@ function provedRenderEntry(step) {
   root.innerHTML = `
     <div class="proved-entry__main">
       <div class="proved-entry__content">
-        <h2 class="proved-entry__title">${step === 'pet' ? '누구와 함께할까요?' : '어떻게 시작할까요?'}</h2>
+        <h2 class="proved-entry__title">${step === 'pet' ? '누구와 함께할까요?' : isLogin ? '로그인 방법을 선택해주세요' : '먼저 로그인 방식을 선택해주세요'}</h2>
         ${options}
         ${detail}
         ${steps(step === 'pet' ? 2 : 1)}
