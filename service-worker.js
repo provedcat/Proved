@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260806-feed-registration-emphasis-v3';
+const CACHE_NAME = 'proved-pwa-20260806-guide-install-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -19,7 +19,8 @@ const CORE_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
-  './feed-registration/'
+  './feed-registration/',
+  './guide/calculation-method/'
 ];
 
 const IMAGE_DESTINATIONS = new Set(['image']);
