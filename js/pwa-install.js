@@ -1,4 +1,27 @@
 (function () {
+  const GA4_MEASUREMENT_ID = 'G-HV1TPVCQK7';
+  const GA4_HOSTS = new Set(['proved.kr', 'www.proved.kr']);
+
+  function initializeGoogleAnalytics() {
+    if (!GA4_HOSTS.has(window.location.hostname) || window.__provedGa4Loaded) return;
+
+    window.__provedGa4Loaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () {
+      window.dataLayer.push(arguments);
+    };
+
+    window.gtag('js', new Date());
+    window.gtag('config', GA4_MEASUREMENT_ID);
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA4_MEASUREMENT_ID)}`;
+    document.head.appendChild(script);
+  }
+
+  initializeGoogleAnalytics();
+
   const IOS_INSTALL_MESSAGE = 'Safari 공유 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
   const FALLBACK_INSTALL_MESSAGE = '브라우저 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
   const INSTALL_UNAVAILABLE_MESSAGE = '지금은 브라우저 메뉴에서 “홈 화면에 추가”를 선택해 주세요.';
