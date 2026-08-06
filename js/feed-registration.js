@@ -17,6 +17,33 @@
   document.head.appendChild(script);
 }());
 
+(function initializeNaverAnalytics() {
+  const siteId = '180a5406af05de0';
+  const allowedHosts = new Set(['proved.kr', 'www.proved.kr']);
+  if (!allowedHosts.has(window.location.hostname) || window.__provedNaverAnalyticsLoaded) return;
+
+  window.__provedNaverAnalyticsLoaded = true;
+  window.wcs_add = window.wcs_add || {};
+  window.wcs_add.wa = siteId;
+
+  const trackPage = function () {
+    if (window.wcs && typeof window.wcs_do === 'function') {
+      window.wcs_do();
+    }
+  };
+
+  if (window.wcs && typeof window.wcs_do === 'function') {
+    trackPage();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://wcs.pstatic.net/wcslog.js';
+  script.onload = trackPage;
+  document.head.appendChild(script);
+}());
+
 const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnDwg1b9u_JVoKnxUrcTfS944QOYwJFn7hO4TKNjkzMQrtHU-enpGTFdA/exec';
