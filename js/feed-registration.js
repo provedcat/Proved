@@ -1,3 +1,22 @@
+(function initializeGoogleAnalytics() {
+  const measurementId = 'G-HV1TPVCQK7';
+  const allowedHosts = new Set(['proved.kr', 'www.proved.kr']);
+  if (!allowedHosts.has(window.location.hostname) || window.__provedGa4Loaded) return;
+
+  window.__provedGa4Loaded = true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () {
+    window.dataLayer.push(arguments);
+  };
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId);
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  document.head.appendChild(script);
+}());
+
 const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnDwg1b9u_JVoKnxUrcTfS944QOYwJFn7hO4TKNjkzMQrtHU-enpGTFdA/exec';
