@@ -209,6 +209,176 @@
     });
   }
 
+  function getCalculatorSpeciesFromPath() {
+    const normalizedPath = window.location.pathname.replace(/\/+$/, '/') || '/';
+    if (normalizedPath === '/cat-food-calculator/') return 'cat';
+    if (normalizedPath === '/dog-food-calculator/') return 'dog';
+    return null;
+  }
+
+  function ensureCalculationPrinciples() {
+    const species = getCalculatorSpeciesFromPath();
+    const calculatorPage = document.getElementById('calculatorPage');
+    if (!species || !calculatorPage || document.getElementById('provedCalculationPrinciples')) return;
+
+    if (!document.getElementById('provedCalculationPrinciplesStyles')) {
+      const style = document.createElement('style');
+      style.id = 'provedCalculationPrinciplesStyles';
+      style.textContent = `
+        .proved-calculation-principles {
+          margin: 4px 0 10px;
+          padding: 0 2px;
+        }
+        .proved-calculation-principles details {
+          overflow: hidden;
+          border: 1px solid #e3e7ed;
+          border-radius: 12px;
+          background: #fff;
+          color: #344054;
+        }
+        .proved-calculation-principles summary {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          min-height: 64px;
+          padding: 14px 16px;
+          cursor: pointer;
+          list-style: none;
+          user-select: none;
+        }
+        .proved-calculation-principles summary::-webkit-details-marker { display: none; }
+        .proved-calculation-principles summary strong {
+          display: block;
+          color: #344054;
+          font-size: 14px;
+          font-weight: 900;
+          line-height: 1.45;
+          letter-spacing: -.02em;
+        }
+        .proved-calculation-principles summary small {
+          display: block;
+          margin-top: 3px;
+          color: #98a2b3;
+          font-size: 11px;
+          font-weight: 650;
+          line-height: 1.4;
+        }
+        .proved-calculation-principles__toggle {
+          flex: 0 0 auto;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: #f1f4f8;
+          color: #667085;
+          font-size: 18px;
+          font-weight: 500;
+          line-height: 27px;
+          text-align: center;
+          transition: transform .18s ease;
+        }
+        .proved-calculation-principles details[open] .proved-calculation-principles__toggle {
+          transform: rotate(45deg);
+        }
+        .proved-calculation-principles__body {
+          padding: 0 16px 17px;
+          border-top: 1px solid #eef1f4;
+          color: #667085;
+          font-size: 12px;
+          line-height: 1.7;
+        }
+        .proved-calculation-principles__body > p { margin: 14px 0 10px; }
+        .proved-calculation-principles__body ul {
+          display: grid;
+          gap: 8px;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        .proved-calculation-principles__body li {
+          position: relative;
+          padding-left: 14px;
+        }
+        .proved-calculation-principles__body li::before {
+          content: '';
+          position: absolute;
+          top: .75em;
+          left: 1px;
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: #2f6fed;
+        }
+        .proved-calculation-principles__body b { color: #475467; }
+        .proved-calculation-principles__link {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          margin-top: 14px;
+          color: #2f6fed;
+          font-size: 12px;
+          font-weight: 900;
+          text-decoration: none;
+        }
+        .proved-calculation-principles__notice {
+          margin-top: 12px !important;
+          color: #98a2b3;
+          font-size: 11px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const content = species === 'dog'
+      ? {
+          title: '강아지 계산 결과는 어떻게 산출되나요?',
+          subtitle: '성장 단계와 예상 성견 체중까지 반영한 기준을 확인하세요.',
+          intro: '현재 체중으로 기본 에너지 요구량을 구한 뒤 성장 상태, 중성화 여부, 활동량과 선택한 생활 조건을 반영해 하루 시작 열량을 계산합니다.',
+          items: [
+            '<b>성견</b>은 중성화 여부를 기본으로 활동량이 적음·보통·많음인지에 따라 시작 계수를 조정합니다.',
+            '<b>성장기</b>는 예상 성견 체중과 현재 체중의 비율을 사용하며, 소형견과 대형견의 성장 종료 시점 차이를 반영합니다.',
+            '<b>예상 성견 체중을 모를 때</b>는 월령 기준 임시 계수를 사용하므로 결과의 불확실성이 더 큽니다.',
+            '<b>건식·습식 비율</b>은 무게가 아니라 열량 기준으로 나눈 뒤 각 제품의 kcal/kg을 사용해 하루 급여량(g)으로 환산합니다.',
+            '<b>칼슘·인과 수분</b>은 선택한 사료에 저장된 영양 데이터가 있을 때만 합산하며, 데이터가 없는 제품은 분석에서 제외합니다.'
+          ]
+        }
+      : {
+          title: '고양이 계산 결과는 어떻게 산출되나요?',
+          subtitle: '월령·중성화·체중관리와 식단 배분 기준을 확인하세요.',
+          intro: '현재 체중으로 기본 에너지 요구량을 구한 뒤 월령에 따른 성장 단계, 중성화 여부와 체중관리 선택을 반영해 하루 시작 열량을 계산합니다.',
+          items: [
+            '<b>생후 12개월 미만</b>은 초기·중기·후기 성장기로 나누며, 성장기 중성화 상태도 별도로 반영합니다.',
+            '<b>성묘</b>는 중성화 여부에 따라 시작 계수를 달리하고, 11세 이상은 노령묘 참고 계수를 적용합니다.',
+            '<b>체중관리</b>는 성장에 필요한 에너지를 지나치게 낮추지 않도록 후기 성장기와 성묘의 계산을 구분합니다.',
+            '<b>건식·습식 비율</b>은 무게가 아니라 열량 기준으로 나눈 뒤 각 제품의 kcal/kg을 사용해 하루 급여량(g)으로 환산합니다.',
+            '<b>칼슘·인과 수분</b>은 선택한 사료에 저장된 영양 데이터가 있을 때만 합산하며, 데이터가 없는 제품은 분석에서 제외합니다.'
+          ]
+        };
+
+    const section = document.createElement('section');
+    section.id = 'provedCalculationPrinciples';
+    section.className = 'proved-calculation-principles';
+    section.setAttribute('aria-label', `${species === 'dog' ? '강아지' : '고양이'} 계산 기준 요약`);
+    section.innerHTML = `
+      <details>
+        <summary>
+          <span>
+            <strong>${content.title}</strong>
+            <small>${content.subtitle}</small>
+          </span>
+          <span class="proved-calculation-principles__toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="proved-calculation-principles__body">
+          <p>${content.intro}</p>
+          <ul>${content.items.map((item) => `<li>${item}</li>`).join('')}</ul>
+          <a class="proved-calculation-principles__link" href="/guide/calculation-method/">전체 계산식·참고 자료·한계 보기 <span aria-hidden="true">→</span></a>
+          <p class="proved-calculation-principles__notice">계산 결과는 첫 급여량을 정하기 위한 참고값이며 진단이나 처방을 대신하지 않습니다.</p>
+        </div>
+      </details>
+    `;
+    calculatorPage.appendChild(section);
+  }
+
   function getHiddenUntil() {
     try {
       return Number(window.localStorage.getItem(HIDE_STORAGE_KEY)) || 0;
@@ -340,6 +510,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     ensureInstallPromptMarkup();
     ensureGuideFooterLink();
+    ensureCalculationPrinciples();
 
     document.getElementById('pwaInstallBtn')?.addEventListener('click', handleInstallClick);
     document.getElementById('pwaInstallDismissBtn')?.addEventListener('click', handleInstallDismiss);
