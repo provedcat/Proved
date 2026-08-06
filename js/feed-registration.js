@@ -36,7 +36,9 @@ async function parseResponse(response) {
 }
 
 function showReturnNotice() {
-  document.getElementById('registrationReturnNotice')?.classList.add('is-visible');
+  const complete = document.getElementById('registrationComplete');
+  complete?.classList.add('is-visible');
+  complete?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 async function submitTextRegistration() {
