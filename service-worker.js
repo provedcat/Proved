@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260806-guide-install-v1';
+const CACHE_NAME = 'proved-pwa-20260806-wet-slot-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -19,6 +19,8 @@ const CORE_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './cat-food-calculator/',
+  './dog-food-calculator/',
   './feed-registration/',
   './guide/calculation-method/'
 ];
@@ -59,7 +61,7 @@ async function cacheResponse(request, response) {
 
 async function networkFirst(request) {
   try {
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetch(request, { cache: 'no-store' });
     await cacheResponse(request, networkResponse);
     return networkResponse;
   } catch (error) {
