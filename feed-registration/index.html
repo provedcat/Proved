@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260806-feed-registration-flow">
+  <link rel="stylesheet" href="/css/styles.css?v=20260806-registration-complete-guide">
   <style>
     body { min-height:100vh; background:#F6F7F8; color:#222; }
     .registration-shell { width:min(100%,640px); min-height:100vh; margin:0 auto; padding:20px 20px 48px; }
@@ -37,9 +37,50 @@
     .registration-file { display:block; padding:22px 16px; border:1px dashed #BFC9D8; border-radius:10px; background:#FAFBFD; text-align:center; cursor:pointer; }
     .registration-file strong { display:block; font-size:14px; }
     .registration-file span { display:block; margin-top:5px; color:#8A94A3; font-size:11px; }
-    .registration-return { display:none; margin-top:14px; padding:13px 14px; border:1px solid #CFE0FF; border-radius:10px; background:#F3F7FF; color:#315C9E; font-size:12px; font-weight:750; line-height:1.55; }
-    .registration-return.is-visible { display:block; }
+    .registration-complete { display:none; margin-top:14px; }
+    .registration-complete.is-visible { display:block; }
+    .registration-return { padding:13px 14px; border:1px solid #CFE0FF; border-radius:10px; background:#F3F7FF; color:#315C9E; font-size:12px; font-weight:750; line-height:1.55; }
+    .registration-close-large { width:100%; min-height:52px; margin-top:10px; border:0; border-radius:10px; background:#222B3A; color:#fff; font-size:15px; font-weight:900; box-shadow:0 5px 14px rgba(34,43,58,.16); }
+    .registration-close-large:hover { background:#151B25; }
+    .registration-close-large:focus-visible { outline:3px solid rgba(47,111,237,.22); outline-offset:2px; }
+    .registration-photo-guide { display:grid; gap:12px; margin-top:22px; padding-top:22px; border-top:1px solid #EDF0F4; }
+    .registration-photo-guide > h2 { margin:0; color:#222B3A; font-size:16px; font-weight:900; letter-spacing:-.02em; }
+    .registration-photo-guide > p { margin:-5px 0 0; color:#7B8492; font-size:12px; line-height:1.55; }
+    .photo-example-group { padding:15px; border:1px solid #E4E9F1; border-radius:14px; background:#fff; }
+    .photo-example-group--invalid { border-color:#F1D2D6; background:#FFF9FA; }
+    .photo-example-group--valid { border-color:#C9E5D2; background:#F8FCF9; }
+    .photo-example-heading { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+    .photo-example-heading h3 { margin:0; color:#263141; font-size:14px; font-weight:900; }
+    .photo-example-mark { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#E8505B; color:#fff; font-size:15px; font-weight:900; line-height:1; }
+    .photo-example-group--valid .photo-example-mark { background:#26A15B; font-size:13px; }
+    .photo-example-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .photo-example-card { min-width:0; }
+    .photo-example-card > p { margin:9px 0 0; color:#687384; font-size:11px; font-weight:650; line-height:1.5; text-align:center; }
+    .photo-example-card > p strong { color:#374151; font-weight:900; }
+    .label-example { min-height:118px; overflow:hidden; border:1px solid #D8DEE8; border-radius:10px; background:#F7F5F0; color:#333; }
+    .label-example--nutrition { display:flex; flex-direction:column; gap:5px; padding:12px; background:#F5F1E9; font-size:9px; }
+    .label-example--nutrition > strong { padding-bottom:5px; border-bottom:1px solid #B8B0A2; font-size:10px; }
+    .label-example--nutrition > span { display:flex; justify-content:space-between; gap:5px; }
+    .label-example--nutrition b,.label-example--nutrition i { font-style:normal; font-weight:700; }
+    .label-example--name { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 8px; background:#EAF1F8; text-align:center; }
+    .label-example__brand { margin-bottom:10px; color:#52657D; font-size:8px; font-weight:900; letter-spacing:.12em; }
+    .label-example--name > strong { color:#203A5B; font-size:14px; font-weight:900; line-height:1.15; }
+    .label-example--name > small { margin-top:8px; color:#6B7B8F; font-size:7px; font-weight:800; letter-spacing:.08em; }
+    .label-example--complete { min-height:142px; padding:11px; background:#F6F4EE; }
+    .label-example__product { display:grid; grid-template-columns:50px 1fr; gap:7px; align-items:center; padding-bottom:9px; border-bottom:1px solid #B9B3A8; font-size:9px; }
+    .label-example__product span { font-weight:800; }
+    .label-example__product strong { font-size:10px; font-weight:900; }
+    .label-example__detail { display:grid; grid-template-columns:1.25fr .9fr; gap:10px; padding-top:10px; }
+    .label-example__detail > div { min-width:0; font-size:8px; }
+    .label-example__detail b { display:block; margin-bottom:7px; font-size:9px; }
+    .label-example__detail i { display:block; width:100%; height:5px; margin-top:5px; border-radius:999px; background:#D3CEC4; }
+    .label-example__detail i:nth-child(3) { width:86%; }
+    .label-example__detail i:nth-child(4) { width:93%; }
+    .label-example__detail i:nth-child(5) { width:68%; }
+    .label-example__detail span { display:block; margin-top:5px; white-space:nowrap; }
+    .photo-example-tip { margin:0; padding:12px 13px; border-radius:11px; background:#F3F6FA; color:#657083; font-size:11px; font-weight:700; line-height:1.55; }
     @media(max-width:420px) { .registration-shell { padding-inline:14px; } .registration-card { padding:18px; } }
+    @media(max-width:380px) { .photo-example-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -85,9 +126,62 @@
       </label>
       <button id="uploadFeedBtn" type="button" class="registration-submit">이미지 분석하기</button>
       <div id="uploadMsg" aria-live="polite"></div>
-      <p id="registrationReturnNotice" class="registration-return">등록이 완료되었습니다. 기존 계산기 탭으로 돌아가 방금 등록한 제품명을 검색해 주세요.</p>
+      <div id="registrationComplete" class="registration-complete">
+        <p class="registration-return">등록이 완료되었습니다. 기존 계산기 탭으로 돌아가 방금 등록한 제품명을 검색해 주세요.</p>
+        <button type="button" class="registration-close-large" onclick="window.close()">등록 창 닫기</button>
+      </div>
+
+      <section class="registration-photo-guide" aria-labelledby="photoGuideTitle">
+        <h2 id="photoGuideTitle">어떤 라벨 사진을 올려야 하나요?</h2>
+        <p>제품을 정확히 확인할 수 있도록 아래 예시를 참고해 주세요.</p>
+
+        <section class="photo-example-group photo-example-group--invalid" aria-labelledby="invalidPhotoTitle">
+          <div class="photo-example-heading">
+            <span class="photo-example-mark" aria-hidden="true">×</span>
+            <h3 id="invalidPhotoTitle">이런 경우는 불가능해요</h3>
+          </div>
+          <div class="photo-example-grid">
+            <article class="photo-example-card">
+              <div class="label-example label-example--nutrition" aria-hidden="true">
+                <strong>등록성분량</strong>
+                <span><b>조단백질</b><i>12.0% 이상</i></span>
+                <span><b>조지방</b><i>5.0% 이상</i></span>
+                <span><b>수분</b><i>78.0% 이하</i></span>
+                <span><b>칼슘</b><i>0.20% 이상</i></span>
+              </div>
+              <p><strong>제품명 없이</strong><br>성분만 있는 사진</p>
+            </article>
+            <article class="photo-example-card">
+              <div class="label-example label-example--name" aria-hidden="true">
+                <span class="label-example__brand">PROVED PET</span>
+                <strong>CHICKEN RECIPE</strong>
+                <small>COMPLETE FOOD</small>
+              </div>
+              <p><strong>제품명만 있고</strong><br>성분 정보가 없는 사진</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="photo-example-group photo-example-group--valid" aria-labelledby="validPhotoTitle">
+          <div class="photo-example-heading">
+            <span class="photo-example-mark" aria-hidden="true">✓</span>
+            <h3 id="validPhotoTitle">이런 경우가 가능해요!</h3>
+          </div>
+          <article class="photo-example-card">
+            <div class="label-example label-example--complete" aria-hidden="true">
+              <div class="label-example__product"><span>제품명</span><strong>PROVED 닭고기 레시피</strong></div>
+              <div class="label-example__detail">
+                <div><b>원재료 전성분</b><i></i><i></i><i></i><i></i></div>
+                <div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div>
+              </div>
+            </div>
+            <p><strong>제품명 · 영양성분 · 원재료 전성분</strong><br>세 가지가 모두 한 장에 선명하게 나온 사진</p>
+          </article>
+        </section>
+        <p class="photo-example-tip">라벨을 정면에서 촬영하고, 빛 반사 없이 작은 글씨까지 선명하게 보여주세요.</p>
+      </section>
     </section>
   </main>
-  <script src="/js/feed-registration.js?v=20260806-feed-registration-flow"></script>
+  <script src="/js/feed-registration.js?v=20260806-registration-complete-guide"></script>
 </body>
 </html>
