@@ -926,3 +926,62 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
   .pc-result-card strong { font-size:30px; }
   .pc-feed-heading { align-items:flex-start; }
 }
+
+
+/* Shared site footer */
+.proved-site-footer {
+  width: min(calc(100% - 48px), 720px);
+  margin: 24px auto 0;
+  padding: 24px 0 calc(28px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-subtle, #E4E7EC);
+  color: var(--text-secondary, #5F6673);
+}
+.proved-site-footer__title {
+  margin: 0 0 12px;
+  color: var(--text-primary, #20242C);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.proved-site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.proved-site-footer__nav a {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.proved-site-footer__nav a:hover {
+  color: var(--brand-primary, #3568FF);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.proved-site-footer__copyright {
+  margin: 18px 0 0;
+  color: var(--text-placeholder, #8A919E);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.proved-entry .proved-site-footer {
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: 28px;
+}
+.registration-shell + .proved-site-footer {
+  margin-top: 0;
+}
+@media (max-width: 600px) {
+  .proved-site-footer {
+    width: calc(100% - 32px);
+    padding-top: 20px;
+  }
+  .proved-site-footer__nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+  }
+}
