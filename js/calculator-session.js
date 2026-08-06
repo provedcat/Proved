@@ -20,12 +20,17 @@ function readCalculatorDraftFields() {
 
 function saveCalculatorDraft() {
   if (typeof state === 'undefined') return;
-  const wetFeeds = state.wetSlotIds.map(slotId => ({
-    slotId,
-    feed: state.wetFeedMap[slotId] || null,
-    input: document.getElementById(`wetInput_${slotId}`)?.value || '',
-    ratio: document.getElementById(`wetPct_${slotId}`)?.value || ''
-  })).filter((entry, index) => index === 0 || entry.feed || entry.input.trim());
+
+  const firstWetSlotId = Array.isArray(state.wetSlotIds) ? state.wetSlotIds[0] : null;
+  const wetFeeds = firstWetSlotId == null
+    ? []
+    : [{
+        slotId: firstWetSlotId,
+        feed: state.wetFeedMap[firstWetSlotId] || null,
+        input: document.getElementById(`wetInput_${firstWetSlotId}`)?.value || '',
+        ratio: ''
+      }];
+
   const draft = {
     version: 1,
     species: state.selectedPetSpecies || 'cat',
@@ -35,6 +40,7 @@ function saveCalculatorDraft() {
     scrollY: window.scrollY,
     savedAt: Date.now()
   };
+
   try {
     sessionStorage.setItem(PROVED_CALCULATOR_SESSION_KEY, JSON.stringify(draft));
   } catch (error) {
@@ -61,24 +67,46 @@ function renderRestoredFeed(type, slotId, feed) {
   selected.classList.remove('hidden');
 }
 
+function getWetSlotIdFromElement(slot) {
+  const match = String(slot?.id || '').match(/^wetSlot_(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
 function resetWetSlotsToDefault() {
   if (typeof state === 'undefined') return;
 
-  const currentSlotIds = Array.isArray(state.wetSlotIds) ? [...state.wetSlotIds] : [];
-  currentSlotIds.slice(1).forEach(slotId => {
-    document.getElementById(`wetSlot_${slotId}`)?.remove();
-    delete state.wetFeedMap[slotId];
+  const container = document.getElementById('wetSlots');
+  if (!container) return;
+
+  const domSlots = [...container.querySelectorAll('.pc-wet-slot')];
+  const firstSlot = domSlots[0] || null;
+  const firstSlotId = getWetSlotIdFromElement(firstSlot);
+
+  domSlots.slice(1).forEach(slot => {
+    const slotId = getWetSlotIdFromElement(slot);
+    slot.remove();
+    if (slotId != null) delete state.wetFeedMap[slotId];
   });
 
-  state.wetSlotIds = currentSlotIds.slice(0, 1);
-  if (state.wetSlotIds.length === 0 && typeof addWetSlot === 'function') {
-    addWetSlot();
+  if (firstSlotId == null) {
+    container.replaceChildren();
+    state.wetSlotIds = [];
+    state.wetFeedMap = {};
+    if (typeof addWetSlot === 'function') addWetSlot();
+  } else {
+    Object.keys(state.wetFeedMap || {}).forEach(key => {
+      if (Number(key) !== firstSlotId) delete state.wetFeedMap[key];
+    });
+    state.wetSlotIds = [firstSlotId];
+    state.wetSlotIdCounter = Math.max(Number(state.wetSlotIdCounter) || 0, firstSlotId + 1);
   }
 
   document.getElementById('addWetBtn')?.classList.remove('hidden');
 }
 
 function restoreCalculatorDraft() {
+  resetWetSlotsToDefault();
+
   let draft;
   try {
     draft = JSON.parse(sessionStorage.getItem(PROVED_CALCULATOR_SESSION_KEY) || 'null');
@@ -98,7 +126,6 @@ function restoreCalculatorDraft() {
     });
   }
 
-  resetWetSlotsToDefault();
   const firstWetFeed = Array.isArray(draft.wetFeeds) ? draft.wetFeeds[0] : null;
   const firstWetSlotId = state.wetSlotIds[0];
   if (firstWetFeed && firstWetSlotId != null) {
@@ -111,6 +138,8 @@ function restoreCalculatorDraft() {
   toggleDrySwitching();
   updateRatio(document.getElementById('ratioSlider')?.value || 60);
   initializeCalculatorChoices();
+  saveCalculatorDraft();
+
   if (Number.isFinite(draft.scrollY)) {
     requestAnimationFrame(() => window.scrollTo({ top: draft.scrollY, behavior: 'auto' }));
   }
@@ -123,7 +152,14 @@ function getPreferredRegistrationType() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  resetWetSlotsToDefault();
   restoreCalculatorDraft();
+
+  requestAnimationFrame(() => {
+    resetWetSlotsToDefault();
+    saveCalculatorDraft();
+  });
+
   document.getElementById('calculatorPage')?.addEventListener('input', saveCalculatorDraft);
   document.getElementById('calculatorPage')?.addEventListener('change', saveCalculatorDraft);
   document.getElementById('calculatorPage')?.addEventListener('focusin', event => {
