@@ -837,20 +837,28 @@ input::placeholder { color:var(--text-placeholder); }
 #ratioSlider {
   --ratio-split:60%;
   background:linear-gradient(to right,
-    var(--cat-wet-ink) 0,
-    var(--cat-wet-ink) var(--ratio-split),
+    var(--cat-dry-ink) 0,
     var(--cat-dry-ink) var(--ratio-split),
-    var(--cat-dry-ink) 100%)!important;
+    var(--cat-wet-ink) var(--ratio-split),
+    var(--cat-wet-ink) 100%)!important;
 }
 .proved-dog-mode #ratioSlider {
   background:linear-gradient(to right,
-    var(--dog-wet-ink) 0,
-    var(--dog-wet-ink) var(--ratio-split),
+    var(--dog-dry-ink) 0,
     var(--dog-dry-ink) var(--ratio-split),
-    var(--dog-dry-ink) 100%)!important;
+    var(--dog-wet-ink) var(--ratio-split),
+    var(--dog-wet-ink) 100%)!important;
 }
-.proved-dog-mode #ratioSlider::-webkit-slider-thumb { background:var(--dog-dry-ink); }
-.proved-dog-mode #ratioSlider::-moz-range-thumb { background:var(--dog-dry-ink); }
+#ratioSlider::-webkit-slider-thumb { background:#7A718C!important; }
+#ratioSlider::-moz-range-thumb { background:#7A718C!important; }
+.proved-dog-mode #ratioSlider::-webkit-slider-thumb { background:#6F765E!important; }
+.proved-dog-mode #ratioSlider::-moz-range-thumb { background:#6F765E!important; }
+.pc-feed-registration-card { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; border:1px solid rgba(47,111,237,.18); border-radius:var(--radius-input); background:linear-gradient(135deg,#F7FAFF 0%,#EEF4FF 100%); }
+.pc-feed-registration-card h3 { margin:0; color:var(--text-primary); font-size:15px; font-weight:900; letter-spacing:-.02em; }
+.pc-feed-registration-card p { margin:5px 0 0; color:var(--text-secondary); font-size:12px; font-weight:650; line-height:1.45; }
+.pc-feed-registration-link { flex:0 0 auto; min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:10px 14px; border:1px solid rgba(47,111,237,.28); border-radius:var(--radius-button); background:var(--surface); color:var(--brand-primary); font-size:13px; font-weight:900; box-shadow:0 4px 12px rgba(47,111,237,.08); transition:transform .15s ease,box-shadow .15s ease,background .15s ease; }
+.pc-feed-registration-link:hover { background:#F8FAFF; box-shadow:0 6px 16px rgba(47,111,237,.13); transform:translateY(-1px); }
+.pc-feed-registration-link:focus-visible { outline:3px solid rgba(47,111,237,.18); outline-offset:2px; }
 .pc-primary-button { min-height:50px; border-radius:var(--radius-button); background:var(--brand-primary); }
 .pc-primary-button:hover,.pc-primary-button:active { background:var(--brand-primary-pressed); }
 .pc-result-panel { gap:20px!important; color:var(--text-primary); }
@@ -871,6 +879,8 @@ input::placeholder { color:var(--text-placeholder); }
 .proved-dog-mode #dogAdultWeightField .pc-input-unit { margin-top:4px; }
 @media(max-width:520px) {
   .pc-adult-weight-presets { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .pc-feed-registration-card { align-items:stretch; flex-direction:column; }
+  .pc-feed-registration-link { width:100%; }
 }
 .pc-trend-hero { padding:0!important; border:0!important; background:transparent!important; }
 .pc-trend-hero h2 { font-size:28px!important; color:var(--text-primary)!important; }
@@ -889,6 +899,7 @@ input::placeholder { color:var(--text-placeholder); }
 button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }
 .pc-tabs--primary { margin-top:24px; }
 .pc-upload-section { display:flex; flex-direction:column; gap:16px; padding:20px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:var(--surface-primary); }
+.pc-upload-section.hidden { display:none!important; }
 .pc-upload-section h2 { margin:0; color:var(--text-primary); font-size:18px; font-weight:800; line-height:1.4; }
 .pc-upload-description,.pc-upload-note { margin:0; color:var(--text-secondary); font-size:13px; line-height:1.55; }
 .pc-upload-note { padding-top:12px; border-top:1px solid var(--border-subtle); font-weight:600; }

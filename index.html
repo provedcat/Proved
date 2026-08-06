@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/styles.css?v=20260730-pet-ratio-slider">
+  <link rel="stylesheet" href="css/styles.css?v=20260806-feed-registration-flow">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260806-entry-guidance">
   <style>
     .proved-seo-summary {
@@ -191,6 +191,10 @@
         <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
       </section>
       <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p><p id="wetRatioError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></section>
+      <aside class="pc-feed-registration-card" aria-labelledby="feedRegistrationCardTitle">
+        <div><h3 id="feedRegistrationCardTitle">찾는 사료가 없나요?</h3><p>1분 만에 급여 사료를 등록할 수 있어요.</p></div>
+        <a class="pc-feed-registration-link" href="/feed-registration/" target="_blank" rel="noopener" data-feed-registration-link>사료 등록하기 <span aria-hidden="true">☞</span></a>
+      </aside>
       <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="60" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
       <button type="button" onclick="calculate()" class="pc-primary-button">급여량 계산하기</button>
     </section>
@@ -231,7 +235,7 @@
     </div>
 
     <!-- 사료 추가 업로드 -->
-    <section class="pc-upload-section">
+    <section class="pc-upload-section hidden" aria-hidden="true">
       <h2>사료가 없나요?</h2>
       <p class="pc-upload-description">
         영양성분표가 모두 보이는 사진 <strong>1장</strong>을 올려주세요.<br>
@@ -691,6 +695,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
 <script src="js/calculator.js?v=20260730-dog-growth-formula"></script>
 <script src="js/feed-search.js?v=20260806-product-identification"></script>
+<script src="js/calculator-session.js?v=20260806-feed-registration-flow"></script>
 <script src="js/recent-feed.js?v=20260728-recent-feed-fix"></script>
 <script src="js/saved-cats.js?v=20260728-recent-feed-fix"></script>
 <script src="js/auth.js?v=20260728-calculator-pet-load"></script>

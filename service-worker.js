@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260806-entry-feed-validation-v1';
+const CACHE_NAME = 'proved-pwa-20260806-feed-registration-flow-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -9,6 +9,8 @@ const CORE_ASSETS = [
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',
+  './js/calculator-session.js',
+  './js/feed-registration.js',
   './js/recent-feed.js',
   './js/saved-cats.js',
   './js/auth.js',
@@ -16,7 +18,8 @@ const CORE_ASSETS = [
   './js/weight-trend.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './feed-registration/'
 ];
 
 const IMAGE_DESTINATIONS = new Set(['image']);
