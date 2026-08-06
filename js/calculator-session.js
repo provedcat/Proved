@@ -61,6 +61,23 @@ function renderRestoredFeed(type, slotId, feed) {
   selected.classList.remove('hidden');
 }
 
+function resetWetSlotsToDefault() {
+  if (typeof state === 'undefined') return;
+
+  const currentSlotIds = Array.isArray(state.wetSlotIds) ? [...state.wetSlotIds] : [];
+  currentSlotIds.slice(1).forEach(slotId => {
+    document.getElementById(`wetSlot_${slotId}`)?.remove();
+    delete state.wetFeedMap[slotId];
+  });
+
+  state.wetSlotIds = currentSlotIds.slice(0, 1);
+  if (state.wetSlotIds.length === 0 && typeof addWetSlot === 'function') {
+    addWetSlot();
+  }
+
+  document.getElementById('addWetBtn')?.classList.remove('hidden');
+}
+
 function restoreCalculatorDraft() {
   let draft;
   try {
@@ -81,19 +98,15 @@ function restoreCalculatorDraft() {
     });
   }
 
-  const wetFeeds = (Array.isArray(draft.wetFeeds) ? draft.wetFeeds : [])
-    .filter((entry, index) => index === 0 || entry?.feed || String(entry?.input || '').trim());
-  while (state.wetSlotIds.length < Math.min(wetFeeds.length, 3)) addWetSlot();
-  wetFeeds.forEach((entry, index) => {
-    const slotId = state.wetSlotIds[index];
-    if (slotId == null) return;
-    state.wetFeedMap[slotId] = entry.feed;
-    const input = document.getElementById(`wetInput_${slotId}`);
-    const ratio = document.getElementById(`wetPct_${slotId}`);
-    if (input) input.value = entry.input || entry.feed?.display || entry.feed?.name || '';
-    if (ratio && entry.ratio !== '') ratio.value = entry.ratio;
-    renderRestoredFeed('wet', slotId, entry.feed);
-  });
+  resetWetSlotsToDefault();
+  const firstWetFeed = Array.isArray(draft.wetFeeds) ? draft.wetFeeds[0] : null;
+  const firstWetSlotId = state.wetSlotIds[0];
+  if (firstWetFeed && firstWetSlotId != null) {
+    state.wetFeedMap[firstWetSlotId] = firstWetFeed.feed || null;
+    const input = document.getElementById(`wetInput_${firstWetSlotId}`);
+    if (input) input.value = firstWetFeed.input || firstWetFeed.feed?.display || firstWetFeed.feed?.name || '';
+    renderRestoredFeed('wet', firstWetSlotId, firstWetFeed.feed);
+  }
 
   toggleDrySwitching();
   updateRatio(document.getElementById('ratioSlider')?.value || 60);
