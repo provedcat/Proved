@@ -1,4 +1,4 @@
-name: Brand text audit
+name: Koreanize brand text
 
 on:
   push:
@@ -6,23 +6,99 @@ on:
       - agent/koreanize-brand-text
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit:
+  update-brand:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Find English brand text
+      - name: Replace user-facing English brand text
         shell: bash
         run: |
-          echo '=== Proved / PROVED occurrences ==='
+          python - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path('index.html'),
+              Path('cat-food-calculator/index.html'),
+              Path('dog-food-calculator/index.html'),
+              Path('feed-registration/index.html'),
+              Path('guide/calculation-method/index.html'),
+              Path('manifest.json'),
+              Path('js/share-card.js'),
+              Path('js/pwa-install.js'),
+              Path('js/recent-feed.js'),
+          ]
+
+          alternate_names = {
+              Path('index.html'): '프루브 반려동물 영양 계산기',
+              Path('cat-food-calculator/index.html'): '프루브 고양이 사료 계산기',
+              Path('dog-food-calculator/index.html'): '프루브 강아지 사료 계산기',
+          }
+
+          replacements = [
+              ('ProvedDog', '프루브'),
+              ('ProvedCat', '프루브'),
+              ('PROVED PETS', '프루브 반려동물'),
+              ('PROVED METHOD', '프루브 계산 기준'),
+              ('PROVED PET', '프루브'),
+              ('PROVED 닭고기 레시피', '프루브 닭고기 레시피'),
+              ('Proved', '프루브'),
+          ]
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              if path in alternate_names:
+                  text = text.replace(
+                      '"alternateName": "Proved"',
+                      f'"alternateName": "{alternate_names[path]}"'
+                  )
+              for old, new in replacements:
+                  text = text.replace(old, new)
+              path.write_text(text, encoding='utf-8')
+
+          service_worker = Path('service-worker.js')
+          sw_text = service_worker.read_text(encoding='utf-8')
+          sw_text = sw_text.replace(
+              "const CACHE_NAME = 'proved-pwa-20260806-wet-slot-v2';",
+              "const CACHE_NAME = 'proved-pwa-20260807-korean-brand-v1';"
+          )
+          service_worker.write_text(sw_text, encoding='utf-8')
+
+          logo = '''<?xml version="1.0" encoding="utf-8"?>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 118 40.7" role="img" aria-labelledby="title">
+            <title>프루브</title>
+            <defs>
+              <linearGradient id="underline" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#133BB2"/>
+                <stop offset="1" stop-color="#3568FF"/>
+              </linearGradient>
+            </defs>
+            <path fill="#3568FF" d="M26.157 15.751 L26.157 18.582 L3.036 18.582 L3.036 15.751 L7.49 15.751 L7.49 5.436 L3.278 5.436 L3.278 2.605 L25.882 2.605 L25.882 5.436 L21.741 5.436 L21.741 15.751 L26.157 15.751 Z M29.193 24.551 L29.193 27.452 L0 27.452 L0 24.551 L29.193 24.551 Z M10.903 15.751 L18.322 15.751 L18.322 5.436 L10.903 5.436 L10.903 15.751 Z M35.507 16.026 L35.507 7.334 L52.972 7.334 L52.972 4.363 L35.372 4.363 L35.372 1.5 L56.353 1.5 L56.353 10.197 L38.893 10.197 L38.893 13.163 L57.113 13.163 L57.113 16.026 L35.507 16.026 Z M44.275 31.696 L44.275 21.828 L31.404 21.828 L31.404 18.927 L60.596 18.927 L60.596 21.828 L47.725 21.828 L47.725 31.696 L44.275 31.696 Z M92 24.551 L92 27.452 L62.807 27.452 L62.807 24.551 L92 24.551 Z M87.897 18.652 L66.911 18.652 L66.911 2.293 L70.297 2.293 L70.297 7.679 L84.51 7.679 L84.51 2.26 L87.897 2.26 L87.897 18.652 Z M70.297 15.719 L84.51 15.719 L84.51 10.575 L70.297 10.575 L70.297 15.719 Z"/>
+            <rect x="0" y="38.6" width="36.3" height="2" fill="url(#underline)"/>
+          </svg>
+          '''
+          Path('icons/proved-logo.svg').write_text(logo, encoding='utf-8')
+          PY
+
+          echo '=== Remaining occurrences ==='
           grep -RInE 'Proved|PROVED' . \
             --exclude-dir=.git \
             --exclude-dir=.github \
             --exclude='*.png' \
             --exclude='*.jpg' \
             --exclude='*.jpeg' \
-            --exclude='*.webp' \
-            --exclude='*.woff' \
-            --exclude='*.woff2' || true
+            --exclude='*.webp' || true
+
+      - name: Commit changes to branch
+        shell: bash
+        run: |
+          rm -f .github/workflows/brand-audit.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "사용자 노출 브랜드명을 프루브로 통일"
+          git push origin HEAD:agent/koreanize-brand-text
