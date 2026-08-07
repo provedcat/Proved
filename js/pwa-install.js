@@ -183,11 +183,11 @@
     const prompt = document.createElement('aside');
     prompt.id = 'pwaInstallPrompt';
     prompt.className = 'proved-pwa-install hidden';
-    prompt.setAttribute('aria-label', 'Proved 홈 화면 추가 안내');
+    prompt.setAttribute('aria-label', '프루브 홈 화면 추가 안내');
     prompt.innerHTML = `
       <img class="proved-pwa-install__icon" src="/icons/icon-192.png" alt="" aria-hidden="true">
       <div class="proved-pwa-install__copy">
-        <strong>Proved를 앱처럼 사용하세요</strong>
+        <strong>프루브를 앱처럼 사용하세요</strong>
         <span>홈 화면에 추가하면 계산기를 바로 열 수 있습니다.</span>
         <p id="pwaInstallMsg" class="proved-pwa-install__message hidden" role="status" aria-live="polite"></p>
       </div>
@@ -488,7 +488,7 @@
 
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch((error) => {
-        console.warn('Proved service worker registration failed:', error);
+        console.warn('프루브 service worker registration failed:', error);
       });
     });
   }

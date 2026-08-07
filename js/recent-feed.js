@@ -105,7 +105,7 @@ function createFeedPhotoExamples() {
         </article>
         <article class="pc-feed-photo-example-card">
           <div class="pc-label-mock pc-label-mock--name-only" aria-hidden="true">
-            <span class="pc-label-mock__brand">PROVED PET</span>
+            <span class="pc-label-mock__brand">프루브</span>
             <strong>CHICKEN RECIPE</strong>
             <small>COMPLETE FOOD</small>
           </div>
@@ -123,7 +123,7 @@ function createFeedPhotoExamples() {
         <div class="pc-label-mock pc-label-mock--complete" aria-hidden="true">
           <div class="pc-label-mock__product">
             <span>제품명</span>
-            <strong>PROVED 닭고기 레시피</strong>
+            <strong>프루브 닭고기 레시피</strong>
           </div>
           <div class="pc-label-mock__complete-grid">
             <div>

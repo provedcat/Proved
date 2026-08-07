@@ -42,7 +42,7 @@ function fillShareCard() {
   document.getElementById('sc_catName').textContent = catName;
   document.getElementById('sc_catSub').textContent  = subTxt;
   const brand = document.querySelector('.sc-brand');
-  if (brand) brand.textContent = isDog ? 'ProvedDog' : 'ProvedCat';
+  if (brand) brand.textContent = isDog ? '프루브' : '프루브';
   document.getElementById('sc_der').textContent     = result.DER;
   document.getElementById('sc_foodKcal').textContent = result.foodKcal ?? result.DER;
   const treatBlock = document.getElementById('sc_treatBlock');
@@ -241,7 +241,7 @@ async function shareCard_kakao() {
     // Blob으로 변환
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     const catName = document.getElementById('catName').value || 'cat';
-    const brandName = state.selectedPetSpecies === 'dog' ? 'ProvedDog' : 'ProvedCat';
+    const brandName = state.selectedPetSpecies === 'dog' ? '프루브' : '프루브';
     const file = new File([blob], `${brandName.toLowerCase()}_${catName}.png`, { type: 'image/png' });
 
     // Web Share API (모바일 기기 공유 시트 — 카카오톡 포함)

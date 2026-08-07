@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260806-wet-slot-v2';
+const CACHE_NAME = 'proved-pwa-20260807-korean-brand-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
