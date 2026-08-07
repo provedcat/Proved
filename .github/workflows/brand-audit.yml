@@ -1,0 +1,28 @@
+name: Brand text audit
+
+on:
+  push:
+    branches:
+      - agent/koreanize-brand-text
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find English brand text
+        shell: bash
+        run: |
+          echo '=== Proved / PROVED occurrences ==='
+          grep -RInE 'Proved|PROVED' . \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude='*.png' \
+            --exclude='*.jpg' \
+            --exclude='*.jpeg' \
+            --exclude='*.webp' \
+            --exclude='*.woff' \
+            --exclude='*.woff2' || true
