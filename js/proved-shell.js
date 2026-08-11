@@ -201,17 +201,22 @@ function provedRenderEntry(step) {
   const option = (label, modifier, attributes = '') =>
     `<button class="proved-entry-option proved-entry-option--${modifier}" type="button" ${attributes}>${label}</button>`;
 
-  const speciesOptions = isLogin ? '' : `
+  const speciesOptions = `
       ${option(step === 'pet' ? '고양이와' : '고양이', step === 'pet' ? 'active proved-entry-option--cat' : 'muted proved-entry-option--cat', step === 'pet' ? "onclick=\"provedChooseSpecies('cat')\"" : 'disabled')}
       ${option(step === 'pet' ? '강아지와' : '강아지', step === 'pet' ? 'active proved-entry-option--dog' : 'muted proved-entry-option--dog', step === 'pet' ? "onclick=\"provedChooseSpecies('dog')\"" : 'disabled')}`;
 
-  const options = `
-    <div class="proved-entry-options">
-      ${option('로그인', isLogin || isStart ? 'active proved-entry-option--login' : 'muted proved-entry-option--login', isLogin ? '' : "onclick=\"provedRenderEntry('login')\"")}
-      ${option('로그인 없이', isStart || step === 'pet' ? 'active proved-entry-option--guest' : 'muted proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
-      <div class="proved-entry-divider" aria-hidden="true"></div>
-      ${speciesOptions}
-    </div>`;
+  const choices = isLogin ? '' : `
+    <section class="proved-entry__section" aria-labelledby="provedEntryStartTitle">
+      <h2 id="provedEntryStartTitle" class="proved-entry__title">시작하기</h2>
+      <div class="proved-entry-options">
+        ${option('로그인', isStart ? 'active proved-entry-option--login' : 'muted proved-entry-option--login', "onclick=\"provedRenderEntry('login')\"")}
+        ${option('로그인 없이', 'active proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
+      </div>
+    </section>
+    <section class="proved-entry__section" aria-labelledby="provedEntrySpeciesTitle">
+      <h2 id="provedEntrySpeciesTitle" class="proved-entry__title">누구와 함께할까요?</h2>
+      <div class="proved-entry-options">${speciesOptions}</div>
+    </section>`;
 
   const detail = isLogin ? `
     <div class="proved-login-area">
@@ -230,19 +235,12 @@ function provedRenderEntry(step) {
       <button class="proved-login-guest" type="button" onclick="provedRenderEntry('pet')">로그인 없이 시작하기</button>
     </div>` : '';
 
-  const title = step === 'pet'
-    ? '누구와 함께할까요?'
-    : isLogin
-      ? '로그인 방법'
-      : '시작하기';
-
   root.innerHTML = `
     <div class="proved-entry__main">
       <div class="proved-entry__content">
-        ${isStart ? '<h1 class="proved-entry__statement">반려동물의 한 끼를<br>더 정확하게 이해하는 방법.</h1>' : ''}
+        <h1 class="proved-entry__statement">반려동물의 한 끼를<br>더 정확하게 이해하는 방법.</h1>
         <div class="proved-entry__action">
-          <h2 class="proved-entry__title">${title}</h2>
-          ${options}
+          ${isLogin ? '<h2 class="proved-entry__title">로그인 방법</h2>' : choices}
           ${detail}
           ${steps(step === 'pet' ? 2 : 1)}
         </div>
