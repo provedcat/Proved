@@ -913,18 +913,18 @@
   #provedEntry .proved-entry__nav button { font-size: 13px; }
   #provedEntryMain .proved-entry__content { min-height: 0; padding: 0; }
   #provedEntry .proved-entry__statement {
-    min-height: 450px;
+    min-height: clamp(260px, 38svh, 330px);
     margin: 0;
-    padding: 88px 20px 110px;
+    padding: 54px 20px 62px;
     border-bottom: 1px solid var(--proved-line);
     align-items: flex-start;
-    font-size: clamp(38px, 10.5vw, 48px);
+    font-size: clamp(35px, 9.7vw, 43px);
     line-height: 1.18;
   }
   #provedEntry .proved-entry__action { border-left: 0; }
-  #provedEntry .proved-entry__section { padding: 42px 20px 48px; border-top: 0; border-bottom: 1px solid var(--proved-line); }
+  #provedEntry .proved-entry__section { padding: 30px 20px 34px; border-top: 0; border-bottom: 1px solid var(--proved-line); }
   #provedEntry .proved-entry__section + .proved-entry__section { margin-top: 0; }
-  #provedEntry .proved-entry__section-heading { grid-template-columns: 44px minmax(0,1fr); margin-bottom: 30px; }
+  #provedEntry .proved-entry__section-heading { grid-template-columns: 44px minmax(0,1fr); margin-bottom: 20px; }
   #provedEntry .proved-entry__section-heading .proved-entry__title { font-size: 21px; }
   #provedEntry .proved-entry__section .proved-entry-options,
   #provedEntry .proved-entry__section .proved-login-area { margin-left: 52px; }
