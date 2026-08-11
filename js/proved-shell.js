@@ -190,12 +190,6 @@ function provedRenderEntry(step) {
 
   root.dataset.step = step;
 
-  const steps = activeStep => `
-    <div class="proved-steps" aria-hidden="true">
-      <span class="proved-step ${activeStep === 1 ? 'active' : ''}"></span>
-      <span class="proved-step ${activeStep === 2 ? 'active' : ''}"></span>
-    </div>`;
-
   const isStart = step === 'start';
   const isLogin = step === 'login';
   const option = (label, modifier, attributes = '') =>
@@ -207,14 +201,20 @@ function provedRenderEntry(step) {
 
   const choices = isLogin ? '' : `
     <section class="proved-entry__section" aria-labelledby="provedEntryStartTitle">
-      <h2 id="provedEntryStartTitle" class="proved-entry__title">시작하기</h2>
+      <div class="proved-entry__section-heading">
+        <span class="proved-entry__number" aria-hidden="true">01</span>
+        <h2 id="provedEntryStartTitle" class="proved-entry__title">시작하기</h2>
+      </div>
       <div class="proved-entry-options">
         ${option('로그인', isStart ? 'active proved-entry-option--login' : 'muted proved-entry-option--login', "onclick=\"provedRenderEntry('login')\"")}
         ${option('로그인 없이', 'active proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
       </div>
     </section>
     <section class="proved-entry__section" aria-labelledby="provedEntrySpeciesTitle">
-      <h2 id="provedEntrySpeciesTitle" class="proved-entry__title">누구와 함께할까요?</h2>
+      <div class="proved-entry__section-heading">
+        <span class="proved-entry__number" aria-hidden="true">02</span>
+        <h2 id="provedEntrySpeciesTitle" class="proved-entry__title">누구와 함께할까요?</h2>
+      </div>
       <div class="proved-entry-options">${speciesOptions}</div>
     </section>`;
 
@@ -240,9 +240,13 @@ function provedRenderEntry(step) {
       <div class="proved-entry__content">
         <h1 class="proved-entry__statement">반려동물의 한 끼를<br>더 정확하게 이해하는 방법.</h1>
         <div class="proved-entry__action">
-          ${isLogin ? '<h2 class="proved-entry__title">로그인 방법</h2>' : choices}
-          ${detail}
-          ${steps(step === 'pet' ? 2 : 1)}
+          ${isLogin ? `<section class="proved-entry__section" aria-labelledby="provedEntryLoginTitle">
+            <div class="proved-entry__section-heading">
+              <span class="proved-entry__number" aria-hidden="true">01</span>
+              <h2 id="provedEntryLoginTitle" class="proved-entry__title">로그인 방법</h2>
+            </div>
+            ${detail}
+          </section>` : choices}
         </div>
       </div>
     </div>`;
