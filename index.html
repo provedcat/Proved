@@ -58,12 +58,20 @@
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css?v=20260806-feed-registration-flow">
-  <link rel="stylesheet" href="css/proved-shell.css?v=20260811-editorial-entry">
+  <link rel="stylesheet" href="css/proved-shell.css?v=20260811-editorial-entry-3">
 </head>
 <body class="flex justify-center">
 <div id="provedEntry" class="proved-entry" aria-label="프루브 시작 화면">
   <div class="proved-entry__inner">
-    <img class="proved-wordmark" src="icons/proved-logo.svg" alt="프루브">
+    <header class="proved-entry__header">
+      <a class="proved-entry__brand" href="/" aria-label="프루브 홈">
+        <img class="proved-wordmark" src="icons/proved-logo.svg" alt="프루브">
+      </a>
+      <nav class="proved-entry__nav" aria-label="바로가기">
+        <a href="/guide/calculation-method/">계산 기준</a>
+        <button type="button" onclick="provedRenderEntry('login')">로그인</button>
+      </nav>
+    </header>
     <div id="provedEntryMain"></div>
 <footer class="proved-site-footer">
   <p class="proved-site-footer__title">사이트맵</p>
@@ -72,6 +80,7 @@
     <a href="/feed-registration/">사료 등록하기</a>
     <a href="/cat-food-calculator/">고양이 사료 계산기</a>
     <a href="/dog-food-calculator/">강아지 사료 계산기</a>
+    <a href="/guide/calculation-method/">계산 기준</a>
   </nav>
   <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>
 </footer>
@@ -661,7 +670,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
-<script src="js/proved-shell.js?v=20260811-editorial-entry"></script>
+<script src="js/proved-shell.js?v=20260811-editorial-entry-3"></script>
 <script src="js/pwa-install.js?v=20260701-ui-refresh-2"></script>
 <script src="js/calculator.js?v=20260730-dog-growth-formula"></script>
 <script src="js/feed-search.js?v=20260806-product-identification"></script>
