@@ -451,6 +451,160 @@
   }
 }
 
+/* 2026 editorial entry: one typeface, one brand ink, no decorative copy. */
+.proved-entry {
+  --proved-blue: #3568ff;
+  --proved-blue-dark: #2349b8;
+  --proved-muted: #7b8291;
+  --proved-line: #cbd7ff;
+  font-family: "SUIT Variable", "SUIT", sans-serif;
+  color: var(--proved-blue);
+}
+
+.proved-entry__inner {
+  width: min(calc(100% - 56px), 1180px);
+  padding: 40px 0 calc(40px + env(safe-area-inset-bottom));
+}
+
+.proved-entry__inner > .proved-wordmark {
+  margin-bottom: 0;
+}
+
+.proved-entry__content {
+  padding-block: clamp(56px, 9vh, 110px);
+}
+
+#provedEntryMain[data-step="start"] .proved-entry__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, .82fr);
+  align-items: center;
+  gap: clamp(64px, 9vw, 132px);
+}
+
+.proved-entry__statement {
+  max-width: 760px;
+  margin: 0;
+  color: var(--proved-blue);
+  font-size: clamp(48px, 6vw, 76px);
+  font-weight: 700;
+  line-height: 1.13;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+
+.proved-entry__action {
+  min-width: 0;
+}
+
+.proved-entry__title {
+  margin: 0 0 38px;
+  color: var(--proved-blue);
+  font-size: clamp(22px, 2.3vw, 30px);
+  font-weight: 600;
+  letter-spacing: -.025em;
+  text-align: left;
+}
+
+.proved-entry-options {
+  column-gap: clamp(24px, 4vw, 50px);
+}
+
+.proved-entry-option {
+  color: var(--proved-blue);
+  border-bottom-color: var(--proved-line);
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 500;
+  text-align: left;
+}
+
+.proved-entry-option--active {
+  border-bottom-color: var(--proved-blue);
+}
+
+.proved-entry-option--muted {
+  color: var(--proved-muted);
+}
+
+.proved-entry-divider {
+  background: var(--proved-line);
+}
+
+.proved-entry .proved-entry-option:disabled {
+  color: #a7acb6 !important;
+  border-bottom-color: #e2e5eb !important;
+}
+
+.proved-steps {
+  justify-content: flex-start;
+}
+
+.proved-step {
+  width: 64px;
+  background: #dfe6ff;
+}
+
+.proved-step.active {
+  background: var(--proved-blue);
+}
+
+.proved-login-list {
+  border-top-color: var(--proved-line);
+}
+
+.proved-login-button {
+  color: var(--proved-blue-dark);
+  border-bottom-color: var(--proved-line) !important;
+}
+
+.proved-login-guest,
+.proved-back,
+.proved-entry__hint {
+  color: var(--proved-muted);
+}
+
+.proved-entry ::selection {
+  color: #fff;
+  background: var(--proved-blue);
+}
+
+@media (max-width: 760px) {
+  .proved-entry__inner {
+    width: calc(100% - 40px);
+    padding: 28px 0 calc(34px + env(safe-area-inset-bottom));
+  }
+
+  #provedEntryMain[data-step="start"] .proved-entry__content {
+    display: block;
+    padding-block: 54px 34px;
+  }
+
+  .proved-entry__statement {
+    max-width: 350px;
+    margin-bottom: 72px;
+    font-size: clamp(38px, 11vw, 46px);
+    line-height: 1.16;
+  }
+
+  .proved-entry__title {
+    margin-bottom: 28px;
+    font-size: 21px;
+  }
+
+  .proved-entry-options {
+    column-gap: 24px;
+  }
+
+  .proved-entry-option {
+    min-height: 58px;
+    padding-inline: 0;
+    font-size: 17px;
+  }
+
+  .proved-entry-divider {
+    margin: 28px 0 22px;
+  }
+}
+
 /* Shared typography-led entry flow (start, login, and pet). */
 .proved-entry {
   background: #fff;
@@ -624,4 +778,43 @@
   .proved-entry__title { margin-bottom: 42px; font-size: 28px; font-weight: 500; }
   .proved-entry-option { min-height: 62px; padding: 10px 4px 14px; font-size: 20px; }
   .proved-entry-divider { margin: 30px 0 24px; }
+}
+
+/* Final cascade for the approved editorial landing surface. */
+#provedEntry {
+  --proved-blue: #3568ff;
+  --proved-blue-dark: #2349b8;
+  --proved-muted: #7b8291;
+  --proved-line: #cbd7ff;
+  font-family: "SUIT Variable", "SUIT", sans-serif;
+  color: var(--proved-blue);
+}
+#provedEntry .proved-entry__inner { width:min(calc(100% - 56px),1180px); padding:40px 0 calc(40px + env(safe-area-inset-bottom)); }
+#provedEntry .proved-entry__inner>.proved-wordmark { margin-bottom:0; }
+#provedEntry .proved-entry__content { padding-block:clamp(56px,9vh,110px); }
+#provedEntryMain[data-step="start"] .proved-entry__content { display:grid; grid-template-columns:minmax(0,1.18fr) minmax(320px,.82fr); align-items:center; gap:clamp(64px,9vw,132px); }
+#provedEntry .proved-entry__statement { max-width:760px; margin:0; color:var(--proved-blue); font-size:clamp(48px,6vw,76px); font-weight:700; line-height:1.13; letter-spacing:-.04em; text-wrap:balance; }
+#provedEntry .proved-entry__action { min-width:0; }
+#provedEntry .proved-entry__title { margin:0 0 38px; color:var(--proved-blue); font-size:clamp(22px,2.3vw,30px); font-weight:600; letter-spacing:-.025em; text-align:left; }
+#provedEntry .proved-entry-options { column-gap:clamp(24px,4vw,50px); }
+#provedEntry .proved-entry-option { color:var(--proved-blue); border-bottom-color:var(--proved-line); font-size:clamp(18px,2vw,23px); font-weight:500; text-align:left; }
+#provedEntry .proved-entry-option--active { border-bottom-color:var(--proved-blue); }
+#provedEntry .proved-entry-option--muted { color:var(--proved-muted); }
+#provedEntry .proved-entry-divider { background:var(--proved-line); }
+#provedEntry .proved-entry-option:disabled { color:#a7acb6!important; border-bottom-color:#e2e5eb!important; }
+#provedEntry .proved-steps { justify-content:flex-start; }
+#provedEntry .proved-step { width:64px; background:#dfe6ff; }
+#provedEntry .proved-step.active { background:var(--proved-blue); }
+#provedEntry .proved-login-list { border-top-color:var(--proved-line); }
+#provedEntry .proved-login-button { color:var(--proved-blue-dark); border-bottom-color:var(--proved-line)!important; }
+#provedEntry .proved-login-guest,#provedEntry .proved-back,#provedEntry .proved-entry__hint { color:var(--proved-muted); }
+#provedEntry ::selection { color:#fff; background:var(--proved-blue); }
+@media(max-width:760px){
+  #provedEntry .proved-entry__inner{width:calc(100% - 40px);padding:28px 0 calc(34px + env(safe-area-inset-bottom))}
+  #provedEntryMain[data-step="start"] .proved-entry__content{display:block;padding-block:54px 34px}
+  #provedEntry .proved-entry__statement{max-width:350px;margin-bottom:72px;font-size:clamp(38px,11vw,46px);line-height:1.16}
+  #provedEntry .proved-entry__title{margin-bottom:28px;font-size:21px}
+  #provedEntry .proved-entry-options{column-gap:24px}
+  #provedEntry .proved-entry-option{min-height:58px;padding-inline:0;font-size:17px}
+  #provedEntry .proved-entry-divider{margin:28px 0 22px}
 }

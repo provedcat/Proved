@@ -228,15 +228,24 @@ function provedRenderEntry(step) {
       </div>
       <p id="provedEntryAuthMsg" class="proved-entry-auth-msg hidden" role="status" aria-live="polite"></p>
       <button class="proved-login-guest" type="button" onclick="provedRenderEntry('pet')">로그인 없이 시작하기</button>
-    </div>` : `<p class="proved-entry__hint">${isStart ? '로그인 없이 시작하면 선택할 수 있어요.' : '함께할 반려동물을 선택해 주세요.'}</p>`;
+    </div>` : '';
+
+  const title = step === 'pet'
+    ? '누구와 함께할까요?'
+    : isLogin
+      ? '로그인 방법'
+      : '시작하기';
 
   root.innerHTML = `
     <div class="proved-entry__main">
       <div class="proved-entry__content">
-        <h2 class="proved-entry__title">${step === 'pet' ? '누구와 함께할까요?' : isLogin ? '로그인 방법을 선택해주세요' : '먼저 로그인 방식을 선택해주세요'}</h2>
-        ${options}
-        ${detail}
-        ${steps(step === 'pet' ? 2 : 1)}
+        ${isStart ? '<h1 class="proved-entry__statement">반려동물의 한 끼를<br>더 정확하게 이해하는 방법.</h1>' : ''}
+        <div class="proved-entry__action">
+          <h2 class="proved-entry__title">${title}</h2>
+          ${options}
+          ${detail}
+          ${steps(step === 'pet' ? 2 : 1)}
+        </div>
       </div>
     </div>`;
 }
