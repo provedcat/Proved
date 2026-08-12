@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-header-switch-modal-v3">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-proved-linear-header-v4">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260728-entry-polish">
   <style>
     .proved-seo-summary {
@@ -133,17 +133,14 @@
   <!-- 헤더 -->
   <header class="pc-app-header flex items-center justify-between">
     <button type="button" class="proved-home-button" aria-label="프루브 홈으로 이동" onclick="provedGoHome()">
-      <img class="proved-wordmark proved-wordmark--header" src="/icons/proved-logo.svg" alt="" aria-hidden="true">
+      <span class="proved-header-wordmark" aria-hidden="true">PROVED</span>
     </button>
     <nav id="mainNav" class="pc-header-tabs" aria-label="주요 기능">
       <button id="navCalculator" type="button" onclick="showPage('calculatorPage')" class="is-active" aria-current="page">통합 계산기</button>
       <button id="navWeightTrend" type="button" onclick="showPage('weightTrendPage')" aria-current="false">체중 추이</button>
       <button id="navWetFoodBeta" type="button" onclick="showPage('wetFoodBetaPage')" class="hidden" aria-current="false">습식 탐험</button>
+      <button id="authOpenBtn" type="button" onclick="openAuthSheet()">로그인</button>
     </nav>
-    <button id="authOpenBtn" type="button" onclick="openAuthSheet()"
-      class="px-3 py-2 rounded-full bg-gray-50 border border-gray-100 text-xs font-black text-gray-500">
-      로그인
-    </button>
   </header>
 
   <main class="pc-page-container pb-28">
@@ -436,7 +433,7 @@
 
       <!-- 헤더 -->
       <div class="sc-header">
-        <div class="sc-brand">프루브</div>
+        <div class="sc-brand">PROVED</div>
         <div>
           <div class="sc-cat-name" id="sc_catName">—</div>
           <div class="sc-cat-sub"  id="sc_catSub">—</div>
@@ -463,7 +460,7 @@
 
       <div class="sc-energy-details">
         <div><span>식사 배정</span><strong id="sc_foodKcal">—</strong><small> kcal</small></div>
-        <div id="sc_treatBlock"><span>간식 예약</span><strong id="sc_treatKcal">—</strong><small id="sc_treatPct"></small></div>
+        <div id="sc_treatBlock"><span>간식 배정</span><strong id="sc_treatKcal">—</strong><small id="sc_treatPct"></small></div>
       </div>
 
       <!-- 사료별 급여량 -->
@@ -714,7 +711,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="/js/saved-cats.js?v=20260812-login-save-visibility"></script>
 <script src="/js/auth.js?v=20260728-calculator-pet-load"></script>
 <script src="/js/wet-beta-access.js?v=20260710-wet-beta-access"></script>
-<script src="/js/share-card.js?v=20260725-feeding-flow-2"></script>
+<script src="/js/share-card.js?v=20260812-proved-linear-header-v4"></script>
 <script src="/js/weight-trend.js?v=20260701-ui-refresh-2"></script>
 </body>
 </html>
