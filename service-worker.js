@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260812-editorial-calculator-v1';
+const CACHE_NAME = 'proved-pwa-20260812-flat-analysis-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
