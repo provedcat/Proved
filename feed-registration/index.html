@@ -9,13 +9,13 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260806-registration-complete-guide">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-shared-header-v1">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-shared-header-v1">
+  <script defer src="/js/proved-header.js?v=20260812-shared-header-v1"></script>
   <style>
     body { min-height:100vh; background:#F6F7F8; color:#222; }
     .registration-shell { width:min(100%,640px); min-height:100vh; margin:0 auto; padding:20px 20px 48px; }
-    .registration-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
-    .registration-header img { width:112px; height:auto; }
-    .registration-close { min-height:40px; padding:8px 13px; border:1px solid #E1E5EA; border-radius:10px; background:#fff; color:#6B7280; font-size:12px; font-weight:800; }
+    .registration-shell > .proved-global-header { margin-bottom:22px; }
     .registration-card { padding:22px; border:1px solid #E1E5EA; border-radius:12px; background:#fff; }
     .registration-eyebrow { color:#2F6FED; font-size:12px; font-weight:900; letter-spacing:.08em; }
     .registration-card h1 { margin-top:6px; font-size:25px; font-weight:900; letter-spacing:-.04em; }
@@ -85,10 +85,7 @@
 </head>
 <body>
   <main class="registration-shell">
-    <header class="registration-header">
-      <a href="/" aria-label="프루브 홈"><img src="/icons/proved-logo.svg" alt="프루브"></a>
-      <button type="button" class="registration-close" onclick="window.close()">등록 창 닫기</button>
-    </header>
+    <header data-proved-header="registration"></header>
 
     <section class="registration-card">
       <p class="registration-eyebrow">FEED REGISTRATION</p>
