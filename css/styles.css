@@ -337,33 +337,6 @@ body {
   background: var(--background) !important;
   box-shadow: none !important;
 }
-header { padding: 18px 10px 14px !important; }
-#authOpenBtn {
-  border: 0 !important;
-  background: rgba(255,255,255,0.58) !important;
-  color: #6B7280 !important;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
-}
-.pc-tabs {
-  padding: 0 6px 26px !important;
-  gap: 0 !important;
-  border-radius: 18px;
-}
-#navCalculator,
-#navWeightTrend {
-  min-height: 48px;
-  border-radius: 999px !important;
-  background: var(--muted) !important;
-  color: var(--muted-foreground) !important;
-  box-shadow: none !important;
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-}
-#navCalculator.bg-\[\#2F6FED\],
-#navWeightTrend.bg-\[\#2F6FED\] {
-  background: var(--brand-primary);
-  color: var(--primary-foreground) !important;
-  box-shadow: var(--shadow-button) !important;
-}
 main { padding: 0 16px 28px !important; }
 #calculatorPage { gap: 24px !important; }
 .pc-ratio-card,
@@ -639,7 +612,6 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 .pc-feed-input-row input[type=text] { min-height: 48px; border-color: var(--border-neutral) !important; border-radius: 12px !important; }
 .proved-shell-current { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0; }
 .proved-shell-weight-date { color:var(--text-secondary); font-size:13px; font-weight:500; }
-#navCalculator, #navWeightTrend, #navWetFoodBeta { border-radius:10px !important; }
 
 .pc-feed-panel, .pc-ratio-card { padding:24px !important; border-radius:16px !important; }
 .pc-feed-panel--dry { background:var(--cat-dry-light); border-color:var(--cat-dry); }
@@ -762,20 +734,13 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 html, body { background:var(--page-background)!important; color:var(--text-primary); }
 body { display:block!important; }
 .pc-app-shell { max-width:none; background:var(--page-background)!important; box-shadow:none!important; }
-.pc-app-header { height:64px; padding:0 24px!important; border-bottom:1px solid var(--border-subtle); background:var(--surface-primary); }
-.pc-app-header > * { max-height:46px; }
-.pc-page-container, .proved-shell-bar, .pc-tabs { width:min(100% - 48px, 720px); margin-inline:auto; padding-inline:0!important; }
+.pc-page-container, .proved-shell-bar { width:min(100% - 48px, 720px); margin-inline:auto; padding-inline:0!important; }
 .pc-page-container { padding-top:24px; display:block; }
 .pc-page-container > section { margin:0; }
 .pc-page-container > section:not(.hidden) { display:flex; flex-direction:column; gap:16px!important; }
 .proved-shell-bar { margin-top:24px; min-height:56px; padding:10px 14px!important; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-card)!important; background:var(--surface-primary)!important; box-shadow:none!important; }
 .proved-shell-current { color:var(--text-primary)!important; }
 .proved-load-pet-btn { min-height:44px; padding:0 12px!important; border:1px solid var(--border-default)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--brand-primary)!important; }
-.pc-tabs { margin-top:12px; padding-bottom:0!important; }
-#navCalculator,#navWeightTrend,#navWetFoodBeta { min-height:46px; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-button)!important; background:#fff!important; color:var(--text-secondary)!important; box-shadow:none!important; }
-#navCalculator:hover,#navWeightTrend:hover,#navWetFoodBeta:hover { background:rgba(53,104,255,.04)!important; }
-#navCalculator.is-active,#navWeightTrend.is-active,#navWetFoodBeta.is-active { border-color:rgba(53,104,255,.24)!important; background:rgba(53,104,255,.08)!important; color:var(--brand-primary)!important; }
-#navCalculator:disabled,#navWeightTrend:disabled,#navWetFoodBeta:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; }
 .pc-section-card,.pc-trend-card,.pc-trend-hero,#weightTrendLoginNotice { padding:24px!important; border:1px solid var(--border-subtle)!important; border-radius:var(--radius-card)!important; background:var(--surface-primary)!important; box-shadow:none!important; }
 #calculatorPage { gap:16px!important; }
 .pc-step-section { gap:20px!important; }
@@ -897,7 +862,6 @@ input::placeholder { color:var(--text-placeholder); }
 #trendCatList [data-cat-id] { border-radius:var(--radius-button)!important; }
 :where(button,input,select,[tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(53,104,255,.28)!important; outline-offset:2px; }
 button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }
-.pc-tabs--primary { margin-top:24px; }
 .pc-upload-section { display:flex; flex-direction:column; gap:16px; padding:20px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:var(--surface-primary); }
 .pc-upload-section.hidden { display:none!important; }
 .pc-upload-section h2 { margin:0; color:var(--text-primary); font-size:18px; font-weight:800; line-height:1.4; }
@@ -917,8 +881,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .pc-upload-analyze-button { width:100%; min-height:50px; padding:12px 16px; border:0; border-radius:var(--radius-button); background:var(--brand-primary); color:#fff; font-size:16px; font-weight:800; box-shadow:none; }
 .pc-upload-analyze-button:hover,.pc-upload-analyze-button:active { background:var(--brand-primary-pressed); }
 @media (max-width:600px) {
-  .pc-app-header { padding-inline:16px!important; }
-  .pc-page-container,.proved-shell-bar,.pc-tabs { width:calc(100% - 32px); }
+  .pc-page-container,.proved-shell-bar { width:calc(100% - 32px); }
   .pc-section-card,.pc-trend-card,#weightTrendLoginNotice { padding:18px!important; }
   #trendSummaryBox { grid-template-columns:1fr; gap:16px!important; padding:18px; }
   #trendSummaryBox > div { padding:16px 0 0!important; border-left:0!important; border-top:1px solid var(--border-subtle)!important; }
@@ -978,7 +941,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 }
 
 /* 2026 editorial calculator flow: 01 feeds, 02 pet, 03 ratio, 04 result */
-.pc-page-container,.proved-shell-bar,.pc-tabs{width:min(100% - 48px,1180px)}
+.pc-page-container,.proved-shell-bar{width:min(100% - 48px,1180px)}
 #calculatorPage{display:flex!important;flex-direction:column;gap:0!important;border-inline:1px solid var(--border-subtle);background:#fff}
 #calculatorPage>.pc-section-card{margin:0!important;padding:48px 44px 54px!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}
 #feedsStep{order:1}#petInfoStep{order:2}#ratioStep{order:3}#resultArea{order:4}
@@ -1003,7 +966,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .pc-app-shell button,.pc-feed-registration-link{border-radius:0!important}#calculatorPage .pc-primary-button{border-radius:0!important}
 #resultArea{gap:28px!important;color:var(--text-primary)!important}#resultArea>.pc-section-title{font-size:29px!important}#resultTitle{margin:0;color:var(--brand-primary);font-size:clamp(34px,4.5vw,58px);font-weight:720;line-height:1.16;letter-spacing:-.035em}#resultTitle>span{display:block}
 .pc-result-summary{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--border-subtle);border-inline:0;border-radius:0;background:#fff}.pc-result-summary>div{display:block;padding:20px;border-right:1px solid var(--border-subtle);border-bottom:0}.pc-result-summary>div:first-child{padding-left:0}.pc-result-card{border-radius:0!important}.pc-result-card--dry h3,.pc-result-card--dry strong{color:var(--cat-dry-ink)!important}.pc-result-card--wet h3,.pc-result-card--wet strong{color:var(--cat-wet-ink)!important}.proved-dog-mode .pc-result-card--dry h3,.proved-dog-mode .pc-result-card--dry strong{color:var(--dog-dry-ink)!important}.proved-dog-mode .pc-result-card--wet h3,.proved-dog-mode .pc-result-card--wet strong{color:var(--dog-wet-ink)!important}
-@media(max-width:820px){.pc-page-container,.proved-shell-bar,.pc-tabs{width:calc(100% - 24px)}#calculatorPage>.pc-section-card{padding:38px 20px 44px!important}.pc-feed-grid{display:block}.pc-feed-grid>.pc-feed-panel,.pc-feed-grid>.pc-feed-panel+.pc-feed-panel{padding:24px 0!important;border-left:0!important}.pc-feed-grid>.pc-feed-panel+.pc-feed-panel{border-top:1px solid var(--border-subtle)!important}#petInfoStep{grid-template-columns:1fr}.pc-ratio-feed-names,.pc-live-preview{grid-template-columns:1fr}.pc-ratio-feed-names p+p,.pc-live-preview p+p{padding-left:0;border-left:0;border-top:1px solid var(--border-subtle)}.pc-result-summary{grid-template-columns:1fr}.pc-result-summary>div,.pc-result-summary>div:first-child{padding:16px 0;border-right:0;border-bottom:1px solid var(--border-subtle)}.pc-result-summary>div:last-child{border-bottom:0}#resultTitle>span{display:inline}#resultTitle>span+span::before{content:' '}}
+@media(max-width:820px){.pc-page-container,.proved-shell-bar{width:calc(100% - 24px)}#calculatorPage>.pc-section-card{padding:38px 20px 44px!important}.pc-feed-grid{display:block}.pc-feed-grid>.pc-feed-panel,.pc-feed-grid>.pc-feed-panel+.pc-feed-panel{padding:24px 0!important;border-left:0!important}.pc-feed-grid>.pc-feed-panel+.pc-feed-panel{border-top:1px solid var(--border-subtle)!important}#petInfoStep{grid-template-columns:1fr}.pc-ratio-feed-names,.pc-live-preview{grid-template-columns:1fr}.pc-ratio-feed-names p+p,.pc-live-preview p+p{padding-left:0;border-left:0;border-top:1px solid var(--border-subtle)}.pc-result-summary{grid-template-columns:1fr}.pc-result-summary>div,.pc-result-summary>div:first-child{padding:16px 0;border-right:0;border-bottom:1px solid var(--border-subtle)}.pc-result-summary>div:last-child{border-bottom:0}#resultTitle>span{display:inline}#resultTitle>span+span::before{content:' '}}
 
 /* Final geometry and flat analysis language. */
 .pc-app-shell input,.pc-app-shell select,.pc-app-shell textarea,.pc-input-unit,.pc-feed-input-row,.pc-subratio,.pc-segmented,.pc-segmented-option,.pc-choice-chip,.pc-adult-weight-presets button,.pc-search-list{border-radius:0!important}
@@ -1017,15 +980,15 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 @media(max-width:520px){.pc-kcal-counter{grid-template-columns:48px minmax(120px,1fr) 48px;width:100%}.pc-analysis-metrics,.pc-water-summary{grid-template-columns:1fr 1fr}.pc-analysis-metrics strong,.pc-water-summary strong{font-size:23px}.pc-analysis-row{gap:14px}}
 
 /* Header navigation, exclusive page switching, and editorial result modal. */
-.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:22px}
+.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center;height:64px;padding:0 24px!important;gap:22px;border-bottom:1px solid var(--border-subtle);background:var(--surface-primary)}
 .proved-header-wordmark{color:var(--brand-primary);font-size:21px;font-weight:800;letter-spacing:.035em;line-height:1}
 .proved-home-button{border-radius:0!important}
 .proved-home-button:hover{background:transparent!important;color:var(--brand-primary)}
-.pc-header-tabs{display:flex;justify-self:end;align-items:center;min-width:0}
-.pc-header-tabs button{min-height:32px;padding:0 18px;border:0!important;border-left:1px solid var(--border-default)!important;border-radius:0!important;background:transparent!important;color:var(--text-secondary)!important;font-size:13px;font-weight:720;white-space:nowrap}
-.pc-header-tabs button:last-child{border-right:1px solid var(--border-default)!important}
+.pc-header-tabs{display:flex;justify-self:end;align-self:stretch;align-items:stretch;min-width:0;border-left:1px solid var(--brand-primary)}
+.pc-header-tabs button{appearance:none!important;display:flex!important;align-items:center;justify-content:center;min-height:0!important;margin:0!important;padding:0 20px!important;border:0!important;border-right:1px solid var(--brand-primary)!important;border-radius:0!important;background:none!important;color:var(--text-secondary)!important;box-shadow:none!important;font-size:13px;font-weight:720;line-height:1;white-space:nowrap;transform:none!important}
+.pc-header-tabs button:hover,.pc-header-tabs button:active{border-color:var(--brand-primary)!important;border-radius:0!important;background:none!important;box-shadow:none!important;transform:none!important}
 .pc-header-tabs button.is-active{color:var(--brand-primary)!important}
-#authOpenBtn{border-left:1px solid var(--border-default)!important;border-right:1px solid var(--border-default)!important;border-radius:0!important;background:transparent!important;color:var(--text-secondary)!important;box-shadow:none!important}
+#authOpenBtn{border:0!important;border-right:1px solid var(--brand-primary)!important;border-radius:0!important;background:none!important;color:var(--text-secondary)!important;box-shadow:none!important}
 #calculatorPage.hidden,#weightTrendPage.hidden,#wetFoodBetaPage.hidden{display:none!important}
 
 .pc-field-label{color:var(--brand-primary)!important}
@@ -1060,7 +1023,7 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 @media(max-width:720px){
   .pc-app-header{grid-template-columns:auto 1fr;gap:8px;padding-inline:12px!important}
   .pc-header-tabs{justify-self:stretch;justify-content:flex-end}
-  .pc-header-tabs button{padding-inline:9px;font-size:11px}
+  .pc-header-tabs button{padding-inline:9px!important;font-size:11px}
   .proved-header-wordmark{font-size:17px}
   #authOpenBtn{padding-inline:9px!important}
   .share-modal-inner{padding-inline:10px}

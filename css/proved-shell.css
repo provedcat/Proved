@@ -287,11 +287,6 @@
   font-weight: 900;
 }
 
-.proved-dog-mode .pc-tabs button[aria-disabled="true"] {
-  opacity: .55;
-  pointer-events: none;
-}
-
 @media (min-width: 768px) {
   .proved-entry__inner {
     padding-top: 78px;
