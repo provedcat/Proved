@@ -70,25 +70,6 @@
     }
     a { color: inherit; }
     .guide-shell { width: min(100%, 820px); margin: 0 auto; padding: 22px 18px 72px; }
-    .guide-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-    .guide-header img { width: 112px; height: auto; display: block; }
-    .guide-header nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
-    .guide-header nav a {
-      padding: 7px 10px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: #fff;
-      color: #5e6877;
-      font-size: 12px;
-      font-weight: 800;
-      text-decoration: none;
-    }
     .guide-hero {
       padding: 32px;
       border: 1px solid #dce4f1;
@@ -194,8 +175,6 @@
 
     @media (max-width: 640px) {
       .guide-shell { padding-inline: 14px; }
-      .guide-header { align-items: flex-start; }
-      .guide-header nav { max-width: 190px; }
       .guide-hero { padding: 24px 20px; border-radius: 16px; }
       .guide-toc, .guide-section { padding: 20px 17px; border-radius: 14px; }
       .guide-toc ol, .method-grid { grid-template-columns: 1fr; }
@@ -229,10 +208,7 @@
     a { text-underline-offset: 4px; }
     a:focus-visible, button:focus-visible { outline: 3px solid rgba(53,104,255,.28); outline-offset: 4px; }
     .guide-shell { width: min(calc(100% - 56px), 1180px); padding: 0 0 72px; }
-    .guide-header { min-height: 80px; margin: 0 0 64px; padding: 18px 0; border-bottom: 1px solid var(--line); }
-    .guide-header img { width: 118px; }
-    .guide-header nav { gap: 24px; }
-    .guide-header nav a { padding: 0 0 3px; border: 0; border-radius: 0; background: transparent; color: var(--blue); font-size: 14px; font-weight: 500; }
+    .guide-shell > .proved-global-header { margin-bottom:64px; }
     .guide-layout { display: grid; grid-template-columns: minmax(280px,.72fr) minmax(0,1.28fr); gap: clamp(56px,7vw,104px); align-items:start; }
     .guide-sidebar { position: sticky; top: 28px; }
     .guide-hero { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -282,8 +258,7 @@
     .guide-footer a { color: var(--blue); font-weight: 500; }
     @media (max-width: 760px) {
       .guide-shell { width: calc(100% - 40px); padding-bottom: 48px; }
-      .guide-header { min-height: 70px; margin-bottom: 44px; align-items: center; }
-      .guide-header nav { max-width: 190px; gap: 10px 16px; }
+      .guide-shell > .proved-global-header { margin-bottom:44px; }
       .guide-layout { display: block; }
       .guide-sidebar { position: static; }
       .guide-hero h1 { max-width: 340px; font-size: 43px; }
@@ -299,17 +274,13 @@
       table { font-size: 12px; }
       th, td { padding: 11px 9px; }
     }
-  </style>
+</style>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-shared-header-v1">
+  <script defer src="/js/proved-header.js?v=20260812-shared-header-v1"></script>
 </head>
 <body>
   <div class="guide-shell">
-    <header class="guide-header">
-      <a href="/" aria-label="프루브 홈"><img src="/icons/proved-logo.svg" alt="프루브"></a>
-      <nav aria-label="계산기 바로가기">
-        <a href="/cat-food-calculator/">고양이 계산기</a>
-        <a href="/dog-food-calculator/">강아지 계산기</a>
-      </nav>
-    </header>
+    <header data-proved-header="guide"></header>
 
     <main>
       <article class="guide-layout">
