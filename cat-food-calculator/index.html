@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-flat-analysis-flow">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-header-switch-modal-v3">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260728-entry-polish">
   <style>
     .proved-seo-summary {
@@ -135,26 +135,16 @@
     <button type="button" class="proved-home-button" aria-label="프루브 홈으로 이동" onclick="provedGoHome()">
       <img class="proved-wordmark proved-wordmark--header" src="/icons/proved-logo.svg" alt="" aria-hidden="true">
     </button>
+    <nav id="mainNav" class="pc-header-tabs" aria-label="주요 기능">
+      <button id="navCalculator" type="button" onclick="showPage('calculatorPage')" class="is-active" aria-current="page">통합 계산기</button>
+      <button id="navWeightTrend" type="button" onclick="showPage('weightTrendPage')" aria-current="false">체중 추이</button>
+      <button id="navWetFoodBeta" type="button" onclick="showPage('wetFoodBetaPage')" class="hidden" aria-current="false">습식 탐험</button>
+    </nav>
     <button id="authOpenBtn" type="button" onclick="openAuthSheet()"
       class="px-3 py-2 rounded-full bg-gray-50 border border-gray-100 text-xs font-black text-gray-500">
       로그인
     </button>
   </header>
-
-  <nav id="mainNav" class="pc-tabs pc-tabs--primary px-6 pb-4 grid grid-cols-3 gap-2" aria-label="주요 기능">
-    <button id="navCalculator" onclick="showPage('calculatorPage')"
-      class="is-active py-3 text-sm font-black" aria-current="page">
-      통합 계산기
-    </button>
-    <button id="navWeightTrend" onclick="showPage('weightTrendPage')"
-      class="py-3 text-sm font-black" aria-current="false">
-      체중 추이
-    </button>
-    <button id="navWetFoodBeta" onclick="showPage('wetFoodBetaPage')"
-      class="hidden py-3 text-sm font-black" aria-current="false">
-      습식 탐험
-    </button>
-  </nav>
 
   <main class="pc-page-container pb-28">
 
@@ -213,6 +203,8 @@
 
     <!-- 3단계: 결과 -->
     <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p></section>
+
+    <script>document.getElementById('calculatorPage')?.insertBefore(document.getElementById('feedsStep'),document.getElementById('petInfoStep'));</script>
 
 
     <!-- 제품 목록 바텀시트 -->
@@ -437,7 +429,7 @@
   <div class="share-modal-inner">
 
     <!-- 닫기 버튼 -->
-    <button class="share-close-btn" onclick="closeShareModal()">닫기</button>
+    <button type="button" class="share-close-btn" onclick="closeShareModal()" aria-label="결과 이미지 닫기">ⓧ</button>
 
     <!-- 캡처 대상 카드 -->
     <div id="shareCard">
@@ -715,7 +707,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="/js/proved-shell.js?v=20260728-entry-polish"></script>
 <script src="/js/pwa-install.js?v=20260812-flat-analysis-flow"></script>
-<script src="/js/calculator.js?v=20260812-flat-analysis-flow"></script>
+<script src="/js/calculator.js?v=20260812-header-switch-modal-v3"></script>
 <script src="/js/feed-search.js?v=20260805-request-result-v7-subpages"></script>
 <script src="/js/calculator-session.js?v=20260806-feed-registration-flow"></script>
 <script src="/js/recent-feed.js?v=20260728-recent-feed-fix"></script>
