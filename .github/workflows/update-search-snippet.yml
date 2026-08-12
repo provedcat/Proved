@@ -1,0 +1,56 @@
+name: Update search snippet
+
+on:
+  push:
+    branches:
+      - agent/improve-search-snippet
+
+permissions:
+  contents: write
+
+jobs:
+  update-snippet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update title and descriptions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          title = '고양이·강아지 사료 계산기 | 급여량·칼슘/인·수분까지 | 프루브'
+          desc = '먹이는 사료를 검색하고 건식·습식 비율을 선택하면 하루 권장 급여량을 계산합니다. 선택한 사료의 칼슘·인 섭취량과 비율, 예상 수분 섭취량까지 함께 확인할 수 있습니다.'
+
+          replacements = {
+              '<title>고양이·강아지 사료 급여량 계산기 | 프루브</title>': f'<title>{title}</title>',
+              '<meta name="description" content="프루브는 고양이·강아지의 체중, 생년월일, 중성화 여부와 건식·습식 사료 비율을 바탕으로 하루 권장 칼로리와 사료 급여량을 계산하고 칼슘·인 비율과 수분 섭취량을 확인할 수 있습니다.">': f'<meta name="description" content="{desc}">',
+              '<meta property="og:title" content="고양이·강아지 사료 급여량 계산기 | 프루브">': f'<meta property="og:title" content="{title}">',
+              '<meta property="og:description" content="프루브는 반려동물의 체중과 생애 단계, 건식·습식 비율을 바탕으로 하루 권장 칼로리와 사료 급여량을 계산합니다.">': f'<meta property="og:description" content="{desc}">',
+              '<meta name="twitter:title" content="고양이·강아지 사료 급여량 계산기 | 프루브">': f'<meta name="twitter:title" content="{title}">',
+              '<meta name="twitter:description" content="반려동물의 체중과 생애 단계, 건식·습식 비율을 바탕으로 하루 권장 칼로리와 사료 급여량을 계산합니다.">': f'<meta name="twitter:description" content="{desc}">',
+              '"description": "고양이와 강아지의 하루 권장 칼로리, 건사료·습식사료 급여량, 칼슘·인 비율과 수분 섭취량을 계산하는 웹서비스입니다."': f'"description": "{desc}"'
+          }
+
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Expected text not found: {old}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit updated metadata
+        shell: bash
+        run: |
+          rm -f .github/workflows/update-search-snippet.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "검색결과 제목과 설명을 차별화된 문구로 수정"
+          git push origin HEAD:agent/improve-search-snippet
