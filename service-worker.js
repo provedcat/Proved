@@ -1,10 +1,12 @@
-const CACHE_NAME = 'proved-pwa-20260812-single-header-system-v6';
+const CACHE_NAME = 'proved-pwa-20260812-shared-header-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
   './service-worker.js',
   './css/styles.css',
   './css/proved-shell.css',
+  './css/proved-header.css',
+  './js/proved-header.js',
   './js/proved-shell.js',
   './js/pwa-install.js',
   './js/calculator.js',
