@@ -220,7 +220,7 @@ function updateSaveFeedingButtonVisibility() {
   const isAlreadySaved = !!(hasResult && currentSaveKey && currentSaveKey === state.lastSavedResultKey);
   const canClick = hasResult && !state.isCalculationDirty && !isSaving && !isAlreadySaved;
 
-  button.classList.toggle('hidden', !hasResult);
+  button.classList.toggle('hidden', !hasResult || !state.currentUser);
   button.disabled = !canClick;
   button.classList.toggle('bg-[#2F6FED]', canClick);
   button.classList.toggle('text-white', canClick);
@@ -246,7 +246,7 @@ function updateSaveFeedingButtonVisibility() {
   if (!hasResult) {
     setSaveFeedingRecordMessage('먼저 급여량을 계산해 주세요.', 'gray');
   } else if (!state.currentUser) {
-    setSaveFeedingRecordMessage('로그인하면 현재 계산 결과를 저장할 수 있습니다.', 'gray');
+    setSaveFeedingRecordMessage('', 'gray');
   } else if (state.selectedSavedCatId) {
     setSaveFeedingRecordMessage('', 'gray');
   } else {

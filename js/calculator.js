@@ -610,6 +610,8 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
 
   const resultLabel = document.querySelector('#resultArea > .pc-section-title');
   if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
+  const shareButton = document.getElementById('openShareModalBtn');
+  if (shareButton) shareButton.textContent = '결과 이미지 보기';
 
   const treatInput = document.getElementById('treatKcalInput');
   const changeTreat = amount => {
@@ -662,38 +664,30 @@ function analyzeCaP() {
   const pOk   = 총인   >= NRC.인_권장   * (state.lastResult.DER / 1000);
   const rOk   = ratio  && parseFloat(ratio) >= NRC.비율_최소 && parseFloat(ratio) <= NRC.비율_상한;
 
-  const sc = ok => ok ? 'text-green-500' : 'text-red-400';
-  const st = ok => ok ? '✅ 정상' : '⚠️ 확인필요';
+  const sc = ok => ok ? 'is-ok' : 'is-check';
+  const st = ok => ok ? '정상' : '확인 필요';
+  const analysisIcon = '<svg class="pc-analysis-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M8 12h8M12 8v8"></path></svg>';
 
   const html = `
-    <div class="p-6 bg-gray-50 rounded-3xl space-y-4">
-      <h3 class="font-black text-gray-800">📊 칼슘 · 인 분석</h3>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white p-4 rounded-2xl text-center">
-          <p class="text-xs text-gray-400 mb-1">칼슘 섭취량</p>
-          <p class="text-2xl font-black">${Math.round(총칼슘)}</p>
-          <p class="text-xs text-gray-400">mg / day</p>
-          <p class="text-xs font-bold mt-1 ${sc(caOk)}">${st(caOk)}</p>
+    <div class="pc-analysis-result pc-analysis-result--cap">
+      <h3>${analysisIcon}<span>칼슘 · 인 분석</span></h3>
+      <div class="pc-analysis-metrics">
+        <div>
+          <span>칼슘 섭취량</span><strong>${Math.round(총칼슘)} <small>mg/day</small></strong><em class="${sc(caOk)}">${st(caOk)}</em>
         </div>
-        <div class="bg-white p-4 rounded-2xl text-center">
-          <p class="text-xs text-gray-400 mb-1">인 섭취량</p>
-          <p class="text-2xl font-black">${Math.round(총인)}</p>
-          <p class="text-xs text-gray-400">mg / day</p>
-          <p class="text-xs font-bold mt-1 ${sc(pOk)}">${st(pOk)}</p>
+        <div>
+          <span>인 섭취량</span><strong>${Math.round(총인)} <small>mg/day</small></strong><em class="${sc(pOk)}">${st(pOk)}</em>
         </div>
       </div>
-      <div class="bg-white p-4 rounded-2xl text-center">
-        <p class="text-xs text-gray-400 mb-1">칼슘 : 인 비율</p>
-        <p class="text-3xl font-black ${rOk ? 'text-green-500' : 'text-red-400'}">${ratio ? ratio + ' : 1' : '계산불가'}</p>
-        <p class="text-xs text-gray-400 mt-1">정상 범위 ${NRC.비율_최소} ~ ${NRC.비율_상한} : 1</p>
+      <div class="pc-analysis-ratio">
+        <span>칼슘 : 인 비율</span><strong class="${sc(rOk)}">${ratio ? ratio + ' : 1' : '계산 불가'}</strong><small>참고 범위 ${NRC.비율_최소}–${NRC.비율_상한} : 1</small>
       </div>
       ${결과목록.map(s => `
-        <div class="flex justify-between text-sm py-2 border-b border-gray-100">
-          <span class="font-bold text-gray-600">${s.이름}</span>
-          <span class="text-gray-400">Ca ${s.ca_mg}mg · P ${s.p_mg}mg</span>
+        <div class="pc-analysis-row">
+          <span>${s.이름}</span><strong>Ca ${s.ca_mg}mg · P ${s.p_mg}mg</strong>
         </div>`).join('')}
-      ${제외목록.length ? `<p class="text-xs text-gray-300">※ 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
-      <p class="text-xs text-gray-300 leading-relaxed">※ ${NRC.기준} 기준 참고값입니다.</p>
+      ${제외목록.length ? `<p class="pc-analysis-note">데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
+      <p class="pc-analysis-note">${NRC.기준} 기준 참고값입니다.</p>
     </div>`;
 
   document.getElementById('capResult').innerHTML = html;
@@ -741,66 +735,25 @@ function analyzeWater() {
   const gaugeWidth = Math.min(충족률, 100);
 
   let statusMsg;
-  if (총수분_ml === 0 && 결과목록.length === 0) {
-    statusMsg = `<p class="text-sm text-gray-400 text-center py-2">수분 데이터가 있는 사료가 없습니다.</p>`;
-  } else if (ok) {
-    statusMsg = `<p class="text-sm font-bold text-green-500">✅ 사료만으로도 권장 수분 최소치 충족!</p>`;
-  } else {
-    statusMsg = `<p class="text-sm font-bold text-amber-500">💧 물그릇으로 약 <span class="text-lg font-black">${부족분}ml</span> 이상 추가 섭취 권장</p>`;
-  }
+  if (총수분_ml === 0 && 결과목록.length === 0) statusMsg = '수분 데이터가 있는 사료가 없습니다.';
+  else if (ok) statusMsg = '사료를 통한 수분 섭취가 참고 최소치를 충족합니다.';
+  else statusMsg = `물그릇으로 약 ${부족분}ml 이상 추가 섭취를 권장합니다.`;
+  const waterIcon = '<svg class="pc-analysis-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11Z"></path></svg>';
 
   const html = `
-    <div class="p-6 bg-gray-50 rounded-3xl space-y-4">
-      <h3 class="font-black text-gray-800">💧 수분 섭취량 분석</h3>
-      <div class="bg-white p-5 rounded-2xl space-y-3">
-        <div class="flex justify-between items-end">
-          <div>
-            <p class="text-xs text-gray-400 mb-1">사료 통한 수분 섭취</p>
-            <p class="text-4xl font-black text-[#38a8c5]">${총수분_ml}<span class="text-base font-bold text-gray-400 ml-1">ml</span></p>
-          </div>
-          <div class="text-right">
-            <p class="text-xs text-gray-400">권장 범위</p>
-            <p class="text-sm font-black text-gray-600">${권장_최소}–${권장_최대} ml</p>
-            <p class="text-xs text-gray-300">체중 ${weight}kg 기준</p>
-          </div>
-        </div>
-        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-          <div class="h-3 rounded-full transition-all duration-500" style="width:${gaugeWidth}%; background:${gaugeColor};"></div>
-        </div>
-        <div class="flex justify-between text-[10px] text-gray-300 font-bold">
-          <span>0ml</span>
-          <span style="color:${gaugeColor}">${충족률}% 충족</span>
-          <span>${권장_최소}ml</span>
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-2xl">${statusMsg}</div>
-      ${결과목록.length > 0 ? `<div class="space-y-2">
+    <div class="pc-analysis-result pc-analysis-result--water">
+      <h3>${waterIcon}<span>수분 섭취량 분석</span></h3>
+      <div class="pc-water-summary"><div><span>사료를 통한 수분 섭취</span><strong>${총수분_ml}<small>ml</small></strong></div><div><span>참고 범위</span><strong>${권장_최소}–${권장_최대}<small>ml</small></strong><small>체중 ${weight}kg 기준</small></div></div>
+      <div class="pc-water-gauge"><i style="width:${gaugeWidth}%;background:${gaugeColor}"></i></div><p class="pc-water-status">${충족률}% · ${statusMsg}</p>
+      ${결과목록.length > 0 ? `<div class="pc-analysis-rows">
         ${결과목록.map(s => {
-          const barW     = 총수분_ml > 0 ? Math.round((s.water_ml / 총수분_ml) * 100) : 0;
           const barColor = s.종류 === '습식사료' ? '#3D8BFF' : '#FF9F43';
           return `
-          <div class="bg-white p-4 rounded-2xl">
-            <div class="flex justify-between items-center mb-2">
-              <div>
-                <span class="text-[10px] font-black uppercase" style="color:${barColor}">${s.종류 === '습식사료' ? 'WET' : 'DRY'}</span>
-                <p class="font-bold text-sm text-gray-800">${s.이름}</p>
-              </div>
-              <div class="text-right">
-                <p class="font-black text-gray-900">${s.water_ml}ml</p>
-                <p class="text-xs text-gray-400">${s.수분_pct}% × ${s.급여량_g}g</p>
-              </div>
-            </div>
-            <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div class="h-1.5 rounded-full" style="width:${barW}%; background:${barColor};"></div>
-            </div>
-          </div>`;
+          <div class="pc-analysis-row" style="--feed-color:${barColor}"><span><small>${s.종류}</small>${s.이름}</span><strong>${s.water_ml}ml<small>${s.수분_pct}% × ${s.급여량_g}g</small></strong></div>`;
         }).join('')}
       </div>` : ''}
-      ${제외목록.length ? `<p class="text-xs text-gray-300">※ 수분 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
-      <p class="text-xs text-gray-300 leading-relaxed">
-        ※ WSAVA 기준 성묘 권장 수분 44~55ml/kg/day 참고값입니다.<br>
-        ※ 물그릇 음수량은 포함되지 않습니다.
-      </p>
+      ${제외목록.length ? `<p class="pc-analysis-note">수분 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
+      <p class="pc-analysis-note">WSAVA 성묘 권장 수분 44–55ml/kg/day 참고값이며 물그릇 음수량은 포함하지 않습니다.</p>
     </div>`;
 
   document.getElementById('waterResult').innerHTML = html;
