@@ -238,7 +238,7 @@ function provedRenderEntry(step) {
   root.innerHTML = `
     <div class="proved-entry__main">
       <div class="proved-entry__content">
-        <h1 class="proved-entry__statement">반려동물의 한 끼를<br>더 정확하게 이해하는 방법.</h1>
+        <h1 class="proved-entry__statement"><span>반려동물의 한 끼를</span><span>더 정확하게 이해하는 방법.</span></h1>
         <div class="proved-entry__action">
           ${isLogin ? `<section class="proved-entry__section" aria-labelledby="provedEntryLoginTitle">
             <div class="proved-entry__section-heading">
