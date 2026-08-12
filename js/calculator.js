@@ -155,7 +155,7 @@ function updateCalculatorSpeciesCopy(species = state.selectedPetSpecies || 'cat'
   const nameLabel = document.querySelector('label[for="catName"]');
   const weightInput = document.getElementById('catWeight');
 
-  if (nameLabel) nameLabel.textContent = `${speciesLabel} 이름`;
+  if (nameLabel) nameLabel.innerHTML = `이름 <span class="pc-optional">선택</span>`;
   if (weightInput) weightInput.max = isDog ? '150' : '20';
   document.getElementById('dogActivityField')?.classList.toggle('hidden', !isDog);
   document.querySelectorAll('[data-pet-species-copy]').forEach(element => {
@@ -169,12 +169,11 @@ function updateDogConditionalFields() {
   const birthValue = document.getElementById('catBirth')?.value;
   const birth = birthValue ? new Date(`${birthValue}T00:00:00`) : null;
   const months = birth && !Number.isNaN(birth.getTime()) ? getAgeMonths(birth) : null;
-  const expectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value) || 25;
-  const growthLimit = getDogAdultTransitionMonths(expectedAdultWeight);
-  document.getElementById('dogAdultWeightField')?.classList.toggle('hidden', !(isDog && months !== null && months < growthLimit));
+  document.getElementById('dogAdultWeightField')?.classList.toggle('hidden', !(isDog && months !== null && months < 18));
 }
 
 function markCalculationDirty() {
+  updateFeedingPreview();
   if (!state.lastResult) return;
   state.isCalculationDirty = true;
   updateResultActionState();
@@ -279,6 +278,65 @@ function updateRatio(v) {
   document.getElementById('dryPct').textContent = dryPercent;
   document.getElementById('wetPct').textContent = wetPercent;
   document.getElementById('ratioSlider')?.style.setProperty('--ratio-split', `${dryPercent}%`);
+  updateFeedingPreview();
+}
+
+function getTreatKcal() {
+  return Math.max(0, Math.round(Number(document.getElementById('treatKcalInput')?.value) || 0));
+}
+
+function getSelectedWetEntries() {
+  return state.wetSlotIds.map(sid => ({ sid, feed: state.wetFeedMap[sid] })).filter(entry => entry.feed);
+}
+
+function getAllocationPreview(foodKcal, dryRatio, wetRatio) {
+  const switching = document.getElementById('drySwitching')?.checked;
+  const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
+  const dryTotal = switching ? dryFeeds.reduce((sum, _, index) => sum + (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0), 0) : 100;
+  const dryGrams = dryFeeds.reduce((sum, feed, index) => {
+    const share = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (dryTotal || 100) : 1;
+    return sum + Math.round((foodKcal * dryRatio * share) / (feed.kcal / 1000));
+  }, 0);
+  const wetEntries = getSelectedWetEntries();
+  const additionalWetPct = wetEntries.slice(1).reduce((sum, { sid }) => sum + (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0), 0);
+  const wetGrams = wetEntries.reduce((sum, { sid, feed }, index) => {
+    const share = wetEntries.length === 1 ? 1 : index === 0 ? (100 - additionalWetPct) / 100 : (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0) / 100;
+    return sum + Math.round((foodKcal * wetRatio * Math.max(0, share)) / (feed.kcal / 1000));
+  }, 0);
+  return { dryGrams, wetGrams, dryFeeds, wetEntries };
+}
+
+function updateFeedingPreview() {
+  const dryName = document.getElementById('ratioDryFeedName');
+  const wetName = document.getElementById('ratioWetFeedName');
+  const dryFeeds = document.getElementById('drySwitching')?.checked ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
+  const wetEntries = getSelectedWetEntries();
+  if (dryName) dryName.textContent = dryFeeds.length ? `${dryFeeds[0].name}${dryFeeds.length > 1 ? ` 외 ${dryFeeds.length - 1}개` : ''}` : '선택한 건사료 없음';
+  if (wetName) wetName.textContent = wetEntries.length ? `${wetEntries[0].feed.name}${wetEntries.length > 1 ? ` 외 ${wetEntries.length - 1}개` : ''}` : '선택한 습식사료 없음';
+  const weight = Number(document.getElementById('catWeight')?.value);
+  const birthStr = document.getElementById('catBirth')?.value;
+  const neutered = document.getElementById('catNeutered')?.value;
+  if (!Number.isFinite(weight) || !birthStr || !['true', 'false'].includes(neutered)) {
+    if (document.getElementById('previewDryGrams')) document.getElementById('previewDryGrams').textContent = '—';
+    if (document.getElementById('previewWetGrams')) document.getElementById('previewWetGrams').textContent = '—';
+    return;
+  }
+  const species = state.selectedPetSpecies || 'cat';
+  const plan = getCaloriePlan(weight, birthStr, neutered === 'true', document.getElementById('isDiet')?.checked, new Date(), species, {
+    activity: document.querySelector('input[name="dogActivity"]:checked')?.value || 'normal',
+    expectedAdultWeight: Number(document.getElementById('dogExpectedAdultWeight')?.value) || null,
+    pregnant: document.getElementById('isPregnant')?.checked,
+    lactating: document.getElementById('isLactating')?.checked
+  });
+  const treatKcal = Math.min(getTreatKcal(), plan.DER);
+  const ratios = getMealRatios(document.getElementById('ratioSlider')?.value || 60);
+  const preview = getAllocationPreview(plan.DER - treatKcal, ratios.dryPercent / 100, ratios.wetPercent / 100);
+  const dryPreview = document.getElementById('previewDryGrams');
+  const wetPreview = document.getElementById('previewWetGrams');
+  if (dryPreview) dryPreview.textContent = preview.dryFeeds.length ? preview.dryGrams : '—';
+  if (wetPreview) wetPreview.textContent = preview.wetEntries.length ? preview.wetGrams : '—';
+  const share = document.getElementById('treatKcalShare');
+  if (share) share.textContent = `하루 필요 열량의 ${(treatKcal / plan.DER * 100).toFixed(1)}%`;
 }
 
 // -----------------------------------------------
@@ -400,7 +458,6 @@ function calculate() {
   const speciesLabel = species === 'dog' ? '강아지' : '고양이';
   const maxWeight = species === 'dog' ? 150 : 20;
 
-  if (!name) firstErrors.push(showCalculatorError('catNameError', `${speciesLabel} 이름을 입력해 주세요.`, 'catName'));
   const birth = birthStr ? new Date(`${birthStr}T00:00:00`) : null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   if (!birthStr) firstErrors.push(showCalculatorError('catBirthError', '생년월일을 입력해 주세요.', 'catBirth'));
@@ -410,8 +467,7 @@ function calculate() {
   const dogExpectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value);
   const dogAdultWeightUnknown = document.getElementById('dogExpectedAdultWeight')?.dataset.unknown === 'true';
   const dogAgeMonths = birth ? getAgeMonths(birth, today) : null;
-  const dogNeedsAdultWeight = species === 'dog' && dogAgeMonths !== null &&
-    dogAgeMonths < getDogAdultTransitionMonths(dogExpectedAdultWeight || 25);
+  const dogNeedsAdultWeight = species === 'dog' && dogAgeMonths !== null && dogAgeMonths < 18;
   if (dogNeedsAdultWeight && !dogAdultWeightUnknown && (!Number.isFinite(dogExpectedAdultWeight) || dogExpectedAdultWeight < weight || dogExpectedAdultWeight > 150)) {
     firstErrors.push(showCalculatorError('dogAdultWeightError', '예상 성견 체중을 선택·입력하거나 ‘모르겠어요’를 눌러 주세요.', 'dogExpectedAdultWeight'));
   }
@@ -453,9 +509,10 @@ function calculate() {
     lactating
   });
   const { DER } = caloriePlan;
-  const selectedTreatReservePct = document.querySelector('input[name="treatReservePct"]:checked')?.value || '0';
-  const treatReservePct = Number(selectedTreatReservePct) / 100;
-  const treatKcal = Math.round(DER * treatReservePct);
+  const legacyTreatPct = Number(document.querySelector('input[name="treatReservePct"]:checked')?.value || 0) / 100;
+  const requestedTreatKcal = document.getElementById('treatKcalInput') ? getTreatKcal() : Math.round(DER * legacyTreatPct);
+  const treatKcal = Math.min(requestedTreatKcal, DER);
+  const treatReservePct = DER > 0 ? treatKcal / DER : 0;
   const foodKcal = DER - treatKcal;
   const switching = document.getElementById('drySwitching').checked;
   const resultData = { 건사료_결과: [], 습식사료_결과: [] };
@@ -478,7 +535,15 @@ function calculate() {
     resultData.습식사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
   [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach(item => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><div><span>${item.type}</span><h3>${item.이름}</h3><p>전체 식단의 ${item.비율}%</p></div><div><strong>${item.급여량_g}g</strong><p>${item.담당칼로리} kcal</p></div></article>`));
-  document.getElementById('resCatName').textContent = name;
+  const resultTitle = document.getElementById('resultTitle');
+  const dryTotalGrams = resultData.건사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
+  const wetTotalGrams = resultData.습식사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
+  resultTitle.replaceChildren();
+  const firstLine = document.createElement('span');
+  firstLine.textContent = `오늘 ${name ? `${name}에게 ` : ''}건사료 ${dryTotalGrams}g과`;
+  const secondLine = document.createElement('span');
+  secondLine.textContent = `습식사료 총 ${wetTotalGrams}g을 급여하세요.`;
+  resultTitle.append(firstLine, secondLine);
   document.getElementById('resDER').textContent = DER;
   document.getElementById('resFoodKcal').textContent = foodKcal;
   document.getElementById('resTreatKcal').textContent = treatKcal;
@@ -536,6 +601,33 @@ function renderDogCalculationContext(species, plan, selectedFeeds) {
     warnings.classList.remove('hidden');
   }
 }
+
+if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', () => {
+  const calculatorPage = document.getElementById('calculatorPage');
+  const feedsStep = document.getElementById('feedsStep');
+  const petInfoStep = document.getElementById('petInfoStep');
+  if (calculatorPage && feedsStep && petInfoStep) calculatorPage.insertBefore(feedsStep, petInfoStep);
+
+  const resultLabel = document.querySelector('#resultArea > .pc-section-title');
+  if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
+
+  const treatInput = document.getElementById('treatKcalInput');
+  const changeTreat = amount => {
+    treatInput.value = String(Math.max(0, (Number(treatInput.value) || 0) + amount));
+    markCalculationDirty();
+  };
+  document.getElementById('treatKcalMinus')?.addEventListener('click', () => changeTreat(-5));
+  document.getElementById('treatKcalPlus')?.addEventListener('click', () => changeTreat(5));
+  treatInput?.addEventListener('input', markCalculationDirty);
+
+  ['catBirth', 'catWeight', 'catNeutered', 'isDiet', 'isPregnant', 'isLactating', 'dogExpectedAdultWeight']
+    .forEach(id => {
+      document.getElementById(id)?.addEventListener('input', updateFeedingPreview);
+      document.getElementById(id)?.addEventListener('change', updateFeedingPreview);
+    });
+  document.querySelectorAll('input[name="dogActivity"]').forEach(input => input.addEventListener('change', updateFeedingPreview));
+  updateRatio(document.getElementById('ratioSlider')?.value || 60);
+});
 
 // -----------------------------------------------
 // 칼슘/인 분석

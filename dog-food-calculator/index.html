@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260806-feed-registration-flow">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-editorial-calculator-flow">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260728-entry-polish">
   <style>
     .proved-seo-summary {
@@ -161,12 +161,12 @@
     <section id="calculatorPage" class="space-y-10">
 
     <!-- 1단계: 고양이 정보 -->
-    <section class="pc-step-section pc-section-card" aria-labelledby="step1Title">
+    <section id="petInfoStep" class="pc-step-section pc-section-card" aria-labelledby="step1Title">
       <div class="pc-section-heading pc-section-heading--with-action">
-        <div><h2 id="step1Title" class="pc-section-title"><span>01</span> 정보 입력</h2><p><span data-pet-species-copy>고양이</span>의 현재 상태를 입력해 주세요.</p></div>
+        <div><h2 id="step1Title" class="pc-section-title"><span>02</span> 반려동물 정보</h2><p>필요 열량 계산에 사용할 정보를 입력하세요.</p></div>
         <button id="calculatorPetLoadButton" type="button" class="pc-compact-load-button hidden" onclick="openPetSelectorModal('calculator')">반려동물 불러오기</button>
       </div>
-      <div class="pc-field"><label class="pc-field-label" for="catName">고양이 이름</label><input type="text" id="catName" autocomplete="name" placeholder="이름을 입력해 주세요"><p id="catNameError" class="pc-inline-error hidden" role="alert"></p></div>
+      <div class="pc-field"><label class="pc-field-label" for="catName">이름 <span class="pc-optional">선택</span></label><input type="text" id="catName" autocomplete="name" placeholder="선택"><p id="catNameError" class="pc-inline-error hidden" role="alert"></p></div>
       <div class="pc-field"><label class="pc-field-label" for="catBirth">생년월일</label><input type="date" id="catBirth"><p id="catBirthError" class="pc-inline-error hidden" role="alert"></p></div>
       <div class="pc-field"><label class="pc-field-label" for="catWeight">현재 체중</label><div class="pc-input-unit"><input type="number" id="catWeight" placeholder="0.0" step="0.1" min="0.5" max="20"><span>kg</span></div><p id="catWeightError" class="pc-inline-error hidden" role="alert"></p></div>
       <fieldset class="pc-field"><legend class="pc-field-label">중성화 여부</legend><input type="hidden" id="catNeutered" value=""><div class="pc-segmented" role="radiogroup" aria-label="중성화 여부"><button type="button" class="pc-segmented-option" data-neutered="true" role="radio" aria-checked="false">중성화했어요</button><button type="button" class="pc-segmented-option" data-neutered="false" role="radio" aria-checked="false">중성화하지 않았어요</button></div><p id="catNeuteredError" class="pc-inline-error hidden" role="alert"></p></fieldset>
@@ -188,26 +188,28 @@
         <p id="dogAdultWeightError" class="pc-inline-error hidden" role="alert"></p>
       </div>
       <fieldset class="pc-field"><legend class="pc-field-label">해당하는 경우만 선택</legend><div class="pc-chip-row"><label class="pc-choice-chip"><input type="checkbox" id="isDiet"><span>다이어트</span></label><label class="pc-choice-chip"><input type="checkbox" id="isPregnant"><span>임신 중</span></label><label class="pc-choice-chip"><input type="checkbox" id="isLactating"><span>수유 중</span></label></div><p id="lifeStageError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></fieldset>
-      <fieldset class="pc-field"><legend class="pc-field-label">간식도 급여하나요?</legend><div class="pc-segmented" role="radiogroup" aria-label="간식 열량 예약"><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="0" checked><span>급여하지 않음</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="5"><span>5% 남기기</span></label><label class="pc-segmented-option"><input type="radio" name="treatReservePct" value="10"><span>10% 남기기</span></label></div></fieldset>
+      <fieldset class="pc-field pc-treat-field"><legend class="pc-field-label">간식 열량</legend><div class="pc-kcal-counter"><button type="button" id="treatKcalMinus" aria-label="간식 열량 5킬로칼로리 줄이기">−</button><label><span class="sr-only">간식 열량</span><input type="number" id="treatKcalInput" value="0" min="0" step="5"><span>kcal</span></label><button type="button" id="treatKcalPlus" aria-label="간식 열량 5킬로칼로리 늘리기">＋</button></div><p class="pc-help">참고: 미니 트릿 10개 or 일반 트릿 2개 ≈ 5kcal · 짜먹는 스틱 간식 ≈ 7~13kcal</p><p class="pc-help">제품마다 크기와 열량이 다르므로 포장지의 kcal 표시를 확인해 주세요.</p><p id="treatKcalShare" class="pc-treat-share">정보를 입력하면 하루 필요 열량에서 차지하는 비율을 확인할 수 있습니다.</p></fieldset>
       <div id="calBox" class="hidden" aria-hidden="true"><span id="derVal"></span><span id="derDetail"></span><span id="dietNotice"></span></div>
     </section>
 
     <!-- 2단계: 식단 구성 -->
-    <section class="pc-step-section pc-section-card" aria-labelledby="step2Title">
-      <div class="pc-section-heading"><h2 id="step2Title" class="pc-section-title"><span>02</span> 식단 구성</h2><p>급여할 제품과 비율을 설정해 주세요.</p></div>
+    <section id="feedsStep" class="pc-step-section pc-section-card" aria-labelledby="step2Title">
+      <div class="pc-section-heading"><h2 id="step2Title" class="pc-section-title"><span>01</span> 급여 중인 사료</h2><p>찾는 사료가 있는지 먼저 확인하세요.</p></div>
+      <div class="pc-feed-grid">
       <section class="pc-feed-panel pc-feed-panel--dry"><div class="pc-feed-heading"><h3>건사료 검색</h3><label class="pc-switch"><input type="checkbox" id="drySwitching" onchange="toggleDrySwitching()"><span>건사료 교체 중</span></label></div>
         <div class="relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput1">건사료 검색</label><input type="text" id="dryInput1" placeholder="건사료 검색..." oninput="searchFeed('dry',this.value,'dryList1',0)" onfocus="searchFeed('dry',this.value,'dryList1',0)"><div id="drySwPctWrap1" class="hidden pc-subratio"><input aria-label="기존 건사료 비율" type="number" id="drySwPct1" value="70" min="0" max="100"><span>%</span></div></div><div id="dryList1" class="pc-search-list hidden"></div><div class="pc-feed-action-row"><button type="button" onclick="openFeedPicker('dry',0)" class="pc-feed-picker-button">제품 목록에서 찾기</button><button type="button" id="recentDryFeedButton" class="pc-recent-feed-button hidden" onclick="selectRecentFeed('dry')"></button></div><p id="drySelected1" class="pc-selected-feed hidden"></p></div>
         <div id="dryArea2" class="hidden relative"><div class="pc-feed-input-row"><label class="sr-only" for="dryInput2">새 건사료 검색</label><input type="text" id="dryInput2" placeholder="새 건사료 검색..." oninput="searchFeed('dry',this.value,'dryList2',1)" onfocus="searchFeed('dry',this.value,'dryList2',1)"><div class="pc-subratio"><input aria-label="새 건사료 비율" type="number" id="drySwPct2" value="30" min="0" max="100"><span>%</span></div></div><div id="dryList2" class="pc-search-list hidden"></div><button type="button" onclick="openFeedPicker('dry',1)" class="pc-feed-picker-button">제품 목록에서 찾기</button><p id="drySelected2" class="pc-selected-feed hidden"></p></div>
         <p id="dryFeedError" class="pc-inline-error hidden" role="alert"></p>
       </section>
       <section class="pc-feed-panel pc-feed-panel--wet"><div class="pc-feed-heading"><h3>습식사료 검색</h3><button type="button" onclick="addWetSlot()" id="addWetBtn" class="pc-feed-picker-button">추가 (최대 3개)</button></div><div id="wetSlots" class="pc-wet-slots"></div><p id="wetFeedError" class="pc-inline-error hidden" role="alert"></p><p id="wetRatioError" class="pc-inline-error hidden" role="alert" aria-live="polite"></p></section>
+      </div>
       <aside class="pc-feed-registration-card" aria-labelledby="feedRegistrationCardTitle">
         <div><h3 id="feedRegistrationCardTitle">찾는 사료가 없나요?</h3><p>1분 만에 급여 사료를 등록할 수 있어요.</p></div>
         <a class="pc-feed-registration-link" href="/feed-registration/" target="_blank" rel="noopener" data-feed-registration-link>사료 등록하기 <span aria-hidden="true">☞</span></a>
       </aside>
-      <section class="pc-ratio-card"><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="60" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">왼쪽은 습식 100%, 오른쪽은 건식 100%</p></section>
-      <button type="button" onclick="calculate()" class="pc-primary-button">급여량 계산하기</button>
     </section>
+
+    <section id="ratioStep" class="pc-step-section pc-section-card" aria-labelledby="ratioStepTitle"><div class="pc-section-heading"><h2 id="ratioStepTitle" class="pc-section-title"><span>03</span> 급여 비율</h2><p>비율을 움직이면 예상 급여량이 바로 달라집니다.</p></div><section class="pc-ratio-card"><div class="pc-ratio-feed-names"><p class="pc-dry-text"><span>건식</span><strong id="ratioDryFeedName">선택한 건사료 없음</strong></p><p class="pc-wet-text"><span>습식</span><strong id="ratioWetFeedName">선택한 습식사료 없음</strong></p></div><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="60" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">건식과 습식의 급여 비율을 조정하세요.</p><div class="pc-live-preview" id="feedingPreview" aria-live="polite"><p class="pc-dry-text"><span>건식 예상 급여량</span><strong><span id="previewDryGrams">—</span>g</strong></p><p class="pc-wet-text"><span>습식 예상 급여량</span><strong>총 <span id="previewWetGrams">—</span>g</strong></p></div></section><button type="button" onclick="calculate()" class="pc-primary-button">이 구성으로 계산하기</button></section>
 
     <!-- 3단계: 결과 -->
     <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p></section>
@@ -713,7 +715,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="/js/proved-shell.js?v=20260728-entry-polish"></script>
 <script src="/js/pwa-install.js?v=20260701-ui-refresh-2"></script>
-<script src="/js/calculator.js?v=20260730-dog-growth-formula"></script>
+<script src="/js/calculator.js?v=20260812-editorial-calculator-flow"></script>
 <script src="/js/feed-search.js?v=20260805-request-result-v7-subpages"></script>
 <script src="/js/calculator-session.js?v=20260806-feed-registration-flow"></script>
 <script src="/js/recent-feed.js?v=20260728-recent-feed-fix"></script>
