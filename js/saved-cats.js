@@ -111,9 +111,9 @@ async function loadMyCats() {
 
   list.innerHTML = cats.map(cat => `
     <button type="button" data-cat-id="${escapeHtml(cat.id)}"
-      class="w-full p-3 bg-white border border-blue-100 rounded-xl text-left hover:border-[#2F6FED] transition-colors">
-      <span class="block text-sm font-black text-gray-800">${escapeHtml(cat.name || '이름 없음')}</span>
-      <span class="block text-xs font-bold text-gray-400 mt-0.5">
+      class="proved-pet-choice">
+      <span class="proved-pet-choice__name">${escapeHtml(cat.name || '이름 없음')}</span>
+      <span class="proved-pet-choice__meta">
         ${escapeHtml(cat.birth_date || '생년월일 없음')} · ${cat.neutered ? '중성화 O' : '중성화 X'}
       </span>
     </button>
