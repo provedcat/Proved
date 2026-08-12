@@ -55,8 +55,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-single-header-system-v6">
-  <link rel="stylesheet" href="/css/proved-shell.css?v=20260812-single-header-system-v6">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-shared-header-v1">
+  <link rel="stylesheet" href="/css/proved-shell.css?v=20260812-shared-header-v1">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-shared-header-v1">
+  <script defer src="/js/proved-header.js?v=20260812-shared-header-v1"></script>
   <style>
     .proved-seo-summary {
       flex: 0 0 auto;
@@ -107,7 +109,7 @@
 <body class="flex justify-center">
 <div id="provedEntry" class="proved-entry" aria-label="프루브 시작 화면">
   <div class="proved-entry__inner">
-    <img class="proved-wordmark" src="/icons/proved-logo.svg" alt="프루브">
+    <header data-proved-header="home"></header>
     <div id="provedEntryMain"></div>
     <section class="proved-seo-summary" aria-labelledby="provedSeoTitle">
       <h1 id="provedSeoTitle">고양이·강아지 사료 급여량 계산기</h1>
@@ -131,17 +133,7 @@
 <div class="pc-app-shell w-full min-h-screen overflow-x-hidden">
 
   <!-- 헤더 -->
-  <header class="pc-app-header flex items-center justify-between">
-    <button type="button" class="proved-home-button" aria-label="프루브 홈으로 이동" onclick="provedGoHome()">
-      <span class="proved-header-wordmark" aria-hidden="true">PROVED</span>
-    </button>
-    <nav id="mainNav" class="pc-header-tabs" aria-label="주요 기능">
-      <button id="navCalculator" type="button" onclick="showPage('calculatorPage')" class="is-active" aria-current="page">통합 계산기</button>
-      <button id="navWeightTrend" type="button" onclick="showPage('weightTrendPage')" aria-current="false">체중 추이</button>
-      <button id="navWetFoodBeta" type="button" onclick="showPage('wetFoodBetaPage')" class="hidden" aria-current="false">습식 탐험</button>
-      <button id="authOpenBtn" type="button" onclick="openAuthSheet()">로그인</button>
-    </nav>
-  </header>
+  <header data-proved-header="calculator"></header>
 
   <main class="pc-page-container pb-28">
 
