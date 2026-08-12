@@ -226,13 +226,15 @@
       style.id = 'provedCalculationPrinciplesStyles';
       style.textContent = `
         .proved-calculation-principles {
-          margin: 4px 0 10px;
-          padding: 0 2px;
+          order: 5;
+          margin: 0;
+          padding: 34px 44px 46px;
+          border-bottom: 1px solid #e4e7ec;
         }
         .proved-calculation-principles details {
-          overflow: hidden;
-          border: 1px solid #e3e7ed;
-          border-radius: 12px;
+          border: 0;
+          border-top: 1px solid #cbd7ff;
+          border-radius: 0;
           background: #fff;
           color: #344054;
         }
@@ -242,7 +244,7 @@
           justify-content: space-between;
           gap: 16px;
           min-height: 64px;
-          padding: 14px 16px;
+          padding: 18px 0;
           cursor: pointer;
           list-style: none;
           user-select: none;
@@ -268,8 +270,8 @@
           flex: 0 0 auto;
           width: 28px;
           height: 28px;
-          border-radius: 50%;
-          background: #f1f4f8;
+          border-radius: 0;
+          background: transparent;
           color: #667085;
           font-size: 18px;
           font-weight: 500;
@@ -281,7 +283,7 @@
           transform: rotate(45deg);
         }
         .proved-calculation-principles__body {
-          padding: 0 16px 17px;
+          padding: 0 0 18px;
           border-top: 1px solid #eef1f4;
           color: #667085;
           font-size: 12px;
@@ -325,6 +327,7 @@
           color: #98a2b3;
           font-size: 11px;
         }
+        @media(max-width:820px){.proved-calculation-principles{padding:30px 20px 38px}}
       `;
       document.head.appendChild(style);
     }
