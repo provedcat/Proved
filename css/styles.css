@@ -979,16 +979,6 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .pc-water-gauge{height:6px;margin-top:24px;background:#edf0f4}.pc-water-gauge i{display:block;height:100%}.pc-water-status{margin:10px 0 20px;color:var(--text-secondary);font-size:13px}.share-btn-row button,#saveFeedingRecordBtn,.share-close-btn{border-radius:0!important}
 @media(max-width:520px){.pc-kcal-counter{grid-template-columns:48px minmax(120px,1fr) 48px;width:100%}.pc-analysis-metrics,.pc-water-summary{grid-template-columns:1fr 1fr}.pc-analysis-metrics strong,.pc-water-summary strong{font-size:23px}.pc-analysis-row{gap:14px}}
 
-/* Header navigation, exclusive page switching, and editorial result modal. */
-.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center;height:64px;padding:0 24px!important;gap:22px;border-bottom:1px solid var(--border-subtle);background:var(--surface-primary)}
-.proved-header-wordmark{color:var(--brand-primary);font-size:21px;font-weight:800;letter-spacing:.035em;line-height:1}
-.proved-home-button{border-radius:0!important}
-.proved-home-button:hover{background:transparent!important;color:var(--brand-primary)}
-.pc-header-tabs{display:flex;justify-self:end;align-self:stretch;align-items:stretch;min-width:0;border-left:1px solid var(--brand-primary)}
-.pc-header-tabs button{appearance:none!important;display:flex!important;align-items:center;justify-content:center;min-height:0!important;margin:0!important;padding:0 20px!important;border:0!important;border-right:1px solid var(--brand-primary)!important;border-radius:0!important;background:none!important;color:var(--text-secondary)!important;box-shadow:none!important;font-size:13px;font-weight:720;line-height:1;white-space:nowrap;transform:none!important}
-.pc-header-tabs button:hover,.pc-header-tabs button:active{border-color:var(--brand-primary)!important;border-radius:0!important;background:none!important;box-shadow:none!important;transform:none!important}
-.pc-header-tabs button.is-active{color:var(--brand-primary)!important}
-#authOpenBtn{border:0!important;border-right:1px solid var(--brand-primary)!important;border-radius:0!important;background:none!important;color:var(--text-secondary)!important;box-shadow:none!important}
 #calculatorPage.hidden,#weightTrendPage.hidden,#wetFoodBetaPage.hidden{display:none!important}
 
 .pc-field-label{color:var(--brand-primary)!important}
@@ -1021,11 +1011,6 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .share-btn-kakao{border:1px solid var(--brand-primary)!important;background:#fff!important;color:var(--brand-primary)!important}
 
 @media(max-width:720px){
-  .pc-app-header{grid-template-columns:auto 1fr;gap:8px;padding-inline:12px!important}
-  .pc-header-tabs{justify-self:stretch;justify-content:flex-end}
-  .pc-header-tabs button{padding-inline:9px!important;font-size:11px}
-  .proved-header-wordmark{font-size:17px}
-  #authOpenBtn{padding-inline:9px!important}
   .share-modal-inner{padding-inline:10px}
 }
 @media (max-width: 600px) {
