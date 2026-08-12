@@ -51,7 +51,7 @@ function loadWetFoodBetaScript() {
 
     const script = document.createElement('script');
 
-    script.src = 'js/wet-food-beta.js?v=20260710-wet-beta-private';
+    script.src = '/js/wet-food-beta.js?v=20260812-editorial-wet-beta-v1';
     script.dataset.wetFoodBetaScript = 'true';
 
     script.onload = () => resolve();
