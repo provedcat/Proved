@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260812-header-switch-modal-v3';
+const CACHE_NAME = 'proved-pwa-20260812-proved-linear-header-v4';
 const CORE_ASSETS = [
   './',
   './manifest.json',
