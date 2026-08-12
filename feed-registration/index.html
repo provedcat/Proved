@@ -397,7 +397,7 @@
 
     .photo-guide-grid {
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);
       border-top:1px solid var(--reg-line);
       border-bottom:1px solid var(--reg-line);
     }
@@ -409,6 +409,32 @@
     }
 
     .photo-example-card:last-child { border-right:0; }
+
+    .photo-example-notes {
+      display:grid;
+      align-content:center;
+      padding:36px 32px;
+    }
+
+    .photo-example-notes h3 {
+      margin:0 0 20px;
+      color:var(--reg-blue);
+      font-size:16px;
+      font-weight:800;
+    }
+
+    .photo-example-notes p {
+      margin:0;
+      padding:16px 0;
+      border-top:1px solid var(--reg-line);
+      color:#657083;
+      font-size:13px;
+      font-weight:550;
+      line-height:1.65;
+      word-break:keep-all;
+    }
+
+    .photo-example-notes p:last-child { border-bottom:1px solid var(--reg-line); }
 
     .photo-example-status {
       display:flex;
@@ -577,6 +603,7 @@
       .photo-guide-grid { grid-template-columns:1fr; }
       .photo-example-card { border-right:0; border-bottom:1px solid var(--reg-line); }
       .photo-example-card:last-child { border-bottom:0; }
+      .photo-example-notes { padding-inline:0; }
     }
 
     @media (max-width:560px) {
@@ -720,13 +747,13 @@
 
     <section class="registration-photo-guide" aria-labelledby="photoGuideTitle">
       <div class="registration-photo-guide__head">
-        <h2 id="photoGuideTitle">한 장에<br>어디까지 보여야 할까?</h2>
-        <p>이미지 등록은 사진의 정보 밀도가 중요합니다. 제품을 식별할 수 있는 이름과 영양성분, 원재료 전성분이 한 장 안에서 함께 확인되어야 합니다.</p>
+        <h2 id="photoGuideTitle">한 장에 무엇을<br>담아야 할까?</h2>
+        <p>제품명이 선명하면 사진에서 부족한 영양성분과 원재료 정보는 신뢰할 수 있는 공식 자료와 판매 정보를 검색해 보완합니다.</p>
       </div>
 
       <div class="photo-guide-grid">
         <article class="photo-example-card">
-          <div class="photo-example-status photo-example-status--valid"><strong>가능</strong><span>먼저 볼 사진</span></div>
+          <div class="photo-example-status photo-example-status--valid"><strong>이렇게 촬영해 주세요</strong><span>권장 사진</span></div>
           <div class="label-example label-example--complete" aria-hidden="true">
             <div class="label-example__product"><span>제품명</span><strong>프루브 닭고기 레시피</strong></div>
             <div class="label-example__detail">
@@ -734,33 +761,17 @@
               <div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div>
             </div>
           </div>
-          <p><strong>제품명 · 영양성분 · 원재료 전성분</strong> 세 가지가 한 장에 선명하게 보이면 분석할 수 있습니다.</p>
+          <p><strong>제품명 · 영양성분 · 원재료 전성분</strong>이 함께 보이면 가장 정확하게 분석할 수 있습니다.</p>
         </article>
 
-        <article class="photo-example-card">
-          <div class="photo-example-status photo-example-status--invalid"><strong>불가능</strong><span>성분만 보임</span></div>
-          <div class="label-example label-example--nutrition" aria-hidden="true">
-            <strong>등록성분량</strong>
-            <span><b>조단백질</b><i>12.0% 이상</i></span>
-            <span><b>조지방</b><i>5.0% 이상</i></span>
-            <span><b>수분</b><i>78.0% 이하</i></span>
-            <span><b>칼슘</b><i>0.20% 이상</i></span>
-          </div>
-          <p><strong>제품명 없이</strong> 영양성분만 보이면 어떤 제품인지 확정할 수 없습니다.</p>
-        </article>
-
-        <article class="photo-example-card">
-          <div class="photo-example-status photo-example-status--invalid"><strong>불가능</strong><span>제품명만 보임</span></div>
-          <div class="label-example label-example--name" aria-hidden="true">
-            <span class="label-example__brand">프루브</span>
-            <strong>CHICKEN RECIPE</strong>
-            <small>COMPLETE FOOD</small>
-          </div>
-          <p><strong>제품명만 있고</strong> 성분 정보가 없다면 계산에 필요한 데이터를 만들 수 없습니다.</p>
-        </article>
+        <aside class="photo-example-notes" aria-label="피해야 할 사진">
+          <h3>이 사진은 다시 확인해 주세요</h3>
+          <p><strong>제품명 없이 성분표만 보이면</strong><br>어떤 제품인지 확정할 수 없어요.</p>
+          <p><strong>제품명이 흐리거나 잘리면</strong><br>검색으로 정보를 보완하기 어려워요.</p>
+        </aside>
       </div>
 
-      <p class="photo-example-tip">촬영 팁: 라벨을 정면에서 찍고, 빛 반사와 그림자를 피한 뒤 작은 숫자까지 확대했을 때 읽히는지 확인해 주세요.</p>
+      <p class="photo-example-tip">제품명·영양성분·원재료가 함께 보이도록 촬영해 주세요. 한 장에 담기 어렵다면 제품 뒷면 전체가 선명하게 보이도록 찍어주세요.</p>
     </section>
   </main>
 
