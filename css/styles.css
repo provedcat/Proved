@@ -1017,12 +1017,19 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 @media(max-width:520px){.pc-kcal-counter{grid-template-columns:48px minmax(120px,1fr) 48px;width:100%}.pc-analysis-metrics,.pc-water-summary{grid-template-columns:1fr 1fr}.pc-analysis-metrics strong,.pc-water-summary strong{font-size:23px}.pc-analysis-row{gap:14px}}
 
 /* Header navigation, exclusive page switching, and editorial result modal. */
-.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:22px}
+.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:22px}
+.proved-header-wordmark{color:var(--brand-primary);font-size:21px;font-weight:800;letter-spacing:.035em;line-height:1}
+.proved-home-button{border-radius:0!important}
+.proved-home-button:hover{background:transparent!important;color:var(--brand-primary)}
 .pc-header-tabs{display:flex;justify-self:end;align-items:center;min-width:0}
 .pc-header-tabs button{min-height:32px;padding:0 18px;border:0!important;border-left:1px solid var(--border-default)!important;border-radius:0!important;background:transparent!important;color:var(--text-secondary)!important;font-size:13px;font-weight:720;white-space:nowrap}
 .pc-header-tabs button:last-child{border-right:1px solid var(--border-default)!important}
 .pc-header-tabs button.is-active{color:var(--brand-primary)!important}
+#authOpenBtn{border-left:1px solid var(--border-default)!important;border-right:1px solid var(--border-default)!important;border-radius:0!important;background:transparent!important;color:var(--text-secondary)!important;box-shadow:none!important}
 #calculatorPage.hidden,#weightTrendPage.hidden,#wetFoodBetaPage.hidden{display:none!important}
+
+.pc-field-label{color:var(--brand-primary)!important}
+#resultArea #resultTitle{color:var(--brand-primary)!important}
 
 #resultArea #capBtn,#resultArea #waterBtn{min-height:54px!important;border:0!important;border-radius:0!important;color:#fff!important;box-shadow:none!important}
 #resultArea #capBtn{background:var(--calcium-ink)!important}
@@ -1037,20 +1044,25 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 #shareCard::before,#shareCard::after{display:none!important}
 .sc-header,.sc-kcal-block,.sc-feeds,.sc-analysis,.sc-footer{background:#fff!important;border-color:var(--border-subtle)!important}
 .sc-brand,.sc-kcal-label{color:var(--brand-primary)!important}
+.sc-brand{font-style:normal!important;font-weight:800!important;letter-spacing:.035em!important}
 .sc-cat-name,.sc-kcal-num,.sc-energy-num,.sc-feed-name,.sc-feed-grams,.sc-an-value,.sc-water-num{color:var(--text-primary)!important}
 .sc-cat-sub,.sc-kcal-unit,.sc-ratio-txt,.sc-feeds-title,.sc-feed-kcal,.sc-energy-label,.sc-an-label,.sc-footer{color:var(--text-secondary)!important}
 .sc-feed-row,.sc-an-card,.sc-cap-item,.sc-water-box{border-radius:0!important;background:#fff!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;box-shadow:none!important}
+.sc-energy-details{gap:0!important;padding:0 24px!important;background:#fff!important;border-bottom:1px solid var(--border-subtle)!important}
+.sc-energy-details>div{padding:15px 0!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;color:var(--text-secondary)!important}
+.sc-energy-details>div+div{padding-left:16px!important;border-left:1px solid var(--border-subtle)!important}
+.sc-energy-details strong{color:var(--text-primary)!important}
 .share-btn-row{margin-top:16px!important;gap:8px!important}
 .share-btn-row button{min-height:50px!important;border-radius:0!important}
 .share-btn-save{border:0!important;background:var(--brand-primary)!important;color:#fff!important}
 .share-btn-kakao{border:1px solid var(--brand-primary)!important;background:#fff!important;color:var(--brand-primary)!important}
 
 @media(max-width:720px){
-  .pc-app-header{grid-template-columns:auto 1fr auto;gap:8px;padding-inline:12px!important}
+  .pc-app-header{grid-template-columns:auto 1fr;gap:8px;padding-inline:12px!important}
   .pc-header-tabs{justify-self:stretch;justify-content:flex-end}
   .pc-header-tabs button{padding-inline:9px;font-size:11px}
-  .proved-wordmark--header{max-width:72px}
-  #authOpenBtn{padding-inline:7px!important}
+  .proved-header-wordmark{font-size:17px}
+  #authOpenBtn{padding-inline:9px!important}
   .share-modal-inner{padding-inline:10px}
 }
 @media (max-width: 600px) {
