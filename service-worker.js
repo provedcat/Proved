@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260812-registration-v2';
+const CACHE_NAME = 'proved-pwa-20260812-editorial-wet-beta-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',

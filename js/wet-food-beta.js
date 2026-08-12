@@ -447,17 +447,17 @@ function renderWetFoodCandidateCard(item) {
   const f = item.feed, s = item.scoreInfo;
   const reasons = s.reasonCodes.slice(0, 4).map(c => `<li>${reasonTextMap[c] || c}</li>`).join('') || '<li>현재 답변 기준에서 비교를 시작할 수 있는 후보예요.</li>';
   const cautions = s.cautionCodes.slice(0, 3).map(c => `<li>${cautionTextMap[c] || c}</li>`).join('') || '<li>처음에는 소량으로 반응을 확인해 주세요.</li>';
-  return `<article class="wet-beta-card bg-white border border-gray-100 rounded-3xl p-4 shadow-sm space-y-4">
-    <div class="flex gap-4">
-      ${f.image_url ? `<img src="${f.image_url}" alt="" class="w-20 h-20 rounded-2xl object-cover bg-gray-50" loading="lazy">` : `<div class="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl">🥫</div>`}
-      <div class="flex-1 min-w-0"><p class="text-xs font-black text-blue-400">${f.제조사 || '제조사 정보 없음'}</p><h4 class="font-black text-gray-800 leading-snug">${f.제품명 || '제품명 정보 없음'}</h4><p class="inline-block mt-2 px-3 py-1 bg-gray-100 rounded-full text-[11px] font-black text-gray-500">${s.candidateType}</p></div>
+  return `<article class="wet-beta-card">
+    <div class="wet-beta-card__head">
+      ${f.image_url ? `<img src="${f.image_url}" alt="" class="wet-beta-card__image" loading="lazy">` : `<div class="wet-beta-card__placeholder" aria-hidden="true">WET</div>`}
+      <div class="wet-beta-card__identity"><p>${f.제조사 || '제조사 정보 없음'}</p><h4>${f.제품명 || '제품명 정보 없음'}</h4><span>${s.candidateType}</span></div>
     </div>
-    <p class="text-xs font-bold text-gray-500 leading-relaxed">이 제품은 현재 답변 기준에서 비교를 시작하기 좋은 후보예요. 확정 추천이 아니라, 기존 식단에 소량 더해보며 반응을 확인하기 위한 후보로 봐주세요.</p>
-    <div class="grid grid-cols-2 gap-2 text-xs">
-      ${[['완전식 여부', f.완전식여부 || '확인 필요'], ['메인단백질', f.메인단백질 || '정보 없음'], ['열량', formatKcal(f)], ['조단백', formatValue(f.조단백, '%')], ['조지방', formatValue(f.조지방, '%')], ['수분', formatValue(f.수분, '%')], ['칼슘', formatValue(f.칼슘, '%')], ['인', formatValue(f.인, '%')], ['Ca:P', formatValue(f.ca_p_ratio)], ['겔화제', getGelInfo(f.겔화제).label]].map(([k,v]) => `<div class="bg-gray-50 rounded-2xl p-3"><p class="text-[10px] font-black text-gray-400">${k}</p><p class="font-bold text-gray-700 mt-1">${v}</p></div>`).join('')}
+    <p class="wet-beta-card__lead">확정 추천이 아니라, 기존 식단에 소량 더해보며 반응을 확인하기 위한 비교 후보입니다.</p>
+    <div class="wet-beta-facts">
+      ${[['완전식 여부', f.완전식여부 || '확인 필요'], ['메인단백질', f.메인단백질 || '정보 없음'], ['열량', formatKcal(f)], ['조단백', formatValue(f.조단백, '%')], ['조지방', formatValue(f.조지방, '%')], ['수분', formatValue(f.수분, '%')], ['칼슘', formatValue(f.칼슘, '%')], ['인', formatValue(f.인, '%')], ['Ca:P', formatValue(f.ca_p_ratio)], ['겔화제', getGelInfo(f.겔화제).label]].map(([k,v]) => `<div><span>${k}</span><strong>${v}</strong></div>`).join('')}
     </div>
-    <div class="grid md:grid-cols-2 gap-3 text-xs leading-relaxed"><div class="bg-blue-50 rounded-2xl p-3"><p class="font-black text-blue-500 mb-1">이유</p><ul class="list-disc pl-4 text-gray-600 space-y-1">${reasons}</ul></div><div class="bg-orange-50 rounded-2xl p-3"><p class="font-black text-orange-500 mb-1">확인하면 좋은 점</p><ul class="list-disc pl-4 text-gray-600 space-y-1">${cautions}</ul></div></div>
-    ${f.쿠팡_링크 ? `<a href="${f.쿠팡_링크}" target="_blank" rel="noopener" class="block text-center py-3 rounded-2xl bg-gray-900 text-white text-xs font-black">제품 정보 보기</a>` : ''}
+    <div class="wet-beta-notes"><div><p>선정 이유</p><ul>${reasons}</ul></div><div><p>확인할 점</p><ul>${cautions}</ul></div></div>
+    ${f.쿠팡_링크 ? `<a href="${f.쿠팡_링크}" target="_blank" rel="noopener" class="wet-beta-link">제품 정보 보기</a>` : ''}
   </article>`;
 }
 
@@ -465,7 +465,7 @@ function renderWetFoodBeta() {
   const root = document.getElementById('wetFoodBetaRoot'); if (!root) return;
   const q = wetFoodQuestions[wetFoodBetaState.step];
   const progress = Math.round(((wetFoodBetaState.step + 1) / wetFoodQuestions.length) * 100);
-  root.innerHTML = `<section class="space-y-5"><div class="pc-info-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm"><p class="text-xs font-black text-blue-400 mb-2">습식 후보 찾기 v0.1 베타 · ${wetFoodBetaState.step + 1}/${wetFoodQuestions.length}</p><div class="h-2 bg-gray-100 rounded-full overflow-hidden mb-5"><div class="h-full bg-[#2d7dd2]" style="width:${progress}%"></div></div><h2 class="text-xl font-black text-gray-800 leading-snug">${q.title}</h2><p class="text-sm font-bold text-gray-400 mt-2 leading-relaxed">${q.description}</p><div class="mt-5 space-y-2">${q.options.map(([code,label,desc]) => `<button type="button" onclick="selectWetFoodAnswer('${q.key}','${code}')" class="w-full text-left p-4 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100"><p class="font-black text-gray-800">${label}</p><p class="text-xs font-bold text-gray-400 mt-1">${desc}</p></button>`).join('')}</div></div></section>`;
+  root.innerHTML = `<section class="wet-beta-question"><div class="wet-beta-progress"><span>${String(wetFoodBetaState.step + 1).padStart(2, '0')} / ${String(wetFoodQuestions.length).padStart(2, '0')}</span><i style="width:${progress}%"></i></div><div class="wet-beta-question__copy"><h2>${q.title}</h2><p>${q.description}</p></div><div class="wet-beta-options">${q.options.map(([code,label,desc]) => `<button type="button" onclick="selectWetFoodAnswer('${q.key}','${code}')"><strong>${label}</strong><span>${desc}</span></button>`).join('')}</div></section>`;
 }
 
 function selectWetFoodAnswer(key, code) {
@@ -475,7 +475,7 @@ function selectWetFoodAnswer(key, code) {
 }
 function renderWetFoodInputs() {
   const root = document.getElementById('wetFoodBetaRoot'), input = wetFoodBetaState.answers.currentFoodInput;
-  root.innerHTML = `<section class="pc-info-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4"><p class="text-xs font-black text-blue-400">현재 먹는 사료 입력</p><h2 class="text-xl font-black text-gray-800">제품명을 일부만 입력해도 괜찮아요.</h2>${input === 'dry' || input === 'both' ? `<input id="wetBetaDryFood" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border border-gray-100" placeholder="건사료 제품명">` : ''}${input === 'wet' || input === 'both' ? `<textarea id="wetBetaWetFoods" rows="4" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border border-gray-100" placeholder="습식 제품명 (여러 개는 쉼표 또는 줄바꿈)"></textarea>` : ''}<button onclick="runWetFoodBeta()" class="w-full py-4 bg-[#2d7dd2] text-white rounded-2xl font-black">후보 보기</button><button onclick="wetFoodBetaState.answers.currentFoodInput='skip'; runWetFoodBeta()" class="w-full py-3 bg-gray-100 text-gray-500 rounded-2xl font-black text-sm">입력 없이 계속하기</button></section>`;
+  root.innerHTML = `<section class="wet-beta-input"><p class="wet-beta-kicker">현재 먹는 사료</p><h2>제품명을 일부만 입력해도 괜찮아요.</h2><div class="wet-beta-input__fields">${input === 'dry' || input === 'both' ? `<label>건사료 제품명<input id="wetBetaDryFood" placeholder="브랜드와 제품명"></label>` : ''}${input === 'wet' || input === 'both' ? `<label>습식사료 제품명<textarea id="wetBetaWetFoods" rows="3" placeholder="여러 개는 쉼표 또는 줄바꿈으로 구분"></textarea></label>` : ''}</div><div class="wet-beta-actions"><button type="button" onclick="runWetFoodBeta()" class="wet-beta-primary">후보 보기</button><button type="button" onclick="wetFoodBetaState.answers.currentFoodInput='skip'; runWetFoodBeta()" class="wet-beta-text-button">입력 없이 계속하기</button></div></section>`;
 }
 
 async function runWetFoodBeta() {
@@ -483,7 +483,7 @@ async function runWetFoodBeta() {
   wetFoodBetaState.isLoading = true;
   wetFoodBetaState.answers.dryFood = document.getElementById('wetBetaDryFood')?.value || '';
   wetFoodBetaState.answers.wetFoods = document.getElementById('wetBetaWetFoods')?.value || '';
-  const root = document.getElementById('wetFoodBetaRoot'); root.innerHTML = '<div class="p-6 bg-white rounded-3xl text-center font-black text-blue-400">후보를 불러오는 중이에요...</div>';
+  const root = document.getElementById('wetFoodBetaRoot'); root.innerHTML = '<div class="wet-beta-status" role="status">후보를 비교하고 있습니다.</div>';
   const scenario = getWetFoodScenario(wetFoodBetaState.answers);
   try {
     const [currentProteins, result] = await Promise.all([findCurrentFoodProteins(wetFoodBetaState.answers), fetchWetFoodCandidates()]);
@@ -497,7 +497,7 @@ async function runWetFoodBeta() {
 function renderWetFoodResults(scenario, currentProteins, scored, error) {
   const root = document.getElementById('wetFoodBetaRoot');
   const groups = groupCandidates(scored);
-  root.innerHTML = `<section class="space-y-5"><div class="p-5 bg-blue-50 rounded-3xl border border-blue-100"><p class="text-xs font-black text-blue-400 mb-2">상황 요약</p><p class="text-base font-bold text-gray-800 leading-relaxed whitespace-pre-line">${getScenarioSummary(scenario)}</p>${currentProteins.length ? `<p class="mt-3 text-xs font-bold text-blue-500">현재 식단 단백질 참고: ${formatProteinLabels(currentProteins).join(', ')}</p>` : ''}</div>${error ? `<div class="p-5 bg-red-50 rounded-3xl text-sm font-bold text-red-500 leading-relaxed">Supabase 조회에 실패했어요. 잠시 후 다시 시도해 주세요.<br>${error.message || error}</div>` : ''}${!error && !scored.length ? `<div class="p-5 bg-gray-50 rounded-3xl text-sm font-bold text-gray-500 leading-relaxed">조건에 맞는 습식 후보를 찾지 못했어요. DB가 업데이트되면 후보가 표시됩니다.</div>` : ''}${groups.map(([title, items]) => `<div class="space-y-3"><h3 class="text-lg font-black text-gray-800">${title}</h3>${items.map(renderWetFoodCandidateCard).join('')}</div>`).join('')}<div class="p-5 bg-gray-50 rounded-3xl space-y-2"><p class="font-black text-gray-700">더 좁혀보기</p>${['먹고 난 뒤 반응도 반영하기','가격대도 같이 보기','후보 수 줄이기'].map(t => `<button disabled class="w-full py-3 rounded-2xl bg-white border border-gray-100 text-gray-300 font-black text-sm">${t} · 다음 버전 예정</button>`).join('')}</div><button onclick="resetWetFoodBeta()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black">처음부터 다시 하기</button></section>`;
+  root.innerHTML = `<section class="wet-beta-results"><div class="wet-beta-summary"><p>상황 요약</p><strong>${getScenarioSummary(scenario)}</strong>${currentProteins.length ? `<span>현재 식단 단백질: ${formatProteinLabels(currentProteins).join(', ')}</span>` : ''}</div>${error ? `<div class="wet-beta-message wet-beta-message--error">후보 조회에 실패했습니다. 잠시 후 다시 시도해 주세요.<br>${error.message || error}</div>` : ''}${!error && !scored.length ? `<div class="wet-beta-message">조건에 맞는 습식 후보를 찾지 못했습니다. 제품 DB가 업데이트되면 후보가 표시됩니다.</div>` : ''}${groups.map(([title, items]) => `<section class="wet-beta-group"><h3>${title}</h3><div class="wet-beta-group__items">${items.map(renderWetFoodCandidateCard).join('')}</div></section>`).join('')}<button type="button" onclick="resetWetFoodBeta()" class="wet-beta-reset">처음부터 다시 보기</button></section>`;
 }
 function resetWetFoodBeta() { wetFoodBetaState.step = 0; wetFoodBetaState.answers = {}; renderWetFoodBeta(); }
 
