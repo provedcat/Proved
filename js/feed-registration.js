@@ -49,7 +49,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnDwg1b9u_JVoKnxUrcTfS944QOYwJFn7hO4TKNjkzMQrtHU-enpGTFdA/exec';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const registrationState = { species: 'cat', type: 'dry', userId: null, busy: false, imageFile: null };
+const registrationState = { species: 'cat', type: 'dry', userId: null, busy: false, imageFile: null, previewUrl: null };
 
 function escapeHtml(value) {
   const node = document.createElement('div');
@@ -161,9 +161,13 @@ async function submitImageRegistration() {
     return;
   }
   const button = document.getElementById('uploadFeedBtn');
+  const fileLabel = document.getElementById('registrationFileLabel');
+  const input = document.getElementById('uploadInput');
   registrationState.busy = true;
   button.disabled = true;
-  button.textContent = '이미지 분석 중...';
+  input.disabled = true;
+  button.classList.remove('is-visible');
+  fileLabel?.classList.add('is-busy');
   renderMessage('uploadMsg', '라벨 정보를 분석하고 있습니다.');
   try {
     const base64 = await new Promise((resolve, reject) => {
@@ -180,15 +184,37 @@ async function submitImageRegistration() {
     renderMessage('uploadMsg', '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.', 'success');
     document.getElementById('uploadInput').value = '';
     registrationState.imageFile = null;
+    document.getElementById('uploadPrompt').textContent = '분석 완료';
     showReturnNotice();
   } catch (error) {
     console.error(error);
     renderMessage('uploadMsg', error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
+    button.classList.add('is-visible');
   } finally {
     registrationState.busy = false;
     button.disabled = false;
-    button.textContent = '이미지 분석하기';
+    input.disabled = false;
+    fileLabel?.classList.remove('is-busy');
   }
+}
+
+function showImagePreview(file) {
+  const preview = document.getElementById('uploadPreview');
+  if (registrationState.previewUrl) URL.revokeObjectURL(registrationState.previewUrl);
+  registrationState.previewUrl = URL.createObjectURL(file);
+  preview.replaceChildren();
+  const image = document.createElement('img');
+  image.src = registrationState.previewUrl;
+  image.alt = '선택한 라벨 사진 미리보기';
+  preview.removeAttribute('aria-hidden');
+  preview.appendChild(image);
+  document.getElementById('uploadPrompt').textContent = file.name;
+}
+
+function validateImageFile(file) {
+  if (!file.type.startsWith('image/')) return 'JPG 또는 PNG 이미지 파일을 선택해 주세요.';
+  if (file.size > 10 * 1024 * 1024) return '사진은 10MB 이하만 등록할 수 있습니다.';
+  return '';
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -201,11 +227,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('feedTextRequestInput').addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); submitTextRegistration(); }
   });
-  document.getElementById('uploadInput').addEventListener('change', event => {
-    registrationState.imageFile = event.target.files?.[0] || null;
-    if (registrationState.imageFile) renderMessage('uploadMsg', `선택됨: ${registrationState.imageFile.name}`);
+  document.getElementById('uploadInput').addEventListener('change', async event => {
+    const file = event.target.files?.[0] || null;
+    if (!file || registrationState.busy) return;
+    const validationMessage = validateImageFile(file);
+    if (validationMessage) {
+      event.target.value = '';
+      registrationState.imageFile = null;
+      renderMessage('uploadMsg', validationMessage, 'warning');
+      return;
+    }
+    registrationState.imageFile = file;
+    showImagePreview(file);
+    document.getElementById('uploadFeedBtn').classList.remove('is-visible');
+    await submitImageRegistration();
   });
   document.getElementById('uploadFeedBtn').addEventListener('click', submitImageRegistration);
   const { data } = await sb.auth.getSession();
   registrationState.userId = data.session?.user?.id || null;
+});
+
+window.addEventListener('pagehide', () => {
+  if (registrationState.previewUrl) URL.revokeObjectURL(registrationState.previewUrl);
 });

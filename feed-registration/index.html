@@ -9,9 +9,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-feed-registration-editorial-v1">
-  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-shared-header-v1">
-  <script defer src="/js/proved-header.js?v=20260812-shared-header-v1"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-feed-registration-photo-v2">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-feed-registration-photo-v2">
+  <script defer src="/js/proved-header.js?v=20260812-feed-registration-photo-v2"></script>
   <style>
     :root {
       --reg-blue:#3568FF;
@@ -598,6 +598,50 @@
       .photo-example-card { padding-inline:0; }
       .photo-example-status,.photo-example-card > p,.label-example { margin-inline:0; }
     }
+
+    /* Registration photo flow v2 */
+    .registration-shell { width:min(calc(100% - 48px),1180px); padding:0 0 96px; }
+    .registration-shell > .proved-global-header { width:100%; margin:0; }
+    .registration-hero h1,.registration-route__head h2,.registration-photo-guide__head h2 { color:var(--reg-blue); }
+    .registration-routes { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
+    .registration-route { display:flex; flex-direction:column; padding:72px 48px 76px; }
+    .registration-route:first-child { padding-left:48px; }
+    .registration-route__head { min-height:156px; }
+    .registration-form { display:flex; flex:1; flex-direction:column; }
+    .registration-form .registration-submit { margin-top:auto; }
+    .registration-route--photo .registration-submit,.registration-retry { border-color:var(--reg-blue); background:var(--reg-blue); }
+    .registration-file { grid-template-columns:104px minmax(0,1fr) auto; align-content:center; align-items:center; gap:20px; min-height:180px; }
+    .registration-file::after { content:none; }
+    .registration-file__preview { width:104px; height:126px; display:grid; place-items:center; overflow:hidden; border:1px solid var(--reg-line); background:#f4f6fa; color:var(--reg-blue); font-size:34px; }
+    .registration-file__preview img { width:100%; height:100%; object-fit:cover; }
+    .registration-file__copy strong { max-width:none; padding:0; color:var(--reg-blue); font-size:18px; }
+    .registration-file__copy > span { max-width:270px; margin-top:9px; }
+    .registration-file__plus { color:var(--reg-blue); font-size:38px; font-weight:300; }
+    .registration-file.is-busy { opacity:.65; cursor:wait; }
+    .registration-retry { display:none; width:100%; min-height:52px; margin-top:16px; border:0; border-radius:0; color:#fff; font-size:14px; font-weight:800; }
+    .registration-retry.is-visible { display:block; }
+    .photo-guide-grid .photo-example-card:first-child { background:#f7faff; }
+    .label-example { position:relative; min-height:190px; padding:34px 30px; border:1px solid #bfc5ce; background:linear-gradient(135deg,#555b63,#aeb2b8 48%,#626870); box-shadow:inset 0 0 36px rgba(0,0,0,.22); }
+    .label-example::before { content:''; position:absolute; inset:15px 13px 17px 18px; background:#f3efe5; box-shadow:0 7px 18px rgba(0,0,0,.28); transform:rotate(-1.5deg); }
+    .label-example > * { position:relative; z-index:1; }
+    .label-example--name::before { background:#e7edf3; transform:rotate(1.8deg); }
+    .label-example--complete { padding:34px 28px; }
+    @media(max-width:760px) {
+      .registration-shell { width:100%; padding:0 0 72px; }
+      .registration-shell > .proved-global-header { width:100%; margin:0; }
+      .registration-hero__copy { padding-inline:20px; }
+      .registration-context { margin-inline:0; }
+      .registration-routes { grid-template-columns:1fr; }
+      .registration-route,.registration-route:first-child { padding-inline:20px; }
+      .registration-route--photo { margin-inline:0; }
+      .registration-route__head { min-height:0; }
+      .registration-photo-guide { padding-inline:20px; }
+    }
+    @media(max-width:480px) {
+      .registration-file { grid-template-columns:78px minmax(0,1fr); padding-inline:14px; }
+      .registration-file__preview { width:78px; height:98px; }
+      .registration-file__plus { display:none; }
+    }
   </style>
 </head>
 <body>
@@ -653,17 +697,18 @@
         <div class="registration-route__head">
           <span class="registration-route__number" aria-hidden="true">02</span>
           <div>
-            <h2>라벨 한 장으로<br>분석해 등록하기</h2>
-            <p>제품명·영양성분·원재료 전성분이 한 장에 보이면 라벨을 읽어 제품 정보를 등록합니다.</p>
+            <h2>라벨 사진으로<br>등록하기</h2>
+            <p>사진을 선택하면 썸네일을 보여주고 곧바로 라벨 분석을 시작합니다.</p>
           </div>
         </div>
 
-        <label class="registration-file">
-          <strong>라벨 사진 선택</strong>
-          <span>JPG 또는 PNG · 10MB 이하 1장<br>빛 반사 없이 작은 글씨까지 선명하게</span>
+        <label class="registration-file" id="registrationFileLabel">
+          <span class="registration-file__preview" id="uploadPreview" aria-hidden="true">＋</span>
+          <span class="registration-file__copy"><strong id="uploadPrompt">라벨 사진 선택</strong><span>JPG 또는 PNG · 10MB 이하 1장<br>선택하면 자동으로 분석을 시작합니다.</span></span>
+          <span class="registration-file__plus" aria-hidden="true">＋</span>
           <input type="file" id="uploadInput" accept="image/*" class="hidden">
         </label>
-        <button id="uploadFeedBtn" type="button" class="registration-submit">이미지 분석하기</button>
+        <button id="uploadFeedBtn" type="button" class="registration-retry">다시 분석하기</button>
         <div id="uploadMsg" aria-live="polite"></div>
       </article>
     </section>
@@ -680,6 +725,18 @@
       </div>
 
       <div class="photo-guide-grid">
+        <article class="photo-example-card">
+          <div class="photo-example-status photo-example-status--valid"><strong>가능</strong><span>먼저 볼 사진</span></div>
+          <div class="label-example label-example--complete" aria-hidden="true">
+            <div class="label-example__product"><span>제품명</span><strong>프루브 닭고기 레시피</strong></div>
+            <div class="label-example__detail">
+              <div><b>원재료 전성분</b><i></i><i></i><i></i><i></i></div>
+              <div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div>
+            </div>
+          </div>
+          <p><strong>제품명 · 영양성분 · 원재료 전성분</strong> 세 가지가 한 장에 선명하게 보이면 분석할 수 있습니다.</p>
+        </article>
+
         <article class="photo-example-card">
           <div class="photo-example-status photo-example-status--invalid"><strong>불가능</strong><span>성분만 보임</span></div>
           <div class="label-example label-example--nutrition" aria-hidden="true">
@@ -701,18 +758,6 @@
           </div>
           <p><strong>제품명만 있고</strong> 성분 정보가 없다면 계산에 필요한 데이터를 만들 수 없습니다.</p>
         </article>
-
-        <article class="photo-example-card">
-          <div class="photo-example-status photo-example-status--valid"><strong>가능</strong><span>정보가 한 장에 모임</span></div>
-          <div class="label-example label-example--complete" aria-hidden="true">
-            <div class="label-example__product"><span>제품명</span><strong>프루브 닭고기 레시피</strong></div>
-            <div class="label-example__detail">
-              <div><b>원재료 전성분</b><i></i><i></i><i></i><i></i></div>
-              <div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div>
-            </div>
-          </div>
-          <p><strong>제품명 · 영양성분 · 원재료 전성분</strong> 세 가지가 한 장에 선명하게 보이면 분석할 수 있습니다.</p>
-        </article>
       </div>
 
       <p class="photo-example-tip">촬영 팁: 라벨을 정면에서 찍고, 빛 반사와 그림자를 피한 뒤 작은 숫자까지 확대했을 때 읽히는지 확인해 주세요.</p>
@@ -730,6 +775,6 @@
     <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>
   </footer>
 
-  <script src="/js/feed-registration.js?v=20260812-feed-registration-editorial-v1"></script>
+  <script src="/js/feed-registration.js?v=20260812-auto-image-analysis-v2"></script>
 </body>
 </html>
