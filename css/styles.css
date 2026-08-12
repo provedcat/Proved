@@ -1015,6 +1015,44 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .pc-analysis-ratio{padding:24px 0;border-bottom:1px solid var(--border-subtle)}.pc-analysis-ratio span,.pc-analysis-ratio small{display:block;color:var(--text-secondary);font-size:12px}.pc-analysis-ratio strong{display:block;margin:5px 0;color:var(--calcium-ink);font-size:34px}.pc-analysis-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:17px 0;border-bottom:1px solid var(--border-subtle);font-size:13px}.pc-analysis-row>span{font-weight:700}.pc-analysis-row>strong{text-align:right;color:var(--text-secondary);font-weight:600}.pc-analysis-row small{display:block;color:var(--feed-color,var(--text-secondary));font-size:10px}.pc-analysis-note{margin:14px 0 0;color:var(--text-placeholder);font-size:11px;line-height:1.6}
 .pc-water-gauge{height:6px;margin-top:24px;background:#edf0f4}.pc-water-gauge i{display:block;height:100%}.pc-water-status{margin:10px 0 20px;color:var(--text-secondary);font-size:13px}.share-btn-row button,#saveFeedingRecordBtn,.share-close-btn{border-radius:0!important}
 @media(max-width:520px){.pc-kcal-counter{grid-template-columns:48px minmax(120px,1fr) 48px;width:100%}.pc-analysis-metrics,.pc-water-summary{grid-template-columns:1fr 1fr}.pc-analysis-metrics strong,.pc-water-summary strong{font-size:23px}.pc-analysis-row{gap:14px}}
+
+/* Header navigation, exclusive page switching, and editorial result modal. */
+.pc-app-header{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:22px}
+.pc-header-tabs{display:flex;justify-self:end;align-items:center;min-width:0}
+.pc-header-tabs button{min-height:32px;padding:0 18px;border:0!important;border-left:1px solid var(--border-default)!important;border-radius:0!important;background:transparent!important;color:var(--text-secondary)!important;font-size:13px;font-weight:720;white-space:nowrap}
+.pc-header-tabs button:last-child{border-right:1px solid var(--border-default)!important}
+.pc-header-tabs button.is-active{color:var(--brand-primary)!important}
+#calculatorPage.hidden,#weightTrendPage.hidden,#wetFoodBetaPage.hidden{display:none!important}
+
+#resultArea #capBtn,#resultArea #waterBtn{min-height:54px!important;border:0!important;border-radius:0!important;color:#fff!important;box-shadow:none!important}
+#resultArea #capBtn{background:var(--calcium-ink)!important}
+#resultArea #waterBtn{background:var(--water-ink)!important}
+#capResult,#waterResult,#capResult>div,#waterResult>div{border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}
+#capResult>div,#waterResult>div{padding:30px 0 8px!important}
+
+#shareModal{background:rgba(24,35,58,.54)!important;padding:28px 16px 52px!important}
+.share-modal-inner{position:relative;max-width:400px!important;gap:0!important;padding:46px 20px 20px;background:#fff;border:1px solid var(--border-default);border-radius:0!important;box-shadow:0 20px 70px rgba(20,39,82,.18)}
+.share-close-btn{position:absolute;top:6px;right:8px;width:36px!important;height:36px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--brand-primary)!important;font-size:25px!important;font-weight:500!important;line-height:1}
+#shareCard{width:360px!important;max-width:100%!important;background:#fff!important;border:1px solid var(--border-default)!important;border-radius:0!important;color:var(--text-primary)!important;box-shadow:none!important}
+#shareCard::before,#shareCard::after{display:none!important}
+.sc-header,.sc-kcal-block,.sc-feeds,.sc-analysis,.sc-footer{background:#fff!important;border-color:var(--border-subtle)!important}
+.sc-brand,.sc-kcal-label{color:var(--brand-primary)!important}
+.sc-cat-name,.sc-kcal-num,.sc-energy-num,.sc-feed-name,.sc-feed-grams,.sc-an-value,.sc-water-num{color:var(--text-primary)!important}
+.sc-cat-sub,.sc-kcal-unit,.sc-ratio-txt,.sc-feeds-title,.sc-feed-kcal,.sc-energy-label,.sc-an-label,.sc-footer{color:var(--text-secondary)!important}
+.sc-feed-row,.sc-an-card,.sc-cap-item,.sc-water-box{border-radius:0!important;background:#fff!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;box-shadow:none!important}
+.share-btn-row{margin-top:16px!important;gap:8px!important}
+.share-btn-row button{min-height:50px!important;border-radius:0!important}
+.share-btn-save{border:0!important;background:var(--brand-primary)!important;color:#fff!important}
+.share-btn-kakao{border:1px solid var(--brand-primary)!important;background:#fff!important;color:var(--brand-primary)!important}
+
+@media(max-width:720px){
+  .pc-app-header{grid-template-columns:auto 1fr auto;gap:8px;padding-inline:12px!important}
+  .pc-header-tabs{justify-self:stretch;justify-content:flex-end}
+  .pc-header-tabs button{padding-inline:9px;font-size:11px}
+  .proved-wordmark--header{max-width:72px}
+  #authOpenBtn{padding-inline:7px!important}
+  .share-modal-inner{padding-inline:10px}
+}
 @media (max-width: 600px) {
   .proved-site-footer {
     width: calc(100% - 32px);
