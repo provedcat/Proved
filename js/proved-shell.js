@@ -207,7 +207,7 @@ function provedRenderEntry(step) {
       </div>
       <div class="proved-entry-options">
         ${option('로그인', isStart ? 'active proved-entry-option--login' : 'muted proved-entry-option--login', "onclick=\"provedRenderEntry('login')\"")}
-        ${option('로그인 없이', 'active proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
+        ${option('로그인없이', 'active proved-entry-option--guest', step === 'pet' ? '' : "onclick=\"provedRenderEntry('pet')\"")}
       </div>
     </section>
     <section class="proved-entry__section" aria-labelledby="provedEntrySpeciesTitle">
