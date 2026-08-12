@@ -9,118 +9,637 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-registration-v2">
-  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-registration-v2">
-  <script defer src="/js/proved-header.js?v=20260812-registration-v2"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-feed-registration-photo-v2">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260812-feed-registration-photo-v2">
+  <script defer src="/js/proved-header.js?v=20260812-feed-registration-photo-v2"></script>
   <style>
-    :root { --registration-blue:#3568ff; --registration-line:rgba(53,104,255,.22); --registration-muted:#697386; }
-    body { min-height:100vh; margin:0; background:#f7f8fa; color:#161922; }
-    .registration-shell,.proved-site-footer { box-sizing:border-box; width:min(calc(100% - 48px),1180px); margin:0 auto; }
-    .registration-shell { min-height:100vh; background:#fff; }
-    .registration-card { border:1px solid var(--registration-line); border-top:0; background:#fff; }
-    .registration-hero { display:grid; grid-template-columns:minmax(0,2fr) minmax(320px,1fr); min-height:520px; border-bottom:1px solid var(--registration-line); }
-    .registration-intro { display:flex; flex-direction:column; justify-content:center; padding:72px 7%; }
-    .registration-eyebrow { margin:0 0 22px; color:var(--registration-blue); font-size:13px; font-weight:800; }
-    .registration-intro h1 { max-width:680px; margin:0; color:var(--registration-blue); font-size:clamp(48px,5.1vw,76px); font-weight:800; line-height:.98; letter-spacing:-.065em; word-break:keep-all; }
-    .registration-lead { max-width:620px; margin:32px 0 0; color:var(--registration-muted); font-size:15px; line-height:1.75; word-break:keep-all; }
-    .registration-choices { display:flex; flex-direction:column; justify-content:center; padding:48px 40px; background:var(--registration-blue); color:#fff; }
-    .registration-choice { margin:0 0 30px; }
-    .registration-choice:last-child { margin-bottom:0; }
-    .registration-choice legend { margin-bottom:12px; font-size:13px; font-weight:800; }
-    .registration-options { display:grid; grid-template-columns:1fr 1fr; }
-    .registration-option { min-height:58px; border:1px solid rgba(255,255,255,.42); border-radius:0; background:transparent; color:#fff; font-size:15px; font-weight:750; }
-    .registration-option + .registration-option { border-left:0; }
-    .registration-option.is-active { background:#fff; color:var(--registration-blue); box-shadow:none; }
-    .registration-methods { display:grid; grid-template-columns:1fr 1fr; }
-    .registration-method { min-width:0; min-height:550px; padding:64px 48px; }
-    .registration-method + .registration-method { border-left:1px solid var(--registration-line); background:#f3f6ff; }
-    .registration-method__heading { display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:start; min-height:122px; }
-    .registration-method__number { color:var(--registration-blue); font-size:58px; font-weight:500; line-height:.9; letter-spacing:-.06em; }
-    .registration-method h2 { margin:0; color:var(--registration-blue); font-size:30px; font-weight:800; line-height:1.1; letter-spacing:-.045em; word-break:keep-all; }
-    .registration-method__description { margin:14px 0 0; color:var(--registration-muted); font-size:13px; line-height:1.65; }
-    .registration-form { display:flex; flex-direction:column; margin-top:36px; }
-    .registration-form label { display:block; margin-bottom:18px; color:var(--registration-blue); font-size:13px; font-weight:800; }
-    .registration-input { width:100%; min-height:64px; padding:0; border:0; border-bottom:1px solid #b7c1d2; border-radius:0; background:transparent; color:#20242c; font-size:18px; outline:none; }
-    .registration-input:focus { border-color:var(--registration-blue); box-shadow:none; }
-    .registration-help { min-height:50px; margin:16px 0 0; color:var(--registration-muted); font-size:12px; line-height:1.65; }
-    .registration-submit { width:100%; min-height:58px; margin-top:22px; border:0; border-radius:0; background:var(--registration-blue); color:#fff; font-size:14px; font-weight:850; }
-    .registration-submit:disabled { opacity:.55; cursor:wait; }
-    .registration-file { position:relative; display:grid; grid-template-columns:96px 1fr auto; align-items:center; gap:18px; min-height:160px; padding:22px; border:1px dashed rgba(53,104,255,.55); background:#fff; cursor:pointer; }
-    .registration-file__preview { width:96px; height:112px; display:grid; place-items:center; overflow:hidden; border:1px solid var(--registration-line); background:#f3f5f8; color:var(--registration-blue); font-size:34px; }
-    .registration-file__preview img { width:100%; height:100%; object-fit:cover; }
-    .registration-file__copy strong { display:block; color:var(--registration-blue); font-size:15px; }
-    .registration-file__copy > span { display:block; margin-top:7px; color:var(--registration-muted); font-size:11px; line-height:1.55; }
-    .registration-file__plus { color:var(--registration-blue); font-size:38px; font-weight:300; }
-    .registration-file.is-busy { opacity:.68; cursor:wait; }
-    .registration-retry { display:none; width:100%; min-height:48px; margin-top:12px; border:0; border-radius:0; background:var(--registration-blue); color:#fff; font-weight:800; }
-    .registration-retry.is-visible { display:block; }
-    .registration-complete { display:none; margin-top:14px; }
-    .registration-complete.is-visible { display:block; }
-    .registration-return { padding:13px 14px; border:1px solid #CFE0FF; border-radius:10px; background:#F3F7FF; color:#315C9E; font-size:12px; font-weight:750; line-height:1.55; }
-    .registration-close-large { width:100%; min-height:52px; margin-top:10px; border:0; border-radius:0; background:var(--registration-blue); color:#fff; font-size:15px; font-weight:900; }
-    .registration-close-large:hover { background:#2455e8; }
-    .registration-close-large:focus-visible { outline:3px solid rgba(47,111,237,.22); outline-offset:2px; }
-    .registration-photo-guide { padding:82px 48px 72px; border-top:1px solid var(--registration-line); }
-    .registration-photo-guide__intro { display:grid; grid-template-columns:minmax(240px,.8fr) minmax(340px,1.2fr); gap:70px; align-items:end; margin-bottom:40px; }
-    .registration-photo-guide h2 { max-width:400px; margin:0; color:var(--registration-blue); font-size:46px; font-weight:800; line-height:1.02; letter-spacing:-.055em; word-break:keep-all; }
-    .registration-photo-guide__intro p { margin:0; color:var(--registration-muted); font-size:14px; line-height:1.75; word-break:keep-all; }
-    .photo-example-list { display:grid; grid-template-columns:1.15fr 1fr 1fr; border-top:1px solid #dce1e8; border-bottom:1px solid #dce1e8; }
-    .photo-example-group { min-width:0; padding:28px; background:#fff; }
-    .photo-example-group + .photo-example-group { border-left:1px solid #dce1e8; }
-    .photo-example-heading { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-    .photo-example-heading h3 { margin:0; color:#263141; font-size:14px; font-weight:900; }
-    .photo-example-mark { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#E8505B; color:#fff; font-size:15px; font-weight:900; line-height:1; }
-    .photo-example-group--valid .photo-example-mark { background:#26A15B; font-size:13px; }
-    .photo-example-grid { display:grid; grid-template-columns:1fr; gap:18px; }
-    .photo-example-card { min-width:0; }
-    .photo-example-card > p { margin:9px 0 0; color:#687384; font-size:11px; font-weight:650; line-height:1.5; text-align:center; }
-    .photo-example-card > p strong { color:#374151; font-weight:900; }
-    .label-example { position:relative; min-height:210px; overflow:hidden; border:1px solid #cbd1da; border-radius:0; background:linear-gradient(135deg,#5d6269,#b8bbc0 46%,#686d74); color:#333; box-shadow:inset 0 0 40px rgba(0,0,0,.22); }
-    .label-example::before { content:''; position:absolute; inset:17px 13px 20px 20px; background:#f3efe5; box-shadow:0 7px 18px rgba(0,0,0,.28); transform:rotate(-1.4deg); }
-    .label-example > * { position:relative; z-index:1; }
-    .label-example--nutrition { display:flex; flex-direction:column; gap:7px; padding:38px 34px; font-size:9px; }
-    .label-example--nutrition > strong { padding-bottom:5px; border-bottom:1px solid #B8B0A2; font-size:10px; }
-    .label-example--nutrition > span { display:flex; justify-content:space-between; gap:5px; }
-    .label-example--nutrition b,.label-example--nutrition i { font-style:normal; font-weight:700; }
-    .label-example--name { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:38px 30px; text-align:center; }
-    .label-example--name::before { background:#e7edf3; transform:rotate(2deg); }
-    .label-example__brand { margin-bottom:10px; color:#52657D; font-size:8px; font-weight:900; letter-spacing:.12em; }
-    .label-example--name > strong { color:#203A5B; font-size:14px; font-weight:900; line-height:1.15; }
-    .label-example--name > small { margin-top:8px; color:#6B7B8F; font-size:7px; font-weight:800; letter-spacing:.08em; }
-    .label-example--complete { min-height:210px; padding:38px 32px; }
-    .label-example__product { display:grid; grid-template-columns:50px 1fr; gap:7px; align-items:center; padding-bottom:9px; border-bottom:1px solid #B9B3A8; font-size:9px; }
+    :root {
+      --reg-blue:#3568FF;
+      --reg-blue-soft:#EEF3FF;
+      --reg-ink:#151922;
+      --reg-muted:#727B8B;
+      --reg-line:#DCE2EA;
+      --reg-paper:#FFFFFF;
+      --reg-wash:#F5F7FA;
+      --reg-red:#D94B4B;
+      --reg-green:#20895A;
+    }
+
+    * { box-sizing:border-box; }
+    html { background:var(--reg-paper); }
+    body {
+      min-height:100vh;
+      margin:0;
+      overflow-x:hidden;
+      background:var(--reg-paper);
+      color:var(--reg-ink);
+      font-family:"SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font:inherit; }
+    button { cursor:pointer; }
+
+    .registration-shell {
+      width:min(100%,1180px);
+      margin:0 auto;
+      padding:0 28px 96px;
+    }
+
+    .registration-shell > .proved-global-header {
+      margin:0 -28px;
+      width:calc(100% + 56px);
+    }
+
+    .registration-hero {
+      display:grid;
+      grid-template-columns:minmax(0,1.34fr) minmax(320px,.66fr);
+      min-height:520px;
+      border-bottom:1px solid var(--reg-line);
+    }
+
+    .registration-hero__copy {
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      padding:76px 72px 64px 0;
+      animation:registrationRise .55s ease-out both;
+    }
+
+    .registration-hero__index {
+      margin:0 0 18px;
+      color:var(--reg-blue);
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .registration-hero h1 {
+      max-width:760px;
+      margin:0;
+      font-size:clamp(48px,6.4vw,84px);
+      font-weight:800;
+      line-height:.98;
+      letter-spacing:-.065em;
+      word-break:keep-all;
+    }
+
+    .registration-hero__lead {
+      max-width:560px;
+      margin:28px 0 0;
+      color:var(--reg-muted);
+      font-size:16px;
+      font-weight:550;
+      line-height:1.7;
+      word-break:keep-all;
+    }
+
+    .registration-context {
+      display:grid;
+      align-content:end;
+      gap:34px;
+      padding:56px 40px 48px;
+      background:var(--reg-blue);
+      color:#fff;
+      animation:registrationRise .55s .08s ease-out both;
+    }
+
+    .registration-context__intro {
+      max-width:290px;
+      margin:0 0 4px;
+      font-size:14px;
+      font-weight:650;
+      line-height:1.6;
+      opacity:.78;
+    }
+
+    .registration-choice {
+      margin:0;
+      padding:0;
+      border:0;
+    }
+
+    .registration-choice legend {
+      width:100%;
+      margin:0 0 11px;
+      color:#fff;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .registration-options {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      border-top:1px solid rgba(255,255,255,.42);
+      border-left:1px solid rgba(255,255,255,.42);
+    }
+
+    .registration-option {
+      min-height:54px;
+      padding:0 14px;
+      border:0;
+      border-right:1px solid rgba(255,255,255,.42);
+      border-bottom:1px solid rgba(255,255,255,.42);
+      border-radius:0;
+      background:transparent;
+      color:rgba(255,255,255,.78);
+      font-size:14px;
+      font-weight:700;
+      transition:background-color .18s ease,color .18s ease;
+    }
+
+    .registration-option:hover,
+    .registration-option:focus-visible {
+      background:rgba(255,255,255,.12);
+      color:#fff;
+    }
+
+    .registration-option:focus-visible {
+      outline:2px solid #fff;
+      outline-offset:-4px;
+    }
+
+    .registration-option.is-active {
+      background:#fff;
+      color:var(--reg-blue);
+    }
+
+    .registration-routes {
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+      border-bottom:1px solid var(--reg-line);
+      animation:registrationRise .55s .14s ease-out both;
+    }
+
+    .registration-route {
+      min-width:0;
+      padding:72px 48px 76px;
+    }
+
+    .registration-route:first-child {
+      padding-left:0;
+      border-right:1px solid var(--reg-line);
+    }
+
+    .registration-route--photo {
+      background:linear-gradient(180deg,#F5F8FF 0%,#EEF3FF 100%);
+    }
+
+    .registration-route__head {
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr);
+      gap:24px;
+      align-items:start;
+      margin-bottom:44px;
+    }
+
+    .registration-route__number {
+      color:var(--reg-blue);
+      font-size:68px;
+      font-weight:750;
+      line-height:.82;
+      letter-spacing:-.07em;
+    }
+
+    .registration-route__head h2 {
+      margin:0;
+      font-size:28px;
+      font-weight:800;
+      line-height:1.08;
+      letter-spacing:-.035em;
+      word-break:keep-all;
+    }
+
+    .registration-route__head p {
+      max-width:390px;
+      margin:11px 0 0;
+      color:var(--reg-muted);
+      font-size:13px;
+      font-weight:550;
+      line-height:1.65;
+      word-break:keep-all;
+    }
+
+    .registration-form label {
+      display:block;
+      margin:0 0 12px;
+      color:var(--reg-blue);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .registration-input {
+      width:100%;
+      min-height:60px;
+      padding:0 2px;
+      border:0;
+      border-bottom:2px solid #BFC8D6;
+      border-radius:0;
+      background:transparent;
+      color:var(--reg-ink);
+      font-size:19px;
+      font-weight:650;
+      outline:none;
+      transition:border-color .18s ease;
+    }
+
+    .registration-input::placeholder {
+      color:#A2A9B5;
+      font-weight:550;
+    }
+
+    .registration-input:focus { border-color:var(--reg-blue); }
+
+    .registration-help {
+      margin:12px 0 0;
+      color:var(--reg-muted);
+      font-size:12px;
+      font-weight:550;
+      line-height:1.65;
+    }
+
+    .registration-submit {
+      width:100%;
+      min-height:56px;
+      margin-top:24px;
+      border:1px solid var(--reg-blue);
+      border-radius:0;
+      background:var(--reg-blue);
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      transition:transform .18s ease,background-color .18s ease,color .18s ease;
+    }
+
+    .registration-submit:hover { transform:translateY(-2px); }
+    .registration-submit:focus-visible { outline:2px solid var(--reg-ink); outline-offset:3px; }
+    .registration-submit:disabled { opacity:.48; cursor:wait; transform:none; }
+
+    .registration-route--photo .registration-submit {
+      border-color:var(--reg-ink);
+      background:var(--reg-ink);
+    }
+
+    .registration-file {
+      position:relative;
+      display:grid;
+      min-height:180px;
+      align-content:center;
+      padding:28px 24px;
+      border:0;
+      border-top:1px dashed #9DB3E3;
+      border-bottom:1px dashed #9DB3E3;
+      background:rgba(255,255,255,.46);
+      text-align:left;
+      cursor:pointer;
+      transition:background-color .18s ease;
+    }
+
+    .registration-file::after {
+      content:'+';
+      position:absolute;
+      top:22px;
+      right:22px;
+      color:var(--reg-blue);
+      font-size:42px;
+      font-weight:300;
+      line-height:1;
+    }
+
+    .registration-file:hover { background:#fff; }
+
+    .registration-file strong {
+      display:block;
+      max-width:250px;
+      padding-right:44px;
+      font-size:20px;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .registration-file span {
+      display:block;
+      max-width:300px;
+      margin-top:10px;
+      color:#6E7B92;
+      font-size:12px;
+      font-weight:550;
+      line-height:1.6;
+    }
+
+    .registration-complete {
+      display:none;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:28px;
+      align-items:center;
+      margin:0;
+      padding:26px 30px;
+      border-bottom:1px solid var(--reg-line);
+      background:var(--reg-ink);
+      color:#fff;
+    }
+
+    .registration-complete.is-visible { display:grid; }
+
+    .registration-return {
+      margin:0;
+      color:#fff;
+      font-size:13px;
+      font-weight:650;
+      line-height:1.6;
+    }
+
+    .registration-close-large {
+      min-width:170px;
+      min-height:48px;
+      padding:0 22px;
+      border:1px solid rgba(255,255,255,.66);
+      border-radius:0;
+      background:transparent;
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .registration-close-large:hover { background:#fff; color:var(--reg-ink); }
+    .registration-close-large:focus-visible { outline:2px solid #fff; outline-offset:3px; }
+
+    .registration-photo-guide {
+      padding:92px 0 16px;
+    }
+
+    .registration-photo-guide__head {
+      display:grid;
+      grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+      gap:56px;
+      align-items:end;
+      margin-bottom:42px;
+    }
+
+    .registration-photo-guide__head h2 {
+      margin:0;
+      font-size:clamp(34px,4.8vw,58px);
+      font-weight:800;
+      line-height:1.02;
+      letter-spacing:-.055em;
+      word-break:keep-all;
+    }
+
+    .registration-photo-guide__head p {
+      max-width:430px;
+      margin:0;
+      color:var(--reg-muted);
+      font-size:14px;
+      font-weight:550;
+      line-height:1.75;
+      word-break:keep-all;
+    }
+
+    .photo-guide-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      border-top:1px solid var(--reg-line);
+      border-bottom:1px solid var(--reg-line);
+    }
+
+    .photo-example-card {
+      min-width:0;
+      padding:28px 28px 30px;
+      border-right:1px solid var(--reg-line);
+    }
+
+    .photo-example-card:last-child { border-right:0; }
+
+    .photo-example-status {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:22px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .photo-example-status--invalid { color:var(--reg-red); }
+    .photo-example-status--valid { color:var(--reg-green); }
+
+    .photo-example-status span:last-child {
+      color:#8B93A1;
+      font-size:11px;
+      font-weight:650;
+    }
+
+    .photo-example-card > p {
+      min-height:54px;
+      margin:18px 0 0;
+      color:#657083;
+      font-size:12px;
+      font-weight:550;
+      line-height:1.6;
+      word-break:keep-all;
+    }
+
+    .photo-example-card > p strong {
+      color:var(--reg-ink);
+      font-weight:800;
+    }
+
+    .label-example {
+      min-height:148px;
+      overflow:hidden;
+      border:1px solid #D5DCE5;
+      border-radius:0;
+      background:#F7F5F0;
+      color:#333;
+    }
+
+    .label-example--nutrition {
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      padding:18px;
+      background:#F5F1E9;
+      font-size:10px;
+    }
+
+    .label-example--nutrition > strong {
+      padding-bottom:7px;
+      border-bottom:1px solid #B8B0A2;
+      font-size:11px;
+    }
+
+    .label-example--nutrition > span {
+      display:flex;
+      justify-content:space-between;
+      gap:5px;
+    }
+
+    .label-example--nutrition b,
+    .label-example--nutrition i { font-style:normal; font-weight:700; }
+
+    .label-example--name {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:18px 10px;
+      background:#EAF1F8;
+      text-align:center;
+    }
+
+    .label-example__brand {
+      margin-bottom:12px;
+      color:#52657D;
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.12em;
+    }
+
+    .label-example--name > strong {
+      color:#203A5B;
+      font-size:16px;
+      font-weight:900;
+      line-height:1.1;
+    }
+
+    .label-example--name > small {
+      margin-top:10px;
+      color:#6B7B8F;
+      font-size:8px;
+      font-weight:800;
+      letter-spacing:.08em;
+    }
+
+    .label-example--complete {
+      min-height:148px;
+      padding:14px;
+      background:#F6F4EE;
+    }
+
+    .label-example__product {
+      display:grid;
+      grid-template-columns:54px 1fr;
+      gap:8px;
+      align-items:center;
+      padding-bottom:11px;
+      border-bottom:1px solid #B9B3A8;
+      font-size:9px;
+    }
+
     .label-example__product span { font-weight:800; }
-    .label-example__product strong { font-size:10px; font-weight:900; }
-    .label-example__detail { display:grid; grid-template-columns:1.25fr .9fr; gap:10px; padding-top:10px; }
+    .label-example__product strong { font-size:11px; font-weight:900; }
+
+    .label-example__detail {
+      display:grid;
+      grid-template-columns:1.2fr .95fr;
+      gap:12px;
+      padding-top:12px;
+    }
+
     .label-example__detail > div { min-width:0; font-size:8px; }
     .label-example__detail b { display:block; margin-bottom:7px; font-size:9px; }
-    .label-example__detail i { display:block; width:100%; height:5px; margin-top:5px; border-radius:999px; background:#D3CEC4; }
+    .label-example__detail i { display:block; width:100%; height:5px; margin-top:5px; background:#D3CEC4; }
     .label-example__detail i:nth-child(3) { width:86%; }
     .label-example__detail i:nth-child(4) { width:93%; }
     .label-example__detail i:nth-child(5) { width:68%; }
     .label-example__detail span { display:block; margin-top:5px; white-space:nowrap; }
-    .photo-example-tip { margin:28px 0 0; padding-top:20px; border-top:1px solid #dce1e8; color:#657083; font-size:12px; font-weight:700; line-height:1.55; }
-    @media(max-width:820px) {
-      .registration-shell,.proved-site-footer { width:100%; }
-      .registration-hero,.registration-methods { grid-template-columns:1fr; }
-      .registration-hero { min-height:0; }
-      .registration-intro { min-height:420px; padding:56px 28px; }
-      .registration-intro h1 { font-size:clamp(44px,12vw,66px); }
-      .registration-choices { padding:38px 28px; }
-      .registration-method { min-height:0; padding:52px 28px; }
-      .registration-method + .registration-method { border-left:0; border-top:1px solid var(--registration-line); }
-      .registration-method__heading { min-height:0; margin-bottom:34px; }
-      .registration-photo-guide { padding:60px 28px; }
-      .registration-photo-guide__intro,.photo-example-list { grid-template-columns:1fr; }
-      .registration-photo-guide__intro { gap:24px; }
-      .registration-photo-guide h2 { font-size:40px; }
-      .photo-example-group + .photo-example-group { border-left:0; border-top:1px solid #dce1e8; }
+
+    .photo-example-tip {
+      margin:30px 0 0;
+      padding:18px 0 0;
+      border-top:1px solid var(--reg-line);
+      color:#657083;
+      font-size:12px;
+      font-weight:650;
+      line-height:1.65;
+    }
+
+    @keyframes registrationRise {
+      from { opacity:0; transform:translateY(18px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+    }
+
+    @media (max-width:900px) {
+      .registration-shell { padding-inline:20px; }
+      .registration-shell > .proved-global-header { margin-inline:-20px; width:calc(100% + 40px); }
+      .registration-hero { grid-template-columns:1fr; min-height:0; }
+      .registration-hero__copy { padding:64px 0 52px; }
+      .registration-context { padding:36px 30px; }
+      .registration-routes { grid-template-columns:1fr; }
+      .registration-route { padding:58px 0 62px; }
+      .registration-route:first-child { border-right:0; border-bottom:1px solid var(--reg-line); }
+      .registration-route--photo { margin-inline:-20px; padding-inline:20px; }
+      .registration-photo-guide__head { grid-template-columns:1fr; gap:18px; }
+      .photo-guide-grid { grid-template-columns:1fr; }
+      .photo-example-card { border-right:0; border-bottom:1px solid var(--reg-line); }
+      .photo-example-card:last-child { border-bottom:0; }
+    }
+
+    @media (max-width:560px) {
+      .registration-shell { padding:0 14px 72px; }
+      .registration-shell > .proved-global-header { margin-inline:-14px; width:calc(100% + 28px); }
+      .registration-hero__copy { padding:46px 0 38px; }
+      .registration-hero h1 { font-size:clamp(42px,13vw,62px); }
+      .registration-hero__lead { margin-top:20px; font-size:14px; }
+      .registration-context { margin-inline:-14px; padding:30px 20px; }
+      .registration-route { padding:48px 0 54px; }
+      .registration-route--photo { margin-inline:-14px; padding-inline:14px; }
+      .registration-route__head { grid-template-columns:1fr; gap:15px; margin-bottom:32px; }
+      .registration-route__number { font-size:54px; }
+      .registration-route__head h2 { font-size:25px; }
+      .registration-input { min-height:56px; font-size:16px; }
+      .registration-complete { grid-template-columns:1fr; margin-inline:-14px; padding:24px 20px; }
+      .registration-close-large { width:100%; }
+      .registration-photo-guide { padding-top:64px; }
+      .photo-example-card { padding-inline:0; }
+      .photo-example-status,.photo-example-card > p,.label-example { margin-inline:0; }
+    }
+
+    /* Registration photo flow v2 */
+    .registration-shell { width:min(calc(100% - 48px),1180px); padding:0 0 96px; }
+    .registration-shell > .proved-global-header { width:100%; margin:0; }
+    .registration-hero h1,.registration-route__head h2,.registration-photo-guide__head h2 { color:var(--reg-blue); }
+    .registration-routes { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
+    .registration-route { display:flex; flex-direction:column; padding:72px 48px 76px; }
+    .registration-route:first-child { padding-left:48px; }
+    .registration-route__head { min-height:156px; }
+    .registration-form { display:flex; flex:1; flex-direction:column; }
+    .registration-form .registration-submit { margin-top:auto; }
+    .registration-route--photo .registration-submit,.registration-retry { border-color:var(--reg-blue); background:var(--reg-blue); }
+    .registration-file { grid-template-columns:104px minmax(0,1fr) auto; align-content:center; align-items:center; gap:20px; min-height:180px; }
+    .registration-file::after { content:none; }
+    .registration-file__preview { width:104px; height:126px; display:grid; place-items:center; overflow:hidden; border:1px solid var(--reg-line); background:#f4f6fa; color:var(--reg-blue); font-size:34px; }
+    .registration-file__preview img { width:100%; height:100%; object-fit:cover; }
+    .registration-file__copy strong { max-width:none; padding:0; color:var(--reg-blue); font-size:18px; }
+    .registration-file__copy > span { max-width:270px; margin-top:9px; }
+    .registration-file__plus { color:var(--reg-blue); font-size:38px; font-weight:300; }
+    .registration-file.is-busy { opacity:.65; cursor:wait; }
+    .registration-retry { display:none; width:100%; min-height:52px; margin-top:16px; border:0; border-radius:0; color:#fff; font-size:14px; font-weight:800; }
+    .registration-retry.is-visible { display:block; }
+    .photo-guide-grid .photo-example-card:first-child { background:#f7faff; }
+    .label-example { position:relative; min-height:190px; padding:34px 30px; border:1px solid #bfc5ce; background:linear-gradient(135deg,#555b63,#aeb2b8 48%,#626870); box-shadow:inset 0 0 36px rgba(0,0,0,.22); }
+    .label-example::before { content:''; position:absolute; inset:15px 13px 17px 18px; background:#f3efe5; box-shadow:0 7px 18px rgba(0,0,0,.28); transform:rotate(-1.5deg); }
+    .label-example > * { position:relative; z-index:1; }
+    .label-example--name::before { background:#e7edf3; transform:rotate(1.8deg); }
+    .label-example--complete { padding:34px 28px; }
+    @media(max-width:760px) {
+      .registration-shell { width:100%; padding:0 0 72px; }
+      .registration-shell > .proved-global-header { width:100%; margin:0; }
+      .registration-hero__copy { padding-inline:20px; }
+      .registration-context { margin-inline:0; }
+      .registration-routes { grid-template-columns:1fr; }
+      .registration-route,.registration-route:first-child { padding-inline:20px; }
+      .registration-route--photo { margin-inline:0; }
+      .registration-route__head { min-height:0; }
+      .registration-photo-guide { padding-inline:20px; }
     }
     @media(max-width:480px) {
-      .registration-method__number { font-size:48px; }
-      .registration-method h2 { font-size:27px; }
-      .registration-file { grid-template-columns:74px 1fr; }
-      .registration-file__preview { width:74px; height:92px; }
+      .registration-file { grid-template-columns:78px minmax(0,1fr); padding-inline:14px; }
+      .registration-file__preview { width:78px; height:98px; }
       .registration-file__plus { display:none; }
     }
   </style>
@@ -129,108 +648,133 @@
   <main class="registration-shell">
     <header data-proved-header="registration"></header>
 
-    <section class="registration-card">
-      <div class="registration-hero">
-        <div class="registration-intro">
-          <p class="registration-eyebrow">사료 등록</p>
-          <h1>찾는 사료가 없다면,<br>여기서 추가하세요.</h1>
-          <p class="registration-lead">제품명을 알고 있으면 검색으로, 라벨 사진이 있으면 사진 분석으로 등록할 수 있습니다. 등록된 제품은 계산기에서 바로 다시 찾아볼 수 있어요.</p>
-        </div>
-        <div class="registration-choices">
+    <section class="registration-hero" aria-labelledby="registrationTitle">
+      <div class="registration-hero__copy">
+        <p class="registration-hero__index">사료 등록</p>
+        <h1 id="registrationTitle">찾는 사료가 없다면,<br>여기서 추가하세요.</h1>
+        <p class="registration-hero__lead">제품명을 알고 있으면 검색으로, 라벨 사진이 있으면 이미지 분석으로 등록할 수 있습니다. 등록된 제품은 계산기에서 바로 다시 찾아볼 수 있어요.</p>
+      </div>
+
+      <aside class="registration-context" aria-label="등록할 사료 선택">
+        <p class="registration-context__intro">먼저 등록할 사료의 대상과 형태를 정해주세요.</p>
         <fieldset class="registration-choice">
-        <legend>누구의 사료인가요?</legend>
-        <div class="registration-options">
-          <button id="speciesCat" class="registration-option" type="button" data-species="cat">고양이</button>
-          <button id="speciesDog" class="registration-option" type="button" data-species="dog">강아지</button>
-        </div>
-        </fieldset>
-      <fieldset class="registration-choice">
-        <legend>어떤 사료인가요?</legend>
-        <div class="registration-options">
-          <button id="typeDry" class="registration-option" type="button" data-type="dry">건사료</button>
-          <button id="typeWet" class="registration-option" type="button" data-type="wet">습식사료</button>
-        </div>
-        </fieldset>
-        </div>
-      </div>
-
-      <div class="registration-methods">
-      <section class="registration-method" aria-labelledby="nameRegistrationTitle">
-        <div class="registration-method__heading"><span class="registration-method__number">01</span><div><h2 id="nameRegistrationTitle">제품명으로<br>찾아 등록하기</h2><p class="registration-method__description">브랜드와 정확한 제품명을 입력하면 공식 자료와 판매 정보를 확인합니다.</p></div></div>
-        <div class="registration-form">
-        <label for="feedTextRequestInput">브랜드 + 제품명</label>
-        <input id="feedTextRequestInput" class="registration-input" type="text" maxlength="120" autocomplete="off" placeholder="예: 힐스 캣 어덜트 유리너리 헤어볼 컨트롤 스튜">
-        <p class="registration-help">브랜드와 정확한 제품명을 함께 입력해 주세요.<br>실제 판매 제품 하나로 확인되는 경우 등록할 수 있습니다.</p>
-        <button id="feedTextRequestBtn" type="button" class="registration-submit">제품명으로 등록</button>
-        <div id="feedTextRequestMsg" aria-live="polite"></div>
-        </div>
-      </section>
-
-      <section class="registration-method" aria-labelledby="photoRegistrationTitle">
-        <div class="registration-method__heading"><span class="registration-method__number">02</span><div><h2 id="photoRegistrationTitle">라벨 사진으로<br>등록하기</h2><p class="registration-method__description">사진을 선택하면 썸네일을 보여주고 곧바로 라벨 분석을 시작합니다.</p></div></div>
-      <label class="registration-file" id="registrationFileLabel">
-        <span class="registration-file__preview" id="uploadPreview" aria-hidden="true">＋</span>
-        <span class="registration-file__copy"><strong id="uploadPrompt">라벨 사진 선택</strong><span>제품명·영양성분·원재료가 보이는 JPG 또는 PNG · 10MB 이하 1장</span></span>
-        <span class="registration-file__plus" aria-hidden="true">＋</span>
-        <input type="file" id="uploadInput" accept="image/*" class="hidden">
-      </label>
-      <button id="uploadFeedBtn" type="button" class="registration-retry">다시 분석하기</button>
-      <div id="uploadMsg" aria-live="polite"></div>
-      <div id="registrationComplete" class="registration-complete">
-        <p class="registration-return">등록이 완료되었습니다. 기존 계산기 탭으로 돌아가 방금 등록한 제품명을 검색해 주세요.</p>
-        <button type="button" class="registration-close-large" onclick="window.close()">등록 창 닫기</button>
-      </div>
-      </section>
-      </div>
-
-      <section class="registration-photo-guide" aria-labelledby="photoGuideTitle">
-        <div class="registration-photo-guide__intro"><h2 id="photoGuideTitle">어떤 사진을<br>올려야 할까요?</h2><p>실제 휴대폰 촬영처럼 약간의 기울기나 배경이 있어도 괜찮습니다. 제품을 식별할 수 있는 이름과 영양성분, 원재료 전성분이 한 장 안에서 읽혀야 합니다.</p></div>
-        <div class="photo-example-list">
-        <section class="photo-example-group photo-example-group--valid" aria-labelledby="validPhotoTitle">
-          <div class="photo-example-heading"><span class="photo-example-mark" aria-hidden="true">✓</span><h3 id="validPhotoTitle">이 사진부터 참고하세요</h3></div>
-          <article class="photo-example-card">
-            <div class="label-example label-example--complete" aria-hidden="true"><div class="label-example__product"><span>제품명</span><strong>프루브 닭고기 레시피</strong></div><div class="label-example__detail"><div><b>원재료 전성분</b><i></i><i></i><i></i><i></i></div><div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div></div></div>
-            <p><strong>제품명 · 영양성분 · 원재료 전성분</strong><br>세 가지가 한 장에서 선명하게 보이는 사진</p>
-          </article>
-        </section>
-        <section class="photo-example-group photo-example-group--invalid" aria-labelledby="invalidNutritionTitle">
-          <div class="photo-example-heading">
-            <span class="photo-example-mark" aria-hidden="true">×</span>
-            <h3 id="invalidNutritionTitle">성분표만 찍은 사진</h3>
+          <legend>반려동물</legend>
+          <div class="registration-options">
+            <button id="speciesCat" class="registration-option" type="button" data-species="cat">고양이</button>
+            <button id="speciesDog" class="registration-option" type="button" data-species="dog">강아지</button>
           </div>
-          <div class="photo-example-grid">
-            <article class="photo-example-card">
-              <div class="label-example label-example--nutrition" aria-hidden="true">
-                <strong>등록성분량</strong>
-                <span><b>조단백질</b><i>12.0% 이상</i></span>
-                <span><b>조지방</b><i>5.0% 이상</i></span>
-                <span><b>수분</b><i>78.0% 이하</i></span>
-                <span><b>칼슘</b><i>0.20% 이상</i></span>
-              </div>
-              <p><strong>제품명 없이</strong><br>성분만 있는 사진</p>
-            </article>
+        </fieldset>
+        <fieldset class="registration-choice">
+          <legend>사료 형태</legend>
+          <div class="registration-options">
+            <button id="typeDry" class="registration-option" type="button" data-type="dry">건사료</button>
+            <button id="typeWet" class="registration-option" type="button" data-type="wet">습식사료</button>
           </div>
-        </section>
-        <section class="photo-example-group photo-example-group--invalid" aria-labelledby="invalidNameTitle"><div class="photo-example-heading"><span class="photo-example-mark" aria-hidden="true">×</span><h3 id="invalidNameTitle">앞면만 찍은 사진</h3></div>
-          <article class="photo-example-card">
-            <div class="label-example label-example--name" aria-hidden="true"><span class="label-example__brand">PROVED</span><strong>CHICKEN RECIPE</strong><small>COMPLETE FOOD</small></div><p><strong>제품명만 있고</strong><br>성분 정보가 없는 사진</p>
-          </article>
-        </section>
+        </fieldset>
+      </aside>
+    </section>
+
+    <section class="registration-routes" aria-label="사료 등록 방법">
+      <article class="registration-route registration-route--name">
+        <div class="registration-route__head">
+          <span class="registration-route__number" aria-hidden="true">01</span>
+          <div>
+            <h2>제품명으로<br>찾아 등록하기</h2>
+            <p>브랜드와 정확한 제품명을 입력하면 공식 자료와 신뢰할 수 있는 판매 정보를 확인해 제품을 찾습니다.</p>
+          </div>
         </div>
-        <p class="photo-example-tip">라벨을 정면에서 촬영하고, 빛 반사 없이 작은 글씨까지 선명하게 보여주세요.</p>
-      </section>
+
+        <section class="registration-form" aria-labelledby="nameRegistrationTitle">
+          <label id="nameRegistrationTitle" for="feedTextRequestInput">브랜드 + 제품명</label>
+          <input id="feedTextRequestInput" class="registration-input" type="text" maxlength="120" autocomplete="off" placeholder="예: 힐스 캣 어덜트 유리너리 헤어볼 컨트롤 스튜">
+          <p class="registration-help">실제 판매 제품 하나로 확인되는 경우 등록할 수 있습니다.<br>브랜드나 제품군만 입력하면 추가 정보가 필요할 수 있어요.</p>
+          <button id="feedTextRequestBtn" type="button" class="registration-submit">제품명으로 등록</button>
+          <div id="feedTextRequestMsg" aria-live="polite"></div>
+        </section>
+      </article>
+
+      <article class="registration-route registration-route--photo">
+        <div class="registration-route__head">
+          <span class="registration-route__number" aria-hidden="true">02</span>
+          <div>
+            <h2>라벨 사진으로<br>등록하기</h2>
+            <p>사진을 선택하면 썸네일을 보여주고 곧바로 라벨 분석을 시작합니다.</p>
+          </div>
+        </div>
+
+        <label class="registration-file" id="registrationFileLabel">
+          <span class="registration-file__preview" id="uploadPreview" aria-hidden="true">＋</span>
+          <span class="registration-file__copy"><strong id="uploadPrompt">라벨 사진 선택</strong><span>JPG 또는 PNG · 10MB 이하 1장<br>선택하면 자동으로 분석을 시작합니다.</span></span>
+          <span class="registration-file__plus" aria-hidden="true">＋</span>
+          <input type="file" id="uploadInput" accept="image/*" class="hidden">
+        </label>
+        <button id="uploadFeedBtn" type="button" class="registration-retry">다시 분석하기</button>
+        <div id="uploadMsg" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <div id="registrationComplete" class="registration-complete">
+      <p class="registration-return">등록이 완료되었습니다. 기존 계산기 탭으로 돌아가 방금 등록한 제품명을 검색해 주세요.</p>
+      <button type="button" class="registration-close-large" onclick="window.close()">등록 창 닫기</button>
+    </div>
+
+    <section class="registration-photo-guide" aria-labelledby="photoGuideTitle">
+      <div class="registration-photo-guide__head">
+        <h2 id="photoGuideTitle">한 장에<br>어디까지 보여야 할까?</h2>
+        <p>이미지 등록은 사진의 정보 밀도가 중요합니다. 제품을 식별할 수 있는 이름과 영양성분, 원재료 전성분이 한 장 안에서 함께 확인되어야 합니다.</p>
+      </div>
+
+      <div class="photo-guide-grid">
+        <article class="photo-example-card">
+          <div class="photo-example-status photo-example-status--valid"><strong>가능</strong><span>먼저 볼 사진</span></div>
+          <div class="label-example label-example--complete" aria-hidden="true">
+            <div class="label-example__product"><span>제품명</span><strong>프루브 닭고기 레시피</strong></div>
+            <div class="label-example__detail">
+              <div><b>원재료 전성분</b><i></i><i></i><i></i><i></i></div>
+              <div><b>등록성분량</b><span>조단백 38.0%</span><span>조지방 18.0%</span><span>수분 10.0%</span></div>
+            </div>
+          </div>
+          <p><strong>제품명 · 영양성분 · 원재료 전성분</strong> 세 가지가 한 장에 선명하게 보이면 분석할 수 있습니다.</p>
+        </article>
+
+        <article class="photo-example-card">
+          <div class="photo-example-status photo-example-status--invalid"><strong>불가능</strong><span>성분만 보임</span></div>
+          <div class="label-example label-example--nutrition" aria-hidden="true">
+            <strong>등록성분량</strong>
+            <span><b>조단백질</b><i>12.0% 이상</i></span>
+            <span><b>조지방</b><i>5.0% 이상</i></span>
+            <span><b>수분</b><i>78.0% 이하</i></span>
+            <span><b>칼슘</b><i>0.20% 이상</i></span>
+          </div>
+          <p><strong>제품명 없이</strong> 영양성분만 보이면 어떤 제품인지 확정할 수 없습니다.</p>
+        </article>
+
+        <article class="photo-example-card">
+          <div class="photo-example-status photo-example-status--invalid"><strong>불가능</strong><span>제품명만 보임</span></div>
+          <div class="label-example label-example--name" aria-hidden="true">
+            <span class="label-example__brand">프루브</span>
+            <strong>CHICKEN RECIPE</strong>
+            <small>COMPLETE FOOD</small>
+          </div>
+          <p><strong>제품명만 있고</strong> 성분 정보가 없다면 계산에 필요한 데이터를 만들 수 없습니다.</p>
+        </article>
+      </div>
+
+      <p class="photo-example-tip">촬영 팁: 라벨을 정면에서 찍고, 빛 반사와 그림자를 피한 뒤 작은 숫자까지 확대했을 때 읽히는지 확인해 주세요.</p>
     </section>
   </main>
-<footer class="proved-site-footer">
-  <p class="proved-site-footer__title">사이트맵</p>
-  <nav class="proved-site-footer__nav" aria-label="사이트맵">
-    <a href="/">홈</a>
-    <a href="/feed-registration/">사료 등록하기</a>
-    <a href="/cat-food-calculator/">고양이 사료 계산기</a>
-    <a href="/dog-food-calculator/">강아지 사료 계산기</a>
-  </nav>
-  <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>
-</footer>
-  <script src="/js/feed-registration.js?v=20260812-auto-image-analysis-v1"></script>
+
+  <footer class="proved-site-footer">
+    <p class="proved-site-footer__title">사이트맵</p>
+    <nav class="proved-site-footer__nav" aria-label="사이트맵">
+      <a href="/">홈</a>
+      <a href="/feed-registration/">사료 등록하기</a>
+      <a href="/cat-food-calculator/">고양이 사료 계산기</a>
+      <a href="/dog-food-calculator/">강아지 사료 계산기</a>
+    </nav>
+    <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>
+  </footer>
+
+  <script src="/js/feed-registration.js?v=20260812-auto-image-analysis-v2"></script>
 </body>
 </html>
