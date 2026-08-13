@@ -298,241 +298,7 @@
   }
 }
 
-/* -----------------------------------------------
-   Figma-inspired mobile app refresh (2026)
-   Scope: visual overrides only; preserve existing IDs/JS behavior.
------------------------------------------------ */
-:root {
-  --background: #F5F7FA;
-  --foreground: #1A1A2E;
-  --card: #FFFFFF;
-  --primary: #2F6FED;
-  --primary-strong: #236fbf;
-  --primary-foreground: #FFFFFF;
-  --secondary: #EEF4FF;
-  --muted: #F0F2F5;
-  --muted-foreground: #9CA3AF;
-  --accent: #FFF8F0;
-  --dry: #FF9F43;
-  --wet: #3D8BFF;
-  --border: #E5E7EB;
-  --destructive: #E74C3C;
-  --nutrition: #5a9e6f;
-  --success: #5a9e6f;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
-  --radius-2xl: 28px;
-  --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-button: 0 8px 18px rgba(41, 121, 255, 0.28);
-  --brand: var(--primary);
-}
-
-html { background: var(--background); }
-body {
-  background: var(--background) !important;
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-.pc-app-shell {
-  background: var(--background) !important;
-  box-shadow: none !important;
-}
-main { padding: 0 16px 28px !important; }
-#calculatorPage { gap: 24px !important; }
-.pc-ratio-card,
-.pc-trend-card,
-#weightTrendLoginNotice,
-#calBox,
-#capResult > div,
-#waterResult > div {
-  border: 1px solid var(--border) !important;
-  background: var(--card) !important;
-  border-radius: var(--radius-xl) !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-.pc-info-card {
-  padding: 0 !important;
-  overflow: visible;
-  gap: 16px !important;
-  border: 0 !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-.pc-section-title,
-.pc-upload-section h2 {
-  color: #05051F !important;
-  letter-spacing: -0.04em;
-}
-.pc-info-card > .pc-section-title {
-  padding: 0 !important;
-  margin-bottom: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-#catName, #catWeight, #catBirth, #catNeutered,
-.pc-info-card label {
-  border: 1px solid var(--border) !important;
-  border-radius: 1rem !important;
-  background: var(--card) !important;
-  color: var(--foreground) !important;
-  box-shadow: none !important;
-}
-#catName { margin-top: 0 !important; }
-#catWeight { border-top: 1px solid var(--border) !important; }
-#savedCatLoadBox {
-  background: #eff6ff !important;
-  border: 1px solid #dbeafe !important;
-  border-radius: 1rem !important;
-}
-#catName::placeholder,
-#catWeight::placeholder,
-#catBirth,
-#catNeutered,
-#dryInput1::placeholder,
-#dryInput2::placeholder,
-#wetSlots input::placeholder { color: #8D99AE; }
-#isDiet { accent-color: var(--primary); }
-#calBox {
-  margin: 14px !important;
-  background: var(--secondary) !important;
-}
-.pc-ratio-card {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-soft) !important;
-  padding: 18px 16px !important;
-}
-#dryPct { color: var(--dry); font-size: 34px; line-height: 1; }
-#wetPct { color: var(--wet); font-size: 34px; line-height: 1; }
-#ratioSlider { height: 10px; background: #D1D5DB; }
-#ratioSlider::-webkit-slider-thumb {
-  width: 20px; height: 20px; border: 0; background: var(--primary); box-shadow: none;
-}
-#ratioSlider::-moz-range-thumb {
-  width: 20px; height: 20px; border: 0; background: var(--primary); border-radius: 50%;
-}
-#dryInput1, #dryInput2, #wetSlots input[type="text"] {
-  min-height: 48px;
-  font-size: 15px;
-}
-#dryInput1, #dryInput2 { background: var(--accent) !important; }
-#dryInput1:focus, #dryInput2:focus { box-shadow: inset 0 0 0 1px rgba(245,146,30,.24); }
-#dryList1, #dryList2, [id^="wetList_"] {
-  border: 1px solid var(--border) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 18px 34px rgba(15,23,42,.14) !important;
-}
-.autocomplete-item { background: #fff; }
-.autocomplete-item:hover { background: var(--secondary); }
-#addWetBtn {
-  background: rgba(255,255,255,.72) !important;
-  border-color: var(--border) !important;
-  color: #667085 !important;
-  border-radius: 999px !important;
-}
-.pc-calculate-btn {
-  background: var(--brand-primary);
-  border-radius: 16px !important;
-  min-height: 58px;
-  box-shadow: 0 12px 22px rgba(45, 125, 210, .28) !important;
-}
-
-.pc-result-hero {
-  background: #111827 !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  border-radius: var(--radius-xl) !important;
-  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.18) !important;
-  color: #FFFFFF !important;
-}
-.pc-result-hero #resDER { color: #FFFFFF !important; }
-.pc-result-label { color: #8EC5FF !important; }
-.pc-result-unit { color: #B7C0CC !important; }
-#capBtn { background: var(--nutrition) !important; }
-#waterBtn { background: #38A8C5 !important; }
-#openShareModalBtn { border-radius: 16px !important; }
-.pc-upload-section {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  padding-top: 0 !important;
-}
-.pc-upload-section h2 {
-  font-size: 22px !important;
-  color: #05051F !important;
-}
-.pc-upload-section label > div {
-  background: var(--secondary);
-  border-color: var(--primary) !important;
-  border-style: solid !important;
-  color: var(--primary);
-}
-#upDryBtn, #upWetBtn {
-  border-radius: 999px !important;
-  background: rgba(255,255,255,.72) !important;
-}
-
-/* Weight trend page */
-#weightTrendPage { gap: 16px !important; }
-.pc-trend-hero {
-  background: #EAF2FF !important;
-  border: 0 !important;
-  border-radius: var(--radius-xl) !important;
-  box-shadow: none !important;
-  padding: 26px 20px !important;
-}
-.pc-trend-card {
-  padding: 18px 16px !important;
-}
-#trendCatList [data-cat-id] {
-  background: #FAFAFB !important;
-  border-color: var(--border) !important;
-  border-radius: 22px !important;
-  min-height: 64px;
-}
-#trendCatList [data-cat-id].border-\[\#2F6FED\] {
-  background: var(--secondary) !important;
-  border-color: var(--primary) !important;
-  border-width: 2px !important;
-}
-#trendCatList [data-cat-menu-button] {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  color: #B8C0CC !important;
-}
-#weightTrendChart { width: 100% !important; }
-#trendSummaryBox { gap: 10px !important; }
-#trendSummaryBox > div {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 16px !important;
-  box-shadow: var(--shadow-soft) !important;
-  text-align: left !important;
-  padding: 16px !important;
-}
-.pc-summary-label { color: var(--primary) !important; }
-#trendLatestWeight, #trendStartWeight, #trendWeightDelta {
-  color: #05051F;
-  font-size: 22px !important;
-  letter-spacing: -0.04em;
-}
-#trendWeightDelta.text-blue-500 { color: var(--primary) !important; }
-#weightTrendLoginNotice button,
-#authSheet button.bg-\[\#2F6FED\] {
-  background: var(--primary) !important;
-  border-radius: 16px !important;
-  box-shadow: var(--shadow-button) !important;
-}
-@media (max-width: 430px) {
-  main { padding-left: 16px !important; padding-right: 16px !important; }
-  header { padding-left: 10px !important; padding-right: 10px !important; }
-  #trendSummaryBox > div { padding: 14px 16px !important; }
-}
-
-/* ProvedCat feeding flow component system */
+/* Calculator foundations */
 :root {
   --brand-blue: #2F6FED; --brand-blue-pressed: #234FB8;
   --page-background: #F6F7F8; --surface: #FFFFFF; --snack-surface: #ECEAE6;
@@ -792,12 +558,11 @@ input::placeholder { color:var(--text-placeholder); }
 .proved-dog-mode #dryPct { color:var(--dog-dry-ink)!important; }
 .proved-dog-mode .pc-wet-text,
 .proved-dog-mode #wetPct { color:var(--dog-wet-ink)!important; }
-.proved-dog-mode .pc-upload-type-button--dry { color:var(--dog-dry-ink); }
-.proved-dog-mode .pc-upload-type-button--wet { color:var(--dog-wet-ink); }
-.proved-dog-mode .pc-upload-type-button--dry.is-active { border-color:rgba(154,91,52,.35); background:rgba(154,91,52,.08); }
-.proved-dog-mode .pc-upload-type-button--wet.is-active { border-color:rgba(56,130,85,.35); background:var(--dog-soft); }
 .pc-feed-picker-button { min-height:44px; border:1px solid currentColor!important; border-radius:var(--radius-button)!important; background:transparent!important; color:inherit!important; }
 .pc-feed-panel--dry .pc-feed-picker-button,.pc-feed-panel--wet .pc-feed-picker-button { background:rgba(255,255,255,.45)!important; }
+.pc-feed-result-title { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--text-primary); font-size:14px; font-weight:800; }
+.pc-feed-review-badge { flex:0 0 auto; display:inline-flex; align-items:center; min-height:22px; padding:2px 8px; border:1px solid #EAD9AB; border-radius:999px; background:#FFFAF0; color:#9A6A00; font-size:10px; font-weight:900; }
+.pc-selected-feed--provisional { color:#8A6400!important; }
 .pc-ratio-values,#dryPct,#wetPct { font-variant-numeric:tabular-nums; }
 #ratioSlider {
   --ratio-split:60%;
@@ -851,35 +616,14 @@ input::placeholder { color:var(--text-placeholder); }
 .pc-trend-hero h2 { font-size:28px!important; color:var(--text-primary)!important; }
 #weightTrendContent { gap:16px!important; }
 #trendSummaryBox { display:grid; grid-template-columns:2fr 1fr 1fr; gap:0!important; padding:24px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:#fff; }
-#trendCatList > .relative { min-width:0; }
-#trendCatList [data-cat-id] { padding-right:76px!important; }
 #trendCatList [data-cat-menu-button] { min-height:44px; box-shadow:none!important; }
 #trendSummaryBox > div { padding:0 18px!important; border:0!important; border-left:1px solid var(--border-subtle)!important; border-radius:0!important; box-shadow:none!important; background:#fff!important; }
 #trendSummaryBox > div:first-child { padding-left:0!important; border-left:0!important; }
 #trendLatestWeight { font-size:34px!important; }
 #trendLatestWeight,#trendStartWeight,#trendWeightDelta { font-variant-numeric:tabular-nums; }
 #weightTrendChart { max-width:100%; font-variant-numeric:tabular-nums; }
-#trendCatList [data-cat-id] { border-radius:var(--radius-button)!important; }
 :where(button,input,select,[tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(53,104,255,.28)!important; outline-offset:2px; }
 button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }
-.pc-upload-section { display:flex; flex-direction:column; gap:16px; padding:20px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:var(--surface-primary); }
-.pc-upload-section.hidden { display:none!important; }
-.pc-upload-section h2 { margin:0; color:var(--text-primary); font-size:18px; font-weight:800; line-height:1.4; }
-.pc-upload-description,.pc-upload-note { margin:0; color:var(--text-secondary); font-size:13px; line-height:1.55; }
-.pc-upload-note { padding-top:12px; border-top:1px solid var(--border-subtle); font-weight:600; }
-.pc-upload-type-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-.pc-upload-type-button { min-height:44px; padding:10px 12px; border:1px solid var(--border-default); border-radius:var(--radius-button); background:var(--page-background); font-size:14px; font-weight:700; }
-.pc-upload-type-button--dry { color:var(--cat-dry-ink); }
-.pc-upload-type-button--wet { color:var(--cat-wet-ink); }
-.pc-upload-type-button--dry.is-active { border-color:rgba(184,90,0,.35); background:var(--cat-dry-soft); }
-.pc-upload-type-button--wet.is-active { border-color:rgba(31,92,196,.35); background:var(--cat-wet-soft); }
-.pc-upload-picker { display:block; width:100%; }
-.pc-upload-picker__box { width:100%; padding:22px 16px; border:1px dashed var(--border-default); border-radius:var(--radius-input); background:var(--page-background); text-align:center; cursor:pointer; transition:border-color .15s ease,background-color .15s ease; }
-.pc-upload-picker__box:hover { border-color:var(--brand-primary); background:rgba(53,104,255,.04); }
-.pc-upload-picker__title { margin:0; color:var(--text-secondary); font-size:14px; font-weight:700; }
-.pc-upload-picker__meta { margin:4px 0 0; color:var(--text-placeholder); font-size:12px; }
-.pc-upload-analyze-button { width:100%; min-height:50px; padding:12px 16px; border:0; border-radius:var(--radius-button); background:var(--brand-primary); color:#fff; font-size:16px; font-weight:800; box-shadow:none; }
-.pc-upload-analyze-button:hover,.pc-upload-analyze-button:active { background:var(--brand-primary-pressed); }
 @media (max-width:600px) {
   .pc-page-container,.proved-shell-bar { width:calc(100% - 32px); }
   .pc-section-card,.pc-trend-card,#weightTrendLoginNotice { padding:18px!important; }
@@ -1094,3 +838,16 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
   .wet-beta-options,.wet-beta-input__fields,.wet-beta-group__items{grid-template-columns:1fr}.wet-beta-options button{border-right:0!important}.wet-beta-input__fields{gap:24px}
   .wet-beta-summary{grid-template-columns:1fr}.wet-beta-summary span{grid-column:1}.wet-beta-card{padding:26px 0;border-right:0}.wet-beta-notes{grid-template-columns:1fr}.wet-beta-actions{align-items:stretch;flex-direction:column}.wet-beta-primary,.wet-beta-text-button{width:100%}
 }
+
+/* Data-driven pet and weight-trend states */
+.proved-pet-choice{display:block;width:100%;padding:14px 16px;border:1px solid var(--border-subtle);border-radius:0;background:#fff;color:var(--text-primary);text-align:left;box-shadow:none}
+.proved-pet-choice:hover,.proved-pet-choice.is-selected{border-color:var(--brand-primary);color:var(--brand-primary)}
+.proved-pet-choice__name,.proved-pet-choice__meta{display:block}
+.proved-pet-choice__name{font-size:14px;font-weight:800;overflow-wrap:anywhere}
+.proved-pet-choice__meta{margin-top:4px;color:var(--text-secondary);font-size:12px;font-weight:600}
+.proved-trend-pet{position:relative;min-width:0}
+.proved-pet-choice--managed{padding-right:78px}
+.proved-trend-pet__menu-button{position:absolute;right:8px;top:50%;min-height:40px;padding:0 10px;border:0;border-left:1px solid var(--border-subtle);border-radius:0;background:#fff;color:var(--text-secondary);font-size:12px;font-weight:700;transform:translateY(-50%)}
+.proved-trend-pet__menu{position:absolute;right:8px;top:54px;z-index:20;min-width:120px;border:1px solid var(--border-subtle);background:#fff}
+.proved-trend-pet__delete{width:100%;padding:10px 12px;border:0;border-radius:0;background:#fff;color:#b42318;font-size:12px;font-weight:750;text-align:left}
+.proved-trend-pet__delete:hover{background:#fff4f2}

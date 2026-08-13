@@ -89,22 +89,22 @@ async function loadTrendCats() {
   }
 
   list.innerHTML = cats.map(cat => `
-    <div class="relative group">
+    <div class="proved-trend-pet">
       <button type="button" data-cat-id="${escapeHtml(cat.id)}"
-        class="w-full p-4 pr-14 bg-gray-50 border border-gray-100 rounded-2xl text-left hover:border-[#2d7dd2] hover:bg-blue-50 transition-colors">
-        <span class="block text-sm font-black text-gray-800">${escapeHtml(cat.name || '이름 없음')}</span>
-        <span class="block text-xs font-bold text-gray-400 mt-1">
+        class="proved-pet-choice proved-pet-choice--managed" aria-pressed="false">
+        <span class="proved-pet-choice__name">${escapeHtml(cat.name || '이름 없음')}</span>
+        <span class="proved-pet-choice__meta">
           ${escapeHtml(cat.birth_date || '생년월일 없음')} · ${cat.neutered ? '중성화 O' : '중성화 X'}
         </span>
       </button>
       <button type="button" data-cat-menu-button="${escapeHtml(cat.id)}" onclick="event.stopPropagation(); toggleTrendCatMenu(this.dataset.catMenuButton)"
-        class="absolute right-3 top-1/2 -translate-y-1/2 flex min-h-[44px] items-center justify-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-bold text-gray-500 hover:text-[#3568FF] hover:border-[#3568FF] transition-colors"
+        class="proved-trend-pet__menu-button"
         aria-label="${escapeHtml(cat.name || '고양이')} 관리 메뉴" aria-expanded="false" aria-controls="trendCatMenu-${escapeHtml(cat.id)}">
         관리
       </button>
-      <div id="trendCatMenu-${escapeHtml(cat.id)}" data-cat-menu="${escapeHtml(cat.id)}" class="hidden absolute right-3 top-14 z-20 min-w-[120px] rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+      <div id="trendCatMenu-${escapeHtml(cat.id)}" data-cat-menu="${escapeHtml(cat.id)}" class="proved-trend-pet__menu hidden">
         <button type="button" data-cat-delete="${escapeHtml(cat.id)}" onclick="event.stopPropagation(); deleteTrendCat(this.dataset.catDelete)"
-          class="w-full rounded-lg px-3 py-2 text-left text-xs font-black text-red-500 hover:bg-red-50 transition-colors">
+          class="proved-trend-pet__delete">
           삭제하기
         </button>
       </div>
@@ -206,10 +206,8 @@ async function selectTrendCat(cat) {
   if (list) {
     list.querySelectorAll('[data-cat-id]').forEach(button => {
       const isActive = String(button.dataset.catId) === String(cat.id);
-      button.classList.toggle('bg-blue-50', isActive);
-      button.classList.toggle('border-[#2d7dd2]', isActive);
-      button.classList.toggle('bg-gray-50', !isActive);
-      button.classList.toggle('border-gray-100', !isActive);
+      button.classList.toggle('is-selected', isActive);
+      button.setAttribute('aria-pressed', String(isActive));
     });
   }
 

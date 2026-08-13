@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260812-editorial-wet-beta-v1">
+  <link rel="stylesheet" href="/css/styles.css?v=20260812-legacy-cleanup-v3">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260812-shared-header-v1">
   <link rel="stylesheet" href="/css/proved-header.css?v=20260812-shared-header-v1">
   <script defer src="/js/proved-header.js?v=20260812-shared-header-v1"></script>
@@ -226,35 +226,6 @@
         <div id="feedPickerList" class="flex-1 min-h-0 overflow-y-auto pt-3 space-y-2"></div>
       </section>
     </div>
-
-    <!-- 사료 추가 업로드 -->
-    <section class="pc-upload-section hidden" aria-hidden="true">
-      <h2>사료가 없나요?</h2>
-      <p class="pc-upload-description">
-        영양성분표가 모두 보이는 사진 <strong>1장</strong>을 올려주세요.<br>
-        여러 장으로 나눠진 경우 <strong>한 장으로 만들어</strong> 업로드해주세요.
-      </p>
-      <p class="pc-upload-note">업로드 및 분석까지 최대 30초 걸릴 수 있습니다. 중복 업로드를 피해주세요.</p>
-      <div class="pc-upload-type-row">
-        <button type="button" onclick="setUploadType('dry')" id="upDryBtn" class="pc-upload-type-button pc-upload-type-button--dry is-active" aria-pressed="true">
-          건사료 추가
-        </button>
-        <button type="button" onclick="setUploadType('wet')" id="upWetBtn" class="pc-upload-type-button pc-upload-type-button--wet" aria-pressed="false">
-          습식사료 추가
-        </button>
-      </div>
-      <label class="pc-upload-picker">
-        <div class="pc-upload-picker__box">
-          <p class="pc-upload-picker__title">사진을 선택하세요</p>
-          <p class="pc-upload-picker__meta">JPG, PNG · 1장 · 10MB 이하</p>
-        </div>
-        <input type="file" id="uploadInput" accept="image/*" class="hidden" onchange="handleUploadFileChange(this)">
-      </label>
-      <button id="uploadFeedBtn" type="button" class="pc-upload-analyze-button">
-        이미지 분석하기
-      </button>
-      <div id="uploadMsg"></div>
-    </section>
 
     </section>
 
@@ -647,18 +618,6 @@ window.addEventListener('DOMContentLoaded', () => {
     .forEach(input => input.addEventListener('change', markCalculationDirty));
   document.getElementById('ratioSlider')?.addEventListener('input', markCalculationDirty);
 
-  const feedUploadForm = document.getElementById('feedUploadForm');
-  if (feedUploadForm) {
-    feedUploadForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-    });
-  }
-
-  const uploadFeedBtn = document.getElementById('uploadFeedBtn');
-  if (uploadFeedBtn) {
-    uploadFeedBtn.addEventListener('click', handleFeedImageUpload);
-  }
-
   ['catWeight','catBirth','catNeutered','isDiet'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('change', updateCalorie);
@@ -691,13 +650,13 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="/js/proved-shell.js?v=20260728-entry-polish"></script>
 <script src="/js/pwa-install.js?v=20260812-flat-analysis-flow"></script>
 <script src="/js/calculator.js?v=20260812-header-switch-modal-v3"></script>
-<script src="/js/feed-search.js?v=20260805-request-result-v7-subpages"></script>
+<script src="/js/feed-search.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/calculator-session.js?v=20260806-feed-registration-flow"></script>
-<script src="/js/recent-feed.js?v=20260728-recent-feed-fix"></script>
-<script src="/js/saved-cats.js?v=20260812-login-save-visibility"></script>
+<script src="/js/recent-feed.js?v=20260812-legacy-cleanup-v2"></script>
+<script src="/js/saved-cats.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/auth.js?v=20260728-calculator-pet-load"></script>
 <script src="/js/wet-beta-access.js?v=20260812-editorial-wet-beta-v1"></script>
 <script src="/js/share-card.js?v=20260812-proved-linear-header-v4"></script>
-<script src="/js/weight-trend.js?v=20260701-ui-refresh-2"></script>
+<script src="/js/weight-trend.js?v=20260812-legacy-cleanup-v2"></script>
 </body>
 </html>
