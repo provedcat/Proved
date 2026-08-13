@@ -613,15 +613,12 @@ input::placeholder { color:var(--text-placeholder); }
 .pc-trend-hero h2 { font-size:28px!important; color:var(--text-primary)!important; }
 #weightTrendContent { gap:16px!important; }
 #trendSummaryBox { display:grid; grid-template-columns:2fr 1fr 1fr; gap:0!important; padding:24px; border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:#fff; }
-#trendCatList > .relative { min-width:0; }
-#trendCatList [data-cat-id] { padding-right:76px!important; }
 #trendCatList [data-cat-menu-button] { min-height:44px; box-shadow:none!important; }
 #trendSummaryBox > div { padding:0 18px!important; border:0!important; border-left:1px solid var(--border-subtle)!important; border-radius:0!important; box-shadow:none!important; background:#fff!important; }
 #trendSummaryBox > div:first-child { padding-left:0!important; border-left:0!important; }
 #trendLatestWeight { font-size:34px!important; }
 #trendLatestWeight,#trendStartWeight,#trendWeightDelta { font-variant-numeric:tabular-nums; }
 #weightTrendChart { max-width:100%; font-variant-numeric:tabular-nums; }
-#trendCatList [data-cat-id] { border-radius:var(--radius-button)!important; }
 :where(button,input,select,[tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(53,104,255,.28)!important; outline-offset:2px; }
 button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }
 @media (max-width:600px) {
@@ -843,9 +840,9 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .proved-pet-choice{display:block;width:100%;padding:14px 16px;border:1px solid var(--border-subtle);border-radius:0;background:#fff;color:var(--text-primary);text-align:left;box-shadow:none}
 .proved-pet-choice:hover,.proved-pet-choice.is-selected{border-color:var(--brand-primary);color:var(--brand-primary)}
 .proved-pet-choice__name,.proved-pet-choice__meta{display:block}
-.proved-pet-choice__name{font-size:14px;font-weight:800}
+.proved-pet-choice__name{font-size:14px;font-weight:800;overflow-wrap:anywhere}
 .proved-pet-choice__meta{margin-top:4px;color:var(--text-secondary);font-size:12px;font-weight:600}
-.proved-trend-pet{position:relative}
+.proved-trend-pet{position:relative;min-width:0}
 .proved-pet-choice--managed{padding-right:78px}
 .proved-trend-pet__menu-button{position:absolute;right:8px;top:50%;min-height:40px;padding:0 10px;border:0;border-left:1px solid var(--border-subtle);border-radius:0;background:#fff;color:var(--text-secondary);font-size:12px;font-weight:700;transform:translateY(-50%)}
 .proved-trend-pet__menu{position:absolute;right:8px;top:54px;z-index:20;min-width:120px;border:1px solid var(--border-subtle);background:#fff}
