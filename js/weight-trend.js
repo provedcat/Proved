@@ -91,7 +91,7 @@ async function loadTrendCats() {
   list.innerHTML = cats.map(cat => `
     <div class="proved-trend-pet">
       <button type="button" data-cat-id="${escapeHtml(cat.id)}"
-        class="proved-pet-choice proved-pet-choice--managed">
+        class="proved-pet-choice proved-pet-choice--managed" aria-pressed="false">
         <span class="proved-pet-choice__name">${escapeHtml(cat.name || '이름 없음')}</span>
         <span class="proved-pet-choice__meta">
           ${escapeHtml(cat.birth_date || '생년월일 없음')} · ${cat.neutered ? '중성화 O' : '중성화 X'}
