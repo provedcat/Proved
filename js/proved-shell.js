@@ -192,6 +192,7 @@ function provedRenderEntry(step) {
 
   const isStart = step === 'start';
   const isLogin = step === 'login';
+  const isSignedInPetChoice = step === 'pet' && Boolean(state.currentUser);
   const option = (label, modifier, attributes = '') =>
     `<button class="proved-entry-option proved-entry-option--${modifier}" type="button" ${attributes}>${label}</button>`;
 
@@ -199,7 +200,16 @@ function provedRenderEntry(step) {
       ${option(step === 'pet' ? '고양이와' : '고양이', step === 'pet' ? 'active proved-entry-option--cat' : 'muted proved-entry-option--cat', step === 'pet' ? "onclick=\"provedChooseSpecies('cat')\"" : 'disabled')}
       ${option(step === 'pet' ? '강아지와' : '강아지', step === 'pet' ? 'active proved-entry-option--dog' : 'muted proved-entry-option--dog', step === 'pet' ? "onclick=\"provedChooseSpecies('dog')\"" : 'disabled')}`;
 
-  const choices = isLogin ? '' : `
+  const signedInSpeciesChoice = `
+    <section class="proved-entry__section" aria-labelledby="provedEntrySpeciesTitle">
+      <div class="proved-entry__section-heading">
+        <span class="proved-entry__number" aria-hidden="true">01</span>
+        <h2 id="provedEntrySpeciesTitle" class="proved-entry__title">누구와 함께할까요?</h2>
+      </div>
+      <div class="proved-entry-options">${speciesOptions}</div>
+    </section>`;
+
+  const choices = isLogin ? '' : isSignedInPetChoice ? signedInSpeciesChoice : `
     <section class="proved-entry__section" aria-labelledby="provedEntryStartTitle">
       <div class="proved-entry__section-heading">
         <span class="proved-entry__number" aria-hidden="true">01</span>
@@ -398,6 +408,16 @@ function provedScheduleLoginDestination(sessionOrUser) {
 
 async function setActivePet(pet, options = {}) {
   const normalizedPet = { ...pet, species: pet.species || 'cat' };
+  const destination = provedGetSpeciesPath(normalizedPet.species);
+  const currentPath = window.location.pathname.replace(/\/+$/, '/') || '/';
+
+  if (currentPath !== destination) {
+    state.selectedPetSpecies = normalizedPet.species;
+    if (normalizedPet.id) provedSetLastActivePet(normalizedPet);
+    window.location.assign(destination);
+    return;
+  }
+
   resetRecentFeedButtons();
   provedHideEntry();
   provedApplyCurrentPetState(normalizedPet);
