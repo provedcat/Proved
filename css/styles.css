@@ -742,8 +742,9 @@ button:disabled { border-color:var(--border-default)!important; background:#ECEF
 .sc-header,.sc-kcal-block,.sc-feeds,.sc-analysis,.sc-footer{background:#fff!important;border-color:var(--border-subtle)!important}
 .sc-brand,.sc-kcal-label{color:var(--brand-primary)!important}
 .sc-brand{font-style:normal!important;font-weight:800!important;letter-spacing:.035em!important}
-.sc-cat-name,.sc-kcal-num,.sc-energy-num,.sc-feed-name,.sc-feed-g,.sc-an-value,.sc-water-num{color:var(--text-primary)!important}
-.sc-cat-sub,.sc-kcal-unit,.sc-ratio-txt,.sc-feeds-title,.sc-feed-kcal,.sc-energy-label,.sc-an-label,.sc-footer{color:var(--text-secondary)!important}
+.sc-cat-name,.sc-kcal-num,.sc-feed-name,.sc-feed-g,.sc-an-val,.sc-cap-item-val,.sc-water-ml{color:var(--text-primary)!important}
+.sc-cat-sub,.sc-kcal-unit,.sc-ratio-txt,.sc-feeds-title,.sc-feed-type,.sc-feed-kcal,.sc-analysis-title,.sc-an-label,.sc-cap-item-label,.sc-cap-item-unit,.sc-water-nums,.sc-footer,.sc-footer-url,.sc-footer-date{color:var(--text-secondary)!important}
+.sc-feed-type{opacity:1!important}
 .sc-feed-row,.sc-an-card,.sc-cap-item,.sc-water-box{border-radius:0!important;background:#fff!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;box-shadow:none!important}
 .sc-energy-details{gap:0!important;padding:0 24px!important;background:#fff!important;border-bottom:1px solid var(--border-subtle)!important}
 .sc-energy-details>div{padding:15px 0!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;color:var(--text-secondary)!important}
