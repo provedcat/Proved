@@ -1,21 +1,24 @@
 (function () {
   const globalItems = [
-    { label: '고양이 계산기', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
-    { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
+    { label: '고양이', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
+    { label: '강아지', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
-    // 사료/아카이브 아래에 새 하위 URL을 추가할 때 이 목록도 함께 갱신합니다.
-    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
-    { label: '아카이브', href: '/archive/', matches: ['/archive/', '/guide/calculation-method/'] },
+    // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
+    { label: '사료', href: '/feed-registration/', matches: ['/feed-registration/', '/food/'] },
+    { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/archive/'] },
     { label: '로그인', auth: true }
   ];
 
-  const calculatorItems = [
-    { label: '계산기', id: 'navCalculator', page: 'calculatorPage' },
-    { label: '체중 추이', id: 'navWeightTrend', page: 'weightTrendPage' },
-    { label: '습식 탐험', id: 'navWetFoodBeta', page: 'wetFoodBetaPage', hidden: true }
-  ];
-
   const sectionItems = {
+    cat: [
+      { label: '계산기', id: 'navCalculator', page: 'calculatorPage' },
+      { label: '체중 추이', id: 'navWeightTrend', page: 'weightTrendPage' },
+      { label: '습식 탐험', id: 'navWetFoodBeta', page: 'wetFoodBetaPage', hidden: true }
+    ],
+    dog: [
+      { label: '계산기', id: 'navCalculator', page: 'calculatorPage' },
+      { label: '체중 추이', id: 'navWeightTrend', page: 'weightTrendPage' }
+    ],
     food: [
       { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
       { label: '사료 목록', disabled: true },
@@ -33,6 +36,8 @@
   }
 
   function getSectionKey(path = normalizedPath()) {
+    if (path.startsWith('/cat-food-calculator/')) return 'cat';
+    if (path.startsWith('/dog-food-calculator/')) return 'dog';
     if (path.startsWith('/food/') || path.startsWith('/feed-registration/')) return 'food';
     if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/')) return 'archive';
     return null;
@@ -84,32 +89,26 @@
     return element;
   }
 
-  function renderCalculatorSubnav(root) {
-    if (root.dataset.provedHeader !== 'calculator') return;
-    const existing = root.parentElement?.querySelector(':scope > .proved-calculator-subnav');
-    if (existing) existing.remove();
-
-    const subnav = document.createElement('nav');
-    subnav.className = 'proved-calculator-subnav';
-    subnav.id = 'mainNav';
-    subnav.setAttribute('aria-label', '계산기 메뉴');
-    calculatorItems.forEach(item => {
-      subnav.appendChild(createItem(item, 'proved-calculator-subnav__item'));
-    });
-    root.insertAdjacentElement('afterend', subnav);
-  }
-
   function renderSectionSubnav(root) {
+    // 시작 화면의 헤더는 서비스 화면과 분리합니다. 같은 URL 안에 두 헤더가 존재해도
+    // 실제 서비스 헤더에만 섹션 탭이 붙도록 해 중복 선과 중복 내비게이션을 막습니다.
+    if (root.dataset.provedHeader === 'home') return;
+
     const sectionKey = getSectionKey();
-    if (!sectionKey) return;
+    const items = sectionItems[sectionKey];
+    if (!sectionKey || !items) return;
 
     const existing = root.parentElement?.querySelector(':scope > .proved-section-subnav');
     if (existing) existing.remove();
 
     const subnav = document.createElement('nav');
     subnav.className = `proved-section-subnav proved-section-subnav--${sectionKey}`;
-    subnav.setAttribute('aria-label', `${sectionKey === 'food' ? '사료' : '아카이브'} 하위 메뉴`);
-    sectionItems[sectionKey].forEach(item => {
+    subnav.dataset.section = sectionKey;
+    subnav.dataset.visibleItems = String(items.filter(item => !item.hidden).length);
+    subnav.setAttribute('aria-label', `${sectionKey === 'cat' ? '고양이' : sectionKey === 'dog' ? '강아지' : sectionKey === 'food' ? '사료' : '아카이브'} 하위 메뉴`);
+    if (sectionKey === 'cat' || sectionKey === 'dog') subnav.id = 'mainNav';
+
+    items.forEach(item => {
       subnav.appendChild(createItem(item, 'proved-section-subnav__item'));
     });
 
@@ -132,7 +131,6 @@
     nav.setAttribute('aria-label', '주요 메뉴');
     globalItems.forEach(item => nav.appendChild(createItem(item)));
     root.append(brand, nav);
-    renderCalculatorSubnav(root);
     renderSectionSubnav(root);
   }
 
@@ -142,10 +140,10 @@
       <p class="proved-site-footer__title">사이트맵</p>
       <nav class="proved-site-footer__nav" aria-label="사이트맵">
         <a href="/">홈</a>
-        <a href="/cat-food-calculator/">고양이 계산기</a>
-        <a href="/dog-food-calculator/">강아지 계산기</a>
-        <a href="/food/">사료</a>
-        <a href="/archive/">아카이브</a>
+        <a href="/cat-food-calculator/">고양이</a>
+        <a href="/dog-food-calculator/">강아지</a>
+        <a href="/feed-registration/">사료</a>
+        <a href="/guide/calculation-method/">아카이브</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
   }
