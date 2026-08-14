@@ -203,6 +203,7 @@
   letter-spacing: .08em !important;
 }
 
+.proved-site-footer__links,
 .proved-site-footer__nav {
   display: flex !important;
   flex-wrap: wrap !important;
@@ -211,6 +212,11 @@
   margin: 20px 0 !important;
 }
 
+.proved-site-footer__links a,
+.proved-site-footer__links a:visited,
+.proved-site-footer__links a:hover,
+.proved-site-footer__links a:focus-visible,
+.proved-site-footer__links a:active,
 .proved-site-footer__nav a,
 .proved-site-footer__nav a:visited,
 .proved-site-footer__nav a:hover,
@@ -244,6 +250,7 @@
     margin-top: 64px !important;
   }
 
+  .proved-site-footer__links,
   .proved-site-footer__nav {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
