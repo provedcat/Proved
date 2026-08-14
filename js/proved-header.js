@@ -15,8 +15,27 @@
     { label: '습식 탐험', id: 'navWetFoodBeta', page: 'wetFoodBetaPage', hidden: true }
   ];
 
+  const sectionItems = {
+    food: [
+      { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
+      { label: '사료 목록', disabled: true },
+      { label: '조건으로 찾기', disabled: true }
+    ],
+    archive: [
+      { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
+      { label: '사료 읽기', disabled: true },
+      { label: '에디토리얼', disabled: true }
+    ]
+  };
+
   function normalizedPath() {
     return window.location.pathname.replace(/\/+$/, '/') || '/';
+  }
+
+  function getSectionKey(path = normalizedPath()) {
+    if (path.startsWith('/food/') || path.startsWith('/feed-registration/')) return 'food';
+    if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/')) return 'archive';
+    return null;
   }
 
   function runAuthAction() {
@@ -44,6 +63,10 @@
       element.addEventListener('click', runAuthAction);
     }
     if (item.hidden) element.classList.add('hidden');
+    if (item.disabled) {
+      element.disabled = true;
+      element.setAttribute('aria-disabled', 'true');
+    }
 
     const path = normalizedPath();
     const isCurrent = item.match
@@ -76,6 +99,24 @@
     root.insertAdjacentElement('afterend', subnav);
   }
 
+  function renderSectionSubnav(root) {
+    const sectionKey = getSectionKey();
+    if (!sectionKey) return;
+
+    const existing = root.parentElement?.querySelector(':scope > .proved-section-subnav');
+    if (existing) existing.remove();
+
+    const subnav = document.createElement('nav');
+    subnav.className = `proved-section-subnav proved-section-subnav--${sectionKey}`;
+    subnav.setAttribute('aria-label', `${sectionKey === 'food' ? '사료' : '아카이브'} 하위 메뉴`);
+    sectionItems[sectionKey].forEach(item => {
+      subnav.appendChild(createItem(item, 'proved-section-subnav__item'));
+    });
+
+    root.classList.add('has-section-subnav');
+    root.insertAdjacentElement('afterend', subnav);
+  }
+
   function renderHeader(root) {
     root.className = 'proved-global-header';
     root.innerHTML = '';
@@ -92,6 +133,7 @@
     globalItems.forEach(item => nav.appendChild(createItem(item)));
     root.append(brand, nav);
     renderCalculatorSubnav(root);
+    renderSectionSubnav(root);
   }
 
   function renderFooter(root) {
