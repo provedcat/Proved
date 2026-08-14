@@ -18,15 +18,12 @@ function setWetBetaAccessGranted(granted) {
 }
 
 function updateWetBetaNavigation(allowed) {
-  const nav = document.getElementById('mainNav');
   const button = document.getElementById('navWetFoodBeta');
+  if (!button) return;
 
-  button?.classList.toggle('hidden', !allowed);
-
-  if (nav) {
-    nav.classList.toggle('grid-cols-2', !allowed);
-    nav.classList.toggle('grid-cols-3', allowed);
-  }
+  const nav = button.closest('.proved-section-subnav');
+  button.classList.toggle('hidden', !allowed);
+  if (nav) nav.dataset.visibleItems = allowed ? '3' : '2';
 }
 
 function loadWetFoodBetaScript() {
