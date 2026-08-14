@@ -199,16 +199,6 @@
     document.body.appendChild(prompt);
   }
 
-  function ensureGuideFooterLink() {
-    document.querySelectorAll('.proved-site-footer__nav').forEach((nav) => {
-      if (nav.querySelector('a[href="/guide/calculation-method/"]')) return;
-      const link = document.createElement('a');
-      link.href = '/guide/calculation-method/';
-      link.textContent = '계산 기준';
-      nav.appendChild(link);
-    });
-  }
-
   function getCalculatorSpeciesFromPath() {
     const normalizedPath = window.location.pathname.replace(/\/+$/, '/') || '/';
     if (normalizedPath === '/cat-food-calculator/') return 'cat';
@@ -512,7 +502,6 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     ensureInstallPromptMarkup();
-    ensureGuideFooterLink();
     ensureCalculationPrinciples();
 
     document.getElementById('pwaInstallBtn')?.addEventListener('click', handleInstallClick);
