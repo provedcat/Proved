@@ -1,9 +1,11 @@
 (function () {
   const globalItems = [
-    { label: '고양이', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
-    { label: '강아지', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
-    { label: '사료 등록', href: '/feed-registration/', match: '/feed-registration/' },
-    { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
+    { label: '고양이 계산기', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
+    { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
+    // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
+    // 사료/아카이브 아래에 새 하위 URL을 추가할 때 이 목록도 함께 갱신합니다.
+    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
+    { label: '아카이브', href: '/archive/', matches: ['/archive/', '/guide/calculation-method/'] },
     { label: '로그인', auth: true }
   ];
 
@@ -43,14 +45,17 @@
     }
     if (item.hidden) element.classList.add('hidden');
 
+    const path = normalizedPath();
     const isCurrent = item.match
-      ? normalizedPath() === item.match
-      : item.page === 'calculatorPage';
+      ? path === item.match
+      : Array.isArray(item.matches)
+        ? item.matches.some(match => path.startsWith(match))
+        : item.page === 'calculatorPage';
 
     if (isCurrent) {
       element.classList.add('is-current');
       element.setAttribute('aria-current', 'page');
-    } else if (item.page || item.match) {
+    } else if (item.page || item.match || item.matches) {
       element.setAttribute('aria-current', 'false');
     }
     return element;
@@ -95,10 +100,10 @@
       <p class="proved-site-footer__title">사이트맵</p>
       <nav class="proved-site-footer__nav" aria-label="사이트맵">
         <a href="/">홈</a>
-        <a href="/feed-registration/">사료 등록</a>
-        <a href="/cat-food-calculator/">고양이</a>
-        <a href="/dog-food-calculator/">강아지</a>
-        <a href="/guide/calculation-method/">계산 기준</a>
+        <a href="/cat-food-calculator/">고양이 계산기</a>
+        <a href="/dog-food-calculator/">강아지 계산기</a>
+        <a href="/food/">사료</a>
+        <a href="/archive/">아카이브</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
   }
