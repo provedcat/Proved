@@ -2,6 +2,8 @@
   const globalItems = [
     { label: '고양이 계산기', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
     { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
+    // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
+    // 사료/아카이브 아래에 새 하위 URL을 추가할 때 이 목록도 함께 갱신합니다.
     { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
     { label: '아카이브', href: '/archive/', matches: ['/archive/', '/guide/calculation-method/'] },
     { label: '로그인', auth: true }
@@ -106,6 +108,12 @@
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
   }
 
+  function removeLegacyGuideFooterLink() {
+    document.querySelectorAll('.proved-site-footer__nav a[href="/guide/calculation-method/"]').forEach(link => {
+      link.remove();
+    });
+  }
+
   function setAuthLabel(loggedIn) {
     document.querySelectorAll('[data-proved-auth="true"]').forEach(item => {
       item.textContent = loggedIn ? '로그인됨' : '로그인';
@@ -116,6 +124,13 @@
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
   window.addEventListener('proved:auth-state', event => setAuthLabel(Boolean(event.detail?.loggedIn)));
+
+  // 기존 pwa-install.js가 DOMContentLoaded에서 계산 기준 링크를 다시 붙이는 구형 동작을
+  // 실행하더라도 공통 푸터는 새 5개 IA만 유지합니다. pwa-install.js 정리 후 제거할 수 있습니다.
+  window.addEventListener('DOMContentLoaded', () => {
+    window.setTimeout(removeLegacyGuideFooterLink, 0);
+  });
+
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     window.setTimeout(runAuthAction, 0);
   }
