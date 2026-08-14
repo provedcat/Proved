@@ -1,0 +1,74 @@
+name: PR79 asset cache bust
+
+on:
+  push:
+    branches:
+      - agent/unified-site-chrome
+
+permissions:
+  contents: write
+
+jobs:
+  apply-cache-bust:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/unified-site-chrome
+          fetch-depth: 0
+
+      - name: Bump changed asset query versions in consuming HTML
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          version = "20260814-unified-chrome-v1"
+          replacements = {
+              "proved-header.css": version,
+              "proved-header.js": version,
+              "wet-beta-access.js": version,
+          }
+
+          changed = []
+          for path in Path('.').rglob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              updated = text
+              for asset, asset_version in replacements.items():
+                  updated = re.sub(
+                      rf'({re.escape(asset)}\?v=)[^"\'<>\s]+',
+                      rf'\g<1>{asset_version}',
+                      updated,
+                  )
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(str(path))
+
+          print('Updated HTML files:')
+          for path in changed:
+              print(f' - {path}')
+
+          if not changed:
+              raise SystemExit('No consuming HTML files were updated.')
+
+      - name: Verify no stale rollout keys remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIn --include='*.html' 'proved-header.css?v=20260813-global-chrome-v1' .
+          ! grep -RIn --include='*.html' 'proved-header.js?v=20260813-global-chrome-v1' .
+          ! grep -RIn --include='*.html' 'wet-beta-access.js?v=20260812-editorial-wet-beta-v1' .
+          git diff --check
+          git diff -- '*.html'
+
+      - name: Commit cache-bust updates and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/pr79-cache-bust.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: bust navigation asset caches'
+          git push origin HEAD:agent/unified-site-chrome
