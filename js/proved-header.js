@@ -98,7 +98,7 @@
     root.className = 'proved-site-footer';
     root.innerHTML = `
       <p class="proved-site-footer__title">사이트맵</p>
-      <nav class="proved-site-footer__links" aria-label="사이트맵">
+      <nav class="proved-site-footer__nav" aria-label="사이트맵">
         <a href="/">홈</a>
         <a href="/cat-food-calculator/">고양이 계산기</a>
         <a href="/dog-food-calculator/">강아지 계산기</a>
