@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260814-section-subnav-v1';
+const CACHE_NAME = 'proved-pwa-20260814-unified-chrome-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -25,6 +25,7 @@ const CORE_ASSETS = [
   './dog-food-calculator/',
   './feed-registration/',
   './guide/calculation-method/',
+  // Legacy entry URLs remain precached only as compatibility redirects.
   './food/',
   './archive/'
 ];

@@ -2,7 +2,8 @@
   --proved-header-blue: var(--brand-primary, #3568ff);
   --proved-header-text: var(--text-secondary, #697386);
   --proved-header-line: rgba(53, 104, 255, .24);
-  --proved-header-surface: #fff;
+  --proved-header-surface: transparent;
+  --proved-section-surface: #fff;
 }
 
 .proved-global-header {
@@ -93,90 +94,7 @@
   display: none;
 }
 
-@media (max-width: 720px) {
-  .proved-global-header {
-    min-height: 68px;
-    gap: 18px;
-    padding: 0 18px;
-  }
-
-  .proved-global-header__brand {
-    font-size: 18px;
-  }
-
-  .proved-global-header__nav {
-    gap: 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .proved-global-header__nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .proved-global-header__item {
-    min-height: 40px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 430px) {
-  .proved-global-header {
-    gap: 12px;
-    padding-inline: 14px;
-  }
-
-  .proved-global-header__brand {
-    font-size: 16px;
-  }
-
-  .proved-global-header__nav {
-    gap: 12px;
-  }
-
-  .proved-global-header__item {
-    font-size: 11px;
-  }
-}
-
-/* Calculator-only navigation stays separate from the shared global header. */
-.proved-calculator-subnav {
-  box-sizing: border-box;
-  width: min(calc(100% - 40px), 1120px);
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin: 0 auto;
-  border-bottom: 1px solid rgba(53, 104, 255, .16);
-  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.proved-calculator-subnav__item {
-  appearance: none;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--proved-header-blue);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.proved-calculator-subnav__item.is-current,
-.proved-calculator-subnav__item[aria-current="page"] {
-  font-weight: 800;
-}
-
-.proved-calculator-subnav__item.hidden {
-  display: none;
-}
-
-/* Food and Archive use one shared three-column secondary navigation. */
+/* One shared secondary navigation for Cat, Dog, Food and Archive. */
 .proved-section-subnav {
   box-sizing: border-box;
   width: 100%;
@@ -185,8 +103,16 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   border-bottom: 1px solid var(--proved-header-line);
-  background: var(--proved-header-surface);
+  background: transparent;
   font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.proved-section-subnav[data-visible-items="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.proved-section-subnav[data-visible-items="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .proved-section-subnav__item {
@@ -216,12 +142,14 @@
 .proved-section-subnav__item:focus-visible,
 .proved-section-subnav__item:active,
 .proved-section-subnav__item.is-current,
+.proved-section-subnav__item.is-active,
 .proved-section-subnav__item[aria-current="page"] {
   color: var(--proved-header-blue);
   background: transparent;
 }
 
 .proved-section-subnav__item.is-current,
+.proved-section-subnav__item.is-active,
 .proved-section-subnav__item[aria-current="page"] {
   font-weight: 800;
 }
@@ -237,7 +165,32 @@
   cursor: default;
 }
 
-/* The guide used to place spacing directly after the global header. Move it below the new Archive tabs. */
+.proved-section-subnav__item.hidden {
+  display: none;
+}
+
+/* Shared outer geometry: header, section navigation and page live in the same shell. */
+.pc-app-shell {
+  width: min(calc(100% - 56px), 1180px) !important;
+  margin-inline: auto !important;
+  background: var(--page-background, #f6f7f8) !important;
+}
+
+.pc-app-shell > .proved-global-header,
+.pc-app-shell > .proved-section-subnav,
+.pc-app-shell > .pc-page-container {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+
+.registration-shell > .proved-global-header,
+.registration-shell > .proved-section-subnav {
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+
+/* The guide used to place spacing directly after the global header. Move it below Archive tabs. */
 .guide-shell > .proved-global-header.has-section-subnav {
   margin-bottom: 0 !important;
 }
@@ -246,16 +199,62 @@
   margin-bottom: 64px;
 }
 
+/* Calculator becomes a page flow instead of four floating white cards. */
+#calculatorPage {
+  border-inline: 1px solid var(--proved-header-line) !important;
+  background: transparent !important;
+}
+
+#calculatorPage > .pc-section-card {
+  margin: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--proved-header-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#feedsStep,
+#ratioStep {
+  background: transparent !important;
+}
+
+#petInfoStep,
+#resultArea {
+  background: var(--proved-section-surface) !important;
+}
+
+#ratioStep .pc-ratio-card {
+  background: transparent !important;
+}
+
+#resultArea {
+  box-shadow: none !important;
+}
+
 @media (max-width: 720px) {
-  .proved-calculator-subnav {
-    width: calc(100% - 36px);
+  .proved-global-header {
+    min-height: 68px;
     gap: 18px;
+    padding: 0 18px;
+  }
+
+  .proved-global-header__brand {
+    font-size: 18px;
+  }
+
+  .proved-global-header__nav {
+    gap: 16px;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  .proved-calculator-subnav::-webkit-scrollbar {
+  .proved-global-header__nav::-webkit-scrollbar {
     display: none;
+  }
+
+  .proved-global-header__item {
+    min-height: 40px;
+    font-size: 12px;
   }
 
   .proved-section-subnav {
@@ -268,11 +267,34 @@
     font-size: 13px;
     line-height: 1.25;
   }
+
+  .pc-app-shell {
+    width: calc(100% - 24px) !important;
+  }
 }
 
 @media (max-width: 760px) {
   .guide-shell > .proved-section-subnav {
     margin-bottom: 44px;
+  }
+}
+
+@media (max-width: 430px) {
+  .proved-global-header {
+    gap: 12px;
+    padding-inline: 14px;
+  }
+
+  .proved-global-header__brand {
+    font-size: 16px;
+  }
+
+  .proved-global-header__nav {
+    gap: 12px;
+  }
+
+  .proved-global-header__item {
+    font-size: 11px;
   }
 }
 
