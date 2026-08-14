@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260812-editorial-wet-beta-v1';
+const CACHE_NAME = 'proved-pwa-20260814-site-structure-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -24,7 +24,9 @@ const CORE_ASSETS = [
   './cat-food-calculator/',
   './dog-food-calculator/',
   './feed-registration/',
-  './guide/calculation-method/'
+  './guide/calculation-method/',
+  './food/',
+  './archive/'
 ];
 
 const IMAGE_DESTINATIONS = new Set(['image']);
