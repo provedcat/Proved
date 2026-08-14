@@ -176,6 +176,113 @@
   display: none;
 }
 
+/* Food and Archive use one shared three-column secondary navigation. */
+.proved-section-subnav {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 90px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  border-bottom: 1px solid var(--proved-header-line);
+  background: var(--proved-header-surface);
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.proved-section-subnav__item {
+  appearance: none;
+  min-width: 0;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: rgba(53, 104, 255, .68);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.proved-section-subnav__item:hover,
+.proved-section-subnav__item:focus-visible,
+.proved-section-subnav__item:active,
+.proved-section-subnav__item.is-current,
+.proved-section-subnav__item[aria-current="page"] {
+  color: var(--proved-header-blue);
+  background: transparent;
+}
+
+.proved-section-subnav__item.is-current,
+.proved-section-subnav__item[aria-current="page"] {
+  font-weight: 800;
+}
+
+.proved-section-subnav__item:focus-visible {
+  outline: 1px solid var(--proved-header-blue);
+  outline-offset: -7px;
+}
+
+.proved-section-subnav__item:disabled,
+.proved-section-subnav__item[aria-disabled="true"] {
+  color: rgba(53, 104, 255, .48);
+  cursor: default;
+}
+
+/* The guide used to place spacing directly after the global header. Move it below the new Archive tabs. */
+.guide-shell > .proved-global-header.has-section-subnav {
+  margin-bottom: 0 !important;
+}
+
+.guide-shell > .proved-section-subnav {
+  margin-bottom: 64px;
+}
+
+@media (max-width: 720px) {
+  .proved-calculator-subnav {
+    width: calc(100% - 36px);
+    gap: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .proved-calculator-subnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .proved-section-subnav {
+    min-height: 64px;
+  }
+
+  .proved-section-subnav__item {
+    min-height: 62px;
+    padding: 0 4px;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 760px) {
+  .guide-shell > .proved-section-subnav {
+    margin-bottom: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .proved-section-subnav__item {
+    font-size: 12px;
+    letter-spacing: -.02em;
+  }
+}
+
 /* One constrained blue footer across every page. */
 .proved-site-footer {
   box-sizing: border-box !important;
@@ -228,17 +335,6 @@
 }
 
 @media (max-width: 720px) {
-  .proved-calculator-subnav {
-    width: calc(100% - 36px);
-    gap: 18px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .proved-calculator-subnav::-webkit-scrollbar {
-    display: none;
-  }
-
   .proved-site-footer {
     width: calc(100% - 36px) !important;
     margin-top: 64px !important;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260814-site-structure-v1';
+const CACHE_NAME = 'proved-pwa-20260814-section-subnav-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -63,20 +63,26 @@ async function cacheResponse(request, response) {
   await cache.put(request, response.clone());
 }
 
+async function matchCached(request) {
+  const exactMatch = await caches.match(request);
+  if (exactMatch) return exactMatch;
+  return caches.match(request, { ignoreSearch: true });
+}
+
 async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request, { cache: 'no-store' });
     await cacheResponse(request, networkResponse);
     return networkResponse;
   } catch (error) {
-    const cachedResponse = await caches.match(request);
+    const cachedResponse = await matchCached(request);
     if (cachedResponse) return cachedResponse;
     throw error;
   }
 }
 
 async function cacheFirst(request) {
-  const cachedResponse = await caches.match(request);
+  const cachedResponse = await matchCached(request);
   if (cachedResponse) return cachedResponse;
 
   const networkResponse = await fetch(request);
