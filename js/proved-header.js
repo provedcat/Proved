@@ -98,7 +98,7 @@
     root.className = 'proved-site-footer';
     root.innerHTML = `
       <p class="proved-site-footer__title">사이트맵</p>
-      <nav class="proved-site-footer__nav" aria-label="사이트맵">
+      <nav class="proved-site-footer__links" aria-label="사이트맵">
         <a href="/">홈</a>
         <a href="/cat-food-calculator/">고양이 계산기</a>
         <a href="/dog-food-calculator/">강아지 계산기</a>
@@ -106,12 +106,6 @@
         <a href="/archive/">아카이브</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
-  }
-
-  function removeLegacyGuideFooterLink() {
-    document.querySelectorAll('.proved-site-footer__nav a[href="/guide/calculation-method/"]').forEach(link => {
-      link.remove();
-    });
   }
 
   function setAuthLabel(loggedIn) {
@@ -124,13 +118,6 @@
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
   window.addEventListener('proved:auth-state', event => setAuthLabel(Boolean(event.detail?.loggedIn)));
-
-  // 기존 pwa-install.js가 DOMContentLoaded에서 계산 기준 링크를 다시 붙이는 구형 동작을
-  // 실행하더라도 공통 푸터는 새 5개 IA만 유지합니다. pwa-install.js 정리 후 제거할 수 있습니다.
-  window.addEventListener('DOMContentLoaded', () => {
-    window.setTimeout(removeLegacyGuideFooterLink, 0);
-  });
-
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     window.setTimeout(runAuthAction, 0);
   }
