@@ -20,30 +20,21 @@
   <meta name="theme-color" content="#3568FF">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
-  <link rel="stylesheet" href="/css/proved-header.css?v=20260814-site-structure-v1">
-  <script defer src="/js/proved-header.js?v=20260814-site-structure-v1"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260814-section-subnav-v1">
+  <script defer src="/js/proved-header.js?v=20260814-section-subnav-v1"></script>
   <style>
-    :root { --blue:#3568ff; --blue-dark:#2349b8; --line:#cbd7ff; --muted:#6f7685; }
+    :root { --blue:#3568ff; --blue-dark:#2349b8; }
     * { box-sizing:border-box; }
     body { margin:0; background:#fff; color:var(--blue-dark); font-family:"SUIT Variable",SUIT,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     .hub-shell { width:min(calc(100% - 56px),1120px); margin:0 auto; }
-    .hub-main { min-height:58vh; padding:84px 0 20px; }
+    .hub-main { min-height:52vh; padding:84px 0 40px; }
     .hub-kicker { margin:0 0 14px; color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.1em; }
     h1 { margin:0; color:var(--blue); font-size:clamp(48px,7vw,78px); line-height:1; letter-spacing:-.045em; }
-    .hub-copy { max-width:620px; margin:24px 0 54px; font-size:17px; line-height:1.75; }
-    .hub-list { border-top:1px solid var(--line); }
-    .hub-item { display:grid; grid-template-columns:minmax(160px,.35fr) minmax(0,1fr) auto; gap:24px; align-items:center; min-height:96px; border-bottom:1px solid var(--line); text-decoration:none; }
-    .hub-item strong { color:var(--blue); font-size:22px; font-weight:650; }
-    .hub-item span { color:var(--muted); font-size:14px; line-height:1.6; }
-    .hub-item em { color:var(--blue); font-size:12px; font-style:normal; font-weight:700; }
-    .hub-item--disabled { cursor:default; }
+    .hub-copy { max-width:620px; margin:24px 0 0; font-size:17px; line-height:1.75; }
     @media (max-width:720px) {
       .hub-shell { width:calc(100% - 36px); }
       .hub-main { padding-top:56px; }
-      .hub-copy { margin-bottom:38px; font-size:15px; }
-      .hub-item { grid-template-columns:1fr auto; gap:8px 16px; padding:20px 0; }
-      .hub-item strong { font-size:19px; }
-      .hub-item span { grid-column:1 / -1; }
+      .hub-copy { font-size:15px; }
     }
   </style>
 </head>
@@ -53,25 +44,7 @@
     <main class="hub-main">
       <p class="hub-kicker">FOOD</p>
       <h1>사료</h1>
-      <p class="hub-copy">등록된 사료를 확인하고 조건에 맞는 제품을 찾거나, 아직 없는 사료의 등록을 요청할 수 있습니다.</p>
-
-      <section class="hub-list" aria-label="사료 메뉴">
-        <div class="hub-item hub-item--disabled" aria-disabled="true">
-          <strong>사료 목록</strong>
-          <span>등록된 고양이·강아지 사료의 영양정보와 전성분을 확인합니다.</span>
-          <em>준비 중</em>
-        </div>
-        <div class="hub-item hub-item--disabled" aria-disabled="true">
-          <strong>조건으로 찾기</strong>
-          <span>유형, 주 단백질원 등 원하는 조건으로 사료를 좁혀봅니다.</span>
-          <em>준비 중</em>
-        </div>
-        <a class="hub-item" href="/feed-registration/">
-          <strong>등록 요청</strong>
-          <span>제품명 또는 라벨 사진으로 데이터베이스에 없는 사료의 등록을 요청합니다.</span>
-          <em>열기 →</em>
-        </a>
-      </section>
+      <p class="hub-copy">프루브의 사료 데이터베이스를 둘러보고 필요한 제품을 찾거나 등록할 수 있습니다.</p>
     </main>
     <footer class="proved-site-footer" data-proved-footer></footer>
   </div>
