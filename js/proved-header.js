@@ -78,7 +78,7 @@
       ? path === item.match
       : Array.isArray(item.matches)
         ? item.matches.some(match => path.startsWith(match))
-        : item.page === 'calculatorPage';
+        : false;
 
     if (isCurrent) {
       element.classList.add('is-current');
