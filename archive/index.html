@@ -20,30 +20,21 @@
   <meta name="theme-color" content="#3568FF">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
-  <link rel="stylesheet" href="/css/proved-header.css?v=20260814-site-structure-v1">
-  <script defer src="/js/proved-header.js?v=20260814-site-structure-v1"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260814-section-subnav-v1">
+  <script defer src="/js/proved-header.js?v=20260814-section-subnav-v1"></script>
   <style>
-    :root { --blue:#3568ff; --blue-dark:#2349b8; --line:#cbd7ff; --muted:#6f7685; }
+    :root { --blue:#3568ff; --blue-dark:#2349b8; }
     * { box-sizing:border-box; }
     body { margin:0; background:#fff; color:var(--blue-dark); font-family:"SUIT Variable",SUIT,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     .hub-shell { width:min(calc(100% - 56px),1120px); margin:0 auto; }
-    .hub-main { min-height:58vh; padding:84px 0 20px; }
+    .hub-main { min-height:52vh; padding:84px 0 40px; }
     .hub-kicker { margin:0 0 14px; color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.1em; }
     h1 { margin:0; color:var(--blue); font-size:clamp(48px,7vw,78px); line-height:1; letter-spacing:-.045em; }
-    .hub-copy { max-width:650px; margin:24px 0 54px; font-size:17px; line-height:1.75; }
-    .hub-list { border-top:1px solid var(--line); }
-    .hub-item { display:grid; grid-template-columns:minmax(160px,.35fr) minmax(0,1fr) auto; gap:24px; align-items:center; min-height:96px; border-bottom:1px solid var(--line); text-decoration:none; }
-    .hub-item strong { color:var(--blue); font-size:22px; font-weight:650; }
-    .hub-item span { color:var(--muted); font-size:14px; line-height:1.6; }
-    .hub-item em { color:var(--blue); font-size:12px; font-style:normal; font-weight:700; }
-    .hub-item--disabled { cursor:default; }
+    .hub-copy { max-width:650px; margin:24px 0 0; font-size:17px; line-height:1.75; }
     @media (max-width:720px) {
       .hub-shell { width:calc(100% - 36px); }
       .hub-main { padding-top:56px; }
-      .hub-copy { margin-bottom:38px; font-size:15px; }
-      .hub-item { grid-template-columns:1fr auto; gap:8px 16px; padding:20px 0; }
-      .hub-item strong { font-size:19px; }
-      .hub-item span { grid-column:1 / -1; }
+      .hub-copy { font-size:15px; }
     }
   </style>
 </head>
@@ -53,25 +44,7 @@
     <main class="hub-main">
       <p class="hub-kicker">ARCHIVE</p>
       <h1>아카이브</h1>
-      <p class="hub-copy">프루브가 계산에 사용하는 기준과 사료를 읽는 방법, 사료와 반려동물 영양에 관한 자료를 모읍니다.</p>
-
-      <section class="hub-list" aria-label="아카이브 메뉴">
-        <a class="hub-item" href="/guide/calculation-method/">
-          <strong>계산 기준</strong>
-          <span>급여량, 칼슘·인, 수분 등 프루브가 계산에 적용하는 기준과 한계를 확인합니다.</span>
-          <em>열기 →</em>
-        </a>
-        <div class="hub-item hub-item--disabled" aria-disabled="true">
-          <strong>사료 읽기</strong>
-          <span>보장성분, 열량, DM, NFE와 사료 라벨을 이해하는 데 필요한 자료를 정리합니다.</span>
-          <em>준비 중</em>
-        </div>
-        <div class="hub-item hub-item--disabled" aria-disabled="true">
-          <strong>에디토리얼</strong>
-          <span>사료와 급여를 둘러싼 질문, 사례와 분석을 기록합니다.</span>
-          <em>준비 중</em>
-        </div>
-      </section>
+      <p class="hub-copy">프루브의 계산 기준과 사료·영양을 이해하는 데 필요한 자료를 모읍니다.</p>
     </main>
     <footer class="proved-site-footer" data-proved-footer></footer>
   </div>
