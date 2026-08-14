@@ -154,10 +154,26 @@
     });
   }
 
+  function enterSpeciesCalculatorByDefault() {
+    const sectionKey = getSectionKey();
+    if (sectionKey !== 'cat' && sectionKey !== 'dog') return;
+    if (!document.getElementById('provedEntry')) return;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof window.provedChooseSpecies === 'function') {
+        window.provedChooseSpecies(sectionKey);
+        return;
+      }
+      document.getElementById('provedEntry')?.classList.add('hidden');
+      window.showPage?.('calculatorPage');
+    });
+  }
+
   document.querySelectorAll('[data-proved-header]').forEach(renderHeader);
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
   window.addEventListener('proved:auth-state', event => setAuthLabel(Boolean(event.detail?.loggedIn)));
+  enterSpeciesCalculatorByDefault();
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     window.setTimeout(runAuthAction, 0);
   }
