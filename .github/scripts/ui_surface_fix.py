@@ -1,0 +1,247 @@
+from pathlib import Path
+import re
+
+version = "20260816-surface-consistency-v1"
+
+styles_path = Path("css/styles.css")
+styles = styles_path.read_text(encoding="utf-8")
+
+replacements = [
+    (
+        "button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }",
+        ".pc-app-shell button:disabled { border-color:var(--border-default)!important; background:#ECEFF3!important; color:#747C88!important; cursor:not-allowed; }",
+        "global button disabled rule",
+    ),
+    (
+        "#calculatorPage{display:flex!important;flex-direction:column;gap:0!important;border-inline:1px solid var(--border-subtle);background:#fff}",
+        "#calculatorPage{display:flex!important;flex-direction:column;gap:0!important;border-inline:1px solid var(--border-subtle);background:transparent}",
+        "calculator page surface",
+    ),
+    (
+        "#calculatorPage>.pc-section-card{margin:0!important;padding:48px 44px 54px!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}",
+        "#calculatorPage>.pc-section-card{margin:0!important;padding:48px 44px 54px!important;border:0!important;border-bottom:1px solid var(--border-subtle)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}",
+        "calculator section base surface",
+    ),
+    (
+        ".pc-feed-grid>.pc-feed-panel{min-width:0;padding:28px 34px 8px 0!important;border:0!important;border-radius:0!important;background:#fff!important}",
+        ".pc-feed-grid>.pc-feed-panel{min-width:0;padding:28px 34px 8px 0!important;border:0!important;border-radius:0!important;background:transparent!important}",
+        "feed panel surface",
+    ),
+    (
+        "#ratioStep .pc-ratio-card{padding:0!important;border:0!important;border-radius:0!important;background:#fff!important}",
+        "#ratioStep .pc-ratio-card{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}",
+        "ratio card surface",
+    ),
+]
+for old, new, label in replacements:
+    if old not in styles:
+        raise SystemExit(f"missing expected {label}")
+    styles = styles.replace(old, new, 1)
+
+order_rule = "#feedsStep{order:1}#petInfoStep{order:2}#ratioStep{order:3}#resultArea{order:4}"
+if order_rule not in styles:
+    raise SystemExit("missing calculator step order rule")
+styles = styles.replace(
+    order_rule,
+    order_rule + "\n#feedsStep,#ratioStep{background:transparent!important}#petInfoStep,#resultArea{background:#fff!important}",
+    1,
+)
+styles_path.write_text(styles, encoding="utf-8")
+
+header_path = Path("css/proved-header.css")
+header = header_path.read_text(encoding="utf-8")
+if "--proved-page-surface:" not in header:
+    header = header.replace(
+        "  --proved-section-surface: #fff;\n",
+        "  --proved-section-surface: #fff;\n  --proved-page-surface: var(--page-background, #f5f6f8);\n",
+        1,
+    )
+legacy_calc = re.compile(
+    r"/\* Calculator becomes a page flow instead of four floating white cards\. \*/\n"
+    r"#calculatorPage \{.*?\n#resultArea \{\n  box-shadow: none !important;\n\}\n\n",
+    re.S,
+)
+header, count = legacy_calc.subn("", header, count=1)
+if count != 1:
+    raise SystemExit(f"expected one calculator surface block, removed {count}")
+anchor = "/* Shared outer geometry: header, section navigation and page live in the same shell. */\n"
+if anchor not in header:
+    raise SystemExit("missing shared geometry anchor")
+common_surface = """/* One page surface for all sectioned areas; content sections may layer white surfaces on top. */
+html:has(.pc-app-shell),
+body:has(.pc-app-shell),
+html:has(.registration-shell),
+body:has(.registration-shell),
+html:has(.guide-shell),
+body:has(.guide-shell) {
+  background: var(--proved-page-surface) !important;
+}
+
+.pc-app-shell,
+.registration-shell,
+.guide-shell {
+  background: var(--proved-page-surface) !important;
+}
+
+"""
+header = header.replace(anchor, anchor + common_surface, 1)
+header_path.write_text(header, encoding="utf-8")
+
+shell_path = Path("css/proved-shell.css")
+shell = shell_path.read_text(encoding="utf-8")
+marker = "/* Landing page aligned with the shared Proved design system */"
+if marker not in shell:
+    raise SystemExit("missing entry legacy marker")
+base = shell.split(marker, 1)[0].rstrip() + "\n\n"
+current = '''/* Current editorial entry flow. This is the only active entry-layout layer. */
+.proved-entry {
+  --proved-blue: #3568ff;
+  --proved-blue-dark: #2349b8;
+  --proved-muted: #7b8291;
+  --proved-line: #cbd7ff;
+  background: #fff;
+  color: var(--proved-blue);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  font-family: "SUIT Variable", "SUIT", sans-serif;
+}
+
+.proved-entry__inner {
+  width: min(calc(100% - 56px), 1180px);
+  max-width: none;
+  min-height: 100svh;
+  height: auto;
+  margin-inline: auto;
+  padding: 0;
+  border-inline: 1px solid var(--proved-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.proved-entry__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: initial;
+  gap: 0;
+  padding: 0;
+}
+
+.proved-entry__content {
+  width: 100%;
+  min-height: 640px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, .82fr);
+  align-items: stretch;
+  gap: 0;
+}
+
+.proved-entry__statement {
+  max-width: none;
+  margin: 0;
+  padding: clamp(84px, 10vw, 132px) clamp(34px, 5vw, 68px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--proved-blue);
+  font-size: clamp(48px, 6vw, 76px);
+  font-weight: 700;
+  line-height: 1.13;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+
+.proved-entry__statement span { display: block; width: 100%; white-space: nowrap; }
+
+.proved-entry__action {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--proved-line);
+  border-block: 1px solid var(--proved-line);
+}
+
+.proved-entry__section { padding: clamp(32px, 4vw, 48px) clamp(28px, 4vw, 48px); border: 0; }
+.proved-entry__section + .proved-entry__section { border-top: 1px solid var(--proved-line); }
+.proved-entry__section-heading { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: baseline; gap: 8px; margin-bottom: 28px; }
+.proved-entry__number { color: var(--proved-blue); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.proved-entry__title { margin: 0; color: var(--proved-blue); font-size: clamp(22px, 2.3vw, 30px); font-weight: 600; line-height: 1.25; letter-spacing: -.025em; text-align: left; }
+
+.proved-entry-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(24px, 4vw, 50px); row-gap: 0; margin-left: 52px; }
+.proved-entry-option {
+  appearance: none;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 6px 18px;
+  border: 0;
+  border-bottom: 2px solid var(--proved-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--proved-blue);
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+.proved-entry-option--active { border-bottom-color: var(--proved-blue); }
+.proved-entry-option--muted { color: var(--proved-muted); border-bottom-color: #e2e5eb; }
+.proved-entry-option:not(:disabled):hover { color: var(--proved-blue); border-bottom-color: var(--proved-blue); }
+.proved-entry-option:focus-visible { outline: 3px solid rgba(53, 104, 255, .24); outline-offset: 5px; }
+.proved-entry .proved-entry-option:disabled { border: 0 !important; border-bottom: 2px solid #e2e5eb !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; color: #a7acb6 !important; cursor: default; }
+
+.proved-login-area { margin: 0 0 0 52px; }
+.proved-entry__hint { margin: 0 0 20px !important; color: var(--proved-muted); font-size: 14px; font-weight: 400; text-align: left; }
+.proved-login-list { display: block; border-top: 1px solid var(--proved-line); }
+.proved-login-button { display: flex; align-items: center; gap: 24px; width: 100%; min-height: 72px; padding: 16px 12px; border: 0 !important; border-bottom: 1px solid var(--proved-line) !important; border-radius: 0; background: transparent; box-shadow: none; color: var(--proved-blue-dark); font-size: 20px; font-weight: 400; text-align: left; }
+.proved-login-button:hover { color: var(--proved-blue); background: transparent; }
+.proved-login-provider-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 42px; width: 42px; height: 42px; color: currentColor; }
+.proved-login-provider-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+.proved-login-guest, .proved-back { min-height: 0; margin-top: 22px; border: 0; background: transparent; color: var(--proved-muted); font-size: 16px; font-weight: 400; text-decoration: underline; }
+.proved-entry-auth-msg { font-weight: 400; }
+.proved-steps { display: flex; gap: 18px; justify-content: flex-start; margin-top: 56px; }
+.proved-step { width: 64px; height: 2px; border-radius: 0; background: #dfe6ff; }
+.proved-step.active { background: var(--proved-blue); }
+.proved-entry ::selection { color: #fff; background: var(--proved-blue); }
+
+#provedEntry .proved-site-footer { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 28px !important; border: 0 !important; border-top: 1px solid var(--proved-line) !important; background: transparent !important; color: var(--proved-blue) !important; display: grid !important; grid-template-columns: auto minmax(0, 1fr) auto !important; align-items: start !important; gap: 24px 40px !important; text-align: left !important; }
+#provedEntry .proved-site-footer__title, #provedEntry .proved-site-footer__copyright { margin: 0 !important; }
+#provedEntry .proved-site-footer__nav { justify-content: flex-start !important; margin: 0 !important; }
+
+@media (max-width: 760px) {
+  .proved-entry__inner { width: calc(100% - 24px); }
+  .proved-entry__content { min-height: 0; grid-template-columns: 1fr; }
+  .proved-entry__statement { min-height: clamp(260px, 38svh, 330px); padding: 54px 20px 62px; border-bottom: 1px solid var(--proved-line); align-items: flex-start; font-size: clamp(35px, 9.7vw, 43px); line-height: 1.18; }
+  .proved-entry__statement span { white-space: normal; }
+  .proved-entry__action { border-left: 0; border-top: 0; border-bottom: 1px solid var(--proved-line); }
+  .proved-entry__section { padding: 30px 20px 34px; }
+  .proved-entry__section-heading { margin-bottom: 20px; }
+  .proved-entry__title { font-size: 21px; }
+  .proved-entry-options, .proved-login-area { margin-left: 52px; }
+  .proved-entry-option { min-height: 58px; padding-inline: 0; font-size: 17px; }
+  #provedEntry .proved-site-footer { padding: 26px 20px calc(30px + env(safe-area-inset-bottom)) !important; grid-template-columns: 1fr !important; gap: 18px !important; }
+  #provedEntry .proved-site-footer__nav { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px 18px !important; }
+}
+'''
+shell_path.write_text(base + current, encoding="utf-8")
+
+for path in Path('.').rglob('*.html'):
+    text = path.read_text(encoding='utf-8')
+    updated = re.sub(r'(styles\.css\?v=)[^"\'<>\s]+', rf'\g<1>{version}', text)
+    updated = re.sub(r'(proved-shell\.css\?v=)[^"\'<>\s]+', rf'\g<1>{version}', updated)
+    updated = re.sub(r'(proved-header\.css\?v=)[^"\'<>\s]+', rf'\g<1>{version}', updated)
+    if updated != text:
+        path.write_text(updated, encoding='utf-8')
+
+sw_path = Path('service-worker.js')
+sw = sw_path.read_text(encoding='utf-8')
+sw, count = re.subn(r"const CACHE_NAME = '[^']+';", "const CACHE_NAME = 'proved-pwa-20260816-surface-consistency-v1';", sw, count=1)
+if count != 1:
+    raise SystemExit('service worker cache name not found')
+sw_path.write_text(sw, encoding='utf-8')
