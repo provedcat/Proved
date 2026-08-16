@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260814-unified-chrome-v1';
+const CACHE_NAME = 'proved-pwa-20260816-surface-consistency-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',

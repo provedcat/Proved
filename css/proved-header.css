@@ -4,6 +4,7 @@
   --proved-header-line: rgba(53, 104, 255, .24);
   --proved-header-surface: transparent;
   --proved-section-surface: #fff;
+  --proved-page-surface: var(--page-background, #f5f6f8);
 }
 
 .proved-global-header {
@@ -170,6 +171,22 @@
 }
 
 /* Shared outer geometry: header, section navigation and page live in the same shell. */
+/* One page surface for all sectioned areas; content sections may layer white surfaces on top. */
+html:has(.pc-app-shell),
+body:has(.pc-app-shell),
+html:has(.registration-shell),
+body:has(.registration-shell),
+html:has(.guide-shell),
+body:has(.guide-shell) {
+  background: var(--proved-page-surface) !important;
+}
+
+.pc-app-shell,
+.registration-shell,
+.guide-shell {
+  background: var(--proved-page-surface) !important;
+}
+
 .pc-app-shell {
   width: min(calc(100% - 56px), 1180px) !important;
   margin-inline: auto !important;
@@ -197,38 +214,6 @@
 
 .guide-shell > .proved-section-subnav {
   margin-bottom: 64px;
-}
-
-/* Calculator becomes a page flow instead of four floating white cards. */
-#calculatorPage {
-  border-inline: 1px solid var(--proved-header-line) !important;
-  background: transparent !important;
-}
-
-#calculatorPage > .pc-section-card {
-  margin: 0 !important;
-  border: 0 !important;
-  border-bottom: 1px solid var(--proved-header-line) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-#feedsStep,
-#ratioStep {
-  background: transparent !important;
-}
-
-#petInfoStep,
-#resultArea {
-  background: var(--proved-section-surface) !important;
-}
-
-#ratioStep .pc-ratio-card {
-  background: transparent !important;
-}
-
-#resultArea {
-  box-shadow: none !important;
 }
 
 @media (max-width: 720px) {
