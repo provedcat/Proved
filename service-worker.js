@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260818-food-index-v1';
+const CACHE_NAME = 'proved-pwa-20260818-food-detail-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -7,12 +7,14 @@ const CORE_ASSETS = [
   './css/proved-shell.css',
   './css/proved-header.css',
   './css/food-list.css',
+  './css/food-detail-refinements.css',
   './js/proved-header.js',
   './js/proved-shell.js',
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',
   './js/food-list.js',
+  './js/food-detail-refinements.js',
   './js/calculator-session.js',
   './js/feed-registration.js',
   './js/recent-feed.js',
