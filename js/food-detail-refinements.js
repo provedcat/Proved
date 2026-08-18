@@ -28,10 +28,10 @@
           '칼슘:인': { min: 1.0, max: 1.5 }
         },
         adult: {
-          '조단백': { min: 25 },
+          '조단백': { min: 33.3 },
           '조지방': { min: 9 },
-          '칼슘': { min: 0.4 },
-          '인': { min: 0.26 },
+          '칼슘': { min: 0.53 },
+          '인': { min: 0.35 },
           '칼슘:인': { min: 1.0, max: 2.0 }
         }
       }
@@ -39,7 +39,7 @@
     dog: {
       aafco: {
         growth: {
-          '조단백': { min: 22.5 },
+          '조단백': { min: 22.0 },
           '조지방': { min: 8.5 },
           '칼슘': { min: 1.2, max: 2.5 },
           '인': { min: 1.0, max: 1.6 },
@@ -62,10 +62,10 @@
           '칼슘:인': { min: 1.0, max: 1.6 }
         },
         adult: {
-          '조단백': { min: 18 },
+          '조단백': { min: 21 },
           '조지방': { min: 5.5 },
-          '칼슘': { min: 0.5, max: 2.5 },
-          '인': { min: 0.4, max: 1.6 },
+          '칼슘': { min: 0.58, max: 2.5 },
+          '인': { min: 0.46, max: 1.6 },
           '칼슘:인': { min: 1.0, max: 2.0 }
         }
       }
@@ -87,12 +87,12 @@
     return trimmed.includes('.') ? trimmed : `${trimmed}.0`;
   }
 
-  // DB의 ca_p_ratio는 Ca/P 값이다. 화면에서는 Ca를 1로 고정해 1 : P 상대값으로 표시한다.
+  // DB의 ca_p_ratio는 Ca/P 값이다. 화면에서는 Ca를 1로 고정해 1:P 상대값으로 표시한다.
   function normalizeRatio(caOverP) {
     const ratio = Number(caOverP);
     if (!Number.isFinite(ratio) || ratio <= 0) return '—';
     const phosphorusRelative = 1 / ratio;
-    return `1 : ${trimFixed(phosphorusRelative, 2)}`;
+    return `1:${trimFixed(phosphorusRelative, 2)}`;
   }
 
   function readOriginalRatio(root) {
@@ -266,7 +266,7 @@
     note.innerHTML = `
       <strong>주요 영양성분 기준 비교</strong>
       <p>등록된 조단백·조지방·칼슘·인·칼슘:인 값만 AAFCO 및 FEDIAF 기준과 비교한 참고 정보입니다. 전체 영양 적합성이나 인증을 의미하지 않습니다.</p>
-      <p>FEDIAF는 2025 Nutritional Guidelines의 DM 기준을 사용합니다. 어덜트는 표준 MER 기준, 성장기는 보수적인 성장 초기 기준을 적용하며 주식으로 확인되지 않은 제품은 비교하지 않습니다.</p>`;
+      <p>FEDIAF는 2025 Nutritional Guidelines의 DM 기준을 사용하며, 단일 어덜트 열은 낮은 MER의 더 보수적인 기준을 적용했습니다. 성장기는 보수적인 성장 초기 기준을 적용하고, 주식으로 확인되지 않은 제품은 비교하지 않습니다.</p>`;
     if (originalNote?.classList.contains('food-table-note')) {
       originalNote.insertAdjacentElement('afterend', note);
     } else {
