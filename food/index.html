@@ -3,13 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>사료 등록 요청으로 이동 | 프루브</title>
-  <meta name="robots" content="noindex,follow">
-  <link rel="canonical" href="https://proved.kr/feed-registration/">
-  <meta http-equiv="refresh" content="0; url=/feed-registration/">
-  <script>window.location.replace('/feed-registration/');</script>
+  <title>고양이·강아지 사료 목록 | 프루브</title>
+  <meta name="description" content="프루브에 등록된 고양이·강아지 사료를 브랜드와 제품명으로 검색하고 열량, 수분, 칼슘·인 비율과 상세 영양정보를 확인합니다.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://proved.kr/food/">
+
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="프루브">
+  <meta property="og:title" content="고양이·강아지 사료 목록 | 프루브">
+  <meta property="og:description" content="브랜드와 제품명으로 사료를 찾고 등록된 영양정보를 확인하세요.">
+  <meta property="og:url" content="https://proved.kr/food/">
+  <meta property="og:image" content="https://proved.kr/icons/icon-512.png">
+
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#3568FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260818-food-index-v1">
+  <link rel="stylesheet" href="/css/food-list.css?v=20260818-food-index-v1">
+  <script defer src="/js/proved-header.js?v=20260818-food-index-v1"></script>
+  <script defer src="/js/food-list.js?v=20260818-food-index-v1"></script>
 </head>
 <body>
-  <p><a href="/feed-registration/">사료 등록 요청으로 이동</a></p>
+  <div class="food-shell">
+    <header data-proved-header="food"></header>
+
+    <main class="food-main">
+      <section id="foodListView" class="food-list-view" aria-labelledby="foodListTitle">
+        <div class="food-list-hero">
+          <p class="food-eyebrow">FOOD INDEX</p>
+          <h1 id="foodListTitle">사료 목록</h1>
+          <p class="food-list-hero__lead">브랜드와 제품명으로 찾고, 필요한 영양정보만 빠르게 확인하세요.</p>
+        </div>
+
+        <section class="food-controls" aria-label="사료 목록 검색 및 필터">
+          <div class="food-search-field">
+            <label for="foodSearchInput">브랜드 또는 제품명 검색</label>
+            <div class="food-search-field__row">
+              <svg class="food-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+              <input id="foodSearchInput" type="search" autocomplete="off" placeholder="예: RAWZ, 로우즈 연어" spellcheck="false">
+              <button id="foodSearchClear" class="food-search-clear" type="button" aria-label="검색어 지우기" hidden>지우기</button>
+            </div>
+          </div>
+
+          <div class="food-filter-grid">
+            <fieldset class="food-filter-group">
+              <legend>대상</legend>
+              <div class="food-filter-options" id="foodSpeciesFilters">
+                <button type="button" data-species="cat" aria-pressed="true">고양이</button>
+                <button type="button" data-species="dog" aria-pressed="false">강아지</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="food-filter-group">
+              <legend>형태</legend>
+              <div class="food-filter-options" id="foodTypeFilters">
+                <button type="button" data-type="all" aria-pressed="true">전체</button>
+                <button type="button" data-type="dry" aria-pressed="false">건사료</button>
+                <button type="button" data-type="wet" aria-pressed="false">습식사료</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="food-filter-group">
+              <legend>분류</legend>
+              <div class="food-filter-options" id="foodRoleFilters">
+                <button type="button" data-role="all" aria-pressed="true">전체</button>
+                <button type="button" data-role="주식" aria-pressed="false">주식</button>
+                <button type="button" data-role="보조식" aria-pressed="false">보조식</button>
+              </div>
+            </fieldset>
+
+            <div class="food-sort-group">
+              <label for="foodSortSelect">정렬</label>
+              <select id="foodSortSelect">
+                <option value="brand">브랜드순</option>
+                <option value="product">제품명순</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="food-results-section" aria-labelledby="foodResultsHeading">
+          <div class="food-results-heading">
+            <p id="foodResultsHeading" class="food-results-count" aria-live="polite">사료 목록을 불러오는 중입니다.</p>
+            <p class="food-results-note">검수 전 제품은 별도로 표시합니다.</p>
+          </div>
+          <div id="foodResults" class="food-results" aria-live="polite"></div>
+          <div id="foodListStatus" class="food-list-status" role="status"></div>
+          <button id="foodLoadMore" class="food-load-more" type="button" hidden>더 보기</button>
+        </section>
+      </section>
+
+      <section id="foodDetailView" class="food-detail-view" aria-labelledby="foodDetailTitle" hidden>
+        <div class="food-detail-toolbar">
+          <button id="foodBackToList" class="food-back-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+            사료 목록
+          </button>
+        </div>
+
+        <div id="foodDetailContent"></div>
+        <div id="foodDetailStatus" class="food-detail-status" role="status"></div>
+      </section>
+    </main>
+
+    <footer data-proved-footer></footer>
+  </div>
 </body>
 </html>

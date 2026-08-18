@@ -4,7 +4,7 @@
     { label: '강아지', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
-    { label: '사료', href: '/feed-registration/', matches: ['/feed-registration/', '/food/'] },
+    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
     { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/archive/'] },
     { label: '로그인', auth: true }
   ];
@@ -21,7 +21,7 @@
     ],
     food: [
       { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
-      { label: '사료 목록', disabled: true },
+      { label: '사료 목록', href: '/food/', match: '/food/' },
       { label: '조건으로 찾기', disabled: true }
     ],
     archive: [
@@ -142,7 +142,7 @@
         <a href="/">홈</a>
         <a href="/cat-food-calculator/">고양이</a>
         <a href="/dog-food-calculator/">강아지</a>
-        <a href="/feed-registration/">사료</a>
+        <a href="/food/">사료</a>
         <a href="/guide/calculation-method/">아카이브</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
