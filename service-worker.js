@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260816-surface-consistency-v1';
+const CACHE_NAME = 'proved-pwa-20260818-food-index-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -6,11 +6,13 @@ const CORE_ASSETS = [
   './css/styles.css',
   './css/proved-shell.css',
   './css/proved-header.css',
+  './css/food-list.css',
   './js/proved-header.js',
   './js/proved-shell.js',
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',
+  './js/food-list.js',
   './js/calculator-session.js',
   './js/feed-registration.js',
   './js/recent-feed.js',
@@ -24,9 +26,9 @@ const CORE_ASSETS = [
   './cat-food-calculator/',
   './dog-food-calculator/',
   './feed-registration/',
-  './guide/calculation-method/',
-  // Legacy entry URLs remain precached only as compatibility redirects.
   './food/',
+  './guide/calculation-method/',
+  // Legacy archive URL remains precached only as a compatibility redirect.
   './archive/'
 ];
 
