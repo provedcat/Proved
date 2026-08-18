@@ -1,22 +1,22 @@
 (function () {
   'use strict';
 
+  // 이 표는 상세 페이지에 이미 저장된 일부 주요 성분을 기준표와 대조하기 위한 참고용이다.
+  // 전체 AAFCO/FEDIAF 영양 적합성 판정이나 인증을 의미하지 않는다.
   const GUIDELINES = {
     cat: {
       aafco: {
         growth: {
           '조단백': { min: 30 },
           '조지방': { min: 9 },
-          '칼슘': { min: 1.0, max: 2.5 },
-          '인': { min: 0.8, max: 1.6 },
-          '칼슘:인': { min: 1.0, max: 2.0 }
+          '칼슘': { min: 1.0 },
+          '인': { min: 0.8 }
         },
         adult: {
           '조단백': { min: 26 },
           '조지방': { min: 9 },
-          '칼슘': { min: 0.6, max: 2.5 },
-          '인': { min: 0.5, max: 1.6 },
-          '칼슘:인': { min: 1.0, max: 2.0 }
+          '칼슘': { min: 0.6 },
+          '인': { min: 0.5 }
         }
       },
       fediaf: {
@@ -41,7 +41,7 @@
         growth: {
           '조단백': { min: 22.5 },
           '조지방': { min: 8.5 },
-          '칼슘': { min: 1.2, max: 1.8 },
+          '칼슘': { min: 1.2, max: 2.5 },
           '인': { min: 1.0, max: 1.6 },
           '칼슘:인': { min: 1.0, max: 2.0 }
         },
@@ -82,7 +82,9 @@
   }
 
   function trimFixed(value, digits) {
-    return Number(value).toFixed(digits).replace(/\.0+$/, '.0').replace(/(\.\d*?)0+$/, '$1');
+    const fixed = Number(value).toFixed(digits);
+    const trimmed = fixed.replace(/0+$/, '').replace(/\.$/, '');
+    return trimmed.includes('.') ? trimmed : `${trimmed}.0`;
   }
 
   function normalizeRatio(caOverP) {
@@ -180,7 +182,7 @@
   function evaluate(value, rule, eligible) {
     if (!eligible) return { text: '—', className: 'is-na', title: '주식으로 확인된 제품에만 비교합니다.' };
     if (!rule || value === null || value === undefined || !Number.isFinite(Number(value))) {
-      return { text: '—', className: 'is-na', title: '비교 가능한 등록 값이 없습니다.' };
+      return { text: '—', className: 'is-na', title: '비교 가능한 기준 또는 등록 값이 없습니다.' };
     }
 
     const numeric = Number(value);
@@ -263,7 +265,7 @@
     note.innerHTML = `
       <strong>주요 영양성분 기준 비교</strong>
       <p>등록된 조단백·조지방·칼슘·인·칼슘:인 값만 AAFCO 및 FEDIAF 기준과 비교한 참고 정보입니다. 전체 영양 적합성이나 인증을 의미하지 않습니다.</p>
-      <p>FEDIAF는 2025 Nutritional Guidelines의 DM 기준을 사용하며, 성장기는 보수적인 성장 초기 기준을 적용합니다. 주식으로 확인되지 않은 제품은 비교하지 않습니다.</p>`;
+      <p>FEDIAF는 2025 Nutritional Guidelines의 DM 기준을 사용합니다. 어덜트는 표준 MER 기준, 성장기는 보수적인 성장 초기 기준을 적용하며 주식으로 확인되지 않은 제품은 비교하지 않습니다.</p>`;
     if (originalNote?.classList.contains('food-table-note')) {
       originalNote.insertAdjacentElement('afterend', note);
     } else {
