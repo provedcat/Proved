@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260818-food-detail-v2';
+const CACHE_NAME = 'proved-pwa-20260818-color-system-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
   './css/styles.css',
   './css/proved-shell.css',
   './css/proved-header.css',
+  './css/proved-colors.css',
   './css/food-list.css',
   './css/food-detail-refinements.css',
   './js/proved-header.js',
