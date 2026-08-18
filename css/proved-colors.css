@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
 
-  /* Canonical Proved color tokens. Existing values only. */
+  /* Canonical Proved palette: existing colors only. */
   --proved-color-blue: #3568FF;
   --proved-color-bg: #F5F7FA;
   --proved-color-text: #727B8B;
@@ -9,29 +9,64 @@
   --proved-color-line: #DCE2EA;
   --proved-color-white: #FFFFFF;
 
-  /* Legacy/common aliases */
+  /* Common / calculator aliases */
   --brand: var(--proved-color-blue) !important;
   --brand-primary: var(--proved-color-blue) !important;
   --brand-blue: var(--proved-color-blue) !important;
   --brand-blue-pressed: var(--proved-color-blue) !important;
+  --primary: var(--proved-color-blue) !important;
   --page-background: var(--proved-color-bg) !important;
+  --background: var(--proved-color-bg) !important;
   --surface: var(--proved-color-white) !important;
   --snack-surface: var(--proved-color-bg) !important;
+  --foreground: var(--proved-color-blue) !important;
   --text-primary: var(--proved-color-blue) !important;
   --text-secondary: var(--proved-color-text) !important;
+  --text-placeholder: var(--proved-color-text-soft) !important;
   --border: var(--proved-color-line) !important;
+  --border-neutral: var(--proved-color-line) !important;
+  --border-default: var(--proved-color-line) !important;
+  --border-subtle: var(--proved-color-line) !important;
+
+  /* Dry/wet still need a visual split in sliders: Blue vs existing gray only. */
   --dry: var(--proved-color-blue) !important;
   --wet: var(--proved-color-text) !important;
   --cat-dry: var(--proved-color-blue) !important;
   --cat-dry-strong: var(--proved-color-blue) !important;
+  --cat-dry-ink: var(--proved-color-blue) !important;
+  --cat-dry-light: transparent !important;
+  --cat-dry-surface: transparent !important;
   --cat-wet: var(--proved-color-text) !important;
-  --cat-wet-strong: var(--proved-color-text) !important;
+  --cat-wet-strong: var(--proved-color-blue) !important;
+  --cat-wet-ink: var(--proved-color-blue) !important;
+  --cat-wet-light: transparent !important;
+  --cat-wet-surface: transparent !important;
   --dog-dry: var(--proved-color-blue) !important;
   --dog-dry-strong: var(--proved-color-blue) !important;
+  --dog-dry-ink: var(--proved-color-blue) !important;
   --dog-wet: var(--proved-color-text) !important;
-  --dog-wet-strong: var(--proved-color-text) !important;
+  --dog-wet-strong: var(--proved-color-blue) !important;
+  --dog-wet-ink: var(--proved-color-blue) !important;
 
-  /* Shared shell/header */
+  /* Nutrition analysis accents are no longer separate brand colors. */
+  --analysis-green: var(--proved-color-blue) !important;
+  --analysis-water: var(--proved-color-blue) !important;
+  --calcium-ink: var(--proved-color-blue) !important;
+  --water-ink: var(--proved-color-blue) !important;
+
+  /* Result/modal palette: Blue + white, never navy. */
+  --result-background: var(--proved-color-blue) !important;
+  --result-surface: var(--proved-color-blue) !important;
+  --result-text: var(--proved-color-white) !important;
+  --result-text-secondary: rgba(255, 255, 255, .68) !important;
+  --result-divider: rgba(255, 255, 255, .34) !important;
+  --modal-background: var(--proved-color-blue) !important;
+  --modal-surface: var(--proved-color-white) !important;
+  --modal-text: var(--proved-color-blue) !important;
+  --modal-text-secondary: var(--proved-color-text) !important;
+  --modal-divider: var(--proved-color-line) !important;
+
+  /* Shared shell/header aliases */
   --proved-blue: var(--proved-color-blue) !important;
   --proved-blue-dark: var(--proved-color-blue) !important;
   --proved-navy: var(--proved-color-blue) !important;
@@ -44,7 +79,7 @@
   --proved-section-surface: transparent !important;
   --proved-page-surface: var(--proved-color-bg) !important;
 
-  /* Registration */
+  /* Feed registration aliases */
   --reg-blue: var(--proved-color-blue) !important;
   --reg-blue-soft: var(--proved-color-bg) !important;
   --reg-ink: var(--proved-color-blue) !important;
@@ -53,7 +88,7 @@
   --reg-paper: var(--proved-color-bg) !important;
   --reg-wash: var(--proved-color-bg) !important;
 
-  /* Food index/detail */
+  /* Food index/detail aliases */
   --food-blue: var(--proved-color-blue) !important;
   --food-blue-dark: var(--proved-color-blue) !important;
   --food-ink: var(--proved-color-blue) !important;
@@ -66,14 +101,12 @@
   --food-moisture: var(--proved-color-blue) !important;
   --food-protein: var(--proved-color-blue) !important;
   --food-ratio: var(--proved-color-blue) !important;
-  --food-energy-soft: var(--proved-color-bg) !important;
-  --food-moisture-soft: var(--proved-color-bg) !important;
-  --food-protein-soft: var(--proved-color-bg) !important;
-  --food-ratio-soft: var(--proved-color-bg) !important;
+  --food-energy-soft: transparent !important;
+  --food-moisture-soft: transparent !important;
+  --food-protein-soft: transparent !important;
+  --food-ratio-soft: transparent !important;
   --food-dry: var(--proved-color-blue) !important;
   --food-wet: var(--proved-color-text) !important;
-  --food-ratio-violet: var(--proved-color-blue) !important;
-  --food-ratio-violet-soft: var(--proved-color-bg) !important;
 
   /* Calculation guide legacy aliases */
   --blue: var(--proved-color-blue) !important;
@@ -104,7 +137,7 @@ body ::selection {
   color: var(--proved-color-white) !important;
 }
 
-/* Header / sub navigation / footer */
+/* ---------- Global header / subnav / footer ---------- */
 .proved-global-header,
 .proved-section-subnav {
   border-color: var(--proved-color-line) !important;
@@ -149,7 +182,7 @@ body ::selection {
   color: var(--proved-color-blue) !important;
 }
 
-/* Home / login / pet selection */
+/* ---------- Home / login / pet selection ---------- */
 .proved-entry,
 .proved-entry__inner {
   background: var(--proved-color-bg) !important;
@@ -192,7 +225,8 @@ body ::selection {
 .proved-home-button:active,
 .proved-pet-row,
 .proved-pet-row.is-active,
-.proved-load-pet-btn {
+.proved-load-pet-btn,
+.proved-pet-modal__panel {
   background: var(--proved-color-white) !important;
 }
 
@@ -200,29 +234,34 @@ body ::selection {
   background: rgba(53, 104, 255, .28) !important;
 }
 
-.proved-pet-modal__panel {
-  background: var(--proved-color-white) !important;
-}
-
-/* Calculator / weight trend / login surfaces */
+/* ---------- Calculator / weight trend ---------- */
 .pc-app-shell,
 .pc-page-container,
 #calculatorPage,
-#weightTrendPage {
+#weightTrendPage,
+#wetFoodBetaPage {
   background: transparent !important;
 }
 
 .pc-section-card,
 .pc-feed-panel,
+.pc-ratio-card,
 .pc-result-card,
 .pc-results-card,
 .pc-analysis-card,
 .pc-analysis-panel,
 .pc-weight-card,
 .pc-weight-panel,
-.pc-summary-card {
+.pc-summary-card,
+.pc-result-summary,
+.pc-analysis-result,
+#capResult,
+#waterResult,
+#capResult > div,
+#waterResult > div {
   background: transparent !important;
   box-shadow: none !important;
+  border-color: var(--proved-color-line) !important;
 }
 
 .pc-app-shell h1,
@@ -238,7 +277,12 @@ body ::selection {
 .pc-selected-feed,
 .pc-kcal-value,
 .pc-weight-value,
-.pc-summary-value {
+.pc-summary-value,
+#resultTitle,
+.pc-analysis-result h3,
+.pc-analysis-metrics strong,
+.pc-water-summary strong,
+.pc-analysis-ratio strong {
   color: var(--proved-color-blue) !important;
 }
 
@@ -250,8 +294,45 @@ body ::selection {
 .pc-result-label,
 .pc-weight-unit,
 .pc-weight-meta,
-.pc-summary-label {
+.pc-summary-label,
+.pc-analysis-metrics span,
+.pc-water-summary span,
+.pc-analysis-row strong,
+.pc-analysis-note,
+.pc-water-status {
   color: var(--proved-color-text) !important;
+}
+
+.pc-feed-panel--dry,
+.pc-feed-panel--wet,
+.pc-ratio-card {
+  background: transparent !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-feed-panel--dry .pc-feed-input-row input,
+.pc-feed-panel--wet .pc-feed-input-row input {
+  background: var(--proved-color-white) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-feed-panel--dry .pc-feed-heading h3,
+.pc-feed-panel--wet .pc-feed-heading h3,
+.pc-feed-panel--dry .pc-selected-feed,
+.pc-feed-panel--wet .pc-selected-feed,
+.proved-dog-mode .pc-feed-panel--dry .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--wet .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--dry .pc-selected-feed,
+.proved-dog-mode .pc-feed-panel--wet .pc-selected-feed,
+.pc-result-card--dry h3,
+.pc-result-card--dry strong,
+.pc-result-card--wet h3,
+.pc-result-card--wet strong,
+.proved-dog-mode .pc-result-card--dry h3,
+.proved-dog-mode .pc-result-card--dry strong,
+.proved-dog-mode .pc-result-card--wet h3,
+.proved-dog-mode .pc-result-card--wet strong {
+  color: var(--proved-color-blue) !important;
 }
 
 .pc-app-shell input:not([type="range"]),
@@ -260,7 +341,11 @@ body ::selection {
 .pc-search-list,
 .pc-segmented-option,
 .pc-choice-chip,
-.pc-adult-weight-presets button {
+.pc-adult-weight-presets button,
+.pc-kcal-counter button,
+.pc-feed-picker-button,
+.pc-recent-feed-button,
+#addWetBtn {
   background: var(--proved-color-white) !important;
 }
 
@@ -281,19 +366,43 @@ body ::selection {
 .pc-adult-weight-presets button,
 .pc-feed-picker-button,
 .pc-recent-feed-button,
-.pc-compact-load-button {
+.pc-compact-load-button,
+#addWetBtn {
   color: var(--proved-color-text) !important;
   border-color: var(--proved-color-line) !important;
 }
 
+.pc-segmented-option.is-selected,
 .pc-segmented-option[aria-checked="true"],
 .pc-segmented-option:has(input:checked),
 .pc-choice-chip:has(input:checked),
 .pc-adult-weight-presets button[aria-pressed="true"],
 .pc-feed-picker-button:hover,
-.pc-compact-load-button:hover {
+.pc-compact-load-button:hover,
+.pc-kcal-counter button,
+.pc-kcal-counter label {
   color: var(--proved-color-blue) !important;
   border-color: var(--proved-color-blue) !important;
+}
+
+.pc-primary-button,
+.pc-feed-registration-card,
+#openShareModalBtn,
+#resultArea #capBtn,
+#resultArea #waterBtn,
+.pc-analysis-block > .pc-secondary-button {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+  border-color: var(--proved-color-blue) !important;
+}
+
+.pc-feed-registration-card p,
+.pc-feed-registration-card .pc-feed-registration-link {
+  color: var(--proved-color-white) !important;
+}
+
+.pc-feed-registration-link {
+  border-color: var(--proved-color-white) !important;
 }
 
 input[type="range"] {
@@ -305,7 +414,9 @@ input[type="range"]::-moz-range-thumb {
   background: var(--proved-color-blue) !important;
 }
 
-/* Tailwind utility fallbacks used by dynamic calculator/login markup */
+/* Semantic status colors intentionally remain untouched: .is-ok, .is-check, inline errors, etc. */
+
+/* Tailwind utility fallbacks used by dynamic calculator/login markup. */
 .text-black,
 .text-gray-900,
 .text-slate-900,
@@ -317,9 +428,11 @@ input[type="range"]::-moz-range-thumb {
 .text-gray-700,
 .text-gray-600,
 .text-gray-500,
+.text-gray-400,
 .text-slate-700,
 .text-slate-600,
-.text-slate-500 {
+.text-slate-500,
+.text-slate-400 {
   color: var(--proved-color-text) !important;
 }
 
@@ -339,39 +452,65 @@ input[type="range"]::-moz-range-thumb {
   border-color: var(--proved-color-line) !important;
 }
 
-/* Share / PWA surfaces: remove decorative navy/yellow while preserving status colors. */
+/* ---------- Share / PWA ---------- */
 #shareModal {
   background: rgba(53, 104, 255, .38) !important;
 }
 
-#shareCard {
-  background: var(--proved-color-blue) !important;
+.share-modal-inner {
+  background: var(--proved-color-bg) !important;
+  border-color: var(--proved-color-line) !important;
+  box-shadow: none !important;
 }
 
-.sc-brand,
-.sc-kcal-label,
-.sc-cat-name,
-.sc-kcal-num,
-.sc-feed-type,
-.sc-feed-name,
-.sc-feed-g,
-.sc-cap-item-val {
+#shareCard,
+#shareCard .sc-header,
+#shareCard .sc-kcal-block,
+#shareCard .sc-feeds,
+#shareCard .sc-analysis,
+#shareCard .sc-footer,
+#shareCard .sc-energy-details {
+  background: var(--proved-color-blue) !important;
+  border-color: rgba(255, 255, 255, .34) !important;
+}
+
+#shareCard .sc-feed-row,
+#shareCard .sc-an-card,
+#shareCard .sc-cap-item,
+#shareCard .sc-energy-details > div {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, .34) !important;
+}
+
+#shareCard .sc-brand,
+#shareCard .sc-kcal-label,
+#shareCard .sc-cat-name,
+#shareCard .sc-kcal-num,
+#shareCard .sc-feed-name,
+#shareCard .sc-feed-g,
+#shareCard .sc-an-val,
+#shareCard .sc-cap-item-val,
+#shareCard .sc-water-ml,
+#shareCard .sc-energy-details strong {
   color: var(--proved-color-white) !important;
 }
 
-.sc-cat-sub,
-.sc-kcal-unit,
-.sc-ratio-txt,
-.sc-feeds-title,
-.sc-feed-kcal,
-.sc-analysis-title,
-.sc-an-label,
-.sc-cap-item-label,
-.sc-cap-item-unit,
-.sc-water-nums,
-.sc-footer-url,
-.sc-footer-date {
-  color: rgba(255, 255, 255, .62) !important;
+#shareCard .sc-cat-sub,
+#shareCard .sc-kcal-unit,
+#shareCard .sc-ratio-txt,
+#shareCard .sc-feeds-title,
+#shareCard .sc-feed-type,
+#shareCard .sc-feed-kcal,
+#shareCard .sc-analysis-title,
+#shareCard .sc-an-label,
+#shareCard .sc-cap-item-label,
+#shareCard .sc-cap-item-unit,
+#shareCard .sc-water-nums,
+#shareCard .sc-footer,
+#shareCard .sc-footer-url,
+#shareCard .sc-footer-date,
+#shareCard .sc-energy-details > div {
+  color: rgba(255, 255, 255, .68) !important;
 }
 
 .sc-dry-seg {
@@ -382,6 +521,11 @@ input[type="range"]::-moz-range-thumb {
 .sc-ratio-bar,
 .sc-water-gauge-track {
   background: rgba(255, 255, 255, .34) !important;
+}
+
+.share-close-btn {
+  background: transparent !important;
+  color: var(--proved-color-blue) !important;
 }
 
 .share-btn-save {
@@ -409,7 +553,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: none !important;
 }
 
-/* Feed registration */
+/* ---------- Feed registration ---------- */
 .registration-shell {
   background: transparent !important;
   color: var(--proved-color-text) !important;
@@ -447,11 +591,31 @@ input[type="range"]::-moz-range-thumb {
   color: var(--proved-color-text-soft) !important;
 }
 
-.registration-route--photo .registration-submit,
+.registration-context,
+.registration-complete,
 .registration-submit,
-.registration-complete {
+.registration-route--photo .registration-submit {
   background: var(--proved-color-blue) !important;
   border-color: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+.registration-context__intro,
+.registration-context legend,
+.registration-context .registration-option:not(.is-active),
+.registration-complete .registration-return,
+.registration-complete .registration-close-large {
+  color: var(--proved-color-white) !important;
+}
+
+.registration-context .registration-option.is-active {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
+}
+
+.registration-close-large:hover {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
 }
 
 .registration-file,
@@ -478,7 +642,9 @@ input[type="range"]::-moz-range-thumb {
   color: var(--proved-color-blue) !important;
 }
 
-/* Food list/detail */
+/* Registration red/green validation state colors are intentionally not overridden. */
+
+/* ---------- Food index / detail ---------- */
 .food-shell,
 .food-main,
 .food-list-view,
@@ -533,15 +699,14 @@ input[type="range"]::-moz-range-thumb {
   background: var(--proved-color-white) !important;
 }
 
-.food-metric {
-  color: var(--proved-color-blue) !important;
-  background: transparent !important;
-  border-top-color: var(--proved-color-blue) !important;
-}
-
+.food-metric,
+.food-metric--energy,
+.food-metric--moisture,
+.food-metric--protein,
 .food-metric--ratio {
   color: var(--proved-color-blue) !important;
   background: transparent !important;
+  border-top-color: var(--proved-color-blue) !important;
 }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
@@ -553,7 +718,8 @@ input[type="range"]::-moz-range-thumb {
 .food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td:nth-child(2),
-.food-guideline-note strong {
+.food-guideline-note strong,
+.food-guideline-status.is-pass {
   color: var(--proved-color-blue) !important;
 }
 
@@ -567,7 +733,9 @@ input[type="range"]::-moz-range-thumb {
   border-color: var(--proved-color-line) !important;
 }
 
-/* Calculation guide / archive */
+/* .food-guideline-status.is-fail remains semantic red. */
+
+/* ---------- Calculation guide / archive ---------- */
 .guide-shell,
 .guide-layout,
 .guide-hero,
@@ -588,8 +756,7 @@ input[type="range"]::-moz-range-thumb {
 .guide-section h3,
 .method-card strong,
 .formula,
-.reference-list a,
-.install-box button {
+.reference-list a {
   color: var(--proved-color-blue) !important;
 }
 
@@ -613,9 +780,9 @@ input[type="range"]::-moz-range-thumb {
 .install-box,
 .reference-list a,
 .guide-footer,
-table,
-th,
-td {
+.guide-shell table,
+.guide-shell th,
+.guide-shell td {
   border-color: var(--proved-color-line) !important;
 }
 
@@ -645,28 +812,29 @@ td {
   color: var(--proved-color-text) !important;
 }
 
-/* Keep white text only on intentionally blue functional surfaces. */
-.registration-context,
-.registration-complete,
-.registration-submit,
-.install-box button {
+#limits {
+  background: var(--proved-color-blue) !important;
   color: var(--proved-color-white) !important;
 }
 
-.registration-context *,
-.registration-complete * {
+#limits h2,
+#limits p,
+#limits ul {
   color: var(--proved-color-white) !important;
 }
+
+.install-box button {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+/* Warning / error / success / limit state colors remain semantic exceptions. */
 
 @media (max-width: 760px) {
   .food-shell,
   .registration-shell,
   .guide-shell,
   .pc-app-shell {
-    background: transparent !important;
-  }
-
-  .food-metric {
     background: transparent !important;
   }
 }
