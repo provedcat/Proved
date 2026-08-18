@@ -1,4 +1,19 @@
 (function () {
+  function ensureColorSystem() {
+    if (!document.querySelector('link[data-proved-colors]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/css/proved-colors.css?v=20260818-color-system-v1';
+      link.dataset.provedColors = 'true';
+      document.head.appendChild(link);
+    }
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', '#3568FF');
+  }
+
+  ensureColorSystem();
+
   const globalItems = [
     { label: '고양이', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
     { label: '강아지', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
