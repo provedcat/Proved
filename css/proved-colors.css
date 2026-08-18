@@ -1,0 +1,840 @@
+:root {
+  color-scheme: light;
+
+  /* Canonical Proved palette: existing colors only. */
+  --proved-color-blue: #3568FF;
+  --proved-color-bg: #F5F7FA;
+  --proved-color-text: #727B8B;
+  --proved-color-text-soft: #9AA1AD;
+  --proved-color-line: #DCE2EA;
+  --proved-color-white: #FFFFFF;
+
+  /* Common / calculator aliases */
+  --brand: var(--proved-color-blue) !important;
+  --brand-primary: var(--proved-color-blue) !important;
+  --brand-blue: var(--proved-color-blue) !important;
+  --brand-blue-pressed: var(--proved-color-blue) !important;
+  --primary: var(--proved-color-blue) !important;
+  --page-background: var(--proved-color-bg) !important;
+  --background: var(--proved-color-bg) !important;
+  --surface: var(--proved-color-white) !important;
+  --snack-surface: var(--proved-color-bg) !important;
+  --foreground: var(--proved-color-blue) !important;
+  --text-primary: var(--proved-color-blue) !important;
+  --text-secondary: var(--proved-color-text) !important;
+  --text-placeholder: var(--proved-color-text-soft) !important;
+  --border: var(--proved-color-line) !important;
+  --border-neutral: var(--proved-color-line) !important;
+  --border-default: var(--proved-color-line) !important;
+  --border-subtle: var(--proved-color-line) !important;
+
+  /* Dry/wet still need a visual split in sliders: Blue vs existing gray only. */
+  --dry: var(--proved-color-blue) !important;
+  --wet: var(--proved-color-text) !important;
+  --cat-dry: var(--proved-color-blue) !important;
+  --cat-dry-strong: var(--proved-color-blue) !important;
+  --cat-dry-ink: var(--proved-color-blue) !important;
+  --cat-dry-light: transparent !important;
+  --cat-dry-surface: transparent !important;
+  --cat-wet: var(--proved-color-text) !important;
+  --cat-wet-strong: var(--proved-color-blue) !important;
+  --cat-wet-ink: var(--proved-color-blue) !important;
+  --cat-wet-light: transparent !important;
+  --cat-wet-surface: transparent !important;
+  --dog-dry: var(--proved-color-blue) !important;
+  --dog-dry-strong: var(--proved-color-blue) !important;
+  --dog-dry-ink: var(--proved-color-blue) !important;
+  --dog-wet: var(--proved-color-text) !important;
+  --dog-wet-strong: var(--proved-color-blue) !important;
+  --dog-wet-ink: var(--proved-color-blue) !important;
+
+  /* Nutrition analysis accents are no longer separate brand colors. */
+  --analysis-green: var(--proved-color-blue) !important;
+  --analysis-water: var(--proved-color-blue) !important;
+  --calcium-ink: var(--proved-color-blue) !important;
+  --water-ink: var(--proved-color-blue) !important;
+
+  /* Result/modal palette: Blue + white, never navy. */
+  --result-background: var(--proved-color-blue) !important;
+  --result-surface: var(--proved-color-blue) !important;
+  --result-text: var(--proved-color-white) !important;
+  --result-text-secondary: rgba(255, 255, 255, .68) !important;
+  --result-divider: rgba(255, 255, 255, .34) !important;
+  --modal-background: var(--proved-color-blue) !important;
+  --modal-surface: var(--proved-color-white) !important;
+  --modal-text: var(--proved-color-blue) !important;
+  --modal-text-secondary: var(--proved-color-text) !important;
+  --modal-divider: var(--proved-color-line) !important;
+
+  /* Shared shell/header aliases */
+  --proved-blue: var(--proved-color-blue) !important;
+  --proved-blue-dark: var(--proved-color-blue) !important;
+  --proved-navy: var(--proved-color-blue) !important;
+  --proved-muted: var(--proved-color-text) !important;
+  --proved-line: var(--proved-color-line) !important;
+  --proved-header-blue: var(--proved-color-blue) !important;
+  --proved-header-text: var(--proved-color-text) !important;
+  --proved-header-line: var(--proved-color-line) !important;
+  --proved-header-surface: transparent !important;
+  --proved-section-surface: transparent !important;
+  --proved-page-surface: var(--proved-color-bg) !important;
+
+  /* Feed registration aliases */
+  --reg-blue: var(--proved-color-blue) !important;
+  --reg-blue-soft: var(--proved-color-bg) !important;
+  --reg-ink: var(--proved-color-blue) !important;
+  --reg-muted: var(--proved-color-text) !important;
+  --reg-line: var(--proved-color-line) !important;
+  --reg-paper: var(--proved-color-bg) !important;
+  --reg-wash: var(--proved-color-bg) !important;
+
+  /* Food index/detail aliases */
+  --food-blue: var(--proved-color-blue) !important;
+  --food-blue-dark: var(--proved-color-blue) !important;
+  --food-ink: var(--proved-color-blue) !important;
+  --food-muted: var(--proved-color-text) !important;
+  --food-soft: var(--proved-color-bg) !important;
+  --food-line: var(--proved-color-line) !important;
+  --food-line-blue: var(--proved-color-line) !important;
+  --food-paper: var(--proved-color-white) !important;
+  --food-energy: var(--proved-color-blue) !important;
+  --food-moisture: var(--proved-color-blue) !important;
+  --food-protein: var(--proved-color-blue) !important;
+  --food-ratio: var(--proved-color-blue) !important;
+  --food-energy-soft: transparent !important;
+  --food-moisture-soft: transparent !important;
+  --food-protein-soft: transparent !important;
+  --food-ratio-soft: transparent !important;
+  --food-dry: var(--proved-color-blue) !important;
+  --food-wet: var(--proved-color-text) !important;
+
+  /* Calculation guide legacy aliases */
+  --blue: var(--proved-color-blue) !important;
+  --blue-dark: var(--proved-color-text) !important;
+  --blue-soft: var(--proved-color-bg) !important;
+  --text: var(--proved-color-text) !important;
+  --muted: var(--proved-color-text) !important;
+  --line: var(--proved-color-line) !important;
+  --bg: var(--proved-color-bg) !important;
+  --card: transparent !important;
+  --cat: var(--proved-color-blue) !important;
+  --dog: var(--proved-color-text) !important;
+  --purple: var(--proved-color-blue) !important;
+  --water: var(--proved-color-text) !important;
+}
+
+html,
+body {
+  background: var(--proved-color-bg) !important;
+}
+
+body {
+  color: var(--proved-color-text);
+}
+
+body ::selection {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+/* ---------- Global header / subnav / footer ---------- */
+.proved-global-header,
+.proved-section-subnav {
+  border-color: var(--proved-color-line) !important;
+  background: transparent !important;
+}
+
+.proved-global-header__brand,
+.proved-global-header__item:hover,
+.proved-global-header__item:focus-visible,
+.proved-global-header__item:active,
+.proved-global-header__item.is-current,
+.proved-global-header__item[aria-current="page"],
+.proved-section-subnav__item:hover,
+.proved-section-subnav__item:focus-visible,
+.proved-section-subnav__item:active,
+.proved-section-subnav__item.is-current,
+.proved-section-subnav__item.is-active,
+.proved-section-subnav__item[aria-current="page"] {
+  color: var(--proved-color-blue) !important;
+}
+
+.proved-global-header__item,
+.proved-section-subnav__item {
+  color: var(--proved-color-text) !important;
+}
+
+.proved-global-header__item:disabled,
+.proved-global-header__item[aria-disabled="true"],
+.proved-section-subnav__item:disabled,
+.proved-section-subnav__item[aria-disabled="true"] {
+  color: var(--proved-color-text-soft) !important;
+}
+
+.proved-site-footer,
+.proved-site-footer__title,
+.proved-site-footer__copyright,
+.proved-site-footer__nav a,
+.proved-site-footer__nav a:visited,
+.proved-site-footer__nav a:hover,
+.proved-site-footer__nav a:focus-visible,
+.proved-site-footer__nav a:active {
+  color: var(--proved-color-blue) !important;
+}
+
+/* ---------- Home / login / pet selection ---------- */
+.proved-entry,
+.proved-entry__inner {
+  background: var(--proved-color-bg) !important;
+  color: var(--proved-color-text) !important;
+}
+
+.proved-entry__statement,
+.proved-entry__title,
+.proved-entry__number,
+.proved-entry-option,
+.proved-choice,
+.proved-login-button,
+.proved-dog-ready {
+  color: var(--proved-color-blue) !important;
+}
+
+.proved-entry__hint,
+.proved-login-guest,
+.proved-back,
+.proved-shell-current,
+.proved-entry-option--muted,
+.proved-choice--muted,
+.proved-choice[disabled] {
+  color: var(--proved-color-text) !important;
+}
+
+.proved-entry__action,
+.proved-entry__section + .proved-entry__section,
+.proved-choice-grid,
+.proved-login-list,
+.proved-login-button,
+.proved-entry-option,
+.proved-step,
+.proved-dog-ready,
+.proved-pet-row {
+  border-color: var(--proved-color-line) !important;
+}
+
+.proved-home-button:hover,
+.proved-home-button:active,
+.proved-pet-row,
+.proved-pet-row.is-active,
+.proved-load-pet-btn,
+.proved-pet-modal__panel {
+  background: var(--proved-color-white) !important;
+}
+
+.proved-pet-modal__backdrop {
+  background: rgba(53, 104, 255, .28) !important;
+}
+
+/* ---------- Calculator / weight trend ---------- */
+.pc-app-shell,
+.pc-page-container,
+#calculatorPage,
+#weightTrendPage,
+#wetFoodBetaPage {
+  background: transparent !important;
+}
+
+.pc-section-card,
+.pc-feed-panel,
+.pc-ratio-card,
+.pc-result-card,
+.pc-results-card,
+.pc-analysis-card,
+.pc-analysis-panel,
+.pc-weight-card,
+.pc-weight-panel,
+.pc-summary-card,
+.pc-result-summary,
+.pc-analysis-result,
+#capResult,
+#waterResult,
+#capResult > div,
+#waterResult > div {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-app-shell h1,
+.pc-app-shell h2,
+.pc-app-shell h3,
+.pc-app-shell h4,
+.pc-section-title,
+.pc-section-title span,
+.pc-feed-heading h3,
+.pc-result-value,
+.pc-result-number,
+.pc-result-total,
+.pc-selected-feed,
+.pc-kcal-value,
+.pc-weight-value,
+.pc-summary-value,
+#resultTitle,
+.pc-analysis-result h3,
+.pc-analysis-metrics strong,
+.pc-water-summary strong,
+.pc-analysis-ratio strong {
+  color: var(--proved-color-blue) !important;
+}
+
+.pc-section-heading p,
+.pc-help,
+.pc-optional,
+.pc-field-help,
+.pc-result-unit,
+.pc-result-label,
+.pc-weight-unit,
+.pc-weight-meta,
+.pc-summary-label,
+.pc-analysis-metrics span,
+.pc-water-summary span,
+.pc-analysis-row strong,
+.pc-analysis-note,
+.pc-water-status {
+  color: var(--proved-color-text) !important;
+}
+
+.pc-feed-panel--dry,
+.pc-feed-panel--wet,
+.pc-ratio-card {
+  background: transparent !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-feed-panel--dry .pc-feed-input-row input,
+.pc-feed-panel--wet .pc-feed-input-row input {
+  background: var(--proved-color-white) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-feed-panel--dry .pc-feed-heading h3,
+.pc-feed-panel--wet .pc-feed-heading h3,
+.pc-feed-panel--dry .pc-selected-feed,
+.pc-feed-panel--wet .pc-selected-feed,
+.proved-dog-mode .pc-feed-panel--dry .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--wet .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--dry .pc-selected-feed,
+.proved-dog-mode .pc-feed-panel--wet .pc-selected-feed,
+.pc-result-card--dry h3,
+.pc-result-card--dry strong,
+.pc-result-card--wet h3,
+.pc-result-card--wet strong,
+.proved-dog-mode .pc-result-card--dry h3,
+.proved-dog-mode .pc-result-card--dry strong,
+.proved-dog-mode .pc-result-card--wet h3,
+.proved-dog-mode .pc-result-card--wet strong {
+  color: var(--proved-color-blue) !important;
+}
+
+.pc-app-shell input:not([type="range"]),
+.pc-app-shell select,
+.pc-app-shell textarea,
+.pc-search-list,
+.pc-segmented-option,
+.pc-choice-chip,
+.pc-adult-weight-presets button,
+.pc-kcal-counter button,
+.pc-feed-picker-button,
+.pc-recent-feed-button,
+#addWetBtn {
+  background: var(--proved-color-white) !important;
+}
+
+.pc-app-shell input:not([type="range"]),
+.pc-app-shell select,
+.pc-app-shell textarea {
+  color: var(--proved-color-blue) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-app-shell input::placeholder,
+.pc-app-shell textarea::placeholder {
+  color: var(--proved-color-text-soft) !important;
+}
+
+.pc-segmented-option,
+.pc-choice-chip,
+.pc-adult-weight-presets button,
+.pc-feed-picker-button,
+.pc-recent-feed-button,
+.pc-compact-load-button,
+#addWetBtn {
+  color: var(--proved-color-text) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.pc-segmented-option.is-selected,
+.pc-segmented-option[aria-checked="true"],
+.pc-segmented-option:has(input:checked),
+.pc-choice-chip:has(input:checked),
+.pc-adult-weight-presets button[aria-pressed="true"],
+.pc-feed-picker-button:hover,
+.pc-compact-load-button:hover,
+.pc-kcal-counter button,
+.pc-kcal-counter label {
+  color: var(--proved-color-blue) !important;
+  border-color: var(--proved-color-blue) !important;
+}
+
+.pc-primary-button,
+.pc-feed-registration-card,
+#openShareModalBtn,
+#resultArea #capBtn,
+#resultArea #waterBtn,
+.pc-analysis-block > .pc-secondary-button {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+  border-color: var(--proved-color-blue) !important;
+}
+
+.pc-feed-registration-card p,
+.pc-feed-registration-card .pc-feed-registration-link {
+  color: var(--proved-color-white) !important;
+}
+
+.pc-feed-registration-link {
+  border-color: var(--proved-color-white) !important;
+}
+
+input[type="range"] {
+  background: var(--proved-color-line) !important;
+}
+
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb {
+  background: var(--proved-color-blue) !important;
+}
+
+/* Semantic status colors intentionally remain untouched: .is-ok, .is-check, inline errors, etc. */
+
+/* Tailwind utility fallbacks used by dynamic calculator/login markup. */
+.text-black,
+.text-gray-900,
+.text-slate-900,
+.text-gray-800,
+.text-slate-800 {
+  color: var(--proved-color-blue) !important;
+}
+
+.text-gray-700,
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+.text-slate-700,
+.text-slate-600,
+.text-slate-500,
+.text-slate-400 {
+  color: var(--proved-color-text) !important;
+}
+
+.bg-gray-50,
+.bg-gray-100,
+.bg-slate-50,
+.bg-slate-100 {
+  background: var(--proved-color-bg) !important;
+}
+
+.border-gray-100,
+.border-gray-200,
+.border-gray-300,
+.border-slate-100,
+.border-slate-200,
+.border-slate-300 {
+  border-color: var(--proved-color-line) !important;
+}
+
+/* ---------- Share / PWA ---------- */
+#shareModal {
+  background: rgba(53, 104, 255, .38) !important;
+}
+
+.share-modal-inner {
+  background: var(--proved-color-bg) !important;
+  border-color: var(--proved-color-line) !important;
+  box-shadow: none !important;
+}
+
+#shareCard,
+#shareCard .sc-header,
+#shareCard .sc-kcal-block,
+#shareCard .sc-feeds,
+#shareCard .sc-analysis,
+#shareCard .sc-footer,
+#shareCard .sc-energy-details {
+  background: var(--proved-color-blue) !important;
+  border-color: rgba(255, 255, 255, .34) !important;
+}
+
+#shareCard .sc-feed-row,
+#shareCard .sc-an-card,
+#shareCard .sc-cap-item,
+#shareCard .sc-energy-details > div {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, .34) !important;
+}
+
+#shareCard .sc-brand,
+#shareCard .sc-kcal-label,
+#shareCard .sc-cat-name,
+#shareCard .sc-kcal-num,
+#shareCard .sc-feed-name,
+#shareCard .sc-feed-g,
+#shareCard .sc-an-val,
+#shareCard .sc-cap-item-val,
+#shareCard .sc-water-ml,
+#shareCard .sc-energy-details strong {
+  color: var(--proved-color-white) !important;
+}
+
+#shareCard .sc-cat-sub,
+#shareCard .sc-kcal-unit,
+#shareCard .sc-ratio-txt,
+#shareCard .sc-feeds-title,
+#shareCard .sc-feed-type,
+#shareCard .sc-feed-kcal,
+#shareCard .sc-analysis-title,
+#shareCard .sc-an-label,
+#shareCard .sc-cap-item-label,
+#shareCard .sc-cap-item-unit,
+#shareCard .sc-water-nums,
+#shareCard .sc-footer,
+#shareCard .sc-footer-url,
+#shareCard .sc-footer-date,
+#shareCard .sc-energy-details > div {
+  color: rgba(255, 255, 255, .68) !important;
+}
+
+.sc-dry-seg {
+  background: var(--proved-color-white) !important;
+}
+
+.sc-wet-seg,
+.sc-ratio-bar,
+.sc-water-gauge-track {
+  background: rgba(255, 255, 255, .34) !important;
+}
+
+.share-close-btn {
+  background: transparent !important;
+  color: var(--proved-color-blue) !important;
+}
+
+.share-btn-save {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+.share-btn-kakao {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
+  border: 1px solid var(--proved-color-blue) !important;
+}
+
+.pwa-install-btn,
+.pwa-install-dismiss-btn {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
+  border-color: var(--proved-color-line) !important;
+  box-shadow: none !important;
+}
+
+.pwa-install-msg {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Feed registration ---------- */
+.registration-shell {
+  background: transparent !important;
+  color: var(--proved-color-text) !important;
+}
+
+.registration-hero h1,
+.registration-route__head h2,
+.registration-photo-guide__head h2,
+.photo-example-notes h3,
+.photo-example-card > p strong,
+.registration-file strong {
+  color: var(--proved-color-blue) !important;
+}
+
+.registration-hero__lead,
+.registration-route__head p,
+.registration-help,
+.registration-photo-guide__head p,
+.registration-file span,
+.photo-example-notes p,
+.photo-example-card > p {
+  color: var(--proved-color-text) !important;
+}
+
+.registration-route--photo {
+  background: transparent !important;
+}
+
+.registration-input {
+  color: var(--proved-color-blue) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.registration-input::placeholder {
+  color: var(--proved-color-text-soft) !important;
+}
+
+.registration-context,
+.registration-complete,
+.registration-submit,
+.registration-route--photo .registration-submit {
+  background: var(--proved-color-blue) !important;
+  border-color: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+.registration-context__intro,
+.registration-context legend,
+.registration-context .registration-option:not(.is-active),
+.registration-complete .registration-return,
+.registration-complete .registration-close-large {
+  color: var(--proved-color-white) !important;
+}
+
+.registration-context .registration-option.is-active {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
+}
+
+.registration-close-large:hover {
+  background: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
+}
+
+.registration-file,
+.label-example,
+.label-example--nutrition,
+.label-example--name {
+  background: var(--proved-color-white) !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.registration-file {
+  border-top-color: var(--proved-color-line) !important;
+  border-bottom-color: var(--proved-color-line) !important;
+}
+
+.label-example,
+.label-example * {
+  color: var(--proved-color-text) !important;
+}
+
+.label-example__brand,
+.label-example strong,
+.label-example b {
+  color: var(--proved-color-blue) !important;
+}
+
+/* Registration red/green validation state colors are intentionally not overridden. */
+
+/* ---------- Food index / detail ---------- */
+.food-shell,
+.food-main,
+.food-list-view,
+.food-detail-view {
+  background: transparent !important;
+}
+
+.food-list-hero h1,
+.food-result__brand,
+.food-result__title,
+.food-result-stat__value,
+.food-detail-brand,
+.food-detail-hero h1,
+.food-section-heading h2,
+.food-basic-item dd,
+.food-metric__value,
+.food-mineral-item__value,
+.food-source-row dd {
+  color: var(--proved-color-blue) !important;
+}
+
+.food-list-hero__lead,
+.food-result__secondary-title,
+.food-result__meta,
+.food-result-stat__label,
+.food-basic-item dt,
+.food-metric__unit,
+.food-mineral-item__sub,
+.food-table-note,
+.food-ingredients,
+.food-source-row dt,
+.food-guideline-note,
+.food-guideline-note p {
+  color: var(--proved-color-text) !important;
+}
+
+.food-results,
+.food-result,
+.food-detail-section,
+.food-basic-grid,
+.food-basic-item,
+.food-nutrition-table,
+.food-mineral-grid,
+.food-mineral-item,
+.food-source-list,
+.food-source-row {
+  background: transparent !important;
+  border-color: var(--proved-color-line) !important;
+}
+
+.food-result:hover {
+  background: var(--proved-color-white) !important;
+}
+
+.food-metric,
+.food-metric--energy,
+.food-metric--moisture,
+.food-metric--protein,
+.food-metric--ratio {
+  color: var(--proved-color-blue) !important;
+  background: transparent !important;
+  border-top-color: var(--proved-color-blue) !important;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
+.food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th,
+.food-guideline-note {
+  background: transparent !important;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
+.food-guideline-ratio-row th,
+.food-guideline-ratio-row td:nth-child(2),
+.food-guideline-note strong,
+.food-guideline-status.is-pass {
+  color: var(--proved-color-blue) !important;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th,
+.food-guideline-status.is-na {
+  color: var(--proved-color-text) !important;
+}
+
+.food-guideline-ratio-row th,
+.food-guideline-ratio-row td {
+  border-color: var(--proved-color-line) !important;
+}
+
+/* .food-guideline-status.is-fail remains semantic red. */
+
+/* ---------- Calculation guide / archive ---------- */
+.guide-shell,
+.guide-layout,
+.guide-hero,
+.guide-toc,
+.guide-section,
+.guide-content,
+.method-card,
+.formula,
+.install-box,
+.reference-list a {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.guide-hero h1,
+.guide-toc h2,
+.guide-section h2,
+.guide-section h3,
+.method-card strong,
+.formula,
+.reference-list a {
+  color: var(--proved-color-blue) !important;
+}
+
+.hero-copy,
+.guide-meta,
+.guide-toc li,
+.guide-toc a,
+.guide-section p,
+.guide-section ul,
+.method-card span,
+.reference-list small,
+.guide-footer {
+  color: var(--proved-color-text) !important;
+}
+
+.guide-content,
+.guide-section,
+.guide-toc li,
+.method-card,
+.formula,
+.install-box,
+.reference-list a,
+.guide-footer,
+.guide-shell table,
+.guide-shell th,
+.guide-shell td {
+  border-color: var(--proved-color-line) !important;
+}
+
+.guide-shell th {
+  background: transparent !important;
+  color: var(--proved-color-blue) !important;
+}
+
+.guide-shell td {
+  color: var(--proved-color-text) !important;
+}
+
+.method-card.cat,
+.method-card.cap {
+  border-top-color: var(--proved-color-blue) !important;
+}
+
+.method-card.dog,
+.method-card.water {
+  border-top-color: var(--proved-color-text) !important;
+}
+
+.note:not(.warning):not(.limit) {
+  background: transparent !important;
+  border-color: var(--proved-color-line) !important;
+  border-left-color: var(--proved-color-blue) !important;
+  color: var(--proved-color-text) !important;
+}
+
+#limits {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+#limits h2,
+#limits p,
+#limits ul {
+  color: var(--proved-color-white) !important;
+}
+
+.install-box button {
+  background: var(--proved-color-blue) !important;
+  color: var(--proved-color-white) !important;
+}
+
+/* Warning / error / success / limit state colors remain semantic exceptions. */
+
+@media (max-width: 760px) {
+  .food-shell,
+  .registration-shell,
+  .guide-shell,
+  .pc-app-shell {
+    background: transparent !important;
+  }
+}

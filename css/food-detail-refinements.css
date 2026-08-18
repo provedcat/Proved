@@ -1,0 +1,139 @@
+.food-detail-hero h1 {
+  color: var(--food-blue) !important;
+}
+
+.food-metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.food-metric--protein {
+  display: none !important;
+}
+
+.food-metric--ratio {
+  color: var(--food-blue) !important;
+  background: transparent !important;
+}
+
+.food-metric--ratio .food-metric__value {
+  letter-spacing: -.045em;
+}
+
+.food-guideline-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-top: 1px solid var(--food-line);
+  -webkit-overflow-scrolling: touch;
+}
+
+.food-guideline-table-scroll .food-nutrition-table {
+  min-width: 900px;
+  border-top: 0;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead tr:first-child th {
+  background: transparent;
+  color: var(--food-blue);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th {
+  background: transparent;
+  color: var(--food-muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.food-guideline-table-scroll .food-nutrition-table th[rowspan="2"] {
+  vertical-align: middle;
+  text-align: left !important;
+}
+
+.food-guideline-cell {
+  min-width: 82px;
+  text-align: center !important;
+}
+
+.food-guideline-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 24px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.food-guideline-status.is-pass {
+  color: var(--food-blue);
+}
+
+.food-guideline-status.is-fail {
+  color: #D04A4A;
+}
+
+.food-guideline-status.is-na {
+  color: var(--food-muted);
+}
+
+.food-guideline-ratio-row th,
+.food-guideline-ratio-row td {
+  border-top: 1px solid var(--food-line);
+}
+
+.food-guideline-ratio-row th,
+.food-guideline-ratio-row td:nth-child(2) {
+  color: var(--food-blue);
+  font-weight: 800;
+}
+
+.food-guideline-note {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-left: 2px solid var(--food-blue);
+  background: transparent;
+  color: var(--food-muted);
+}
+
+.food-guideline-note strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--food-blue);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.food-guideline-note p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.65;
+}
+
+.food-guideline-note p + p {
+  margin-top: 5px;
+}
+
+@media (max-width: 760px) {
+  .food-metric-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .food-metric {
+    min-height: 148px;
+  }
+
+  .food-guideline-table-scroll {
+    margin-right: -20px;
+    padding-right: 20px;
+  }
+
+  .food-guideline-note {
+    padding: 16px;
+  }
+}
