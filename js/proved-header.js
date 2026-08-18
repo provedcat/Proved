@@ -3,7 +3,7 @@
     if (!document.querySelector('link[data-proved-colors]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = '/css/proved-colors.css?v=20260818-color-system-v1';
+      link.href = '/css/proved-colors.css?v=20260818-color-system-v2';
       link.dataset.provedColors = 'true';
       document.head.appendChild(link);
     }
