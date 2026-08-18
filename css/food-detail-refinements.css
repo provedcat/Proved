@@ -1,8 +1,3 @@
-:root {
-  --food-ratio-violet: #5D537F;
-  --food-ratio-violet-soft: #F3F1FA;
-}
-
 .food-detail-hero h1 {
   color: var(--food-blue) !important;
 }
@@ -16,8 +11,8 @@
 }
 
 .food-metric--ratio {
-  color: var(--food-ratio-violet) !important;
-  background: var(--food-ratio-violet-soft) !important;
+  color: var(--food-blue) !important;
+  background: transparent !important;
 }
 
 .food-metric--ratio .food-metric__value {
@@ -37,7 +32,7 @@
 }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:first-child th {
-  background: #f8faff;
+  background: transparent;
   color: var(--food-blue);
   font-size: 11px;
   font-weight: 850;
@@ -46,8 +41,8 @@
 }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th {
-  background: #fbfcff;
-  color: #7f8796;
+  background: transparent;
+  color: var(--food-muted);
   font-size: 10px;
   font-weight: 750;
   text-align: center;
@@ -83,17 +78,17 @@
 }
 
 .food-guideline-status.is-na {
-  color: #B1B7C0;
+  color: var(--food-muted);
 }
 
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td {
-  border-top: 1px solid rgba(93, 83, 127, .18);
+  border-top: 1px solid var(--food-line);
 }
 
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td:nth-child(2) {
-  color: var(--food-ratio-violet);
+  color: var(--food-blue);
   font-weight: 800;
 }
 
@@ -101,14 +96,14 @@
   margin-top: 22px;
   padding: 18px 20px;
   border-left: 2px solid var(--food-blue);
-  background: #f8faff;
+  background: transparent;
   color: var(--food-muted);
 }
 
 .food-guideline-note strong {
   display: block;
   margin-bottom: 8px;
-  color: var(--food-ink);
+  color: var(--food-blue);
   font-size: 12px;
   font-weight: 850;
 }
