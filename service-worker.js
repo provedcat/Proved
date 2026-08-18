@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260818-color-system-v1';
+const CACHE_NAME = 'proved-pwa-20260818-color-system-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
