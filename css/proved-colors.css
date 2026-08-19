@@ -28,31 +28,42 @@
   --border-default: var(--proved-color-line) !important;
   --border-subtle: var(--proved-color-line) !important;
 
-  /* Dry/wet still need a visual split in sliders: Blue vs existing gray only. */
-  --dry: var(--proved-color-blue) !important;
-  --wet: var(--proved-color-text) !important;
-  --cat-dry: var(--proved-color-blue) !important;
-  --cat-dry-strong: var(--proved-color-blue) !important;
-  --cat-dry-ink: var(--proved-color-blue) !important;
+  /* Feed semantic: restored from the existing calculator palette. */
+  --proved-cat-dry: #B85A00;
+  --proved-cat-wet: #1F5CC4;
+  --proved-dog-dry: #9A5B34;
+  --proved-dog-wet: #388255;
+  --dry: var(--proved-cat-dry) !important;
+  --wet: var(--proved-cat-wet) !important;
+  --cat-dry: var(--proved-cat-dry) !important;
+  --cat-dry-strong: var(--proved-cat-dry) !important;
+  --cat-dry-ink: var(--proved-cat-dry) !important;
   --cat-dry-light: transparent !important;
   --cat-dry-surface: transparent !important;
-  --cat-wet: var(--proved-color-text) !important;
-  --cat-wet-strong: var(--proved-color-blue) !important;
-  --cat-wet-ink: var(--proved-color-blue) !important;
+  --cat-wet: var(--proved-cat-wet) !important;
+  --cat-wet-strong: var(--proved-cat-wet) !important;
+  --cat-wet-ink: var(--proved-cat-wet) !important;
   --cat-wet-light: transparent !important;
   --cat-wet-surface: transparent !important;
-  --dog-dry: var(--proved-color-blue) !important;
-  --dog-dry-strong: var(--proved-color-blue) !important;
-  --dog-dry-ink: var(--proved-color-blue) !important;
-  --dog-wet: var(--proved-color-text) !important;
-  --dog-wet-strong: var(--proved-color-blue) !important;
-  --dog-wet-ink: var(--proved-color-blue) !important;
+  --dog-dry: var(--proved-dog-dry) !important;
+  --dog-dry-strong: var(--proved-dog-dry) !important;
+  --dog-dry-ink: var(--proved-dog-dry) !important;
+  --dog-wet: var(--proved-dog-wet) !important;
+  --dog-wet-strong: var(--proved-dog-wet) !important;
+  --dog-wet-ink: var(--proved-dog-wet) !important;
 
-  /* Nutrition analysis accents are no longer separate brand colors. */
+  /* Nutrition semantic */
+  --proved-water: #3E7C7B;
+  --proved-calcium-phosphorus: #5D537F;
   --analysis-green: var(--proved-color-blue) !important;
-  --analysis-water: var(--proved-color-blue) !important;
-  --calcium-ink: var(--proved-color-blue) !important;
-  --water-ink: var(--proved-color-blue) !important;
+  --analysis-water: var(--proved-water) !important;
+  --calcium-ink: var(--proved-calcium-phosphorus) !important;
+  --water-ink: var(--proved-water) !important;
+
+  /* Status */
+  --proved-status-pass: var(--proved-color-blue);
+  --proved-status-warning: #A35D12;
+  --proved-status-neutral: var(--proved-color-text);
 
   /* Result/modal palette: Blue + white, never navy. */
   --result-background: var(--proved-color-blue) !important;
@@ -98,9 +109,9 @@
   --food-line-blue: var(--proved-color-line) !important;
   --food-paper: var(--proved-color-white) !important;
   --food-energy: var(--proved-color-blue) !important;
-  --food-moisture: var(--proved-color-blue) !important;
+  --food-moisture: var(--proved-water) !important;
   --food-protein: var(--proved-color-blue) !important;
-  --food-ratio: var(--proved-color-blue) !important;
+  --food-ratio: var(--proved-calcium-phosphorus) !important;
   --food-energy-soft: transparent !important;
   --food-moisture-soft: transparent !important;
   --food-protein-soft: transparent !important;
@@ -119,8 +130,8 @@
   --card: transparent !important;
   --cat: var(--proved-color-blue) !important;
   --dog: var(--proved-color-text) !important;
-  --purple: var(--proved-color-blue) !important;
-  --water: var(--proved-color-text) !important;
+  --purple: var(--proved-calcium-phosphorus) !important;
+  --water: var(--proved-water) !important;
 }
 
 html,
@@ -317,22 +328,31 @@ body ::selection {
 }
 
 .pc-feed-panel--dry .pc-feed-heading h3,
-.pc-feed-panel--wet .pc-feed-heading h3,
 .pc-feed-panel--dry .pc-selected-feed,
-.pc-feed-panel--wet .pc-selected-feed,
-.proved-dog-mode .pc-feed-panel--dry .pc-feed-heading h3,
-.proved-dog-mode .pc-feed-panel--wet .pc-feed-heading h3,
-.proved-dog-mode .pc-feed-panel--dry .pc-selected-feed,
-.proved-dog-mode .pc-feed-panel--wet .pc-selected-feed,
 .pc-result-card--dry h3,
-.pc-result-card--dry strong,
+.pc-result-card--dry strong {
+  color: var(--proved-cat-dry) !important;
+}
+
+.pc-feed-panel--wet .pc-feed-heading h3,
+.pc-feed-panel--wet .pc-selected-feed,
 .pc-result-card--wet h3,
-.pc-result-card--wet strong,
+.pc-result-card--wet strong {
+  color: var(--proved-cat-wet) !important;
+}
+
+.proved-dog-mode .pc-feed-panel--dry .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--dry .pc-selected-feed,
 .proved-dog-mode .pc-result-card--dry h3,
-.proved-dog-mode .pc-result-card--dry strong,
+.proved-dog-mode .pc-result-card--dry strong {
+  color: var(--proved-dog-dry) !important;
+}
+
+.proved-dog-mode .pc-feed-panel--wet .pc-feed-heading h3,
+.proved-dog-mode .pc-feed-panel--wet .pc-selected-feed,
 .proved-dog-mode .pc-result-card--wet h3,
 .proved-dog-mode .pc-result-card--wet strong {
-  color: var(--proved-color-blue) !important;
+  color: var(--proved-dog-wet) !important;
 }
 
 .pc-app-shell input:not([type="range"]),
@@ -389,11 +409,34 @@ body ::selection {
 .pc-feed-registration-card,
 #openShareModalBtn,
 #resultArea #capBtn,
-#resultArea #waterBtn,
 .pc-analysis-block > .pc-secondary-button {
   background: var(--proved-color-blue) !important;
   color: var(--proved-color-white) !important;
   border-color: var(--proved-color-blue) !important;
+}
+
+#resultArea #capBtn {
+  background: var(--proved-calcium-phosphorus) !important;
+  border-color: var(--proved-calcium-phosphorus) !important;
+}
+
+#resultArea #waterBtn {
+  background: var(--proved-water) !important;
+  border-color: var(--proved-water) !important;
+}
+
+.pc-analysis-result--cap h3,
+.pc-analysis-result--cap .pc-analysis-icon,
+.pc-analysis-result--cap .pc-analysis-metrics strong,
+.pc-analysis-result--cap .pc-analysis-ratio strong {
+  color: var(--proved-calcium-phosphorus) !important;
+}
+
+.pc-analysis-result--water h3,
+.pc-analysis-result--water .pc-analysis-icon,
+.pc-analysis-result--water .pc-water-summary strong,
+.pc-analysis-result--water .pc-water-status {
+  color: var(--proved-water) !important;
 }
 
 .pc-feed-registration-card p,
@@ -412,6 +455,27 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb,
 input[type="range"]::-moz-range-thumb {
   background: var(--proved-color-blue) !important;
+}
+
+#dryPct { color: var(--proved-cat-dry) !important; }
+#wetPct { color: var(--proved-cat-wet) !important; }
+.proved-dog-mode #dryPct { color: var(--proved-dog-dry) !important; }
+.proved-dog-mode #wetPct { color: var(--proved-dog-wet) !important; }
+
+#ratioSlider {
+  background: linear-gradient(90deg,
+    var(--proved-cat-dry) 0,
+    var(--proved-cat-dry) var(--ratio-split),
+    var(--proved-cat-wet) var(--ratio-split),
+    var(--proved-cat-wet) 100%) !important;
+}
+
+.proved-dog-mode #ratioSlider {
+  background: linear-gradient(90deg,
+    var(--proved-dog-dry) 0,
+    var(--proved-dog-dry) var(--ratio-split),
+    var(--proved-dog-wet) var(--ratio-split),
+    var(--proved-dog-wet) 100%) !important;
 }
 
 /* Semantic status colors intentionally remain untouched: .is-ok, .is-check, inline errors, etc. */
@@ -700,14 +764,51 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .food-metric,
-.food-metric--energy,
-.food-metric--moisture,
-.food-metric--protein,
-.food-metric--ratio {
+.food-metric--protein {
   color: var(--proved-color-blue) !important;
   background: transparent !important;
   border-top-color: var(--proved-color-blue) !important;
 }
+
+.food-metric--energy.is-cat-dry { --food-metric-semantic: var(--proved-cat-dry); }
+.food-metric--energy.is-cat-wet { --food-metric-semantic: var(--proved-cat-wet); }
+.food-metric--energy.is-dog-dry { --food-metric-semantic: var(--proved-dog-dry); }
+.food-metric--energy.is-dog-wet { --food-metric-semantic: var(--proved-dog-wet); }
+
+.food-result-stat--energy.is-cat-dry { --food-metric-semantic: var(--proved-cat-dry); }
+.food-result-stat--energy.is-cat-wet { --food-metric-semantic: var(--proved-cat-wet); }
+.food-result-stat--energy.is-dog-dry { --food-metric-semantic: var(--proved-dog-dry); }
+.food-result-stat--energy.is-dog-wet { --food-metric-semantic: var(--proved-dog-wet); }
+
+.food-metric--energy,
+.food-result-stat--energy {
+  color: var(--food-metric-semantic, var(--proved-color-blue)) !important;
+}
+
+.food-result-stat--energy .food-result-stat__value,
+.food-metric--energy .food-metric__value {
+  color: var(--food-metric-semantic, var(--proved-color-blue)) !important;
+}
+
+.food-metric--energy {
+  background: transparent !important;
+  border-top-color: var(--food-metric-semantic, var(--proved-color-blue)) !important;
+}
+
+.food-metric--moisture {
+  color: var(--proved-water) !important;
+  background: transparent !important;
+  border-top-color: var(--proved-water) !important;
+}
+
+.food-metric--ratio {
+  color: var(--proved-calcium-phosphorus) !important;
+  background: transparent !important;
+  border-top-color: var(--proved-calcium-phosphorus) !important;
+}
+
+.food-metric--moisture .food-metric__value { color: var(--proved-water) !important; }
+.food-metric--ratio .food-metric__value { color: var(--proved-calcium-phosphorus) !important; }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
 .food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th,
@@ -719,21 +820,17 @@ input[type="range"]::-moz-range-thumb {
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td:nth-child(2),
 .food-guideline-note strong,
-.food-guideline-status.is-pass {
-  color: var(--proved-color-blue) !important;
-}
+.food-guideline-status.is-pass { color: var(--proved-status-pass) !important; }
+.food-guideline-status.is-fail { color: var(--proved-status-warning) !important; }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th,
-.food-guideline-status.is-na {
-  color: var(--proved-color-text) !important;
-}
+.food-guideline-status.is-na { color: var(--proved-status-neutral) !important; }
 
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td {
   border-color: var(--proved-color-line) !important;
 }
 
-/* .food-guideline-status.is-fail remains semantic red. */
 
 /* ---------- Calculation guide / archive ---------- */
 .guide-shell,
