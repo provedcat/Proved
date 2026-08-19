@@ -818,9 +818,10 @@ input[type="range"]::-moz-range-thumb {
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:first-child th,
 .food-guideline-ratio-row th,
-.food-guideline-ratio-row td:nth-child(2),
 .food-guideline-note strong,
 .food-guideline-status.is-pass { color: var(--proved-status-pass) !important; }
+.food-guideline-ratio-row td:nth-child(2),
+.food-mobile-nutrient__ratio { color: var(--proved-calcium-phosphorus) !important; }
 .food-guideline-status.is-fail { color: var(--proved-status-warning) !important; }
 
 .food-guideline-table-scroll .food-nutrition-table thead tr:nth-child(2) th,

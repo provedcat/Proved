@@ -403,7 +403,7 @@ button { cursor: pointer; }
 
 .food-nutrition-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .food-nutrition-table th,
-.food-nutrition-table td { padding: 17px 10px; border-bottom: 1px solid var(--food-line); text-align: right; font-variant-numeric: tabular-nums; }
+.food-nutrition-table td { padding: 17px 10px; border-bottom: 1px solid var(--food-line); text-align: center; font-variant-numeric: tabular-nums; }
 .food-nutrition-table thead th { color: #959ca7; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
 .food-nutrition-table thead th:first-child,
 .food-nutrition-table tbody th { text-align: left; }

@@ -196,8 +196,66 @@
     return { text: '충족', className: 'is-pass', title: '표시된 주요 성분 기준 범위 내' };
   }
 
+  function statusMarkup(status) {
+    return `<span class="food-guideline-status ${status.className}" title="${status.title}">${status.text}</span>`;
+  }
+
   function statusCell(status) {
-    return `<td class="food-guideline-cell"><span class="food-guideline-status ${status.className}" title="${status.title}">${status.text}</span></td>`;
+    return `<td class="food-guideline-cell">${statusMarkup(status)}</td>`;
+  }
+
+  function getGuidelineStatuses(label, value, rules, eligible) {
+    return {
+      aafco: {
+        growth: evaluate(value, rules.aafco.growth[label], eligible),
+        adult: evaluate(value, rules.aafco.adult[label], eligible)
+      },
+      fediaf: {
+        growth: evaluate(value, rules.fediaf.growth[label], eligible),
+        adult: evaluate(value, rules.fediaf.adult[label], eligible)
+      }
+    };
+  }
+
+  function renderMobileGuidelineGroup(name, statuses, life, collapseMatching) {
+    const isMatching = statuses.growth.text === statuses.adult.text;
+    const states = collapseMatching && isMatching
+      ? `<div class="food-mobile-guideline-group__summary">${statusMarkup(statuses.growth)}</div>`
+      : `<div class="food-mobile-guideline-group__states">
+          <div><span class="food-mobile-guideline-state__life">${life.growth}</span>${statusMarkup(statuses.growth)}</div>
+          <div><span class="food-mobile-guideline-state__life">${life.adult}</span>${statusMarkup(statuses.adult)}</div>
+        </div>`;
+
+    return `<section class="food-mobile-guideline-group" aria-label="${name} 기준">
+      <h4 class="food-mobile-guideline-group__title">${name}</h4>
+      ${states}
+    </section>`;
+  }
+
+  function renderMobileNutrition(rows, life) {
+    const mobile = document.createElement('div');
+    mobile.className = 'food-nutrition-mobile';
+    mobile.setAttribute('aria-label', '모바일 영양정보');
+    mobile.innerHTML = rows.map(row => {
+      const values = row.isRatio
+        ? `<span class="food-mobile-nutrient__ratio">${row.registeredValue}</span>`
+        : `<span class="food-mobile-nutrient__registered">${row.registeredValue}</span><span class="food-mobile-nutrient__dm">DM ${row.dmValue}</span>`;
+      const guidelineGroups = row.guidelines
+        ? `<div class="food-mobile-guideline-groups">
+            ${renderMobileGuidelineGroup('AAFCO', row.guidelines.aafco, life, row.isRatio)}
+            ${renderMobileGuidelineGroup('FEDIAF', row.guidelines.fediaf, life, row.isRatio)}
+          </div>`
+        : '';
+
+      return `<article class="food-mobile-nutrient${row.isRatio ? ' food-mobile-nutrient--ratio' : ''}">
+        <div class="food-mobile-nutrient__values">
+          <h3>${row.label}</h3>
+          ${values}
+        </div>
+        ${guidelineGroups}
+      </article>`;
+    }).join('');
+    return mobile;
   }
 
   function addGuidelineColumns(rawRatio) {
@@ -227,40 +285,62 @@
       </tr>`;
 
     const supported = new Set(['조단백', '조지방', '칼슘', '인']);
-    body.querySelectorAll('tr').forEach(row => {
+    const nutritionRows = Array.from(body.querySelectorAll('tr')).map(row => {
       const label = row.querySelector('th')?.textContent.trim() || '';
+      const cells = row.querySelectorAll('th, td');
       const value = supported.has(label) ? getDmValue(row) : null;
-      row.insertAdjacentHTML('beforeend', [
-        evaluate(value, rules.aafco.growth[label], eligible),
-        evaluate(value, rules.aafco.adult[label], eligible),
-        evaluate(value, rules.fediaf.growth[label], eligible),
-        evaluate(value, rules.fediaf.adult[label], eligible)
-      ].map(statusCell).join(''));
+      return {
+        element: row,
+        label,
+        registeredValue: cells[1]?.textContent.trim() || '—',
+        dmValue: cells[2]?.textContent.trim() || '—',
+        guidelines: supported.has(label) ? getGuidelineStatuses(label, value, rules, eligible) : null,
+        isRatio: false
+      };
+    });
+
+    nutritionRows.forEach(row => {
+      const statuses = row.guidelines
+        ? [row.guidelines.aafco.growth, row.guidelines.aafco.adult, row.guidelines.fediaf.growth, row.guidelines.fediaf.adult]
+        : [evaluate(null, null, eligible), evaluate(null, null, eligible), evaluate(null, null, eligible), evaluate(null, null, eligible)];
+      row.element.insertAdjacentHTML('beforeend', statuses.map(statusCell).join(''));
     });
 
     if (rawRatio && rawRatio > 0) {
       const label = '칼슘:인';
       const row = document.createElement('tr');
       row.className = 'food-guideline-ratio-row';
+      const guidelines = getGuidelineStatuses(label, rawRatio, rules, eligible);
       row.innerHTML = `
         <th scope="row">${label}</th>
         <td>${normalizeRatio(rawRatio)}</td>
         <td>—</td>
         ${[
-          evaluate(rawRatio, rules.aafco.growth[label], eligible),
-          evaluate(rawRatio, rules.aafco.adult[label], eligible),
-          evaluate(rawRatio, rules.fediaf.growth[label], eligible),
-          evaluate(rawRatio, rules.fediaf.adult[label], eligible)
+          guidelines.aafco.growth,
+          guidelines.aafco.adult,
+          guidelines.fediaf.growth,
+          guidelines.fediaf.adult
         ].map(statusCell).join('')}`;
       body.appendChild(row);
+      nutritionRows.push({
+        element: row,
+        label,
+        registeredValue: normalizeRatio(rawRatio),
+        dmValue: '—',
+        guidelines,
+        isRatio: true
+      });
     }
 
     const wrapper = document.createElement('div');
-    wrapper.className = 'food-guideline-table-scroll';
+    wrapper.className = 'food-guideline-table-scroll food-nutrition-desktop';
     table.parentNode.insertBefore(wrapper, table);
     wrapper.appendChild(table);
 
-    const originalNote = wrapper.nextElementSibling;
+    const mobile = renderMobileNutrition(nutritionRows, life);
+    wrapper.insertAdjacentElement('afterend', mobile);
+
+    const originalNote = mobile.nextElementSibling;
     const note = document.createElement('div');
     note.className = 'food-guideline-note';
     note.innerHTML = `
@@ -270,7 +350,7 @@
     if (originalNote?.classList.contains('food-table-note')) {
       originalNote.insertAdjacentElement('afterend', note);
     } else {
-      wrapper.insertAdjacentElement('afterend', note);
+      mobile.insertAdjacentElement('afterend', note);
     }
 
     table.dataset.guidelinesEnhanced = 'true';
