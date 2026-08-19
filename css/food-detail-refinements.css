@@ -50,7 +50,12 @@
 
 .food-guideline-table-scroll .food-nutrition-table th[rowspan="2"] {
   vertical-align: middle;
-  text-align: left !important;
+  text-align: center;
+}
+
+.food-guideline-table-scroll .food-nutrition-table thead th:first-child,
+.food-guideline-table-scroll .food-nutrition-table tbody th {
+  text-align: left;
 }
 
 .food-guideline-cell {
@@ -88,8 +93,19 @@
 
 .food-guideline-ratio-row th,
 .food-guideline-ratio-row td:nth-child(2) {
-  color: var(--food-blue);
   font-weight: 800;
+}
+
+.food-guideline-ratio-row th {
+  color: var(--food-blue);
+}
+
+.food-guideline-ratio-row td:nth-child(2) {
+  color: var(--proved-calcium-phosphorus);
+}
+
+.food-nutrition-mobile {
+  display: none;
 }
 
 .food-guideline-note {
@@ -129,11 +145,129 @@
   }
 
   .food-guideline-table-scroll {
-    margin-right: -20px;
-    padding-right: 20px;
+    display: none;
+  }
+
+  .food-nutrition-mobile {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border-top: 1px solid var(--food-line);
+  }
+
+  .food-mobile-nutrient {
+    min-width: 0;
+    padding: 22px 0 26px;
+    border-bottom: 1px solid var(--food-line);
+  }
+
+  .food-mobile-nutrient__values {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .food-mobile-nutrient__values h3 {
+    min-width: 0;
+    margin: 0;
+    color: var(--food-blue);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .food-mobile-nutrient__registered,
+  .food-mobile-nutrient__dm,
+  .food-mobile-nutrient__ratio {
+    color: var(--food-muted);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .food-mobile-nutrient__ratio {
+    grid-column: 2 / -1;
+    color: var(--proved-calcium-phosphorus);
+    font-weight: 850;
+  }
+
+  .food-mobile-guideline-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    min-width: 0;
+    margin-top: 20px;
+  }
+
+  .food-mobile-guideline-group {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .food-mobile-guideline-group + .food-mobile-guideline-group {
+    border-left: 1px solid var(--food-line);
+  }
+
+  .food-mobile-guideline-group__title {
+    margin: 0 0 10px;
+    color: var(--food-blue);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .02em;
+  }
+
+  .food-mobile-guideline-group__states {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .food-mobile-guideline-group__states > div {
+    min-width: 0;
+  }
+
+  .food-mobile-guideline-state__life {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--food-muted);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .food-mobile-guideline-group__summary {
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .food-mobile-guideline-group .food-guideline-status {
+    min-width: 0;
+    min-height: 20px;
+    max-width: 100%;
+    font-size: 12px;
   }
 
   .food-guideline-note {
-    padding: 16px;
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--food-line);
+  }
+}
+
+@media (max-width: 380px) {
+  .food-mobile-nutrient__values {
+    gap: 8px;
+  }
+
+  .food-mobile-guideline-groups {
+    gap: 12px;
   }
 }
