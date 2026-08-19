@@ -72,6 +72,11 @@
     return type === 'wet' ? '습식사료' : type === 'dry' ? '건사료' : '형태 확인중';
   }
 
+  function getFeedSemanticClass(feed) {
+    const type = feed?.type === 'wet' ? 'wet' : feed?.type === 'dry' ? 'dry' : '';
+    return type ? `is-${state.species}-${type}` : '';
+  }
+
   function getRoleLabel(role) {
     return role || '분류 확인중';
   }
@@ -352,6 +357,7 @@
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
     const meta = [getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
+    const semanticClass = getFeedSemanticClass(feed);
     return `
       <button class="food-result" type="button" data-feed-id="${escapeHtml(feed.id)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
         <span class="food-result__brand">${escapeHtml(brand.name)}</span>
@@ -361,7 +367,7 @@
           <span class="food-result__meta">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span>
         </span>
         <span class="food-result__stats">
-          <span class="food-result-stat"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span>
+          <span class="food-result-stat food-result-stat--energy ${semanticClass}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span>
           <span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span>
           <svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
         </span>
@@ -417,6 +423,7 @@
   function renderDetail(feed) {
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
+    const semanticClass = getFeedSemanticClass(feed);
     const basic = [
       ['대상', getSpeciesLabel()],
       ['형태', getTypeLabel(feed.type)],
@@ -464,7 +471,7 @@
         <section class="food-detail-section" aria-labelledby="foodMetricsHeading">
           ${sectionHeading('02', '핵심 수치', 'foodMetricsHeading')}
           <div class="food-metric-grid">
-            ${metricCard('energy', '열량', formatNumber(feed.final_me, 1), 'kcal/kg', energyIcon())}
+            ${metricCard('energy', '열량', formatNumber(feed.final_me, 1), 'kcal/kg', energyIcon(), semanticClass)}
             ${metricCard('moisture', '수분', formatNumber(feed.수분, 2), '%', moistureIcon())}
             ${metricCard('protein', '단백질 · DM', formatNumber(feed.dm_단백, 2), '%', proteinIcon())}
             ${metricCard('ratio', '칼슘 : 인', isPresent(feed.ca_p_ratio) ? formatNumber(feed.ca_p_ratio, 2) : '—', isPresent(feed.ca_p_ratio) ? ': 1' : '', ratioIcon())}
@@ -515,8 +522,8 @@
     return `<div class="food-section-heading"><span>${number}</span><h2 id="${id}">${escapeHtml(title)}</h2></div>`;
   }
 
-  function metricCard(kind, label, value, unit, icon) {
-    return `<div class="food-metric food-metric--${kind}">${icon}<div><span class="food-metric__label">${escapeHtml(label)}</span><span class="food-metric__value">${escapeHtml(value)}</span>${unit ? `<span class="food-metric__unit">${escapeHtml(unit)}</span>` : ''}</div></div>`;
+  function metricCard(kind, label, value, unit, icon, modifier = '') {
+    return `<div class="food-metric food-metric--${kind} ${modifier}">${icon}<div><span class="food-metric__label">${escapeHtml(label)}</span><span class="food-metric__value">${escapeHtml(value)}</span>${unit ? `<span class="food-metric__unit">${escapeHtml(unit)}</span>` : ''}</div></div>`;
   }
 
   function mineralCard(label, value, sub) {

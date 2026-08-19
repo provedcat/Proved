@@ -11,7 +11,7 @@
 }
 
 .food-metric--ratio {
-  color: var(--food-blue) !important;
+  color: var(--proved-calcium-phosphorus) !important;
   background: transparent !important;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .food-guideline-status.is-fail {
-  color: #D04A4A;
+  color: var(--proved-status-warning);
 }
 
 .food-guideline-status.is-na {
