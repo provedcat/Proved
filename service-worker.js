@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260818-color-system-v2';
+const CACHE_NAME = 'proved-pwa-20260819-nutrition-mobile-v3';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -9,6 +9,7 @@ const CORE_ASSETS = [
   './css/proved-colors.css',
   './css/food-list.css',
   './css/food-detail-refinements.css',
+  './css/food-mobile-nutrition-v2.css',
   './js/proved-header.js',
   './js/proved-shell.js',
   './js/pwa-install.js',
@@ -16,6 +17,7 @@ const CORE_ASSETS = [
   './js/feed-search.js',
   './js/food-list.js',
   './js/food-detail-refinements.js',
+  './js/food-mobile-nutrition-v2.js',
   './js/calculator-session.js',
   './js/feed-registration.js',
   './js/recent-feed.js',

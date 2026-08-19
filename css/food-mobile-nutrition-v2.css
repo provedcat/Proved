@@ -1,0 +1,157 @@
+@media (max-width: 760px) {
+  .food-nutrition-mobile {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    border-top: 1px solid var(--food-line);
+  }
+
+  .food-mobile-values-block,
+  .food-mobile-comparison-block {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .food-mobile-values-table,
+  .food-mobile-comparison-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .food-mobile-values-table__label-col {
+    width: 40%;
+  }
+
+  .food-mobile-values-table th,
+  .food-mobile-values-table td {
+    padding: 15px 8px;
+    border-bottom: 1px solid var(--food-line);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .food-mobile-values-table thead th {
+    color: var(--food-muted);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .food-mobile-values-table thead th:first-child,
+  .food-mobile-values-table tbody th {
+    text-align: left;
+  }
+
+  .food-mobile-values-table tbody th {
+    color: var(--food-blue);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .food-mobile-values-table tbody td {
+    color: #505866;
+    font-size: 15px;
+    font-weight: 760;
+    line-height: 1.35;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .food-mobile-values-table tbody tr.is-ratio td:nth-child(2) {
+    color: var(--proved-calcium-phosphorus);
+    font-weight: 850;
+  }
+
+  .food-mobile-comparison-block {
+    margin-top: 34px;
+  }
+
+  .food-mobile-comparison-block h3 {
+    margin: 0 0 14px;
+    color: var(--food-blue);
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.35;
+  }
+
+  .food-mobile-comparison-table__label-col {
+    width: 26%;
+  }
+
+  .food-mobile-comparison-table th,
+  .food-mobile-comparison-table td {
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--food-line);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .food-mobile-comparison-table thead tr:first-child th {
+    color: var(--food-blue);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .02em;
+  }
+
+  .food-mobile-comparison-table thead tr:nth-child(2) th {
+    color: var(--food-muted);
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .food-mobile-comparison-table thead th:first-child,
+  .food-mobile-comparison-table tbody th {
+    text-align: left;
+  }
+
+  .food-mobile-comparison-table tbody th {
+    color: var(--food-blue);
+    font-size: 11px;
+    font-weight: 780;
+    line-height: 1.25;
+  }
+
+  .food-mobile-comparison-table .food-guideline-status {
+    min-width: 0;
+    min-height: 20px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .food-guideline-note strong {
+    display: none;
+  }
+
+  .food-guideline-note {
+    margin-top: 18px;
+    padding-top: 14px;
+  }
+
+  .food-guideline-note p {
+    font-size: 10px;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 380px) {
+  .food-mobile-values-table th,
+  .food-mobile-values-table td {
+    padding-inline: 5px;
+  }
+
+  .food-mobile-values-table tbody td {
+    font-size: 14px;
+  }
+
+  .food-mobile-comparison-table th,
+  .food-mobile-comparison-table td {
+    padding-inline: 2px;
+  }
+
+  .food-mobile-comparison-table .food-guideline-status {
+    font-size: 9px;
+  }
+}
