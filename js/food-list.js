@@ -459,6 +459,10 @@
           </div>
           <h1 id="foodDetailTitle">${escapeHtml(product.primary)}</h1>
           ${product.secondary ? `<p class="food-detail-hero__secondary">${escapeHtml(product.secondary)}</p>` : ''}
+          <a class="food-compare-link" href="/food/compare/?species=${escapeHtml(state.species)}&ids=${encodeURIComponent(feed.id)}">
+            다른 제품과 비교하기
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+          </a>
         </header>
 
         <section class="food-detail-section" aria-labelledby="foodBasicHeading">

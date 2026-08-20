@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260819-nutrition-mobile-v3';
+const CACHE_NAME = 'proved-pwa-20260820-food-compare-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -8,6 +8,7 @@ const CORE_ASSETS = [
   './css/proved-header.css',
   './css/proved-colors.css',
   './css/food-list.css',
+  './css/food-compare.css',
   './css/food-detail-refinements.css',
   './css/food-mobile-nutrition-v2.css',
   './js/proved-header.js',
@@ -16,6 +17,7 @@ const CORE_ASSETS = [
   './js/calculator.js',
   './js/feed-search.js',
   './js/food-list.js',
+  './js/food-compare.js',
   './js/food-detail-refinements.js',
   './js/food-mobile-nutrition-v2.js',
   './js/calculator-session.js',
@@ -32,6 +34,7 @@ const CORE_ASSETS = [
   './dog-food-calculator/',
   './feed-registration/',
   './food/',
+  './food/compare/',
   './guide/calculation-method/',
   // Legacy archive URL remains precached only as a compatibility redirect.
   './archive/'

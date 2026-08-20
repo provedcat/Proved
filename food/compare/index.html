@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사료 비교 | 프루브</title>
+  <meta name="description" content="두 사료의 DM 영양성분과 열량 기준 영양소, 수분 및 급여량을 같은 기준으로 비교합니다.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <meta name="theme-color" content="#3568FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260818-color-system-v2">
+  <link rel="stylesheet" href="/css/food-compare.css?v=20260820-food-compare-v2">
+  <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
+  <script defer src="/js/proved-header.js?v=20260818-color-system-v2"></script>
+  <script defer src="/js/food-compare.js?v=20260820-food-compare-v2"></script>
+</head>
+<body>
+  <div class="food-compare-shell">
+    <header data-proved-header="food"></header>
+    <main class="food-compare-main">
+      <div class="food-compare-toolbar">
+        <a class="food-compare-back" id="foodCompareBack" href="/food/">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+          사료 정보로 돌아가기
+        </a>
+      </div>
+
+      <header class="food-compare-hero">
+        <p class="food-compare-eyebrow">FOOD COMPARE</p>
+        <h1>사료 비교</h1>
+        <p>두 제품을 같은 기준으로 환산해 차이를 확인합니다.</p>
+      </header>
+
+      <div id="foodCompareStatus" class="food-compare-status" role="status">비교할 제품 정보를 불러오는 중입니다.</div>
+      <div id="foodCompareContent" hidden></div>
+    </main>
+    <footer data-proved-footer></footer>
+  </div>
+
+  <div id="foodCompareSearchModal" class="food-compare-modal" hidden>
+    <div class="food-compare-modal__backdrop" data-close-compare-search></div>
+    <section class="food-compare-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="foodCompareSearchTitle">
+      <div class="food-compare-modal__header">
+        <div>
+          <p>비교 제품 선택</p>
+          <h2 id="foodCompareSearchTitle">어떤 제품과 비교할까요?</h2>
+        </div>
+        <button id="foodCompareSearchClose" type="button" aria-label="검색 닫기">×</button>
+      </div>
+      <label class="food-compare-search-field" for="foodCompareSearchInput">
+        <span>브랜드 또는 제품명 검색</span>
+        <input id="foodCompareSearchInput" type="search" autocomplete="off" placeholder="예: RAWZ, 로우즈 연어" spellcheck="false">
+      </label>
+      <div id="foodCompareSearchResults" class="food-compare-search-results"></div>
+      <p id="foodCompareSearchStatus" class="food-compare-search-status" role="status"></p>
+    </section>
+  </div>
+</body>
+</html>
