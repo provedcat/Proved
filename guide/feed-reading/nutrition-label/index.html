@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>영양성분표 | PROVED 데이터 읽기</title>
+  <meta name="description" content="사료 영양성분표 읽기. PROVED에 표시되는 사료 데이터를 필요한 질문부터 골라 읽을 수 있습니다.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://proved.kr/guide/feed-reading/nutrition-label/">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="프루브">
+  <meta property="og:title" content="영양성분표 | PROVED 데이터 읽기">
+  <meta property="og:description" content="사료 영양성분표 읽기">
+  <meta property="og:url" content="https://proved.kr/guide/feed-reading/nutrition-label/">
+  <meta property="og:image" content="https://proved.kr/icons/icon-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#3568FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260816-surface-consistency-v1">
+  <link rel="stylesheet" href="/css/feed-reading.css?v=20260820-feed-reading-v1">
+  <script defer src="/js/proved-header.js?v=20260820-feed-reading-v1"></script>
+</head>
+<body>
+  <div class="fr-shell">
+    <header data-proved-header="guide"></header>
+
+    <main class="fr-main">
+      <a class="fr-back" href="/guide/feed-reading/">← PROVED 데이터 읽기</a>
+
+      <section class="fr-category-hero" aria-labelledby="category-title">
+        <h1 id="category-title">영양성분표</h1>
+        <svg class="fr-icon" viewBox="0 0 132 112" aria-hidden="true">
+          <path class="fr-stroke fr-draw" d="M69 12h43v79H69z"/>
+          <path class="fr-stroke fr-draw fr-delay-1" d="M79 31h23"/>
+          <path class="fr-stroke fr-draw fr-delay-2" d="M79 44h23"/>
+          <path class="fr-stroke fr-draw fr-delay-3" d="M79 57h23"/>
+          <path class="fr-stroke fr-draw fr-delay-3" d="M79 70h23"/>
+          <g class="fr-pop">
+            <path class="fr-stroke" d="M19 66h42l-5 25H24z"/>
+            <path class="fr-stroke" d="M25 66c2-13 28-13 31 0"/>
+            <circle cx="33" cy="59" r="2.5" fill="#fff"/>
+            <circle cx="41" cy="57" r="2.5" fill="#fff"/>
+            <circle cx="49" cy="60" r="2.5" fill="#fff"/>
+          </g>
+        </svg>
+      </section>
+
+      <section class="fr-topic-list" aria-label="영양성분표 소주제">
+        <details class="fr-topic">
+          <summary><span>조단백·조지방의 ‘이상’과 ‘이하’는 무슨 뜻일까요?</span><span class="fr-topic-mark" aria-hidden="true">+</span></summary>
+          <div class="fr-topic-body">보증성분표의 조단백·조지방은 흔히 ‘이상’, 조섬유·수분은 ‘이하’처럼 표시됩니다. 이는 해당 숫자가 제품의 정확한 평균 함량이라는 뜻이 아니라 <strong>보증하는 최소값 또는 최대값</strong>이라는 뜻입니다.<br><br>따라서 조단백 30% 이상인 사료의 실제 조단백이 반드시 30.0%인 것은 아닙니다. 이런 값을 이용해 DM이나 NFE를 계산할 때도 같은 한계가 따라갑니다.</div>
+        </details>
+        <details class="fr-topic">
+          <summary><span>As-fed와 DM은 무엇이 다른가요?</span><span class="fr-topic-mark" aria-hidden="true">+</span></summary>
+          <div class="fr-topic-body">As-fed(AF)는 사료를 실제 급여하는 상태에서의 함량입니다. 수분도 함께 포함되기 때문에 습식과 건식처럼 수분 차이가 큰 제품은 AF 숫자만으로 직접 비교하기 어렵습니다.<br><br>DM(Dry Matter)은 수분을 제외한 건물 기준 함량입니다. 서로 다른 수분의 사료에서 <strong>영양소가 건물 안에 얼마나 농축되어 있는지</strong> 비교할 때 유용합니다.</div>
+        </details>
+        <details class="fr-topic">
+          <summary><span>Guaranteed Analysis와 Typical Analysis는 어떻게 다른가요?</span><span class="fr-topic-mark" aria-hidden="true">+</span></summary>
+          <div class="fr-topic-body">Guaranteed Analysis는 라벨에서 보증하는 최소·최대 범위를 중심으로 표시합니다. Typical Analysis는 제조사가 반복 분석 등을 통해 제시하는 대표적인 실제 함량에 더 가깝습니다.<br><br>둘이 함께 제공된다면 목적이 다릅니다. 제품이 법적·표시 기준을 충족하는지 볼 때는 보증성분이 중요하고, 영양소의 실제 평균적인 수준을 비교할 때는 Typical Analysis가 더 많은 정보를 줄 수 있습니다.</div>
+        </details>
+        <details class="fr-topic">
+          <summary><span>NFE와 추정 열량은 어떻게 만들어지나요?</span><span class="fr-topic-mark" aria-hidden="true">+</span></summary>
+          <div class="fr-topic-body">탄수화물은 사료 라벨에 직접 표시되지 않는 경우가 많습니다. 이때 NFE는 단백질·지방·섬유·수분·회분을 100에서 빼는 방식으로 추정할 수 있습니다. NFE를 포함한 주요 영양성분에는 수정 Atwater 계수를 적용해 대사에너지의 참고값을 계산할 수 있습니다.<div class="fr-formula">NFE = 100 − (조단백 + 조지방 + 조섬유 + 수분 + 조회분)</div><br>이 값들은 직접 측정치가 아니라 입력된 보증성분을 바탕으로 한 계산값입니다. 제조사가 공식 열량을 공개한 경우에는 공식 열량을 우선합니다.</div>
+        </details>
+      </section>
+
+      <div class="fr-source-links" aria-label="참고 자료">
+        <a href="https://www.aafco.org/resources/startups/calorie-content/" target="_blank" rel="noopener noreferrer">AAFCO Calorie Content</a>
+      </div>
+      <p class="fr-site-note">영양 기준과 계산값은 제품의 전체 적합성이나 수의학적 판단을 대신하지 않습니다. PROVED는 확인 가능한 데이터와 계산 근거를 구분해 보여주는 것을 목표로 합니다.</p>
+    </main>
+
+    <footer data-proved-footer></footer>
+  </div>
+</body>
+</html>
