@@ -7,7 +7,7 @@
   const params = new URLSearchParams(window.location.search);
   const state = {
     species: params.get('species') === 'dog' ? 'dog' : 'cat',
-    ids: String(params.get('ids') || '').split(',').map(value => value.trim()).filter(Boolean).slice(0, 2),
+    ids: [...new Set(String(params.get('ids') || '').split(',').map(value => value.trim()).filter(Boolean))].slice(0, 2),
     feeds: [],
     replaceIndex: 1,
     searchTimer: null,
@@ -84,8 +84,19 @@
   }
   function dmInsight(a, b) {
     if (!isPresent(a.dm_단백) || !isPresent(b.dm_단백) || !isPresent(a.dm_지방) || !isPresent(b.dm_지방)) return insightMissing();
-    const proteinHigher = Number(a.dm_단백) >= Number(b.dm_단백) ? getBrand(a) : getBrand(b);
-    const fatHigher = Number(a.dm_지방) >= Number(b.dm_지방) ? getBrand(a) : getBrand(b);
+    const proteinDifference = Number(a.dm_단백) - Number(b.dm_단백);
+    const fatDifference = Number(a.dm_지방) - Number(b.dm_지방);
+    if (proteinDifference === 0 && fatDifference === 0) {
+      return '<p class="food-compare-insight">수분을 제외한 단백질과 지방 표시는 두 제품이 같아요.</p>';
+    }
+    const proteinHigher = proteinDifference === 0 ? null : proteinDifference > 0 ? getBrand(a) : getBrand(b);
+    const fatHigher = fatDifference === 0 ? null : fatDifference > 0 ? getBrand(a) : getBrand(b);
+    if (!proteinHigher) {
+      return `<p class="food-compare-insight">수분을 제외한 단백질 표시는 같고, 지방은 ${escapeHtml(fatHigher)}이 더 높게 표시됩니다.</p>`;
+    }
+    if (!fatHigher) {
+      return `<p class="food-compare-insight">수분을 제외한 지방 표시는 같고, 단백질은 ${escapeHtml(proteinHigher)}이 더 높게 표시됩니다.</p>`;
+    }
     if (proteinHigher === fatHigher) {
       return `<p class="food-compare-insight">수분을 제외하면 ${escapeHtml(proteinHigher)}의 단백질과 지방이 모두 더 높게 표시됩니다.</p>`;
     }
@@ -106,6 +117,8 @@
     els.searchResults = $('foodCompareSearchResults');
     els.searchStatus = $('foodCompareSearchStatus');
     els.searchClose = $('foodCompareSearchClose');
+    els.shell = document.querySelector('.food-compare-shell');
+    els.modalDialog = els.modal.querySelector('.food-compare-modal__dialog');
   }
 
   function bindEvents() {
@@ -128,9 +141,7 @@
     els.content.addEventListener('input', event => {
       if (event.target.matches('[data-simulation-grams]')) updateSimulation();
     });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !els.modal.hidden) closeSearchModal();
-    });
+    document.addEventListener('keydown', handleModalKeydown);
   }
 
   function updateUrl() {
@@ -144,6 +155,7 @@
     if (!state.ids.length) {
       els.status.textContent = '먼저 비교할 제품을 선택해주세요.';
       state.replaceIndex = 0;
+      renderEmptySelection();
       openSearchModal();
       return;
     }
@@ -155,8 +167,15 @@
     }
     const byId = new Map((data || []).map(feed => [String(feed.id), feed]));
     state.feeds = state.ids.map(id => byId.get(String(id))).filter(Boolean);
+    if (state.feeds.length !== state.ids.length) {
+      state.ids = state.feeds.map(feed => String(feed.id));
+      updateUrl();
+    }
     if (!state.feeds.length) {
-      els.status.textContent = '비교할 제품 정보를 찾지 못했습니다.';
+      els.status.textContent = '비교할 제품을 다시 선택해주세요.';
+      state.replaceIndex = 0;
+      renderEmptySelection();
+      openSearchModal();
       return;
     }
     if (state.feeds.length === 1) {
@@ -173,7 +192,12 @@
   function renderWaitingProduct() {
     const feed = state.feeds[0];
     els.content.hidden = false;
-    els.content.innerHTML = `<section class="food-compare-products">${renderProduct(feed, 0)}<article class="food-compare-product"><p class="food-compare-product__brand">비교 제품</p><h2>두 번째 제품을 선택해주세요.</h2></article></section>`;
+    els.content.innerHTML = `<section class="food-compare-products">${renderProduct(feed, 0)}<article class="food-compare-product"><p class="food-compare-product__brand">비교 제품</p><h2>두 번째 제품을 선택해주세요.</h2><button class="food-compare-product__select" type="button" data-change-product="1">제품 선택</button></article></section>`;
+  }
+
+  function renderEmptySelection() {
+    els.content.hidden = false;
+    els.content.innerHTML = '<section class="food-compare-empty"><p>비교할 첫 번째 제품을 선택해주세요.</p><button class="food-compare-product__select" type="button" data-change-product="0">제품 선택</button></section>';
   }
 
   function renderProduct(feed, index) {
@@ -262,9 +286,12 @@
   }
 
   function renderIngredientGroup(a, b) {
+    if (!a.메인단백질 || !b.메인단백질) {
+      return `<div class="food-compare-group"><h3>원재료</h3>${insightMissing()}<div class="food-compare-ingredients">${renderIngredient(a)}${renderIngredient(b)}</div></div>`;
+    }
     const sameProtein = a.메인단백질 && b.메인단백질 && String(a.메인단백질).trim() === String(b.메인단백질).trim();
     const insight = sameProtein
-      ? `두 제품 모두 ${escapeHtml(a.메인단백질)}을 주 단백질원으로 사용하지만, 원재료 구성과 확인된 겔화제 정보에는 차이가 있어요.`
+      ? `두 제품 모두 ${escapeHtml(a.메인단백질)}을 주 단백질원으로 표시하고 있어요.`
       : `${escapeHtml(getBrand(a))}은 ${escapeHtml(a.메인단백질 || '주 단백질원 확인중')}, ${escapeHtml(getBrand(b))}은 ${escapeHtml(b.메인단백질 || '주 단백질원 확인중')}을 주 단백질원으로 표시하고 있어요.`;
     return `<div class="food-compare-group"><h3>원재료</h3><p class="food-compare-insight">${insight}</p>
       <div class="food-compare-ingredients">${renderIngredient(a)}${renderIngredient(b)}</div></div>`;
@@ -283,11 +310,11 @@
   }
 
   function simulationValue(feed, grams, key) {
-    if (!isPresent(feed?.[key])) return null;
+    if (!isPresent(grams) || !isPresent(feed?.[key])) return null;
     return grams * Number(feed[key]) / 100;
   }
   function simulationCalories(feed, grams) {
-    if (!isPresent(feed?.final_me) || Number(feed.final_me) <= 0) return null;
+    if (!isPresent(grams) || !isPresent(feed?.final_me) || Number(feed.final_me) <= 0) return null;
     return grams * Number(feed.final_me) / 1000;
   }
   function updateSimulation() {
@@ -295,7 +322,10 @@
     if (!result || state.feeds.length !== 2) return;
     const grams = [0, 1].map(index => {
       const input = $(`simulationGrams${index}`);
-      return Math.max(1, Math.min(1000, Number(input?.value) || 100));
+      const value = Number(input?.value);
+      const valid = input?.value !== '' && Number.isFinite(value) && value >= 1 && value <= 1000;
+      input?.setAttribute('aria-invalid', valid ? 'false' : 'true');
+      return valid ? value : null;
     });
     const [a, b] = state.feeds;
     const kcalA = simulationCalories(a, grams[0]);
@@ -304,7 +334,7 @@
       ? `${getBrand(a)} ${formatNumber(grams[0], 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, ${getBrand(b)} ${formatNumber(grams[1], 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
       : '비교할 정보가 부족합니다.';
     result.innerHTML = `<p class="food-compare-insight${isPresent(kcalA) && isPresent(kcalB) ? '' : ' is-missing'}">${escapeHtml(sentence)}</p>
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}<br>${formatNumber(grams[0], 0)}g</th><th>${escapeHtml(getBrand(b))}<br>${formatNumber(grams[1], 0)}g</th></tr></thead><tbody>
+      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}<br>${isPresent(grams[0]) ? `${formatNumber(grams[0], 0)}g` : '급여량 확인 필요'}</th><th>${escapeHtml(getBrand(b))}<br>${isPresent(grams[1]) ? `${formatNumber(grams[1], 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
         ${makeRow('섭취 열량', kcalA, kcalB, 'kcal', 1)}
         ${makeRow('단백질 섭취량', simulationValue(a, grams[0], '조단백'), simulationValue(b, grams[1], '조단백'), 'g', 1)}
         ${makeRow('지방 섭취량', simulationValue(a, grams[0], '조지방'), simulationValue(b, grams[1], '조지방'), 'g', 1)}
@@ -315,6 +345,7 @@
   function openSearchModal(trigger) {
     state.lastFocused = trigger || document.activeElement;
     els.modal.hidden = false;
+    els.shell.inert = true;
     document.body.style.overflow = 'hidden';
     els.searchInput.value = '';
     els.searchResults.innerHTML = '';
@@ -324,8 +355,30 @@
   }
   function closeSearchModal() {
     els.modal.hidden = true;
+    els.shell.inert = false;
     document.body.style.overflow = '';
     if (state.lastFocused && typeof state.lastFocused.focus === 'function') state.lastFocused.focus();
+  }
+
+  function handleModalKeydown(event) {
+    if (els.modal.hidden) return;
+    if (event.key === 'Escape') {
+      closeSearchModal();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = [...els.modalDialog.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')]
+      .filter(element => !element.hidden && element.getClientRects().length);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   async function searchFeeds() {
@@ -358,6 +411,7 @@
     state.ids = state.ids.filter(Boolean).slice(0, 2);
     updateUrl();
     els.modal.hidden = true;
+    els.shell.inert = false;
     document.body.style.overflow = '';
     els.content.hidden = true;
     els.status.textContent = '비교할 제품 정보를 불러오는 중입니다.';

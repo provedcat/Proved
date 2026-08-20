@@ -47,6 +47,7 @@ button { cursor: pointer; }
 .food-compare-back:hover { color: var(--compare-blue); }
 .food-compare-back:focus-visible,
 .food-compare-product__change:focus-visible,
+.food-compare-product__select:focus-visible,
 .food-compare-search-result:focus-visible,
 .food-compare-modal__header button:focus-visible,
 .food-simulation-input:focus-visible {
@@ -83,6 +84,19 @@ button { cursor: pointer; }
   font-size: 12px;
   font-weight: 750;
 }
+.food-compare-product__select {
+  min-height: 42px;
+  margin-top: 20px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--compare-blue);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 780;
+}
+.food-compare-empty { padding: 54px 56px; border-bottom: 1px solid var(--compare-line); }
+.food-compare-empty p { margin: 0; color: var(--compare-body); font-size: 15px; font-weight: 700; }
 
 .food-compare-section { padding: 54px 56px 58px; border-bottom: 1px solid var(--compare-line); }
 .food-compare-section__heading { display: grid; grid-template-columns: 42px 1fr; align-items: baseline; gap: 10px; margin-bottom: 34px; }
@@ -134,6 +148,7 @@ button { cursor: pointer; }
   font-weight: 750;
   text-align: right;
 }
+.food-simulation-input[aria-invalid="true"] { border-color: var(--compare-muted); background: var(--compare-soft); }
 .food-simulation-unit { min-height: 44px; display: flex; align-items: center; color: var(--compare-muted); }
 
 .food-compare-disclaimer { padding: 34px 56px 48px; color: var(--compare-muted); font-size: 11px; line-height: 1.75; }
@@ -165,6 +180,7 @@ button { cursor: pointer; }
   .food-compare-hero { padding: 34px 20px 40px; }
   .food-compare-products { grid-template-columns: 1fr; }
   .food-compare-product { padding: 28px 20px 30px; }
+  .food-compare-empty { padding: 42px 20px; }
   .food-compare-product + .food-compare-product { border-top: 1px solid var(--compare-line); border-left: 0; }
   .food-compare-section { padding: 42px 20px 46px; }
   .food-compare-table thead th:first-child,
