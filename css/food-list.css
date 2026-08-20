@@ -355,6 +355,25 @@ button { cursor: pointer; }
   font-size: 14px;
   line-height: 1.55;
 }
+.food-compare-link {
+  width: fit-content;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 28px;
+  padding: 0 20px;
+  border: 1px solid var(--food-blue);
+  border-radius: 0;
+  background: var(--food-blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.food-compare-link:hover { background: var(--food-blue-dark); }
+.food-compare-link:focus-visible { outline: 2px solid rgba(53, 104, 255, .45); outline-offset: 4px; }
+.food-compare-link svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .food-detail-section {
   padding: 54px 56px 58px;
   border-bottom: 1px solid var(--food-line);
