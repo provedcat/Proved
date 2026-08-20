@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260820-food-compare-v2';
+const CACHE_NAME = 'proved-pwa-20260820-feed-reading-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -7,6 +7,7 @@ const CORE_ASSETS = [
   './css/proved-shell.css',
   './css/proved-header.css',
   './css/proved-colors.css',
+  './css/feed-reading.css',
   './css/food-list.css',
   './css/food-compare.css',
   './css/food-detail-refinements.css',
@@ -36,6 +37,11 @@ const CORE_ASSETS = [
   './food/',
   './food/compare/',
   './guide/calculation-method/',
+  './guide/feed-reading/',
+  './guide/feed-reading/sources/',
+  './guide/feed-reading/nutrition-label/',
+  './guide/feed-reading/comparison/',
+  './guide/feed-reading/standards/',
   // Legacy archive URL remains precached only as a compatibility redirect.
   './archive/'
 ];
