@@ -50,6 +50,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnD
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const registrationState = { species: 'cat', type: 'dry', userId: null, busy: false, imageFile: null, previewUrl: null };
+let textWaitTimers = [];
 
 function escapeHtml(value) {
   const node = document.createElement('div');
@@ -87,6 +88,42 @@ function showReturnNotice() {
   complete?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+function clearTextWaitTimers() {
+  textWaitTimers.forEach(window.clearTimeout);
+  textWaitTimers = [];
+}
+
+function setTextWaitStage(message, detail) {
+  const stage = document.getElementById('feedTextRequestStage');
+  const detailNode = document.getElementById('feedTextRequestDetail');
+  if (stage) stage.textContent = message;
+  if (detail && detailNode) detailNode.textContent = detail;
+}
+
+function showTextWait() {
+  clearTextWaitTimers();
+  const wait = document.getElementById('feedTextRequestWait');
+  wait?.classList.add('is-visible');
+  wait?.setAttribute('aria-hidden', 'false');
+  setTextWaitStage('공식 제품 확인 중', '보통 30초 이내에 완료되며, 경우에 따라 최대 1분 정도 걸릴 수 있어요.');
+  textWaitTimers.push(window.setTimeout(() => setTextWaitStage('영양정보 확인 중'), 6000));
+  textWaitTimers.push(window.setTimeout(() => setTextWaitStage('등록 결과 정리 중'), 12000));
+  textWaitTimers.push(window.setTimeout(() => {
+    const alert = document.getElementById('feedTextRequestAlert');
+    if (alert) alert.textContent = '조금만 더 기다려 주세요.';
+    setTextWaitStage('제품 정보를 꼼꼼히 확인하고 있습니다', '완료될 때까지 이 창을 그대로 두세요.');
+  }, 30000));
+}
+
+function hideTextWait() {
+  clearTextWaitTimers();
+  const wait = document.getElementById('feedTextRequestWait');
+  wait?.classList.remove('is-visible');
+  wait?.setAttribute('aria-hidden', 'true');
+  const alert = document.getElementById('feedTextRequestAlert');
+  if (alert) alert.textContent = '창을 닫거나 등록 버튼을 다시 누르지 마세요.';
+}
+
 async function submitTextRegistration() {
   if (registrationState.busy) return;
   const input = document.getElementById('feedTextRequestInput');
@@ -100,8 +137,10 @@ async function submitTextRegistration() {
 
   registrationState.busy = true;
   button.disabled = true;
-  button.textContent = '제품 정보 검색 중...';
-  renderMessage('feedTextRequestMsg', '공식 자료와 신뢰할 수 있는 판매 정보를 확인하고 있습니다.');
+  button.classList.add('is-loading');
+  button.textContent = '사료 정보 확인 중…';
+  document.getElementById('feedTextRequestMsg').replaceChildren();
+  showTextWait();
   try {
     const { data: requestId, error } = await sb.rpc('create_feed_request', {
       p_request_text: query,
@@ -147,8 +186,10 @@ async function submitTextRegistration() {
     console.error(error);
     renderMessage('feedTextRequestMsg', '제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
   } finally {
+    hideTextWait();
     registrationState.busy = false;
     button.disabled = false;
+    button.classList.remove('is-loading');
     button.textContent = '제품명으로 등록';
   }
 }
