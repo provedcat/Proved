@@ -275,6 +275,62 @@
     .registration-submit:focus-visible { outline:2px solid var(--reg-ink); outline-offset:3px; }
     .registration-submit:disabled { opacity:.48; cursor:wait; transform:none; }
 
+    .registration-submit.is-loading {
+      opacity:1;
+      background:#244FAD;
+    }
+
+    .registration-wait {
+      display:none;
+      margin-top:16px;
+      padding:18px 0 2px;
+      border-top:1px solid #DCE3EE;
+    }
+
+    .registration-wait.is-visible { display:block; }
+
+    .registration-wait__alert {
+      margin:0 0 14px;
+      color:#D86100;
+      font-size:14px;
+      font-weight:850;
+      line-height:1.45;
+    }
+
+    .registration-wait__stage {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:0;
+      color:var(--reg-ink);
+      font-size:13px;
+      font-weight:750;
+    }
+
+    .registration-wait__spinner {
+      width:16px;
+      height:16px;
+      flex:0 0 auto;
+      border:2px solid #CAD6EE;
+      border-top-color:var(--reg-blue);
+      border-radius:50%;
+      animation:registration-spin .8s linear infinite;
+    }
+
+    .registration-wait__detail {
+      margin:9px 0 0 26px;
+      color:var(--reg-muted);
+      font-size:12px;
+      font-weight:600;
+      line-height:1.55;
+    }
+
+    @keyframes registration-spin { to { transform:rotate(360deg); } }
+
+    @media (prefers-reduced-motion:reduce) {
+      .registration-wait__spinner { animation-duration:1.8s; }
+    }
+
     .registration-route--photo .registration-submit {
       border-color:var(--reg-ink);
       background:var(--reg-ink);
@@ -716,6 +772,11 @@
           <input id="feedTextRequestInput" class="registration-input" type="text" maxlength="120" autocomplete="off" placeholder="예: 힐스 캣 어덜트 유리너리 헤어볼 컨트롤 스튜">
           <p class="registration-help">실제 판매 제품 하나로 확인되는 경우 등록할 수 있습니다.<br>브랜드나 제품군만 입력하면 추가 정보가 필요할 수 있어요.</p>
           <button id="feedTextRequestBtn" type="button" class="registration-submit">제품명으로 등록</button>
+          <div id="feedTextRequestWait" class="registration-wait" role="status" aria-live="polite" aria-hidden="true">
+            <p id="feedTextRequestAlert" class="registration-wait__alert">창을 닫거나 등록 버튼을 다시 누르지 마세요.</p>
+            <p class="registration-wait__stage"><span class="registration-wait__spinner" aria-hidden="true"></span><span id="feedTextRequestStage">공식 제품 확인 중</span></p>
+            <p id="feedTextRequestDetail" class="registration-wait__detail">보통 30초 이내에 완료되며, 경우에 따라 최대 1분 정도 걸릴 수 있어요.</p>
+          </div>
           <div id="feedTextRequestMsg" aria-live="polite"></div>
         </section>
       </article>
