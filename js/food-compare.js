@@ -265,11 +265,11 @@
   }
 
   function renderMineralGroup(a, b) {
-    return `<div class="food-compare-group"><h3>칼슘 · 인</h3>
+    return `<div class="food-compare-group"><h3>칼슘 · 인 <span class="food-compare-group__unit">단위: g/1,000kcal</span></h3>
       ${compareInsight(a.eb_인, b.eb_인, '인 함량', 'g', '같은 1,000kcal를 급여하면')}
       <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}</th><th>${escapeHtml(getBrand(b))}</th></tr></thead><tbody>
-        ${makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, 'g/1,000kcal')}
-        ${makeRow('인', a.eb_인, b.eb_인, 'g/1,000kcal')}
+        ${makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '')}
+        ${makeRow('인', a.eb_인, b.eb_인, '')}
         ${makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1')}
       </tbody></table></div>`;
   }

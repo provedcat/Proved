@@ -104,6 +104,7 @@ button { cursor: pointer; }
 .food-compare-section__heading h2 { margin: 0; font-size: 23px; font-weight: 780; letter-spacing: -.03em; }
 .food-compare-group + .food-compare-group { margin-top: 46px; padding-top: 44px; border-top: 1px solid var(--compare-line); }
 .food-compare-group h3 { margin: 0 0 18px; color: var(--compare-body); font-size: 14px; font-weight: 800; }
+.food-compare-group__unit { margin-left: 6px; color: var(--compare-muted); font-size: 11px; font-weight: 650; white-space: nowrap; }
 .food-compare-insight {
   margin: 0 0 22px;
   padding-left: 16px;
