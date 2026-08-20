@@ -51,7 +51,15 @@
     const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
     return relation?.name || feed?.제조사 || '브랜드 정보 없음';
   }
-  function getShortName(feed) { return getBrand(feed); }
+  function getProductMarker(index) { return index === 0 ? 'A 제품' : 'B 제품'; }
+  function getFeedIndex(feed) { return state.feeds.indexOf(feed); }
+  function getShortName(feed) {
+    const index = getFeedIndex(feed);
+    return index >= 0 ? getProductMarker(index) : getBrand(feed);
+  }
+  function comparisonTableHead() {
+    return `<thead><tr><th>항목</th><th>A 제품</th><th>B 제품</th></tr></thead>`;
+  }
   function missingCell() { return '<span class="is-missing">비교할 정보가 부족합니다</span>'; }
   function valueCell(value, unit, digits = 2) {
     const formatted = formatValue(value, unit, digits);
@@ -89,8 +97,8 @@
     if (proteinDifference === 0 && fatDifference === 0) {
       return '<p class="food-compare-insight">수분을 제외한 단백질과 지방 표시는 두 제품이 같아요.</p>';
     }
-    const proteinHigher = proteinDifference === 0 ? null : proteinDifference > 0 ? getBrand(a) : getBrand(b);
-    const fatHigher = fatDifference === 0 ? null : fatDifference > 0 ? getBrand(a) : getBrand(b);
+    const proteinHigher = proteinDifference === 0 ? null : proteinDifference > 0 ? getShortName(a) : getShortName(b);
+    const fatHigher = fatDifference === 0 ? null : fatDifference > 0 ? getShortName(a) : getShortName(b);
     if (!proteinHigher) {
       return `<p class="food-compare-insight">수분을 제외한 단백질 표시는 같고, 지방은 ${escapeHtml(fatHigher)}이 더 높게 표시됩니다.</p>`;
     }
@@ -192,20 +200,21 @@
   function renderWaitingProduct() {
     const feed = state.feeds[0];
     els.content.hidden = false;
-    els.content.innerHTML = `<section class="food-compare-products">${renderProduct(feed, 0)}<article class="food-compare-product"><p class="food-compare-product__brand">비교 제품</p><h2>두 번째 제품을 선택해주세요.</h2><button class="food-compare-product__select" type="button" data-change-product="1">제품 선택</button></article></section>`;
+    els.content.innerHTML = `<section class="food-compare-products">${renderProduct(feed, 0)}<article class="food-compare-product"><p class="food-compare-product__marker">B 제품</p><p class="food-compare-product__brand">비교 제품</p><h2>두 번째 제품을 선택해주세요.</h2><button class="food-compare-product__select" type="button" data-change-product="1">B 제품 선택</button></article></section>`;
   }
 
   function renderEmptySelection() {
     els.content.hidden = false;
-    els.content.innerHTML = '<section class="food-compare-empty"><p>비교할 첫 번째 제품을 선택해주세요.</p><button class="food-compare-product__select" type="button" data-change-product="0">제품 선택</button></section>';
+    els.content.innerHTML = '<section class="food-compare-empty"><p>비교할 첫 번째 제품을 선택해주세요.</p><button class="food-compare-product__select" type="button" data-change-product="0">A 제품 선택</button></section>';
   }
 
   function renderProduct(feed, index) {
     return `<article class="food-compare-product">
+      <p class="food-compare-product__marker">${getProductMarker(index)}</p>
       <p class="food-compare-product__brand">${escapeHtml(getBrand(feed))}</p>
       <h2>${escapeHtml(feed.제품명 || '제품명 정보 없음')}</h2>
       <p class="food-compare-product__meta">${escapeHtml(getSpeciesLabel())} · ${escapeHtml(getTypeLabel(feed.type))} · ${escapeHtml(feed.완전식여부 || '분류 확인중')}</p>
-      <button class="food-compare-product__change" type="button" data-change-product="${index}">제품 변경</button>
+      <button class="food-compare-product__change" type="button" data-change-product="${index}">${getProductMarker(index)} 변경</button>
     </article>`;
   }
 
@@ -242,7 +251,7 @@
   function renderDmGroup(a, b) {
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
       ${dmInsight(a, b)}
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}</th><th>${escapeHtml(getBrand(b))}</th></tr></thead><tbody>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('단백질', a.dm_단백, b.dm_단백, '%')}
         ${makeRow('지방', a.dm_지방, b.dm_지방, '%')}
         ${makeRow('섬유', a.dm_섬유, b.dm_섬유, '%')}
@@ -257,7 +266,7 @@
     const proteinB = per100Kcal(b, 'eb_단백');
     return `<div class="food-compare-group"><h3>같은 100kcal 기준</h3>
       ${pairValueInsight(proteinA, proteinB, '단백질', 'g', '같은 100kcal를 급여하면')}
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}</th><th>${escapeHtml(getBrand(b))}</th></tr></thead><tbody>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('단백질', proteinA, proteinB, 'g')}
         ${makeRow('지방', per100Kcal(a, 'eb_지방'), per100Kcal(b, 'eb_지방'), 'g')}
         ${makeRow('탄수화물 추정치', per100Kcal(a, 'eb_탄수화물'), per100Kcal(b, 'eb_탄수화물'), 'g')}
@@ -267,7 +276,7 @@
   function renderMineralGroup(a, b) {
     return `<div class="food-compare-group"><h3>칼슘 · 인 <span class="food-compare-group__unit">단위: g/1,000kcal</span></h3>
       ${compareInsight(a.eb_인, b.eb_인, '인 함량', 'g', '같은 1,000kcal를 급여하면')}
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}</th><th>${escapeHtml(getBrand(b))}</th></tr></thead><tbody>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '')}
         ${makeRow('인', a.eb_인, b.eb_인, '')}
         ${makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1')}
@@ -279,7 +288,7 @@
     const waterB = waterPer100Kcal(b);
     return `<div class="food-compare-group"><h3>수분</h3>
       ${pairValueInsight(waterA, waterB, '수분을', 'ml', '같은 100kcal를 급여하면')}
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}</th><th>${escapeHtml(getBrand(b))}</th></tr></thead><tbody>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('수분 함량', a.수분, b.수분, '%')}
         ${makeRow('100kcal당 수분', waterA, waterB, 'ml', 1)}
       </tbody></table></div>`;
@@ -292,13 +301,14 @@
     const sameProtein = a.메인단백질 && b.메인단백질 && String(a.메인단백질).trim() === String(b.메인단백질).trim();
     const insight = sameProtein
       ? `두 제품 모두 ${escapeHtml(a.메인단백질)}을 주 단백질원으로 표시하고 있어요.`
-      : `${escapeHtml(getBrand(a))}은 ${escapeHtml(a.메인단백질 || '주 단백질원 확인중')}, ${escapeHtml(getBrand(b))}은 ${escapeHtml(b.메인단백질 || '주 단백질원 확인중')}을 주 단백질원으로 표시하고 있어요.`;
+      : `A 제품은 ${escapeHtml(a.메인단백질 || '주 단백질원 확인중')}, B 제품은 ${escapeHtml(b.메인단백질 || '주 단백질원 확인중')}을 주 단백질원으로 표시하고 있어요.`;
     return `<div class="food-compare-group"><h3>원재료</h3><p class="food-compare-insight">${insight}</p>
       <div class="food-compare-ingredients">${renderIngredient(a)}${renderIngredient(b)}</div></div>`;
   }
 
   function renderIngredient(feed) {
-    return `<article class="food-compare-ingredient"><h4>${escapeHtml(getBrand(feed))}</h4><dl>
+    const index = getFeedIndex(feed);
+    return `<article class="food-compare-ingredient"><h4>${escapeHtml(getProductMarker(index))} <span>${escapeHtml(getBrand(feed))}</span></h4><dl>
       <div><dt>주 단백질원</dt><dd>${escapeHtml(feed.메인단백질 || '비교할 정보가 부족합니다')}</dd></div>
       <div><dt>겔화제 · 점증제</dt><dd>${escapeHtml(feed.겔화제 || '별도로 확인된 정보가 없습니다')}</dd></div>
       </dl><p class="food-compare-ingredient__full">${escapeHtml(feed.전성분 || '비교할 정보가 부족합니다')}</p></article>`;
@@ -329,10 +339,10 @@
     const kcalA = simulationCalories(a, grams);
     const kcalB = simulationCalories(b, grams);
     const sentence = isPresent(kcalA) && isPresent(kcalB)
-      ? `${getBrand(a)} ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, ${getBrand(b)} ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
+      ? `A 제품 ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, B 제품 ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
       : '비교할 정보가 부족합니다.';
     result.innerHTML = `<p class="food-compare-insight${isPresent(kcalA) && isPresent(kcalB) ? '' : ' is-missing'}">${escapeHtml(sentence)}</p>
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th><th>${escapeHtml(getBrand(b))}<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
+      <table class="food-compare-table"><thead><tr><th>항목</th><th>A 제품<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th><th>B 제품<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
         ${makeRow('섭취 열량', kcalA, kcalB, 'kcal', 1)}
         ${makeRow('단백질 섭취량', simulationValue(a, grams, '조단백'), simulationValue(b, grams, '조단백'), 'g', 1)}
         ${makeRow('지방 섭취량', simulationValue(a, grams, '조지방'), simulationValue(b, grams, '조지방'), 'g', 1)}

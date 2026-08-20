@@ -69,6 +69,7 @@ button { cursor: pointer; }
 }
 .food-compare-product { min-width: 0; padding: 34px 56px 38px; }
 .food-compare-product + .food-compare-product { border-left: 1px solid var(--compare-line); }
+.food-compare-product__marker { margin: 0 0 10px; color: var(--compare-number); font-size: 11px; font-weight: 800; letter-spacing: .04em; }
 .food-compare-product__brand { margin: 0 0 8px; color: var(--compare-muted); font-size: 11px; font-weight: 800; letter-spacing: .05em; }
 .food-compare-product h2 { margin: 0; font-size: clamp(20px, 2.4vw, 30px); font-weight: 780; line-height: 1.3; letter-spacing: -.035em; }
 .food-compare-product__meta { margin: 12px 0 0; color: var(--compare-muted); font-size: 12px; }
@@ -123,6 +124,7 @@ button { cursor: pointer; }
 .food-compare-table tbody th { width: 31%; text-align: left; }
 .food-compare-table tbody th { color: var(--compare-body); font-size: 12px; font-weight: 750; }
 .food-compare-table td { color: var(--compare-number); font-size: 14px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.food-compare-ingredient h4 span { margin-left: 5px; color: var(--compare-muted); font-size: .72em; font-weight: 700; }
 .food-compare-table td.is-missing { color: var(--compare-muted); font-size: 12px; font-weight: 550; }
 
 .food-compare-ingredients { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260820-food-compare-v1';
+const CACHE_NAME = 'proved-pwa-20260820-food-compare-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',
