@@ -135,8 +135,8 @@ button { cursor: pointer; }
 .food-compare-ingredient__full { margin: 18px 0 0; color: var(--compare-body); font-size: 13px; line-height: 1.85; }
 
 .food-simulation-note { margin: -10px 0 26px; color: var(--compare-muted); font-size: 12px; line-height: 1.65; }
-.food-simulation-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin-bottom: 28px; }
-.food-simulation-control { display: grid; grid-template-columns: minmax(0, 1fr) 110px auto; align-items: end; gap: 10px; }
+.food-simulation-controls { margin-bottom: 28px; }
+.food-simulation-control { width: min(100%, 520px); display: grid; grid-template-columns: minmax(0, 1fr) 110px auto; align-items: end; gap: 10px; }
 .food-simulation-control label { color: var(--compare-body); font-size: 12px; font-weight: 750; }
 .food-simulation-input {
   width: 100%;
@@ -190,7 +190,6 @@ button { cursor: pointer; }
   .food-compare-table td { padding: 14px 5px; }
   .food-compare-ingredients { grid-template-columns: 1fr; gap: 28px; }
   .food-compare-ingredient + .food-compare-ingredient { padding: 28px 0 0; border-top: 1px solid var(--compare-line); border-left: 0; }
-  .food-simulation-controls { grid-template-columns: 1fr; gap: 16px; }
   .food-simulation-control { grid-template-columns: minmax(0, 1fr) 96px auto; }
   .food-compare-disclaimer { padding: 30px 20px 40px; }
   .food-compare-modal { padding: 12px; place-items: end center; }

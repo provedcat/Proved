@@ -226,9 +226,9 @@
       </section>
       <section class="food-compare-section" aria-labelledby="compareSimulationHeading">
         <div class="food-compare-section__heading"><span>02</span><h2 id="compareSimulationHeading">급여량 기준 비교</h2></div>
-        <p class="food-simulation-note">기본값은 각 제품 100g입니다. 실제로 급여할 양이 다르면 제품별로 수정할 수 있습니다.</p>
+        <p class="food-simulation-note">기본값은 100g입니다. 입력한 동일한 급여량을 두 제품에 적용해 비교합니다.</p>
         <div class="food-simulation-controls">
-          ${renderSimulationControl(a, 0)}${renderSimulationControl(b, 1)}
+          ${renderSimulationControl()}
         </div>
         <div id="foodSimulationResult"></div>
       </section>
@@ -304,9 +304,9 @@
       </dl><p class="food-compare-ingredient__full">${escapeHtml(feed.전성분 || '비교할 정보가 부족합니다')}</p></article>`;
   }
 
-  function renderSimulationControl(feed, index) {
-    return `<div class="food-simulation-control"><label for="simulationGrams${index}">${escapeHtml(getBrand(feed))} 급여량</label>
-      <input id="simulationGrams${index}" class="food-simulation-input" data-simulation-grams="${index}" type="number" value="100" min="1" max="1000" step="1" inputmode="decimal"><span class="food-simulation-unit">g</span></div>`;
+  function renderSimulationControl() {
+    return `<div class="food-simulation-control"><label for="simulationGrams">공통 급여량</label>
+      <input id="simulationGrams" class="food-simulation-input" data-simulation-grams type="number" value="100" min="1" max="1000" step="1" inputmode="decimal"><span class="food-simulation-unit">g</span></div>`;
   }
 
   function simulationValue(feed, grams, key) {
@@ -320,25 +320,23 @@
   function updateSimulation() {
     const result = $('foodSimulationResult');
     if (!result || state.feeds.length !== 2) return;
-    const grams = [0, 1].map(index => {
-      const input = $(`simulationGrams${index}`);
-      const value = Number(input?.value);
-      const valid = input?.value !== '' && Number.isFinite(value) && value >= 1 && value <= 1000;
-      input?.setAttribute('aria-invalid', valid ? 'false' : 'true');
-      return valid ? value : null;
-    });
+    const input = $('simulationGrams');
+    const value = Number(input?.value);
+    const valid = input?.value !== '' && Number.isFinite(value) && value >= 1 && value <= 1000;
+    input?.setAttribute('aria-invalid', valid ? 'false' : 'true');
+    const grams = valid ? value : null;
     const [a, b] = state.feeds;
-    const kcalA = simulationCalories(a, grams[0]);
-    const kcalB = simulationCalories(b, grams[1]);
+    const kcalA = simulationCalories(a, grams);
+    const kcalB = simulationCalories(b, grams);
     const sentence = isPresent(kcalA) && isPresent(kcalB)
-      ? `${getBrand(a)} ${formatNumber(grams[0], 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, ${getBrand(b)} ${formatNumber(grams[1], 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
+      ? `${getBrand(a)} ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, ${getBrand(b)} ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
       : '비교할 정보가 부족합니다.';
     result.innerHTML = `<p class="food-compare-insight${isPresent(kcalA) && isPresent(kcalB) ? '' : ' is-missing'}">${escapeHtml(sentence)}</p>
-      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}<br>${isPresent(grams[0]) ? `${formatNumber(grams[0], 0)}g` : '급여량 확인 필요'}</th><th>${escapeHtml(getBrand(b))}<br>${isPresent(grams[1]) ? `${formatNumber(grams[1], 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
+      <table class="food-compare-table"><thead><tr><th>항목</th><th>${escapeHtml(getBrand(a))}<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th><th>${escapeHtml(getBrand(b))}<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
         ${makeRow('섭취 열량', kcalA, kcalB, 'kcal', 1)}
-        ${makeRow('단백질 섭취량', simulationValue(a, grams[0], '조단백'), simulationValue(b, grams[1], '조단백'), 'g', 1)}
-        ${makeRow('지방 섭취량', simulationValue(a, grams[0], '조지방'), simulationValue(b, grams[1], '조지방'), 'g', 1)}
-        ${makeRow('사료를 통한 수분', simulationValue(a, grams[0], '수분'), simulationValue(b, grams[1], '수분'), 'ml', 1)}
+        ${makeRow('단백질 섭취량', simulationValue(a, grams, '조단백'), simulationValue(b, grams, '조단백'), 'g', 1)}
+        ${makeRow('지방 섭취량', simulationValue(a, grams, '조지방'), simulationValue(b, grams, '조지방'), 'g', 1)}
+        ${makeRow('사료를 통한 수분', simulationValue(a, grams, '수분'), simulationValue(b, grams, '수분'), 'ml', 1)}
       </tbody></table>`;
   }
 
