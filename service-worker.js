@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260820-feed-reading-v1';
+const CACHE_NAME = 'proved-pwa-20260821-editorial-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -8,6 +8,7 @@ const CORE_ASSETS = [
   './css/proved-header.css',
   './css/proved-colors.css',
   './css/feed-reading.css',
+  './css/editorial.css',
   './css/food-list.css',
   './css/food-compare.css',
   './css/food-detail-refinements.css',
@@ -21,6 +22,7 @@ const CORE_ASSETS = [
   './js/food-compare.js',
   './js/food-detail-refinements.js',
   './js/food-mobile-nutrition-v2.js',
+  './js/editorial.js',
   './js/calculator-session.js',
   './js/feed-registration.js',
   './js/recent-feed.js',
@@ -42,6 +44,9 @@ const CORE_ASSETS = [
   './guide/feed-reading/nutrition-label/',
   './guide/feed-reading/comparison/',
   './guide/feed-reading/standards/',
+  './editorial/',
+  './editorial/dm-comparison/',
+  './editorial/estimated-calories/',
   // Legacy archive URL remains precached only as a compatibility redirect.
   './archive/'
 ];
