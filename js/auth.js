@@ -207,18 +207,23 @@ function getFeedManufacturer(feed) {
   return separatorIndex >= 0 ? display.slice(0, separatorIndex).trim() : '';
 }
 
-function getSelectedFeedState(type, name) {
-  const feeds = type === 'dry'
+function getCalculationSelectedFeeds() {
+  const switching = Boolean(document.getElementById('drySwitching')?.checked);
+  const dryFeeds = switching
     ? (state.dryFeeds || []).filter(Boolean)
-    : (state.wetSlotIds || []).map(slotId => state.wetFeedMap?.[slotId]).filter(Boolean);
+    : [state.dryFeeds?.[0]].filter(Boolean);
+  const wetFeeds = (state.wetSlotIds || [])
+    .map(slotId => state.wetFeedMap?.[slotId])
+    .filter(Boolean);
 
-  return feeds.find(feed => feed?.name === name) || null;
+  return { dryFeeds, wetFeeds };
 }
 
 async function resolveCalculationFeedAmounts(lastResult) {
+  const { dryFeeds, wetFeeds } = getCalculationSelectedFeeds();
   const selections = [
-    ...(lastResult.건사료_결과 || []).map(item => ({ type: 'dry', item })),
-    ...(lastResult.습식사료_결과 || []).map(item => ({ type: 'wet', item }))
+    ...(lastResult.건사료_결과 || []).map((item, index) => ({ type: 'dry', item, selectedFeed: dryFeeds[index] || null })),
+    ...(lastResult.습식사료_결과 || []).map((item, index) => ({ type: 'wet', item, selectedFeed: wetFeeds[index] || null }))
   ];
 
   if (!selections.length) return [];
@@ -232,8 +237,7 @@ async function resolveCalculationFeedAmounts(lastResult) {
 
   if (error) throw error;
 
-  return selections.map(({ type, item }) => {
-    const selectedFeed = getSelectedFeedState(type, item.이름);
+  return selections.map(({ type, item, selectedFeed }) => {
     const manufacturer = getFeedManufacturer(selectedFeed);
     const candidates = (data || []).filter(row => row.제품명 === item.이름 && row.type === type);
     const matched = manufacturer
