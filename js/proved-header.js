@@ -20,7 +20,7 @@
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
     { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
-    { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/archive/'] },
+    { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/editorial/', '/archive/'] },
     { label: '로그인', auth: true }
   ];
 
@@ -42,7 +42,7 @@
     archive: [
       { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
       { label: '사료 읽기', href: '/guide/feed-reading/', matches: ['/guide/feed-reading/'] },
-      { label: '에디토리얼', disabled: true }
+      { label: '에디토리얼', href: '/editorial/', match: '/editorial/' }
     ]
   };
 
@@ -54,7 +54,7 @@
     if (path.startsWith('/cat-food-calculator/')) return 'cat';
     if (path.startsWith('/dog-food-calculator/')) return 'dog';
     if (path.startsWith('/food/') || path.startsWith('/feed-registration/')) return 'food';
-    if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/') || path.startsWith('/guide/feed-reading/')) return 'archive';
+    if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/') || path.startsWith('/guide/feed-reading/') || path.startsWith('/editorial/')) return 'archive';
     return null;
   }
 
