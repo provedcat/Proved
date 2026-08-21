@@ -101,11 +101,12 @@
             <h2 id="atwater-how">이제 영양성분을 kcal로 바꿉니다</h2>
             <p>단백질, 지방, 탄수화물 추정값을 알았다면 각 영양소가 어느 정도의 에너지를 내는지 계산할 수 있습니다.</p>
             <p>대표적으로 <button type="button" class="ed-term" data-ed-term="modifiedAtwater">수정 Atwater 계수</button>를 이용하면 단백질과 탄수화물에는 3.5 kcal/g, 지방에는 8.5 kcal/g을 적용합니다.</p>
+            <p>사료 100g을 기준으로 보면 영양성분 10%는 계산상 10g으로 볼 수 있습니다. 따라서 각 영양소의 <strong>g/100g 값</strong>에 계수를 곱한 뒤 더하면 <strong>kcal/100g 기준의 추정 열량</strong>을 계산할 수 있습니다.</p>
 
             <figure class="ed-graphic" data-animate aria-labelledby="atwater-graphic-title">
               <figcaption>
                 <div class="ed-visual-title" id="atwater-graphic-title">영양소마다 적용하는 에너지 계수가 다릅니다</div>
-                <p class="ed-visual-caption">숫자를 외울 필요는 없습니다. 어떤 값을 이용해 추정하는지만 이해하면 충분합니다.</p>
+                <p class="ed-visual-caption">아래 식은 사료 100g 기준입니다. 영양성분 %를 g/100g으로 보고 계산합니다.</p>
               </figcaption>
 
               <div class="ed-atwater-grid">
@@ -114,13 +115,13 @@
                 <div class="ed-atwater-item"><span>NFE · 탄수화물</span><strong>3.5 kcal/g</strong></div>
               </div>
 
-              <div class="ed-energy-equation" aria-label="추정 열량 계산 흐름">
-                <div class="ed-energy-box">단백질(g) × 3.5</div>
+              <div class="ed-energy-equation" aria-label="사료 100g 기준 추정 열량 계산 흐름">
+                <div class="ed-energy-box">단백질(g/100g) × 3.5</div>
                 <div class="ed-energy-symbol" aria-hidden="true">+</div>
-                <div class="ed-energy-box">지방(g) × 8.5</div>
+                <div class="ed-energy-box">지방(g/100g) × 8.5</div>
                 <div class="ed-energy-symbol" aria-hidden="true">+</div>
-                <div class="ed-energy-box">NFE(g) × 3.5</div>
-                <div class="ed-energy-symbol" aria-hidden="true">→ kcal</div>
+                <div class="ed-energy-box">NFE(g/100g) × 3.5</div>
+                <div class="ed-energy-symbol" aria-hidden="true">→ 추정 kcal/100g</div>
               </div>
             </figure>
           </section>
