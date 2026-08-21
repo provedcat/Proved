@@ -165,6 +165,163 @@ async function checkLoginState() {
   await refreshAuthUI();
 }
 
+// -----------------------------------------------
+// 익명/로그인 계산 이벤트 저장
+// -----------------------------------------------
+const PROVED_ANONYMOUS_SESSION_KEY = 'proved.anonymousSessionId.v1';
+let volatileAnonymousSessionId = null;
+
+function createAnonymousSessionId() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
+    const random = Math.floor(Math.random() * 16);
+    const value = char === 'x' ? random : ((random & 0x3) | 0x8);
+    return value.toString(16);
+  });
+}
+
+function getAnonymousSessionId() {
+  if (volatileAnonymousSessionId) return volatileAnonymousSessionId;
+
+  try {
+    const existing = localStorage.getItem(PROVED_ANONYMOUS_SESSION_KEY);
+    if (existing) {
+      volatileAnonymousSessionId = existing;
+      return existing;
+    }
+
+    const created = createAnonymousSessionId();
+    localStorage.setItem(PROVED_ANONYMOUS_SESSION_KEY, created);
+    volatileAnonymousSessionId = created;
+    return created;
+  } catch (error) {
+    volatileAnonymousSessionId = createAnonymousSessionId();
+    return volatileAnonymousSessionId;
+  }
+}
+
+function getFeedManufacturer(feed) {
+  const display = String(feed?.display || '');
+  const separatorIndex = display.indexOf(' | ');
+  return separatorIndex >= 0 ? display.slice(0, separatorIndex).trim() : '';
+}
+
+function getCalculationSelectedFeeds() {
+  const switching = Boolean(document.getElementById('drySwitching')?.checked);
+  const dryFeeds = switching
+    ? (state.dryFeeds || []).filter(Boolean)
+    : [state.dryFeeds?.[0]].filter(Boolean);
+  const wetFeeds = (state.wetSlotIds || [])
+    .map(slotId => state.wetFeedMap?.[slotId])
+    .filter(Boolean);
+
+  return { dryFeeds, wetFeeds };
+}
+
+async function resolveCalculationFeedAmounts(lastResult) {
+  const { dryFeeds, wetFeeds } = getCalculationSelectedFeeds();
+  const selections = [
+    ...(lastResult.건사료_결과 || []).map((item, index) => ({ type: 'dry', item, selectedFeed: dryFeeds[index] || null })),
+    ...(lastResult.습식사료_결과 || []).map((item, index) => ({ type: 'wet', item, selectedFeed: wetFeeds[index] || null }))
+  ];
+
+  if (!selections.length) return [];
+
+  const table = lastResult.species === 'dog' ? 'dog_feeds' : 'feeds';
+  const names = [...new Set(selections.map(({ item }) => item.이름).filter(Boolean))];
+  const { data, error } = await sb
+    .from(table)
+    .select('id,제품명,제조사,type')
+    .in('제품명', names);
+
+  if (error) throw error;
+
+  return selections.map(({ type, item, selectedFeed }) => {
+    const manufacturer = getFeedManufacturer(selectedFeed);
+    const candidates = (data || []).filter(row => row.제품명 === item.이름 && row.type === type);
+    const matched = manufacturer
+      ? candidates.find(row => String(row.제조사 || '').trim() === manufacturer) || candidates[0]
+      : candidates[0];
+
+    return {
+      feed_id: matched?.id || null,
+      feed_type: type,
+      feed_name: item.이름,
+      amount_g: Number(item.급여량_g) || 0,
+      kcal: Number(item.담당칼로리) || 0
+    };
+  });
+}
+
+async function persistCalculationEvent(lastResult) {
+  if (!lastResult || !sb) return;
+
+  const weight = Number(document.getElementById('catWeight')?.value);
+  const ageMonths = Math.max(0, Math.floor(Number(lastResult.caloriePlan?.months) || 0));
+  const neuteredValue = document.getElementById('catNeutered')?.value;
+  if (!Number.isFinite(weight) || !['true', 'false'].includes(neuteredValue)) return;
+
+  const feedAmounts = await resolveCalculationFeedAmounts(lastResult);
+  const dryFeedIds = feedAmounts.filter(item => item.feed_type === 'dry' && item.feed_id).map(item => item.feed_id);
+  const wetFeedIds = feedAmounts.filter(item => item.feed_type === 'wet' && item.feed_id).map(item => item.feed_id);
+  const { data: sessionData } = await sb.auth.getSession();
+  const user = sessionData?.session?.user || null;
+  const isDog = lastResult.species === 'dog';
+  const expectedAdultWeight = Number(document.getElementById('dogExpectedAdultWeight')?.value);
+
+  const payload = {
+    anonymous_session_id: getAnonymousSessionId(),
+    species: lastResult.species === 'dog' ? 'dog' : 'cat',
+    weight_kg: weight,
+    age_months: ageMonths,
+    is_neutered: neuteredValue === 'true',
+    is_diet: Boolean(document.getElementById('isDiet')?.checked),
+    is_pregnant: Boolean(document.getElementById('isPregnant')?.checked),
+    is_lactating: Boolean(document.getElementById('isLactating')?.checked),
+    dog_activity: isDog ? (document.querySelector('input[name="dogActivity"]:checked')?.value || 'normal') : null,
+    expected_adult_weight_kg: isDog && Number.isFinite(expectedAdultWeight) && expectedAdultWeight > 0 ? expectedAdultWeight : null,
+    dry_feed_ids: dryFeedIds,
+    wet_feed_ids: wetFeedIds,
+    dry_ratio_pct: Math.round(Number(lastResult.dryRatio || 0) * 100),
+    wet_ratio_pct: Math.round(Number(lastResult.wetRatio || 0) * 100),
+    treat_kcal: Number(lastResult.treatKcal) || 0,
+    der_kcal: Number(lastResult.DER) || 0,
+    food_kcal: Number(lastResult.foodKcal) || 0,
+    feed_amounts: feedAmounts,
+    calculated_at: new Date().toISOString(),
+    is_logged_in: Boolean(user?.id),
+    user_id: user?.id || null
+  };
+
+  const { error } = await sb.from('calculation_events').insert(payload);
+  if (error) throw error;
+}
+
+function installCalculationEventTracking() {
+  const originalCalculate = window.calculate;
+  if (typeof originalCalculate !== 'function' || originalCalculate.__provedCalculationTrackingWrapped) return;
+
+  function trackedCalculate(...args) {
+    const previousResult = state.lastResult;
+    const returnValue = originalCalculate.apply(this, args);
+    const currentResult = state.lastResult;
+
+    if (currentResult && currentResult !== previousResult && !state.isCalculationDirty) {
+      void persistCalculationEvent(currentResult).catch(error => {
+        console.warn('계산 이벤트를 저장하지 못했습니다.', error);
+      });
+    }
+
+    return returnValue;
+  }
+
+  trackedCalculate.__provedCalculationTrackingWrapped = true;
+  window.calculate = trackedCalculate;
+}
+
+installCalculationEventTracking();
+
 window.openAuthSheet = openAuthSheet;
 window.closeAuthSheet = closeAuthSheet;
 window.handleKakaoOAuthLogin = handleKakaoOAuthLogin;
