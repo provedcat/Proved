@@ -47,7 +47,7 @@ async function selectRecentFeed(type) {
   const name = recentFeedNames[type];
   if (!name) return;
   const { data, error } = await sb.from(getActiveFeedTable())
-    .select('제품명,제조사,final_me,eb_칼슘,eb_인,수분,verified,verification_status,searchable_before_review')
+    .select(getFeedSearchColumns())
     .eq('type', type).eq('verified', true).gt('final_me', 0)
     .eq('제품명', name).limit(1).maybeSingle();
   if (!error && data) {
