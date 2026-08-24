@@ -35,7 +35,7 @@ button { cursor: pointer; }
 [hidden] { display: none !important; }
 
 .food-shell {
-  width: min(calc(100% - 56px), 1180px);
+  width: min(calc(100% - (2 * var(--proved-page-gutter, 28px))), var(--proved-content-max, 1124px));
   min-height: 100vh;
   margin-inline: auto;
   background: var(--food-paper);
@@ -513,7 +513,7 @@ button { cursor: pointer; }
 }
 
 @media (max-width: 720px) {
-  .food-shell { width: calc(100% - 24px); }
+  .food-shell { width: calc(100% - (2 * var(--proved-page-gutter-mobile, 16px))); }
   .food-list-hero { padding: 56px 20px 44px; }
   .food-list-hero h1 { font-size: clamp(44px, 15vw, 62px); }
   .food-list-hero__lead { margin-top: 20px; font-size: 14px; }

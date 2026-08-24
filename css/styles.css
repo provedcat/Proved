@@ -855,3 +855,37 @@ input::placeholder { color:var(--text-placeholder); }
 .proved-trend-pet__menu{position:absolute;right:8px;top:54px;z-index:20;min-width:120px;border:1px solid var(--border-subtle);background:#fff}
 .proved-trend-pet__delete{width:100%;padding:10px 12px;border:0;border-radius:0;background:#fff;color:#b42318;font-size:12px;font-weight:750;text-align:left}
 .proved-trend-pet__delete:hover{background:#fff4f2}
+
+/* Calculator structure: one rhythm and one motion language across species. */
+:root {
+  --pc-step-space-block: 56px;
+  --pc-step-padding-inline: 48px;
+  --pc-heading-description-gap: 8px;
+  --pc-field-gap: 20px;
+}
+
+.pc-page-container { width: min(100%, 720px) !important; }
+#calculatorPage > .pc-step-section {
+  padding: var(--pc-step-space-block) var(--pc-step-padding-inline) !important;
+  gap: var(--pc-field-gap) !important;
+}
+.pc-section-heading { margin: 0 0 4px; }
+.pc-section-heading p { margin-top: var(--pc-heading-description-gap); }
+.pc-field { margin: 0; }
+.pc-field > .pc-help,
+.pc-field > .pc-inline-error { margin-top: 8px; }
+#resultArea:not(.hidden),
+.pc-analysis-block > :not(.hidden),
+.proved-pet-modal:not(.hidden) .proved-pet-modal__panel,
+#feedPickerModal:not(.hidden) [role="dialog"],
+#shareModal:not(.hidden) .share-modal-inner {
+  animation: provedReveal var(--proved-motion-base, 240ms) var(--proved-motion-ease, ease-out) both;
+}
+details[open] > :not(summary) { animation: provedReveal var(--proved-motion-fast, 180ms) var(--proved-motion-ease, ease-out) both; }
+@keyframes provedReveal {
+  from { opacity: 0; transform: translateY(var(--proved-motion-distance, 8px)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media(max-width:820px) {
+  :root { --pc-step-space-block: 40px; --pc-step-padding-inline: 20px; --pc-field-gap: 18px; }
+}

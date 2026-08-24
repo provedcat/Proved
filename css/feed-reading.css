@@ -35,7 +35,7 @@ summary:focus-visible {
 }
 
 .fr-shell {
-  width: min(calc(100% - 56px), 1180px);
+  width: min(calc(100% - (2 * var(--proved-page-gutter, 28px))), var(--proved-content-max, 1124px));
   margin: 0 auto;
   padding-bottom: 76px;
 }
