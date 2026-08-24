@@ -11,7 +11,7 @@ function getActiveFeedTable() {
 }
 
 function getFeedSearchColumns() {
-  return '제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부,verified,verification_status,searchable_before_review';
+  return 'id,제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부,calorie_source_detail,calorie_source_url,needs_calorie_review,verified,verification_status,searchable_before_review';
 }
 
 function isProvisionalFeed(feed) {
@@ -84,8 +84,19 @@ async function searchFeed(type, query, listId, slotId) {
 }
 
 function selectFeed(type, slotId, feedData, listId) {
+  const existing = type === 'dry'
+    ? state.dryFeeds.some((item, index) => index !== slotId && item?.id === feedData.id)
+    : Object.entries(state.wetFeedMap).some(([id, item]) => Number(id) !== Number(slotId) && item?.id === feedData.id);
+  if (existing) {
+    const message = type === 'dry'
+      ? '이미 선택한 건사료입니다. 다른 제품을 선택해 주세요.'
+      : '이미 선택한 습식사료입니다. 다른 제품을 선택해 주세요.';
+    showCalculatorError(type === 'dry' ? 'dryFeedError' : 'wetFeedError', message, type === 'dry' ? `dryInput${slotId + 1}` : `wetInput_${slotId}`);
+    return false;
+  }
   const provisional = isProvisionalFeed(feedData);
   const feed = {
+    id: feedData.id,
     name: feedData.제품명,
     display: feedData.제조사 ? `${feedData.제조사} | ${feedData.제품명}` : feedData.제품명,
     kcal: feedData.final_me,
@@ -94,6 +105,9 @@ function selectFeed(type, slotId, feedData, listId) {
     moisture: feedData.수분 ?? null,
     ingredients: feedData.전성분 || '',
     complete: feedData.완전식여부 || '',
+    lifeStage: `${feedData.제품명 || ''} ${feedData.전성분 || ''}`,
+    estimatedCalories: /추정|계산|estimated|calculated/i.test(feedData.calorie_source_detail || '') && !feedData.calorie_source_url,
+    needsCalorieReview: feedData.needs_calorie_review === true,
     provisional,
     verificationStatus: feedData.verification_status || (provisional ? 'pending_review' : 'approved')
   };
@@ -123,6 +137,7 @@ function selectFeed(type, slotId, feedData, listId) {
 
   document.getElementById(listId)?.classList.add('hidden');
   markCalculationDirty();
+  return true;
 }
 
 document.addEventListener('click', event => {
@@ -346,8 +361,7 @@ function renderFeedPicker() {
 function selectFeedFromPicker(index) {
   const feedData = getSortedFeedPickerFeeds()[index];
   if (!feedData) return;
-  selectFeed(feedPickerState.type, feedPickerState.slotId, feedData, null);
-  closeFeedPicker();
+  if (selectFeed(feedPickerState.type, feedPickerState.slotId, feedData, null)) closeFeedPicker();
 }
 
 window.openFeedPicker = openFeedPicker;

@@ -2,7 +2,7 @@ const PROVED_CALCULATOR_SESSION_KEY = 'proved.calculatorDraft.v1';
 
 const calculatorDraftFieldSelectors = [
   '#catName', '#catBirth', '#catWeight', '#catNeutered',
-  '#isDiet', '#isPregnant', '#isLactating', '#dogExpectedAdultWeight',
+  '#isDiet', '#bcsValue', '#isPregnant', '#isLactating', '#dogExpectedAdultWeight',
   '#drySwitching', '#drySwPct1', '#drySwPct2', '#ratioSlider', '#treatKcalInput',
   'input[name="dogActivity"]', 'input[name="treatReservePct"]'
 ];
