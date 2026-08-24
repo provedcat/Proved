@@ -359,3 +359,61 @@ body:has(.guide-shell) {
     width: calc(100% - 28px) !important;
   }
 }
+/* Shared content geometry and restrained interaction motion. */
+:root {
+  --proved-content-max: 1124px;
+  --proved-page-gutter: 28px;
+  --proved-page-gutter-mobile: 16px;
+  --proved-motion-fast: 180ms;
+  --proved-motion-base: 240ms;
+  --proved-motion-distance: 8px;
+  --proved-motion-ease: cubic-bezier(.2, .75, .25, 1);
+}
+
+.proved-container,
+.pc-app-shell,
+.registration-shell,
+.food-shell,
+.guide-shell,
+.ed-shell,
+.proved-site-footer {
+  box-sizing: border-box;
+  width: min(calc(100% - (2 * var(--proved-page-gutter))), var(--proved-content-max)) !important;
+  margin-inline: auto !important;
+}
+
+.proved-global-header,
+.proved-section-subnav {
+  max-width: var(--proved-content-max);
+  margin-inline: auto;
+}
+
+.proved-global-header__item,
+.proved-section-subnav__item,
+.proved-site-footer a {
+  transition: color var(--proved-motion-fast) var(--proved-motion-ease), opacity var(--proved-motion-fast) var(--proved-motion-ease), text-decoration-color var(--proved-motion-fast) var(--proved-motion-ease);
+}
+
+.proved-site-footer a:hover { text-decoration: underline !important; text-underline-offset: 4px; }
+
+@media (max-width: 720px) {
+  .proved-container,
+  .pc-app-shell,
+  .registration-shell,
+  .food-shell,
+  .guide-shell,
+  .ed-shell,
+  .proved-site-footer {
+    width: calc(100% - (2 * var(--proved-page-gutter-mobile))) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

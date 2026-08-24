@@ -40,7 +40,7 @@
     button { cursor:pointer; }
 
     .registration-shell {
-      width:min(100%,1180px);
+      width:min(calc(100% - (2 * var(--proved-page-gutter, 28px))),var(--proved-content-max,1124px));
       margin:0 auto;
       padding:0 28px 96px;
     }
@@ -62,7 +62,7 @@
       flex-direction:column;
       justify-content:flex-end;
       padding:76px 72px 64px 0;
-      animation:registrationRise .55s ease-out both;
+      animation:registrationRise .24s var(--proved-motion-ease) both;
     }
 
     .registration-hero__index {
@@ -100,7 +100,7 @@
       padding:56px 40px 48px;
       background:var(--reg-blue);
       color:#fff;
-      animation:registrationRise .55s .08s ease-out both;
+      animation:registrationRise .24s .04s var(--proved-motion-ease) both;
     }
 
     .registration-context__intro {
@@ -168,7 +168,7 @@
       display:grid;
       grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
       border-bottom:1px solid var(--reg-line);
-      animation:registrationRise .55s .14s ease-out both;
+      animation:registrationRise .24s .08s var(--proved-motion-ease) both;
     }
 
     .registration-route {
@@ -683,7 +683,7 @@
     }
 
     /* Registration photo flow v2 */
-    .registration-shell { width:min(calc(100% - 48px),1180px); padding:0 0 96px; }
+    .registration-shell { width:min(calc(100% - (2 * var(--proved-page-gutter, 28px))),var(--proved-content-max,1124px)); padding:0 0 96px; }
     .registration-shell > .proved-global-header { width:100%; margin:0; }
     .registration-hero h1,.registration-route__head h2,.registration-photo-guide__head h2 { color:var(--reg-blue); }
     .registration-routes { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
