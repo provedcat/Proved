@@ -534,16 +534,16 @@ input[type="range"]::-moz-range-thumb {
 #shareCard .sc-analysis,
 #shareCard .sc-footer,
 #shareCard .sc-energy-details {
-  background: var(--proved-color-blue) !important;
-  border-color: rgba(255, 255, 255, .34) !important;
+  background: var(--proved-color-white) !important;
+  border-color: var(--proved-color-line) !important;
 }
 
 #shareCard .sc-feed-row,
 #shareCard .sc-an-card,
 #shareCard .sc-cap-item,
 #shareCard .sc-energy-details > div {
-  background: transparent !important;
-  border-color: rgba(255, 255, 255, .34) !important;
+  background: var(--proved-color-white) !important;
+  border-color: var(--proved-color-line) !important;
 }
 
 #shareCard .sc-brand,
@@ -556,7 +556,7 @@ input[type="range"]::-moz-range-thumb {
 #shareCard .sc-cap-item-val,
 #shareCard .sc-water-ml,
 #shareCard .sc-energy-details strong {
-  color: var(--proved-color-white) !important;
+  color: var(--proved-color-blue) !important;
 }
 
 #shareCard .sc-cat-sub,
@@ -574,17 +574,20 @@ input[type="range"]::-moz-range-thumb {
 #shareCard .sc-footer-url,
 #shareCard .sc-footer-date,
 #shareCard .sc-energy-details > div {
-  color: rgba(255, 255, 255, .68) !important;
+  color: var(--proved-color-muted) !important;
 }
 
 .sc-dry-seg {
-  background: var(--proved-color-white) !important;
+  background: var(--cat-dry, #FF9F43) !important;
 }
 
-.sc-wet-seg,
+.sc-wet-seg {
+  background: var(--cat-wet, #3D8BFF) !important;
+}
+
 .sc-ratio-bar,
 .sc-water-gauge-track {
-  background: rgba(255, 255, 255, .34) !important;
+  background: var(--proved-color-line) !important;
 }
 
 .share-close-btn {
