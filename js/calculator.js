@@ -349,6 +349,67 @@ function updateRatio(v) {
   updateFeedingPreview();
 }
 
+function updateMobileFeedingPlan() {
+  const dry = document.getElementById('previewDryGrams')?.textContent || '—';
+  const wet = document.getElementById('previewWetGrams')?.textContent || '—';
+  const dryPct = document.getElementById('dryPct')?.textContent || '60';
+  const wetPct = document.getElementById('wetPct')?.textContent || '40';
+  const name = document.getElementById('catName')?.value.trim() || (state.selectedPetSpecies === 'dog' ? '내 강아지' : '내 고양이');
+  const weight = document.getElementById('catWeight')?.value;
+  const summary = document.getElementById('mobilePlanSummary');
+  if (summary) summary.textContent = dry === '—' && wet === '—' ? '입력하면서 급여 계획을 확인하세요' : `건식 ${dry}g · 습식 ${wet}g`;
+  const values = {
+    mobilePlanPet: name,
+    mobilePlanProfile: [state.selectedPetSpecies === 'dog' ? 'DOG' : 'CAT', weight ? `${weight} kg` : ''].filter(Boolean).join(' · '),
+    mobilePlanDry: `${dry} g`, mobilePlanWet: `${wet} g`, mobilePlanRatio: `DRY ${dryPct} · WET ${wetPct}`
+  };
+  Object.entries(values).forEach(([id, value]) => { const node = document.getElementById(id); if (node) node.textContent = value; });
+  document.getElementById('mobilePlanFinalAction')?.classList.toggle('hidden', !state.lastResult || state.isCalculationDirty);
+}
+
+function setMobileCalculatorStep(index, shouldScroll = true) {
+  if (!window.matchMedia('(max-width: 820px)').matches) return;
+  const steps = [...document.querySelectorAll('#feedsStep, #petInfoStep, #ratioStep, #resultArea')];
+  steps.forEach((step, stepIndex) => {
+    step.classList.toggle('pc-mobile-current', stepIndex === index);
+    step.classList.toggle('pc-mobile-collapsed', stepIndex !== index && !step.classList.contains('hidden'));
+    step.dataset.mobileStepState = stepIndex < index ? 'complete' : stepIndex === index ? 'current' : 'upcoming';
+  });
+  if (shouldScroll) steps[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function initializeMobileCalculatorFlow() {
+  if (!window.matchMedia('(max-width: 820px)').matches) return;
+  const steps = [...document.querySelectorAll('#feedsStep, #petInfoStep, #ratioStep')];
+  if (!steps.length) return;
+  ['사료 선택 완료', '반려동물 정보 완료', '이 비율로 계산'].forEach((label, index) => {
+    const step = steps[index];
+    const heading = step.querySelector('.pc-section-heading');
+    const reopen = event => {
+      if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+      if (event.type === 'keydown') event.preventDefault();
+      setMobileCalculatorStep(index);
+    };
+    heading?.setAttribute('role', 'button'); heading?.setAttribute('tabindex', '0');
+    heading?.addEventListener('click', reopen); heading?.addEventListener('keydown', reopen);
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'pc-mobile-step-next'; button.textContent = label;
+    button.addEventListener('click', () => index < 2 ? setMobileCalculatorStep(index + 1) : calculate());
+    step.appendChild(button);
+  });
+  document.body.insertAdjacentHTML('beforeend', `
+    <aside class="pc-mobile-plan-bar" aria-label="현재 급여 계획"><span><b>PV</b><small>현재 급여 계획</small><strong id="mobilePlanSummary">입력하면서 급여 계획을 확인하세요</strong></span><button type="button" id="mobilePlanOpen">계획 보기</button></aside>
+    <div class="pc-mobile-plan-sheet" id="mobilePlanSheet" aria-hidden="true"><button type="button" class="pc-mobile-plan-backdrop" aria-label="급여 계획 닫기"></button><section role="dialog" aria-modal="true" aria-labelledby="mobilePlanTitle"><button type="button" class="pc-mobile-plan-close" aria-label="급여 계획 닫기">ⓧ</button><article class="pc-mobile-plan-paper"><header><div><b id="mobilePlanTitle">PROVED</b><small>DAILY FEEDING PLAN</small></div><span>PV</span></header><div class="pc-mobile-plan-meta"><p><small>NAME</small><strong id="mobilePlanPet">—</strong></p><p><small>PROFILE</small><strong id="mobilePlanProfile">—</strong></p></div><div class="pc-mobile-plan-mark">PV</div><div class="pc-mobile-plan-line"><span>DRY</span><strong id="mobilePlanDry">— g</strong></div><div class="pc-mobile-plan-line"><span>WET</span><strong id="mobilePlanWet">— g</strong></div><div class="pc-mobile-plan-ratio" id="mobilePlanRatio">DRY 60 · WET 40</div><footer><span>계산값은 관찰을 시작하기 위한 기준입니다.</span><b>proved.kr</b></footer></article><button type="button" id="mobilePlanFinalAction" class="pc-mobile-plan-final hidden">최종 이미지 저장·공유</button></section></div>`);
+  const sheet = document.getElementById('mobilePlanSheet');
+  const close = () => { sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+  document.getElementById('mobilePlanOpen').addEventListener('click', () => { updateMobileFeedingPlan(); sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; });
+  sheet.querySelector('.pc-mobile-plan-backdrop').addEventListener('click', close);
+  sheet.querySelector('.pc-mobile-plan-close').addEventListener('click', close);
+  document.getElementById('mobilePlanFinalAction').addEventListener('click', () => { close(); openShareModal(); });
+  document.querySelectorAll('#calculatorPage input, #calculatorPage select').forEach(control => control.addEventListener('input', updateMobileFeedingPlan));
+  setMobileCalculatorStep(0, false); updateMobileFeedingPlan();
+}
+
 function getTreatKcal() {
   return Math.max(0, Math.round(Number(document.getElementById('treatKcalInput')?.value) || 0));
 }
@@ -387,6 +448,7 @@ function updateFeedingPreview() {
   if (!Number.isFinite(weight) || !birthStr || !['true', 'false'].includes(neutered)) {
     if (document.getElementById('previewDryGrams')) document.getElementById('previewDryGrams').textContent = '—';
     if (document.getElementById('previewWetGrams')) document.getElementById('previewWetGrams').textContent = '—';
+    updateMobileFeedingPlan();
     return;
   }
   const species = state.selectedPetSpecies || 'cat';
@@ -405,6 +467,7 @@ function updateFeedingPreview() {
   if (wetPreview) wetPreview.textContent = preview.wetEntries.length ? preview.wetGrams : '—';
   const share = document.getElementById('treatKcalShare');
   if (share) share.textContent = `하루 필요 열량의 ${(treatKcal / plan.DER * 100).toFixed(1)}%`;
+  updateMobileFeedingPlan();
 }
 
 // -----------------------------------------------
@@ -649,11 +712,13 @@ function calculate() {
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
   state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, caloriePlan, bcs: diet ? bcs : null, ...resultData };
   markCalculationFresh();
+  updateMobileFeedingPlan();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
   const resultArea = document.getElementById('resultArea');
   resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
   resultArea.focus({ preventScroll: true });
+  setMobileCalculatorStep(3, false);
 }
 
 function renderDietWarnings({ species, plan, allocations, treatKcal, diet, bcs }) {
@@ -747,6 +812,7 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
     });
   document.querySelectorAll('input[name="dogActivity"]').forEach(input => input.addEventListener('change', updateFeedingPreview));
   updateRatio(document.getElementById('ratioSlider')?.value || 60);
+  initializeMobileCalculatorFlow();
 });
 
 // -----------------------------------------------
