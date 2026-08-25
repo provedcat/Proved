@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260825-mobile-pv-plan-v1">
+  <link rel="stylesheet" href="/css/styles.css?v=20260825-feeding-document-v2">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260816-surface-consistency-v1">
   <link rel="stylesheet" href="/css/proved-header.css?v=20260816-surface-consistency-v1">
   <script defer src="/js/proved-header.js?v=20260814-unified-chrome-v1"></script>
@@ -192,7 +192,18 @@
     <section id="ratioStep" class="pc-step-section pc-section-card" aria-labelledby="ratioStepTitle"><div class="pc-section-heading"><h2 id="ratioStepTitle" class="pc-section-title"><span>03</span> 급여 비율</h2><p>비율을 움직이면 예상 급여량이 바로 달라집니다.</p></div><section class="pc-ratio-card"><div class="pc-ratio-feed-names"><p class="pc-dry-text"><span>건식</span><strong id="ratioDryFeedName">선택한 건사료 없음</strong></p><p class="pc-wet-text"><span>습식</span><strong id="ratioWetFeedName">선택한 습식사료 없음</strong></p></div><div class="pc-ratio-values"><strong class="pc-dry-text">건식 <span id="dryPct">60</span>%</strong><strong class="pc-wet-text">습식 <span id="wetPct">40</span>%</strong></div><label class="sr-only" for="ratioSlider">건식과 습식 급여 비율</label><input type="range" id="ratioSlider" min="0" max="100" value="60" oninput="updateRatio(this.value)" aria-describedby="ratioHelp"><p id="ratioHelp" class="pc-help">건식과 습식의 급여 비율을 조정하세요.</p><div class="pc-live-preview" id="feedingPreview" aria-live="polite"><p class="pc-dry-text"><span>건식 예상 급여량</span><strong><span id="previewDryGrams">—</span>g</strong></p><p class="pc-wet-text"><span>습식 예상 급여량</span><strong>총 <span id="previewWetGrams">—</span>g</strong></p></div></section><button type="button" onclick="calculate()" class="pc-primary-button">이 구성으로 계산하기</button></section>
 
     <!-- 4단계: 계산 결과 -->
-    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>04</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p><aside class="pc-diet-warning-box hidden" aria-labelledby="dietWarningsTitle"><h3 id="dietWarningsTitle">식단 확인이 필요한 항목</h3><ul id="dietWarnings"></ul></aside></section>
+    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite">
+      <p class="pc-section-title"><span>04</span> 오늘의 급여 계획</p>
+      <article id="feedingPlanDocument" class="pc-feeding-document">
+        <header class="pc-document-header"><div><strong>PROVED</strong><span>DAILY FEEDING PLAN</span></div><time id="planDate"></time></header>
+        <div class="pc-document-pet"><span>PET</span><h2 id="resultTitle">하루 급여 계획</h2><strong id="planPetName">내 고양이</strong><small id="planPetProfile"></small></div>
+        <div id="resItems" class="pc-result-items"></div>
+        <div class="pc-result-summary"><div><span>MEAL ENERGY</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div><span>DAILY ENERGY</span><strong><span id="resDER">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>TREATS</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div>
+        <div class="pc-document-analysis"><div><span>Ca : P</span><strong id="planCapRatio">—</strong><small id="planCapStatus"></small></div><div><span>WATER</span><strong id="planWaterIntake">—</strong><small id="planWaterNeed">—</small><em id="planWaterRate">—</em></div></div>
+        <footer><span>proved.kr</span><span>급여량은 체중·체형 변화에 맞춰 조정하세요.</span></footer>
+      </article>
+      <p id="resultLead" class="pc-result-lead hidden"></p><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 비율 보기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취 보기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">이 문서 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p><aside class="pc-diet-warning-box hidden" aria-labelledby="dietWarningsTitle"><h3 id="dietWarningsTitle">식단 확인이 필요한 항목</h3><ul id="dietWarnings"></ul></aside>
+    </section>
 
 
 
@@ -391,7 +402,6 @@
       <!-- 헤더 -->
       <div class="sc-header">
         <div class="sc-brand">PROVED<small>DAILY FEEDING PLAN</small></div>
-        <div class="sc-pv" aria-label="PV">PV</div>
         <div>
           <div class="sc-cat-name" id="sc_catName">—</div>
           <div class="sc-cat-sub"  id="sc_catSub">—</div>
@@ -650,14 +660,14 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="/js/proved-shell.js?v=20260813-auth-route-v1"></script>
 <script src="/js/pwa-install.js?v=20260812-flat-analysis-flow"></script>
-<script src="/js/calculator.js?v=20260825-mobile-pv-plan-v1"></script>
+<script src="/js/calculator.js?v=20260825-feeding-document-v2"></script>
 <script src="/js/feed-search.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/calculator-session.js?v=20260806-feed-registration-flow"></script>
 <script src="/js/recent-feed.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/saved-cats.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/auth.js?v=20260728-calculator-pet-load"></script>
 <script src="/js/wet-beta-access.js?v=20260814-unified-chrome-v1"></script>
-<script src="/js/share-card.js?v=20260825-mobile-pv-plan-v1"></script>
+<script src="/js/share-card.js?v=20260825-feeding-document-v2"></script>
 <script src="/js/weight-trend.js?v=20260812-legacy-cleanup-v2"></script>
 </body>
 </html>
