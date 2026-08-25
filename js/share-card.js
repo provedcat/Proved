@@ -42,7 +42,7 @@ function fillShareCard() {
   document.getElementById('sc_catName').textContent = catName;
   document.getElementById('sc_catSub').textContent  = subTxt;
   const brand = document.querySelector('.sc-brand');
-  if (brand) brand.textContent = 'PROVED';
+  if (brand?.firstChild) brand.firstChild.nodeValue = 'PROVED';
   document.getElementById('sc_der').textContent     = result.DER;
   document.getElementById('sc_foodKcal').textContent = result.foodKcal ?? result.DER;
   const treatBlock = document.getElementById('sc_treatBlock');
