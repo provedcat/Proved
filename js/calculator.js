@@ -349,24 +349,6 @@ function updateRatio(v) {
   updateFeedingPreview();
 }
 
-function updateMobileFeedingPlan() {
-  const dry = document.getElementById('previewDryGrams')?.textContent || '—';
-  const wet = document.getElementById('previewWetGrams')?.textContent || '—';
-  const dryPct = document.getElementById('dryPct')?.textContent || '60';
-  const wetPct = document.getElementById('wetPct')?.textContent || '40';
-  const name = document.getElementById('catName')?.value.trim() || (state.selectedPetSpecies === 'dog' ? '내 강아지' : '내 고양이');
-  const weight = document.getElementById('catWeight')?.value;
-  const summary = document.getElementById('mobilePlanSummary');
-  if (summary) summary.textContent = dry === '—' && wet === '—' ? '입력하면서 급여 계획을 확인하세요' : `건식 ${dry}g · 습식 ${wet}g`;
-  const values = {
-    mobilePlanPet: name,
-    mobilePlanProfile: [state.selectedPetSpecies === 'dog' ? 'DOG' : 'CAT', weight ? `${weight} kg` : ''].filter(Boolean).join(' · '),
-    mobilePlanDry: `${dry} g`, mobilePlanWet: `${wet} g`, mobilePlanRatio: `DRY ${dryPct} · WET ${wetPct}`
-  };
-  Object.entries(values).forEach(([id, value]) => { const node = document.getElementById(id); if (node) node.textContent = value; });
-  document.getElementById('mobilePlanFinalAction')?.classList.toggle('hidden', !state.lastResult || state.isCalculationDirty);
-}
-
 function setMobileCalculatorStep(index, shouldScroll = true) {
   if (!window.matchMedia('(max-width: 820px)').matches) return;
   const steps = [...document.querySelectorAll('#feedsStep, #petInfoStep, #ratioStep, #resultArea')];
@@ -397,17 +379,8 @@ function initializeMobileCalculatorFlow() {
     button.addEventListener('click', () => index < 2 ? setMobileCalculatorStep(index + 1) : calculate());
     step.appendChild(button);
   });
-  document.body.insertAdjacentHTML('beforeend', `
-    <aside class="pc-mobile-plan-bar" aria-label="현재 급여 계획"><span><b>PV</b><small>현재 급여 계획</small><strong id="mobilePlanSummary">입력하면서 급여 계획을 확인하세요</strong></span><button type="button" id="mobilePlanOpen">계획 보기</button></aside>
-    <div class="pc-mobile-plan-sheet" id="mobilePlanSheet" aria-hidden="true"><button type="button" class="pc-mobile-plan-backdrop" aria-label="급여 계획 닫기"></button><section role="dialog" aria-modal="true" aria-labelledby="mobilePlanTitle"><button type="button" class="pc-mobile-plan-close" aria-label="급여 계획 닫기">ⓧ</button><article class="pc-mobile-plan-paper"><header><div><b id="mobilePlanTitle">PROVED</b><small>DAILY FEEDING PLAN</small></div><span>PV</span></header><div class="pc-mobile-plan-meta"><p><small>NAME</small><strong id="mobilePlanPet">—</strong></p><p><small>PROFILE</small><strong id="mobilePlanProfile">—</strong></p></div><div class="pc-mobile-plan-mark">PV</div><div class="pc-mobile-plan-line"><span>DRY</span><strong id="mobilePlanDry">— g</strong></div><div class="pc-mobile-plan-line"><span>WET</span><strong id="mobilePlanWet">— g</strong></div><div class="pc-mobile-plan-ratio" id="mobilePlanRatio">DRY 60 · WET 40</div><footer><span>계산값은 관찰을 시작하기 위한 기준입니다.</span><b>proved.kr</b></footer></article><button type="button" id="mobilePlanFinalAction" class="pc-mobile-plan-final hidden">최종 이미지 저장·공유</button></section></div>`);
-  const sheet = document.getElementById('mobilePlanSheet');
-  const close = () => { sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
-  document.getElementById('mobilePlanOpen').addEventListener('click', () => { updateMobileFeedingPlan(); sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; });
-  sheet.querySelector('.pc-mobile-plan-backdrop').addEventListener('click', close);
-  sheet.querySelector('.pc-mobile-plan-close').addEventListener('click', close);
-  document.getElementById('mobilePlanFinalAction').addEventListener('click', () => { close(); openShareModal(); });
-  document.querySelectorAll('#calculatorPage input, #calculatorPage select').forEach(control => control.addEventListener('input', updateMobileFeedingPlan));
-  setMobileCalculatorStep(0, false); updateMobileFeedingPlan();
+  setMobileCalculatorStep(0, false);
+  updateMobileFeedingSummary();
 }
 
 function getTreatKcal() {
@@ -448,7 +421,7 @@ function updateFeedingPreview() {
   if (!Number.isFinite(weight) || !birthStr || !['true', 'false'].includes(neutered)) {
     if (document.getElementById('previewDryGrams')) document.getElementById('previewDryGrams').textContent = '—';
     if (document.getElementById('previewWetGrams')) document.getElementById('previewWetGrams').textContent = '—';
-    updateMobileFeedingPlan();
+    updateMobileFeedingSummary();
     return;
   }
   const species = state.selectedPetSpecies || 'cat';
@@ -465,9 +438,9 @@ function updateFeedingPreview() {
   const wetPreview = document.getElementById('previewWetGrams');
   if (dryPreview) dryPreview.textContent = preview.dryFeeds.length ? preview.dryGrams : '—';
   if (wetPreview) wetPreview.textContent = preview.wetEntries.length ? preview.wetGrams : '—';
+  updateMobileFeedingSummary({ dryTotalGrams: preview.dryFeeds.length ? preview.dryGrams : '—', wetTotalGrams: preview.wetEntries.length ? preview.wetGrams : '—' });
   const share = document.getElementById('treatKcalShare');
   if (share) share.textContent = `하루 필요 열량의 ${(treatKcal / plan.DER * 100).toFixed(1)}%`;
-  updateMobileFeedingPlan();
 }
 
 // -----------------------------------------------
@@ -680,21 +653,21 @@ function calculate() {
     const grams = Math.round(kcal / (feed.kcal / 1000));
     if (grams > 0 || kcal > 0) resultData.습식사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
-  [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach(item => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><div><span>${item.type}</span><h3>${item.이름}</h3><p>전체 식단의 ${item.비율}%</p></div><div><strong>${item.급여량_g}g</strong><p>${item.담당칼로리} kcal</p></div></article>`));
-  const resultTitle = document.getElementById('resultTitle');
+  [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${item.이름}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
   const dryTotalGrams = resultData.건사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
   const wetTotalGrams = resultData.습식사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
-  resultTitle.replaceChildren();
-  const firstLine = document.createElement('span');
-  firstLine.textContent = `오늘 ${name ? `${name}에게 ` : ''}건사료 ${dryTotalGrams}g과`;
-  const secondLine = document.createElement('span');
-  secondLine.textContent = `습식사료 총 ${wetTotalGrams}g을 급여하세요.`;
-  resultTitle.append(firstLine, secondLine);
+  document.getElementById('resultTitle').textContent = '하루 급여 계획';
+  document.getElementById('planPetName').textContent = name || (species === 'dog' ? '내 강아지' : '내 고양이');
+  document.getElementById('planPetProfile').textContent = [weight ? `${weight} kg` : '', species === 'dog' ? 'DOG' : 'CAT'].filter(Boolean).join(' · ');
+  const resultDate = new Date();
+  document.getElementById('planDate').textContent = `${resultDate.getFullYear()}.${String(resultDate.getMonth() + 1).padStart(2, '0')}.${String(resultDate.getDate()).padStart(2, '0')}`;
   document.getElementById('resDER').textContent = DER;
   document.getElementById('resFoodKcal').textContent = foodKcal;
   document.getElementById('resTreatKcal').textContent = treatKcal;
   document.getElementById('resTreatRow').classList.toggle('hidden', treatKcal === 0);
   document.getElementById('resItems').innerHTML = resultCards.join('');
+  renderCompactPlanAnalysis(resultData, weight);
+  updateMobileFeedingSummary({ dryTotalGrams, wetTotalGrams, complete: true });
   renderDogCalculationContext(species, caloriePlan, [...dryFeeds, ...wetEntries.map(entry => entry.feed)]);
   const warningAllocations = [
     ...dryFeeds.map((feed, index) => ({ feed, share: dryRatio * (switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1) })),
@@ -712,13 +685,50 @@ function calculate() {
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
   state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, caloriePlan, bcs: diet ? bcs : null, ...resultData };
   markCalculationFresh();
-  updateMobileFeedingPlan();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
   const resultArea = document.getElementById('resultArea');
   resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
   resultArea.focus({ preventScroll: true });
   setMobileCalculatorStep(3, false);
+}
+
+function renderCompactPlanAnalysis(resultData, weight) {
+  const feeds = [...resultData.건사료_결과, ...resultData.습식사료_결과];
+  let calcium = 0, phosphorus = 0, water = 0;
+  feeds.forEach(feed => {
+    if (feed.에너지기준_칼슘 > 0 && feed.에너지기준_인 > 0) {
+      calcium += feed.에너지기준_칼슘 * feed.담당칼로리;
+      phosphorus += feed.에너지기준_인 * feed.담당칼로리;
+    }
+    if (feed.수분_pct > 0) water += feed.급여량_g * feed.수분_pct / 100;
+  });
+  const ratio = phosphorus > 0 ? calcium / phosphorus : null;
+  const ratioOk = ratio !== null && ratio >= 1 && ratio <= 2;
+  document.getElementById('planCapRatio').textContent = ratio === null ? '데이터 없음' : `${ratio.toFixed(2)} : 1`;
+  document.getElementById('planCapStatus').textContent = ratio === null ? '' : (ratioOk ? '정상' : '확인 필요');
+  const intake = Math.round(water * 10) / 10;
+  const needMin = Math.round(weight * 44);
+  const needMax = Math.round(weight * 55);
+  const rate = needMin > 0 ? Math.round(intake / needMin * 100) : 0;
+  document.getElementById('planWaterIntake').textContent = `${intake} ml`;
+  document.getElementById('planWaterNeed').textContent = `필요 ${needMin}–${needMax} ml`;
+  document.getElementById('planWaterRate').textContent = `${rate}%`;
+}
+
+function updateMobileFeedingSummary({ dryTotalGrams = null, wetTotalGrams = null, complete = false } = {}) {
+  let bar = document.getElementById('mobileFeedingSummary');
+  if (!bar) {
+    bar = document.createElement('aside');
+    bar.id = 'mobileFeedingSummary';
+    bar.className = 'pc-mobile-feeding-summary';
+    bar.setAttribute('aria-live', 'polite');
+    document.body.appendChild(bar);
+  }
+  const dry = dryTotalGrams ?? document.getElementById('previewDryGrams')?.textContent ?? '—';
+  const wet = wetTotalGrams ?? document.getElementById('previewWetGrams')?.textContent ?? '—';
+  bar.innerHTML = `<span>${complete ? 'CALCULATED PLAN' : 'LIVE FEEDING AMOUNT'}</span><div><p>DRY <strong>${dry}<small>g</small></strong></p><p>WET <strong>${wet}<small>g</small></strong></p></div>`;
+  bar.classList.toggle('is-complete', complete);
 }
 
 function renderDietWarnings({ species, plan, allocations, treatKcal, diet, bcs }) {
@@ -794,7 +804,8 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
   const resultLabel = document.querySelector('#resultArea > .pc-section-title');
   if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
   const shareButton = document.getElementById('openShareModalBtn');
-  if (shareButton) shareButton.textContent = '결과 이미지 보기';
+  if (shareButton) shareButton.textContent = '이 문서 저장·공유';
+  updateMobileFeedingSummary();
 
   const treatInput = document.getElementById('treatKcalInput');
   const changeTreat = amount => {
@@ -844,8 +855,6 @@ function analyzeCaP() {
   });
 
   const ratio = 총인 > 0 ? (총칼슘 / 총인).toFixed(2) : null;
-  const caOk  = 총칼슘 >= NRC.칼슘_권장 * (state.lastResult.DER / 1000);
-  const pOk   = 총인   >= NRC.인_권장   * (state.lastResult.DER / 1000);
   const rOk   = ratio  && parseFloat(ratio) >= NRC.비율_최소 && parseFloat(ratio) <= NRC.비율_상한;
 
   const sc = ok => ok ? 'is-ok' : 'is-check';
@@ -855,21 +864,9 @@ function analyzeCaP() {
   const html = `
     <div class="pc-analysis-result pc-analysis-result--cap">
       <h3>${analysisIcon}<span>칼슘 · 인 분석</span></h3>
-      <div class="pc-analysis-metrics">
-        <div>
-          <span>칼슘 섭취량</span><strong>${Math.round(총칼슘)} <small>mg/day</small></strong><em class="${sc(caOk)}">${st(caOk)}</em>
-        </div>
-        <div>
-          <span>인 섭취량</span><strong>${Math.round(총인)} <small>mg/day</small></strong><em class="${sc(pOk)}">${st(pOk)}</em>
-        </div>
-      </div>
       <div class="pc-analysis-ratio">
-        <span>칼슘 : 인 비율</span><strong class="${sc(rOk)}">${ratio ? ratio + ' : 1' : '계산 불가'}</strong><small>참고 범위 ${NRC.비율_최소}–${NRC.비율_상한} : 1</small>
+        <span>칼슘 : 인 비율</span><strong class="${sc(rOk)}">${ratio ? ratio + ' : 1' : '계산 불가'}</strong><small>${ratio ? st(rOk) : '데이터 없음'}</small>
       </div>
-      ${결과목록.map(s => `
-        <div class="pc-analysis-row">
-          <span>${s.이름}</span><strong>Ca ${s.ca_mg}mg · P ${s.p_mg}mg</strong>
-        </div>`).join('')}
       ${제외목록.length ? `<p class="pc-analysis-note">데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
       <p class="pc-analysis-note">${NRC.기준} 기준 참고값입니다.</p>
     </div>`;
@@ -912,30 +909,17 @@ function analyzeWater() {
   });
 
   총수분_ml = parseFloat(총수분_ml.toFixed(1));
-  const ok         = 총수분_ml >= 권장_최소;
-  const 부족분     = ok ? 0 : Math.round(권장_최소 - 총수분_ml);
   const 충족률     = 권장_최소 > 0 ? Math.round((총수분_ml / 권장_최소) * 100) : 0;
   const gaugeColor = 충족률 >= 100 ? '#22c55e' : 충족률 >= 70 ? '#f59e0b' : '#ef4444';
   const gaugeWidth = Math.min(충족률, 100);
 
-  let statusMsg;
-  if (총수분_ml === 0 && 결과목록.length === 0) statusMsg = '수분 데이터가 있는 사료가 없습니다.';
-  else if (ok) statusMsg = '사료를 통한 수분 섭취가 참고 최소치를 충족합니다.';
-  else statusMsg = `물그릇으로 약 ${부족분}ml 이상 추가 섭취를 권장합니다.`;
   const waterIcon = '<svg class="pc-analysis-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11Z"></path></svg>';
 
   const html = `
     <div class="pc-analysis-result pc-analysis-result--water">
       <h3>${waterIcon}<span>수분 섭취량 분석</span></h3>
-      <div class="pc-water-summary"><div><span>사료를 통한 수분 섭취</span><strong>${총수분_ml}<small>ml</small></strong></div><div><span>참고 범위</span><strong>${권장_최소}–${권장_최대}<small>ml</small></strong><small>체중 ${weight}kg 기준</small></div></div>
-      <div class="pc-water-gauge"><i style="width:${gaugeWidth}%;background:${gaugeColor}"></i></div><p class="pc-water-status">${충족률}% · ${statusMsg}</p>
-      ${결과목록.length > 0 ? `<div class="pc-analysis-rows">
-        ${결과목록.map(s => {
-          const barColor = s.종류 === '습식사료' ? '#3D8BFF' : '#FF9F43';
-          return `
-          <div class="pc-analysis-row" style="--feed-color:${barColor}"><span><small>${s.종류}</small>${s.이름}</span><strong>${s.water_ml}ml<small>${s.수분_pct}% × ${s.급여량_g}g</small></strong></div>`;
-        }).join('')}
-      </div>` : ''}
+      <div class="pc-water-summary"><div><span>섭취량</span><strong>${총수분_ml}<small>ml</small></strong></div><div><span>필요량</span><strong>${권장_최소}–${권장_최대}<small>ml</small></strong></div><div><span>충족 비율</span><strong>${충족률}<small>%</small></strong></div></div>
+      <div class="pc-water-gauge"><i style="width:${gaugeWidth}%;background:${gaugeColor}"></i></div>
       ${제외목록.length ? `<p class="pc-analysis-note">수분 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
       <p class="pc-analysis-note">WSAVA 성묘 권장 수분 44–55ml/kg/day 참고값이며 물그릇 음수량은 포함하지 않습니다.</p>
     </div>`;
