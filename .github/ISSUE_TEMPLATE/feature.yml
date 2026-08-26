@@ -1,0 +1,81 @@
+name: 기능 기획 · 변경
+description: 승인된 World Model Record를 실제 기능 작업으로 전환합니다.
+title: "[PWM-번호] "
+labels:
+  - world-model
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        GitHub는 실행 원장입니다. 기능의 문제·결정·이유는 Notion Record가 기준이며, 이 Issue에는 실행에 필요한 맥락을 연결합니다.
+  - type: input
+    id: pwm_id
+    attributes:
+      label: PWM ID
+      description: Notion World Model Records에 표시된 값을 입력하세요.
+      placeholder: PWM-19
+    validations:
+      required: true
+  - type: input
+    id: notion_url
+    attributes:
+      label: Notion Record
+      description: 해당 World Model Record URL을 붙여 넣으세요.
+      placeholder: https://app.notion.com/...
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 문제 또는 사용자 신호
+      description: 무엇이 불편하고, 어떤 근거로 지금 해결해야 하는지 적습니다.
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: 승인된 결정과 변경 이유
+      description: Current Truth와 Decision Reason을 요약합니다.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 구현 범위
+      description: 이번 작업에 포함할 것과 포함하지 않을 것을 구분합니다.
+      placeholder: |
+        포함:
+        -
+        제외:
+        -
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 기준
+      description: 사용자가 확인할 수 있는 결과로 작성합니다.
+      placeholder: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 배포 후 검증 계획
+      description: PR 병합과 효과 검증을 분리합니다. 어떤 관찰이나 지표로 판단할지 적습니다.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true

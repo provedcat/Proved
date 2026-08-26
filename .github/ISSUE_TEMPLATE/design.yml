@@ -1,0 +1,56 @@
+name: 디자인 규격 · 화면 변경
+description: 디자인 규칙과 화면 변경 이유를 World Model에 연결합니다.
+title: "[PWM-번호] "
+labels:
+  - world-model
+  - design
+body:
+  - type: input
+    id: pwm_id
+    attributes:
+      label: PWM ID
+      placeholder: PWM-6
+    validations:
+      required: true
+  - type: input
+    id: notion_url
+    attributes:
+      label: Notion Record
+      placeholder: https://app.notion.com/...
+    validations:
+      required: true
+  - type: textarea
+    id: hierarchy_problem
+    attributes:
+      label: 현재 화면의 문제
+      description: 정보 위계, 가독성, 일관성 중 무엇이 깨졌는지 적습니다.
+    validations:
+      required: true
+  - type: textarea
+    id: standard
+    attributes:
+      label: 적용할 디자인 규격
+      description: 유지할 Proved 규칙과 이번 변경 원칙을 적습니다.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 변경 범위와 유지 범위
+      placeholder: |
+        변경:
+        -
+        유지:
+        -
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 기준
+      placeholder: |
+        - [ ] PC와 모바일에서 정보 위계가 보인다.
+        - [ ] 기존 Proved 디자인 규칙을 위반하지 않는다.
+        - [ ] 전후 화면을 PR에 첨부한다.
+    validations:
+      required: true
