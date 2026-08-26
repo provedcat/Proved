@@ -1,11 +1,23 @@
 // 04 결과에 보이는 급여 계획서 자체를 저장·공유합니다.
-function openShareModal() {
+async function openShareModal() {
   if (!state.lastResult || state.isCalculationDirty) {
     alert('입력값이 변경되었습니다. 다시 계산한 후 저장하거나 공유해 주세요.');
     return;
   }
+  const preview = document.getElementById('shareCard');
+  preview.innerHTML = '<p class="share-preview-loading">이미지를 만드는 중…</p>';
   document.getElementById('shareModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  try {
+    const canvas = await captureShareCardCanvas();
+    const image = new Image();
+    image.id = 'sharePreviewImage';
+    image.alt = '저장될 하루 급여 계획 이미지 미리보기';
+    image.src = canvas.toDataURL('image/png');
+    preview.replaceChildren(image);
+  } catch (error) {
+    preview.innerHTML = '<p class="share-preview-loading">미리보기를 만들지 못했습니다. 다시 시도해 주세요.</p>';
+  }
 }
 
 function closeShareModal() {
