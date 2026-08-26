@@ -1,0 +1,70 @@
+name: 개발 이슈 · 버그
+description: 재현 가능한 문제를 World Model Record와 연결해 해결합니다.
+title: "[PWM-번호] "
+labels:
+  - world-model
+  - bug
+body:
+  - type: input
+    id: pwm_id
+    attributes:
+      label: PWM ID
+      placeholder: PWM-12
+    validations:
+      required: true
+  - type: input
+    id: notion_url
+    attributes:
+      label: Notion Record
+      placeholder: https://app.notion.com/...
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: 현재 발생하는 현상
+      description: 화면, 기기, 데이터 조건과 실제 결과를 구체적으로 적습니다.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 결과
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 근거
+      description: 스크린샷, 오류 로그, 관련 PR·릴리스 URL을 적습니다.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 해결 기준
+      placeholder: |
+        - [ ] 재현 조건에서 문제가 사라진다.
+        - [ ] 기존 동작에 회귀가 없다.
+        - [ ] Notion에 해결 Event를 남긴다.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
