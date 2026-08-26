@@ -855,6 +855,8 @@ function analyzeCaP() {
   });
 
   const ratio = 총인 > 0 ? (총칼슘 / 총인).toFixed(2) : null;
+  const caOk  = 총칼슘 >= NRC.칼슘_권장 * (state.lastResult.DER / 1000);
+  const pOk   = 총인   >= NRC.인_권장   * (state.lastResult.DER / 1000);
   const rOk   = ratio  && parseFloat(ratio) >= NRC.비율_최소 && parseFloat(ratio) <= NRC.비율_상한;
 
   const sc = ok => ok ? 'is-ok' : 'is-check';
@@ -864,9 +866,21 @@ function analyzeCaP() {
   const html = `
     <div class="pc-analysis-result pc-analysis-result--cap">
       <h3>${analysisIcon}<span>칼슘 · 인 분석</span></h3>
-      <div class="pc-analysis-ratio">
-        <span>칼슘 : 인 비율</span><strong class="${sc(rOk)}">${ratio ? ratio + ' : 1' : '계산 불가'}</strong><small>${ratio ? st(rOk) : '데이터 없음'}</small>
+      <div class="pc-analysis-metrics">
+        <div>
+          <span>칼슘 섭취량</span><strong>${Math.round(총칼슘)} <small>mg/day</small></strong><em class="${sc(caOk)}">${st(caOk)}</em>
+        </div>
+        <div>
+          <span>인 섭취량</span><strong>${Math.round(총인)} <small>mg/day</small></strong><em class="${sc(pOk)}">${st(pOk)}</em>
+        </div>
       </div>
+      <div class="pc-analysis-ratio">
+        <span>칼슘 : 인 비율</span><strong class="${sc(rOk)}">${ratio ? ratio + ' : 1' : '계산 불가'}</strong><small>참고 범위 ${NRC.비율_최소}–${NRC.비율_상한} : 1 · ${ratio ? st(rOk) : '데이터 없음'}</small>
+      </div>
+      ${결과목록.map(s => `
+        <div class="pc-analysis-row">
+          <span>${s.이름}</span><strong>Ca ${s.ca_mg}mg · P ${s.p_mg}mg</strong>
+        </div>`).join('')}
       ${제외목록.length ? `<p class="pc-analysis-note">데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
       <p class="pc-analysis-note">${NRC.기준} 기준 참고값입니다.</p>
     </div>`;
@@ -909,17 +923,30 @@ function analyzeWater() {
   });
 
   총수분_ml = parseFloat(총수분_ml.toFixed(1));
+  const ok         = 총수분_ml >= 권장_최소;
+  const 부족분     = ok ? 0 : Math.round(권장_최소 - 총수분_ml);
   const 충족률     = 권장_최소 > 0 ? Math.round((총수분_ml / 권장_최소) * 100) : 0;
   const gaugeColor = 충족률 >= 100 ? '#22c55e' : 충족률 >= 70 ? '#f59e0b' : '#ef4444';
   const gaugeWidth = Math.min(충족률, 100);
+
+  let statusMsg;
+  if (총수분_ml === 0 && 결과목록.length === 0) statusMsg = '수분 데이터가 있는 사료가 없습니다.';
+  else if (ok) statusMsg = '사료를 통한 수분 섭취가 참고 최소치를 충족합니다.';
+  else statusMsg = `물그릇으로 약 ${부족분}ml 이상 추가 섭취를 권장합니다.`;
 
   const waterIcon = '<svg class="pc-analysis-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11Z"></path></svg>';
 
   const html = `
     <div class="pc-analysis-result pc-analysis-result--water">
       <h3>${waterIcon}<span>수분 섭취량 분석</span></h3>
-      <div class="pc-water-summary"><div><span>섭취량</span><strong>${총수분_ml}<small>ml</small></strong></div><div><span>필요량</span><strong>${권장_최소}–${권장_최대}<small>ml</small></strong></div><div><span>충족 비율</span><strong>${충족률}<small>%</small></strong></div></div>
-      <div class="pc-water-gauge"><i style="width:${gaugeWidth}%;background:${gaugeColor}"></i></div>
+      <div class="pc-water-summary"><div><span>사료를 통한 수분 섭취</span><strong>${총수분_ml}<small>ml</small></strong></div><div><span>참고 범위</span><strong>${권장_최소}–${권장_최대}<small>ml</small></strong><small>체중 ${weight}kg 기준</small></div><div><span>충족 비율</span><strong>${충족률}<small>%</small></strong></div></div>
+      <div class="pc-water-gauge"><i style="width:${gaugeWidth}%;background:${gaugeColor}"></i></div><p class="pc-water-status">${충족률}% · ${statusMsg}</p>
+      ${결과목록.length > 0 ? `<div class="pc-analysis-rows">
+        ${결과목록.map(s => {
+          const barColor = s.종류 === '습식사료' ? '#3D8BFF' : '#FF9F43';
+          return `<div class="pc-analysis-row" style="--feed-color:${barColor}"><span><small>${s.종류}</small>${s.이름}</span><strong>${s.water_ml}ml<small>${s.수분_pct}% × ${s.급여량_g}g</small></strong></div>`;
+        }).join('')}
+      </div>` : ''}
       ${제외목록.length ? `<p class="pc-analysis-note">수분 데이터 없어 제외: ${제외목록.join(', ')}</p>` : ''}
       <p class="pc-analysis-note">WSAVA 성묘 권장 수분 44–55ml/kg/day 참고값이며 물그릇 음수량은 포함하지 않습니다.</p>
     </div>`;
