@@ -1,0 +1,100 @@
+name: Bug or engineering issue
+description: Record an actual-versus-expected problem and its resolution path
+title: "[PWM-____] fix: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Link this engineering issue to a Notion World Model record using its PWM ID.
+        Do not paste a private Notion URL into this public repository.
+
+  - type: input
+    id: world_model_id
+    attributes:
+      label: World Model Record
+      placeholder: PWM-0001
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Calculator
+        - Feed Registration
+        - Feed Database
+        - Archive & Editorial
+        - Authentication
+        - Data & Analytics
+        - Platform
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what the user sees, including device and state.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - P0 — data loss, safety, or core service unavailable
+        - P1 — major user path broken
+        - P2 — degraded experience with workaround
+        - P3 — minor or cosmetic
+    validations:
+      required: true
+
+  - type: textarea
+    id: suspected_cause
+    attributes:
+      label: Cause or current hypothesis
+      description: Leave explicit unknowns instead of inventing certainty.
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Resolution and regression checks
+      placeholder: |
+        - [ ] Root cause confirmed
+        - [ ] Fix tested
+        - [ ] Related paths checked
+        - [ ] Notion Event added after resolution
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submission
+      options:
+        - label: I searched for duplicates.
+          required: true
+        - label: The issue contains no credentials or private Notion URL.
+          required: true
