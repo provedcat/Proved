@@ -1,0 +1,76 @@
+name: Design standard change
+description: Change a Proved design rule while preserving the old reason and affected surfaces
+title: "[PWM-____] design: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Design rules belong in Notion. GitHub tracks only the implementation work.
+        Use the PWM ID and keep private Notion URLs out of this public repository.
+
+  - type: input
+    id: world_model_id
+    attributes:
+      label: World Model Record
+      placeholder: PWM-0001
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      multiple: true
+      options:
+        - Global header and footer
+        - Calculator
+        - Saved result image
+        - Feed registration
+        - Feed list and detail
+        - Archive and editorial
+        - Brand assets
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_rule
+    attributes:
+      label: Current rule
+      description: State the existing design standard that will be kept, changed, or superseded.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Design problem
+      description: Explain the hierarchy, readability, consistency, or brand problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_rule
+    attributes:
+      label: Proposed rule and reason
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include what was rejected and why.
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Visual acceptance criteria
+      placeholder: |
+        - [ ] PC checked
+        - [ ] Mobile checked
+        - [ ] SUIT Variable and Proved Blue rules preserved
+        - [ ] No black title or unnecessary nested card
+    validations:
+      required: true
