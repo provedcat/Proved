@@ -1,0 +1,95 @@
+name: Feature decision
+description: Create implementation work from an approved Proved World Model record
+title: "[PWM-____] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Create or locate the Notion World Model record before opening implementation work.
+        This public repository uses only the PWM ID. Do not paste a private Notion URL.
+
+  - type: input
+    id: world_model_id
+    attributes:
+      label: World Model Record
+      description: Permanent Notion Record ID
+      placeholder: PWM-0001
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Calculator
+        - Feed Database
+        - Archive & Editorial
+        - Brand & Design
+        - Data & Analytics
+        - Platform
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_problem
+    attributes:
+      label: User problem or signal
+      description: Describe the observed problem, feedback, or data that started this work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_truth
+    attributes:
+      label: Current behavior
+      description: What is true in the product today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision_reason
+    attributes:
+      label: Approved decision and reason
+      description: What was decided in Notion, and why was this option chosen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Include affected pages, components, data, and explicit exclusions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use testable checklist items.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Evidence plan
+      description: How and when will the result be validated after shipping?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submission
+      options:
+        - label: I searched for an existing Issue and World Model record.
+          required: true
+        - label: The Notion Decision State is Approved.
+          required: true
