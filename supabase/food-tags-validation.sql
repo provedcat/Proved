@@ -76,6 +76,32 @@ from (
     )
 ) q group by q.species,q.main_protein order by q.species,product_count desc,q.main_protein;
 
+-- Every non-empty, unmapped main-protein value must have the corresponding open
+-- review item. This result must be empty.
+select q.species,q.id,q.main_protein
+from (
+  select 'cat'::text species,f.id,f.메인단백질 main_protein
+  from public.feeds f
+  where nullif(btrim(f.메인단백질),'') is not null
+    and not exists (
+      select 1 from public.feed_food_tags x join public.food_tags t on t.id=x.tag_id
+      where x.feed_id=f.id and t.category='protein_source'
+    )
+  union all
+  select 'dog',f.id,f.메인단백질
+  from public.dog_feeds f
+  where nullif(btrim(f.메인단백질),'') is not null
+    and not exists (
+      select 1 from public.dog_feed_food_tags x join public.food_tags t on t.id=x.tag_id
+      where x.dog_feed_id=f.id and t.category='protein_source'
+    )
+) q
+where not exists (
+  select 1 from public.food_tag_review_queue r
+  where r.species=q.species and r.product_id=q.id
+    and r.issue_type='unknown_protein_source' and r.status='open'
+);
+
 -- 7) Chicken-free samples with complete evidence; inspect at least 10/species.
 select 'cat' species,f.id,f.제조사,f.제품명,f.전성분,x.reason
 from public.feed_food_tags x join public.food_tags t on t.id=x.tag_id join public.feeds f on f.id=x.feed_id
@@ -103,7 +129,9 @@ select species,id,제조사,제품명 from (
   select 'cat'::text species,id,제조사,제품명 from public.feeds
   union all select 'dog',id,제조사,제품명 from public.dog_feeds
 ) p where lower(concat_ws(' ',제조사,제품명)) ~
-  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트)|(hill''?s|힐스).*(prescription diet|프리스크립션 ?다이어트)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)'
+  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)'
+  and lower(concat_ws(' ',제조사,제품명)) !~
+  '(royal canin|로얄캐닌).*(urinary ?care|digestive ?care|light ?weight ?care)'
 order by species,제조사,제품명;
 
 select p.species,p.id,p.제조사,p.제품명
@@ -115,7 +143,27 @@ from (
   from public.dog_feeds f join public.dog_feed_food_tags x on x.dog_feed_id=f.id join public.food_tags t on t.id=x.tag_id
 ) p
 where p.slug='veterinary_diet' and lower(concat_ws(' ',p.제조사,p.제품명)) !~
-  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트)|(hill''?s|힐스).*(prescription diet|프리스크립션 ?다이어트)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)';
+  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)';
+
+-- Royal Canin official Veterinary families that were not tagged. This result
+-- must be empty; ordinary Urinary/Digestive/Light Weight Care lines are excluded.
+select p.species,p.id,p.제조사,p.제품명
+from (
+  select 'cat'::text species,id,제조사,제품명 from public.feeds
+  union all select 'dog',id,제조사,제품명 from public.dog_feeds
+) p
+where lower(concat_ws(' ',p.제조사,p.제품명)) ~ '(royal canin|로얄캐닌)'
+  and lower(p.제품명) ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)'
+  and lower(p.제품명) !~ '(urinary ?care|digestive ?care|light ?weight ?care)'
+  and not exists (
+    select 1 from (
+      select 'cat'::text species,x.feed_id product_id
+      from public.feed_food_tags x join public.food_tags t on t.id=x.tag_id where t.slug='veterinary_diet'
+      union all
+      select 'dog',x.dog_feed_id
+      from public.dog_feed_food_tags x join public.food_tags t on t.id=x.tag_id where t.slug='veterinary_diet'
+    ) tagged where tagged.species=p.species and tagged.product_id=p.id
+  );
 
 -- Recommended AND query (cat example): replace the array with requested slugs.
 select f.* from public.feeds f

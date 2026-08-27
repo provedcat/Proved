@@ -127,7 +127,8 @@ insert into public.food_tags (slug, label_ko, label_en, category, description, s
   ('digestive','소화기','Digestive','management_purpose','소화기 영양관리 목적',30),
   ('skin_allergy','피부·알레르기','Skin & allergy','management_purpose','피부 또는 알레르기 영양관리 목적',40),
   ('weight_management','체중관리','Weight management','management_purpose','체중 영양관리 목적',50),
-  ('hepatic','간','Hepatic','management_purpose','간 영양관리 목적',60)
+  ('hepatic','간','Hepatic','management_purpose','간 영양관리 목적',60),
+  ('diabetes','당뇨','Diabetes','management_purpose','당뇨 영양관리 목적',70)
 on conflict (slug) do update set
   label_ko = excluded.label_ko, label_en = excluded.label_en,
   category = excluded.category, description = excluded.description,
@@ -142,7 +143,8 @@ declare
   r record; j jsonb; blob text; name_text text; ingredients text; protein text;
   class_text text; identity_text text; tag_slug text; tag_source text; tag_reason text;
   has_chicken boolean; has_ambiguous_poultry boolean; has_grain boolean;
-  has_ingredients boolean; is_vet_line boolean; has_life_stage boolean; relation_name text;
+  has_ingredients boolean; is_vet_line boolean; has_life_stage boolean;
+  has_protein_source boolean; relation_name text;
 begin
   delete from public.feed_food_tags where source <> 'manual';
   delete from public.dog_feed_food_tags where source <> 'manual';
@@ -195,6 +197,7 @@ begin
       end if;
 
       -- Existing main-protein is authoritative and may yield multiple tags.
+      has_protein_source := false;
       foreach tag_slug in array array[
         'chicken','turkey','duck','beef','lamb','pork','rabbit','venison','salmon','tuna',
         'white_fish','cod','pollock','trout','herring','mackerel','sardine','anchovy','fish',
@@ -227,12 +230,18 @@ begin
            (tag_slug='egg' and protein ~ '(egg|계란|달걀|난백|전란)') or
            (tag_slug='insect' and protein ~ '(insect|곤충|밀웜|동애등에)') or
            (tag_slug='fish' and protein ~ '(fish|생선|어류)' and protein !~ '(salmon|연어|tuna|참치|white ?fish|흰살|백색어|cod|대구|pollock|명태|황태|trout|송어|herring|청어|mackerel|고등어|sardine|정어리|anchovy|멸치)') then
+          has_protein_source := true;
           execute format('insert into public.%I (%I,tag_id,source,confidence,reason) select $1,id,$2,$3,$4 from food_tags where slug=$5 on conflict do nothing',
             case when relation_name='feeds' then 'feed_food_tags' else 'dog_feed_food_tags' end,
             case when relation_name='feeds' then 'feed_id' else 'dog_feed_id' end)
             using r.id, 'existing_field', 'high', '메인단백질 필드의 정규화 매핑', tag_slug;
         end if;
       end loop;
+      execute format(
+        'select exists (select 1 from public.%I x join public.food_tags t on t.id=x.tag_id where x.%I=$1 and t.category=''protein_source'')',
+        case when relation_name='feeds' then 'feed_food_tags' else 'dog_feed_food_tags' end,
+        case when relation_name='feeds' then 'feed_id' else 'dog_feed_id' end
+      ) into has_protein_source using r.id;
 
       -- Product class. Veterinary status needs an official product-line signal.
       tag_slug := case when class_text ~ '(완전|주식|complete)' then 'complete_food'
@@ -245,8 +254,12 @@ begin
           using r.id, 'existing_field', 'high', '완전식여부/제품 분류 필드', tag_slug;
       end if;
       is_vet_line :=
-        identity_text ~ '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트)' or
-        identity_text ~ '(hill''?s|힐스).*(prescription diet|프리스크립션 ?다이어트)' or
+        (
+          identity_text ~ '(royal canin|로얄캐닌)' and
+          identity_text ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)' and
+          identity_text !~ '(urinary ?care|digestive ?care|light ?weight ?care)'
+        ) or
+        identity_text ~ '(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)' or
         identity_text ~ '(farmina|파미나).*(vet ?life|벳 ?라이프)' or
         identity_text ~ '(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)' or
         identity_text ~ '(v[.]?o[.]?m|브이오엠).*(rx|알엑스)';
@@ -257,13 +270,14 @@ begin
           using r.id, 'manufacturer_claim', 'high', '제조사·제품명에서 확인된 공식 수의학적 영양관리 제품군';
       end if;
 
-      foreach tag_slug in array array['urinary','renal','digestive','skin_allergy','weight_management','hepatic'] loop
+      foreach tag_slug in array array['urinary','renal','digestive','skin_allergy','weight_management','hepatic','diabetes'] loop
         if (tag_slug='urinary' and blob ~ '(urinary|요로|비뇨|struvite|스트루바이트)') or
            (tag_slug='renal' and blob ~ '(renal|kidney|신장)') or
            (tag_slug='digestive' and blob ~ '(digestive|gastro|소화기|장 건강)') or
            (tag_slug='skin_allergy' and blob ~ '(skin|derma|allerg|피부|알레르)') or
            (tag_slug='weight_management' and blob ~ '(weight (management|control)|satiety|체중 ?(관리|조절)|다이어트)') or
-           (tag_slug='hepatic' and blob ~ '(hepatic|liver|간 건강|간질환)') then
+           (tag_slug='hepatic' and blob ~ '(hepatic|liver|간 건강|간질환)') or
+           (tag_slug='diabetes' and blob ~ '(diabet(es|ic)|당뇨|다이아베틱)') then
           execute format('insert into public.%I (%I,tag_id,source,confidence,reason) select $1,id,$2,$3,$4 from food_tags where slug=$5 on conflict do nothing',
             case when relation_name='feeds' then 'feed_food_tags' else 'dog_feed_food_tags' end,
             case when relation_name='feeds' then 'feed_id' else 'dog_feed_id' end)
@@ -303,9 +317,11 @@ begin
         insert into food_tag_review_queue(species,product_id,issue_type,reason,evidence) values
           (case when relation_name='feeds' then 'cat' else 'dog' end,r.id,'unknown_life_stage','생애주기 근거 없음',jsonb_build_object('name',name_text)) on conflict do nothing;
       end if;
-      if length(trim(protein))=0 then
+      if not has_protein_source then
         insert into food_tag_review_queue(species,product_id,issue_type,reason,evidence) values
-          (case when relation_name='feeds' then 'cat' else 'dog' end,r.id,'unknown_protein_source','메인단백질 필드가 비어 있음',jsonb_build_object('ingredients_present',has_ingredients)) on conflict do nothing;
+          (case when relation_name='feeds' then 'cat' else 'dog' end,r.id,'unknown_protein_source',
+           case when length(trim(protein))=0 then '메인단백질 필드가 비어 있음' else '메인단백질 값에 대응하는 protein_source taxonomy가 없음' end,
+           jsonb_build_object('main_protein',nullif(protein,''),'ingredients_present',has_ingredients)) on conflict do nothing;
       end if;
       if has_ambiguous_poultry and not has_chicken then
         insert into food_tag_review_queue(species,product_id,issue_type,reason,evidence) values
