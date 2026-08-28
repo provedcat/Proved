@@ -15,6 +15,7 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let requestSerial = 0;
   let rafId = 0;
+  let loadingKey = '';
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -130,8 +131,10 @@
 
     const target = ensureSixthCell();
     const { feedId, species } = getContext();
-    if (!target || !feedId || target.dataset.loadedFor === `${species}:${feedId}`) return;
+    const key = feedId ? `${species}:${feedId}` : '';
+    if (!target || !key || target.dataset.loadedFor === key || loadingKey === key) return;
 
+    loadingKey = key;
     const serial = ++requestSerial;
     target.textContent = '불러오는 중…';
 
@@ -139,12 +142,14 @@
       const tags = await loadExtraTags(feedId, species);
       if (serial !== requestSerial || !target.isConnected) return;
       renderExtraTags(target, tags);
-      target.dataset.loadedFor = `${species}:${feedId}`;
+      target.dataset.loadedFor = key;
     } catch (error) {
       if (serial !== requestSerial || !target.isConnected) return;
       target.textContent = '—';
-      target.dataset.loadedFor = `${species}:${feedId}`;
+      target.dataset.loadedFor = key;
       console.warn('[Proved] supplemental food tags:', error);
+    } finally {
+      if (loadingKey === key) loadingKey = '';
     }
   }
 
