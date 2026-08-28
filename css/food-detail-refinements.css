@@ -137,11 +137,42 @@
 
 @media (max-width: 760px) {
   .food-metric-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
   }
 
   .food-metric {
-    min-height: 148px;
+    min-width: 0;
+    min-height: 116px;
+    padding: 12px 9px;
+  }
+
+  .food-metric__icon {
+    width: 27px;
+    height: 27px;
+  }
+
+  .food-metric__label {
+    margin-top: 10px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .food-metric__value {
+    margin-top: 4px;
+    font-size: clamp(19px, 5.4vw, 23px);
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .food-metric__unit {
+    margin-top: 5px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .food-metric--ratio .food-metric__value {
+    font-size: clamp(18px, 5vw, 22px);
   }
 
   .food-guideline-table-scroll {
@@ -263,6 +294,23 @@
 }
 
 @media (max-width: 380px) {
+  .food-metric-grid {
+    gap: 4px !important;
+  }
+
+  .food-metric {
+    min-height: 110px;
+    padding-inline: 7px;
+  }
+
+  .food-metric__value {
+    font-size: 18px;
+  }
+
+  .food-metric--ratio .food-metric__value {
+    font-size: 17px;
+  }
+
   .food-mobile-nutrient__values {
     gap: 8px;
   }
