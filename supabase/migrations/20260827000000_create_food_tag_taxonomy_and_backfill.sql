@@ -275,7 +275,7 @@ begin
            (tag_slug='renal' and blob ~ '(renal|kidney|신장|레날)') or
            (tag_slug='digestive' and blob ~ '(digestive|gastro|소화기|장 건강|가스트로 ?인테스티널)') or
            (tag_slug='skin_allergy' and blob ~ '(skin|derma|allerg|피부|알레르|아날러제닉|하이포알러제닉)') or
-           (tag_slug='weight_management' and blob ~ '(weight (management|control)|satiety|체중 ?(관리|조절)|다이어트|세타이어티)') or
+           (tag_slug='weight_management' and blob ~ '(weight (management|control)|satiety|체중 ?(관리|조절)|세타이어티)') or
            (tag_slug='hepatic' and blob ~ '(hepatic|liver|간 건강|간질환|헤파틱)') or
            (tag_slug='diabetes' and blob ~ '(diabet(es|ic)|당뇨|다이아베틱)') then
           execute format('insert into public.%I (%I,tag_id,source,confidence,reason) select $1,id,$2,$3,$4 from food_tags where slug=$5 on conflict do nothing',
