@@ -1,0 +1,48 @@
+/* Restore semantic colors for food detail key metrics. */
+.food-metric--energy.is-cat-dry {
+  color: var(--proved-cat-dry) !important;
+}
+
+.food-metric--energy.is-cat-wet {
+  color: var(--proved-cat-wet) !important;
+}
+
+.food-metric--energy.is-dog-dry {
+  color: var(--proved-dog-dry) !important;
+}
+
+.food-metric--energy.is-dog-wet {
+  color: var(--proved-dog-wet) !important;
+}
+
+.food-metric--moisture {
+  color: var(--proved-water) !important;
+}
+
+.food-metric--ratio {
+  color: var(--proved-calcium-phosphorus) !important;
+}
+
+.food-metric--energy .food-metric__label,
+.food-metric--energy .food-metric__icon,
+.food-metric--moisture .food-metric__label,
+.food-metric--moisture .food-metric__icon,
+.food-metric--ratio .food-metric__label,
+.food-metric--ratio .food-metric__icon {
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+@media (max-width: 760px) {
+  .food-metric--energy .food-metric__value {
+    color: currentColor !important;
+  }
+
+  .food-metric--moisture .food-metric__value {
+    color: var(--proved-water) !important;
+  }
+
+  .food-metric--ratio .food-metric__value {
+    color: var(--proved-calcium-phosphorus) !important;
+  }
+}
