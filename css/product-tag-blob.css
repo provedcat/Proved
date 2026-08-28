@@ -142,10 +142,6 @@
     gap: 30px;
   }
 
-  .food-detail-profile-grid .food-basic-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .food-tag-blob {
     width: min(100%, 320px);
   }
