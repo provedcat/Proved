@@ -47,7 +47,8 @@
   }
 
   function getFamily(seed) {
-    return (seed % 2 === 0) ? 'round' : 'ellipse';
+    /* Round is the primary visual language. Ellipse remains only as a subtle variation. */
+    return (seed % 10 < 8) ? 'round' : 'soft-ellipse';
   }
 
   function getWeightedCenter(lobes) {
@@ -67,7 +68,7 @@
     const count = sourceLobes.length;
     const productId = new URLSearchParams(window.location.search).get('id') || '';
     const labelKey = labels.map(text => text.textContent.trim()).join('|');
-    const seed = hashString(`${productId}|${labelKey}|${count}|organic-v3`);
+    const seed = hashString(`${productId}|${labelKey}|${count}|organic-v4-round`);
     const random = mulberry32(seed);
     const family = getFamily(seed);
     const center = getWeightedCenter(sourceLobes);
@@ -81,32 +82,32 @@
       const baseArea = rx * ry;
 
       const sizeScale = isCenter
-        ? 1.10 + random() * 0.06
-        : 0.96 + random() * 0.18;
+        ? 1.08 + random() * 0.05
+        : 0.98 + random() * 0.14;
 
       let aspect;
       if (family === 'round') {
-        aspect = 0.93 + random() * 0.14;
+        aspect = 0.96 + random() * 0.08;
       } else {
-        aspect = 1.10 + random() * 0.20;
+        aspect = 1.03 + random() * 0.10;
         if (random() < 0.5) aspect = 1 / aspect;
       }
 
-      const nextRx = clamp(Math.sqrt(baseArea * sizeScale * aspect), 112, 190);
-      const nextRy = clamp(Math.sqrt(baseArea * sizeScale / aspect), 108, 186);
+      const nextRx = clamp(Math.sqrt(baseArea * sizeScale * aspect), 114, 188);
+      const nextRy = clamp(Math.sqrt(baseArea * sizeScale / aspect), 112, 184);
 
-      /* Pull all outer lobes toward the product center so the result reads as one mass, not separate eggs. */
-      const pull = isCenter ? 0.02 : (family === 'round' ? 0.22 : 0.18) + random() * 0.05;
-      const jitterX = isCenter ? (random() - 0.5) * 6 : (random() - 0.5) * 12;
-      const jitterY = isCenter ? (random() - 0.5) * 6 : (random() - 0.5) * 12;
-      const nextCx = clamp(cx + (center.x - cx) * pull + jitterX, 108, 512);
-      const nextCy = clamp(cy + (center.y - cy) * pull + jitterY, 118, 622);
+      /* Keep the lobes close enough to read as one unified organic mass. */
+      const pull = isCenter ? 0.02 : 0.24 + random() * 0.04;
+      const jitterX = isCenter ? (random() - 0.5) * 5 : (random() - 0.5) * 10;
+      const jitterY = isCenter ? (random() - 0.5) * 5 : (random() - 0.5) * 10;
+      const nextCx = clamp(cx + (center.x - cx) * pull + jitterX, 110, 510);
+      const nextCy = clamp(cy + (center.y - cy) * pull + jitterY, 120, 620);
 
       const baseRotation = parseRotation(lobe.getAttribute('transform'));
-      const rotationSpread = family === 'round' ? 8 : 22;
+      const rotationSpread = family === 'round' ? 5 : 10;
       const nextRotation = family === 'round'
-        ? clamp(baseRotation * 0.25 + (random() - 0.5) * rotationSpread, -8, 8)
-        : clamp(baseRotation * 0.55 + (random() - 0.5) * rotationSpread, -18, 18);
+        ? clamp(baseRotation * 0.12 + (random() - 0.5) * rotationSpread, -5, 5)
+        : clamp(baseRotation * 0.25 + (random() - 0.5) * rotationSpread, -9, 9);
 
       lobe.setAttribute('cx', nextCx.toFixed(2));
       lobe.setAttribute('cy', nextCy.toFixed(2));
@@ -118,9 +119,9 @@
       if (text) {
         const originalX = Number(text.getAttribute('x')) || cx;
         const originalY = Number(text.getAttribute('y')) || cy;
-        const labelPull = isCenter ? 0 : pull * 0.78;
-        const nextLabelX = originalX + (center.x - originalX) * labelPull + jitterX * 0.45;
-        const nextLabelY = originalY + (center.y - originalY) * labelPull + jitterY * 0.45;
+        const labelPull = isCenter ? 0 : pull * 0.76;
+        const nextLabelX = originalX + (center.x - originalX) * labelPull + jitterX * 0.35;
+        const nextLabelY = originalY + (center.y - originalY) * labelPull + jitterY * 0.35;
         setTextPosition(text, nextLabelX.toFixed(2), nextLabelY.toFixed(2));
         const gradient = gradients[index];
         if (gradient) {
@@ -146,7 +147,7 @@
         filter.setAttribute('y', '-18%');
         filter.setAttribute('width', '136%');
         filter.setAttribute('height', '140%');
-        filter.innerHTML = `<feDropShadow dx="0" dy="0.9" stdDeviation="1.6" flood-color="${shadowColor}" flood-opacity=".24" />`;
+        filter.innerHTML = `<feDropShadow dx="0" dy="0.8" stdDeviation="1.45" flood-color="${shadowColor}" flood-opacity=".22" />`;
         defs.appendChild(filter);
       }
       text.style.setProperty('fill', '#FFFFFF', 'important');
@@ -157,7 +158,7 @@
   }
 
   function tuneBlob(svg) {
-    if (!svg || svg.dataset.organicV3Applied === 'true') return;
+    if (!svg || svg.dataset.organicV4Applied === 'true') return;
     const defs = svg.querySelector('defs');
     if (!defs) return;
 
@@ -175,17 +176,17 @@
 
     const baseRect = paintRects[0];
     const colorRects = paintRects.slice(1, gradients.length + 1);
-    baseRect.setAttribute('opacity', '.12');
+    baseRect.setAttribute('opacity', '.10');
 
-    let blur = defs.querySelector('#provedBlobOrganicFieldBlur');
+    let blur = defs.querySelector('#provedBlobOrganicFieldBlurV4');
     if (!blur) {
       blur = document.createElementNS(NS, 'filter');
-      blur.setAttribute('id', 'provedBlobOrganicFieldBlur');
+      blur.setAttribute('id', 'provedBlobOrganicFieldBlurV4');
       blur.setAttribute('x', '-28%');
       blur.setAttribute('y', '-28%');
       blur.setAttribute('width', '156%');
       blur.setAttribute('height', '156%');
-      blur.innerHTML = '<feGaussianBlur stdDeviation="15" />';
+      blur.innerHTML = '<feGaussianBlur stdDeviation="14" />';
       defs.appendChild(blur);
     }
 
@@ -193,14 +194,14 @@
       const lobe = sourceLobes[index];
       const rx = Number(lobe.getAttribute('rx')) || 0;
       const ry = Number(lobe.getAttribute('ry')) || 0;
-      gradient.setAttribute('r', String(Math.max(rx, ry) * 1.34));
+      gradient.setAttribute('r', String(Math.max(rx, ry) * 1.30));
 
       const stops = Array.from(gradient.querySelectorAll('stop'));
       const spec = [
         ['0%', '1'],
-        ['38%', '.96'],
-        ['68%', '.74'],
-        ['88%', '.30'],
+        ['40%', '.97'],
+        ['70%', '.78'],
+        ['89%', '.28'],
         ['100%', '0']
       ];
       stops.forEach((stop, stopIndex) => {
@@ -209,7 +210,7 @@
         stop.setAttribute('stop-opacity', spec[stopIndex][1]);
       });
 
-      const localMaskId = `provedBlobOrganicMask-${index}-${hashString(`${index}|${lobe.getAttribute('cx')}|${lobe.getAttribute('cy')}`).toString(36)}`;
+      const localMaskId = `provedBlobOrganicMaskV4-${index}-${hashString(`${index}|${lobe.getAttribute('cx')}|${lobe.getAttribute('cy')}`).toString(36)}`;
       const localMask = document.createElementNS(NS, 'mask');
       localMask.setAttribute('id', localMaskId);
       localMask.setAttribute('maskUnits', 'userSpaceOnUse');
@@ -221,10 +222,10 @@
       const localEllipse = document.createElementNS(NS, 'ellipse');
       localEllipse.setAttribute('cx', lobe.getAttribute('cx'));
       localEllipse.setAttribute('cy', lobe.getAttribute('cy'));
-      localEllipse.setAttribute('rx', String(rx * 1.14));
-      localEllipse.setAttribute('ry', String(ry * 1.14));
+      localEllipse.setAttribute('rx', String(rx * 1.12));
+      localEllipse.setAttribute('ry', String(ry * 1.12));
       localEllipse.setAttribute('fill', '#fff');
-      localEllipse.setAttribute('filter', 'url(#provedBlobOrganicFieldBlur)');
+      localEllipse.setAttribute('filter', 'url(#provedBlobOrganicFieldBlurV4)');
       const transform = lobe.getAttribute('transform');
       if (transform) localEllipse.setAttribute('transform', transform);
       localMask.appendChild(localEllipse);
@@ -233,12 +234,12 @@
       const rect = colorRects[index];
       if (rect) {
         rect.setAttribute('mask', `url(#${localMaskId})`);
-        rect.setAttribute('opacity', '.90');
+        rect.setAttribute('opacity', '.91');
       }
     });
 
     applyLabelTreatment(defs, gradients, labels);
-    svg.dataset.organicV3Applied = 'true';
+    svg.dataset.organicV4Applied = 'true';
   }
 
   function enhance() {
