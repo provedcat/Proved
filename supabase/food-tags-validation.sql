@@ -129,7 +129,7 @@ select species,id,제조사,제품명 from (
   select 'cat'::text species,id,제조사,제품명 from public.feeds
   union all select 'dog',id,제조사,제품명 from public.dog_feeds
 ) p where lower(concat_ws(' ',제조사,제품명)) ~
-  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)'
+  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic|가스트로 ?인테스티널|세타이어티|아날러제닉|헤파틱|레날)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)'
   and lower(concat_ws(' ',제조사,제품명)) !~
   '(royal canin|로얄캐닌).*(urinary ?care|digestive ?care|light ?weight ?care)'
 order by species,제조사,제품명;
@@ -143,7 +143,7 @@ from (
   from public.dog_feeds f join public.dog_feed_food_tags x on x.dog_feed_id=f.id join public.food_tags t on t.id=x.tag_id
 ) p
 where p.slug='veterinary_diet' and lower(concat_ws(' ',p.제조사,p.제품명)) !~
-  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)';
+  '(royal canin|로얄캐닌).*(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic|가스트로 ?인테스티널|세타이어티|아날러제닉|헤파틱|레날)|(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)|(farmina|파미나).*(vet ?life|벳 ?라이프)|(monge|몬지).*(vetsolution|vet ?solution|벳 ?솔루션|벳솔루션)|(v[.]?o[.]?m|브이오엠).*(rx|알엑스)';
 
 -- Royal Canin official Veterinary families that were not tagged. This result
 -- must be empty; ordinary Urinary/Digestive/Light Weight Care lines are excluded.
@@ -153,7 +153,7 @@ from (
   union all select 'dog',id,제조사,제품명 from public.dog_feeds
 ) p
 where lower(concat_ws(' ',p.제조사,p.제품명)) ~ '(royal canin|로얄캐닌)'
-  and lower(p.제품명) ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)'
+  and lower(p.제품명) ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic|가스트로 ?인테스티널|세타이어티|아날러제닉|헤파틱|레날)'
   and lower(p.제품명) !~ '(urinary ?care|digestive ?care|light ?weight ?care)'
   and not exists (
     select 1 from (

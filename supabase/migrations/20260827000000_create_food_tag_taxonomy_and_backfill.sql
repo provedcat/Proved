@@ -256,7 +256,7 @@ begin
       is_vet_line :=
         (
           identity_text ~ '(royal canin|로얄캐닌)' and
-          identity_text ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic)' and
+          identity_text ~ '(veterinary|vet ?diet|벳 ?다이어트|s ?/ ?o|early ?renal|renal|gastro ?intestinal|gastrointestinal|hepatic|satiety|anallergenic|가스트로 ?인테스티널|세타이어티|아날러제닉|헤파틱|레날)' and
           identity_text !~ '(urinary ?care|digestive ?care|light ?weight ?care)'
         ) or
         identity_text ~ '(hill''?s|힐스).*(prescription diet|프리 ?스크립션( ?다이어트)?)' or
@@ -271,12 +271,12 @@ begin
       end if;
 
       foreach tag_slug in array array['urinary','renal','digestive','skin_allergy','weight_management','hepatic','diabetes'] loop
-        if (tag_slug='urinary' and blob ~ '(urinary|요로|비뇨|struvite|스트루바이트)') or
-           (tag_slug='renal' and blob ~ '(renal|kidney|신장)') or
-           (tag_slug='digestive' and blob ~ '(digestive|gastro|소화기|장 건강)') or
-           (tag_slug='skin_allergy' and blob ~ '(skin|derma|allerg|피부|알레르)') or
-           (tag_slug='weight_management' and blob ~ '(weight (management|control)|satiety|체중 ?(관리|조절)|다이어트)') or
-           (tag_slug='hepatic' and blob ~ '(hepatic|liver|간 건강|간질환)') or
+        if (tag_slug='urinary' and blob ~ '(urinary|요로|비뇨|struvite|스트루바이트|유리너리|유러너리)') or
+           (tag_slug='renal' and blob ~ '(renal|kidney|신장|레날)') or
+           (tag_slug='digestive' and blob ~ '(digestive|gastro|소화기|장 건강|가스트로 ?인테스티널)') or
+           (tag_slug='skin_allergy' and blob ~ '(skin|derma|allerg|피부|알레르|아날러제닉|하이포알러제닉)') or
+           (tag_slug='weight_management' and blob ~ '(weight (management|control)|satiety|체중 ?(관리|조절)|다이어트|세타이어티)') or
+           (tag_slug='hepatic' and blob ~ '(hepatic|liver|간 건강|간질환|헤파틱)') or
            (tag_slug='diabetes' and blob ~ '(diabet(es|ic)|당뇨|다이아베틱)') then
           execute format('insert into public.%I (%I,tag_id,source,confidence,reason) select $1,id,$2,$3,$4 from food_tags where slug=$5 on conflict do nothing',
             case when relation_name='feeds' then 'feed_food_tags' else 'dog_feed_food_tags' end,
@@ -300,7 +300,7 @@ begin
       -- Chicken-free is derived only from a disclosed list with neither chicken nor
       -- an unspecified poultry/animal ingredient. This is not a cross-contact claim.
       has_chicken := ingredients ~ '(chicken|닭|치킨|계육|egg|계란|달걀|난백|전란)';
-      has_ambiguous_poultry := ingredients ~ '(poultry|가금(류|육|육분)?|조류|animal fat|animal protein|동물성 ?(지방|단백))';
+      has_ambiguous_poultry := ingredients ~ '(poultry|가금(류|육|육분)?|조류|animal fat|animal protein|animal ?by[ -]?products?|animal derivatives|meat and animal derivatives|동물성 ?(지방|단백|부산물)|육류 및 동물성 부산물)';
       if has_ingredients and not has_chicken and not has_ambiguous_poultry then
         execute format('insert into public.%I (%I,tag_id,source,confidence,reason) select $1,id,$2,$3,$4 from food_tags where slug=''chicken_free'' on conflict do nothing',
           case when relation_name='feeds' then 'feed_food_tags' else 'dog_feed_food_tags' end,
