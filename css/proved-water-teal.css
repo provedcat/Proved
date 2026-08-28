@@ -1,0 +1,7 @@
+:root {
+  --proved-water: #2F858C !important;
+  --analysis-water: var(--proved-water) !important;
+  --water-ink: var(--proved-water) !important;
+  --food-moisture: var(--proved-water) !important;
+  --water: var(--proved-water) !important;
+}
