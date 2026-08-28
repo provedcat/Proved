@@ -1,0 +1,196 @@
+/* Product Tag Blob: food detail visual fingerprint */
+.food-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.food-compare-link--mobile {
+  display: none;
+}
+
+.food-detail-hero {
+  padding-bottom: 30px;
+  border-bottom: 0;
+}
+
+.food-detail-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(300px, .82fr);
+  align-items: start;
+  gap: 54px;
+  padding: 0 56px 58px;
+  border-bottom: 1px solid var(--food-line);
+}
+
+.food-detail-profile-info {
+  min-width: 0;
+}
+
+.food-detail-profile-actions {
+  min-height: 58px;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.food-detail-profile-actions .food-compare-link {
+  margin-top: 0;
+}
+
+.food-detail-profile-grid .food-detail-section--basic {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.food-detail-profile-grid .food-basic-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.food-tag-blob {
+  width: min(100%, 360px);
+  aspect-ratio: 4 / 5;
+  justify-self: end;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  margin-top: -6px;
+  overflow: visible;
+}
+
+.food-tag-blob__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.food-tag-blob__labels text {
+  fill: #111;
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 820;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  letter-spacing: -.025em;
+}
+
+.food-tag-blob__loading {
+  width: 84%;
+  aspect-ratio: 4 / 5;
+  border-radius: 45% 55% 48% 52%;
+  background: linear-gradient(115deg, rgba(53, 104, 255, .06), rgba(53, 104, 255, .13), rgba(53, 104, 255, .06));
+  background-size: 220% 100%;
+  animation: foodTagBlobLoading 1.2s ease-in-out infinite;
+}
+
+.food-tag-blob__empty {
+  margin: 0;
+  color: var(--food-muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-align: center;
+}
+
+@keyframes foodTagBlobLoading {
+  to { background-position: -220% 0; }
+}
+
+@media (max-width: 900px) {
+  .food-detail-profile-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: 34px;
+  }
+
+  .food-tag-blob {
+    width: min(100%, 320px);
+  }
+}
+
+@media (max-width: 720px) {
+  .food-detail-toolbar {
+    padding-top: 22px;
+  }
+
+  .food-detail-toolbar .food-back-button,
+  .food-detail-toolbar .food-compare-link--mobile {
+    min-height: 42px;
+  }
+
+  .food-compare-link--mobile {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid var(--food-blue);
+    border-radius: 0;
+    background: var(--food-blue);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .food-compare-link--mobile svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+  }
+
+  .food-detail-hero {
+    padding-bottom: 22px;
+  }
+
+  .food-detail-profile-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 20px 46px;
+  }
+
+  .food-tag-blob {
+    order: 1;
+    width: min(82vw, 330px);
+    aspect-ratio: 4 / 5;
+    justify-self: auto;
+    align-self: center;
+    margin: 0 auto 36px;
+  }
+
+  .food-detail-profile-info {
+    order: 2;
+    width: 100%;
+  }
+
+  .food-detail-profile-actions {
+    display: none;
+  }
+
+  .food-detail-profile-grid .food-detail-section--basic {
+    padding: 0;
+  }
+
+  .food-detail-profile-grid .food-basic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .food-compare-link--mobile {
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+
+  .food-tag-blob {
+    width: min(80vw, 305px);
+    margin-bottom: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .food-tag-blob__loading { animation: none; }
+}
