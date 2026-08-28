@@ -139,7 +139,16 @@
     brand.className = 'proved-global-header__brand';
     brand.href = '/';
     brand.setAttribute('aria-label', '프루브 홈');
-    brand.textContent = 'PROVED';
+
+    const brandLogo = document.createElement('img');
+    brandLogo.src = '/icons/proved-main-logo.svg';
+    brandLogo.alt = '';
+    brandLogo.width = 114;
+    brandLogo.height = 22;
+    brandLogo.style.display = 'block';
+    brandLogo.style.width = 'clamp(86px, 10vw, 114px)';
+    brandLogo.style.height = 'auto';
+    brand.appendChild(brandLogo);
 
     const nav = document.createElement('nav');
     nav.className = 'proved-global-header__nav';
