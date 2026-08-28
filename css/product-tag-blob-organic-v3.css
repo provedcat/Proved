@@ -1,5 +1,5 @@
 .food-tag-blob {
-  width: min(100%, 320px);
+  width: min(100%, 316px);
 }
 
 .food-tag-blob__labels text {
@@ -8,20 +8,20 @@
 
 @media (max-width: 900px) {
   .food-tag-blob {
-    width: min(100%, 292px);
+    width: min(100%, 286px);
   }
 }
 
 @media (max-width: 720px) {
   .food-tag-blob {
-    width: min(68vw, 270px);
-    margin: 4px auto 12px;
+    width: min(65vw, 258px);
+    margin: 2px auto 10px;
   }
 }
 
 @media (max-width: 420px) {
   .food-tag-blob {
-    width: min(66vw, 258px);
-    margin-bottom: 10px;
+    width: min(63vw, 248px);
+    margin-bottom: 8px;
   }
 }
