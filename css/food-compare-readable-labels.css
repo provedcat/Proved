@@ -1,0 +1,20 @@
+.food-compare-table__product-label {
+  color: var(--compare-body) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.food-compare-table__product-label[data-label-mode="product"] {
+  color: var(--compare-blue) !important;
+}
+
+@media (max-width: 720px) {
+  .food-compare-table__product-label {
+    padding-inline: 4px !important;
+    font-size: 10px !important;
+    line-height: 1.25;
+  }
+}
