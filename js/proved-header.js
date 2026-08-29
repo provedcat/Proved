@@ -193,11 +193,53 @@
     });
   }
 
+  function enhanceFeedPickerSearch() {
+    const sectionKey = getSectionKey();
+    if (sectionKey !== 'cat' && sectionKey !== 'dog') return;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('feedPickerModal');
+      const sortManufacturer = document.getElementById('feedPickerSortManufacturer');
+      const sortBlock = sortManufacturer?.closest('.pb-4');
+      if (!modal || !sortBlock || document.getElementById('feedPickerSearchInput')) return;
+
+      const searchWrap = document.createElement('div');
+      searchWrap.className = 'pb-4';
+      searchWrap.innerHTML = `
+        <label for="feedPickerSearchInput" class="block text-xs font-black text-gray-400 mb-2">검색</label>
+        <input id="feedPickerSearchInput" type="search" inputmode="search" autocomplete="off"
+          placeholder="브랜드 또는 제품명 검색"
+          class="w-full min-h-[48px] px-4 border border-gray-200 bg-white text-sm font-bold text-[#3568FF] placeholder:text-gray-400 outline-none focus:border-[#3568FF]" />`;
+      sortBlock.insertAdjacentElement('beforebegin', searchWrap);
+
+      const input = document.getElementById('feedPickerSearchInput');
+      if (!input) return;
+
+      input.addEventListener('input', () => {
+        if (typeof feedPickerState === 'undefined' || typeof renderFeedPicker !== 'function') return;
+        feedPickerState.nameFilter = input.value;
+        renderFeedPicker();
+      });
+
+      const originalOpenFeedPicker = window.openFeedPicker;
+      if (typeof originalOpenFeedPicker === 'function' && !originalOpenFeedPicker.__provedSearchEnhanced) {
+        const enhancedOpenFeedPicker = function (...args) {
+          const result = originalOpenFeedPicker.apply(this, args);
+          input.value = '';
+          return result;
+        };
+        enhancedOpenFeedPicker.__provedSearchEnhanced = true;
+        window.openFeedPicker = enhancedOpenFeedPicker;
+      }
+    });
+  }
+
   document.querySelectorAll('[data-proved-header]').forEach(renderHeader);
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
   window.addEventListener('proved:auth-state', event => setAuthLabel(Boolean(event.detail?.loggedIn)));
   enterSpeciesCalculatorByDefault();
+  enhanceFeedPickerSearch();
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     window.setTimeout(runAuthAction, 0);
   }
