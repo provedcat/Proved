@@ -4,6 +4,18 @@
   const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const PAGE_SIZE = 24;
+  const TAG_CATEGORY_ORDER = [
+    'protein_source', 'life_stage', 'management_purpose', 'processing_method',
+    'ingredient_condition', 'preparation_type'
+  ];
+  const TAG_CATEGORY_LABELS = {
+    protein_source: '주 단백질원',
+    life_stage: '생애주기',
+    management_purpose: '영양 관리',
+    processing_method: '제조 방식',
+    ingredient_condition: '원재료 조건',
+    preparation_type: '급여 형태'
+  };
 
   const foodSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const state = {
@@ -15,7 +27,12 @@
     total: 0,
     rows: [],
     loading: false,
-    requestSerial: 0
+    requestSerial: 0,
+    tags: [],
+    selectedTagIds: [],
+    activeTagCategory: '',
+    matchingFeedIds: null,
+    tagsLoading: false
   };
 
   const listColumns = [
@@ -139,6 +156,7 @@
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
     state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
+    state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').filter(Boolean))].slice(0, 20);
   }
 
   function writeListStateToUrl(replace = true) {
@@ -148,6 +166,7 @@
     if (state.role !== 'all') params.set('role', state.role);
     if (state.sort !== 'brand') params.set('sort', state.sort);
     if (state.query) params.set('q', state.query);
+    if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     const queryString = params.toString();
     const url = `${window.location.pathname}${queryString ? `?${queryString}` : ''}`;
     history[replace ? 'replaceState' : 'pushState']({}, '', url);
@@ -161,6 +180,7 @@
     if (state.role !== 'all') params.set('role', state.role);
     if (state.sort !== 'brand') params.set('sort', state.sort);
     if (state.query) params.set('q', state.query);
+    if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
   }
 
@@ -180,12 +200,18 @@
     els.back = $('foodBackToList');
     els.detailContent = $('foodDetailContent');
     els.detailStatus = $('foodDetailStatus');
+    els.conditionFolders = $('foodConditionFolders');
+    els.conditionPanel = $('foodConditionPanel');
+    els.selectedConditions = $('foodSelectedConditions');
+    els.conditionStatus = $('foodConditionStatus');
+    els.conditionReset = $('foodConditionReset');
   }
 
   function syncControls() {
     els.searchInput.value = state.query;
     els.searchClear.hidden = !state.query;
     els.sortSelect.value = state.sort;
+    renderConditionFinder();
     document.querySelectorAll('[data-species]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.species === state.species));
     });
@@ -251,6 +277,32 @@
       loadFeeds(true);
     });
 
+    els.conditionFolders.addEventListener('click', event => {
+      const button = event.target.closest('[data-tag-category]');
+      if (!button) return;
+      state.activeTagCategory = state.activeTagCategory === button.dataset.tagCategory ? '' : button.dataset.tagCategory;
+      renderConditionFinder();
+    });
+
+    els.conditionPanel.addEventListener('click', event => {
+      const button = event.target.closest('[data-tag-id]');
+      if (!button) return;
+      toggleTag(button.dataset.tagId);
+    });
+
+    els.selectedConditions.addEventListener('click', event => {
+      const button = event.target.closest('[data-remove-tag-id]');
+      if (button) toggleTag(button.dataset.removeTagId);
+    });
+
+    els.conditionReset.addEventListener('click', () => {
+      state.selectedTagIds = [];
+      state.matchingFeedIds = null;
+      renderConditionFinder();
+      writeListStateToUrl(true);
+      loadFeeds(true);
+    });
+
     els.results.addEventListener('click', event => {
       const button = event.target.closest('[data-feed-id]');
       if (!button) return;
@@ -273,6 +325,116 @@
     els.results.innerHTML = Array.from({ length: 5 }, () => '<div class="food-skeleton" aria-hidden="true"></div>').join('');
   }
 
+  function compareTags(a, b) {
+    const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 9999;
+    const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 9999;
+    return orderA - orderB || String(a.label_ko).localeCompare(String(b.label_ko), 'ko');
+  }
+
+  async function loadConditionTags() {
+    state.tagsLoading = true;
+    els.conditionStatus.textContent = '조건을 불러오는 중입니다.';
+    const { data, error } = await foodSb
+      .from('food_tags')
+      .select('id,label_ko,category,sort_order,is_active')
+      .eq('is_active', true)
+      .in('category', TAG_CATEGORY_ORDER)
+      .order('sort_order', { ascending: true });
+
+    state.tagsLoading = false;
+    if (error) {
+      if (state.selectedTagIds.length) {
+        state.selectedTagIds = [];
+        state.matchingFeedIds = null;
+        writeListStateToUrl(true);
+      }
+      els.conditionStatus.textContent = '조건을 불러오지 못했습니다.';
+      renderConditionFinder();
+      return;
+    }
+
+    state.tags = (data || []).filter(tag => tag.id && tag.label_ko && TAG_CATEGORY_LABELS[tag.category]);
+    const availableIds = new Set(state.tags.map(tag => String(tag.id)));
+    state.selectedTagIds = state.selectedTagIds.filter(id => availableIds.has(String(id)));
+    els.conditionStatus.textContent = '';
+    renderConditionFinder();
+  }
+
+  function renderConditionFinder() {
+    if (!els.conditionFolders) return;
+    const categories = TAG_CATEGORY_ORDER.filter(category => state.tags.some(tag => tag.category === category));
+    if (!categories.length) {
+      els.conditionFolders.innerHTML = state.tagsLoading ? '' : '<p class="food-condition-empty">사용 가능한 조건이 아직 없습니다.</p>';
+      els.conditionPanel.hidden = true;
+      els.selectedConditions.hidden = true;
+      els.conditionReset.hidden = true;
+      return;
+    }
+
+    const orderedCategories = state.activeTagCategory
+      ? [state.activeTagCategory, ...categories.filter(category => category !== state.activeTagCategory)]
+      : categories;
+    els.conditionFolders.innerHTML = orderedCategories.map((category, index) => {
+      const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
+      const active = category === state.activeTagCategory;
+      return `<button class="food-condition-folder${active ? ' is-open' : ''}" type="button" data-tag-category="${escapeHtml(category)}" aria-expanded="${active}" style="--folder-index:${index}">
+        <span>${escapeHtml(TAG_CATEGORY_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}
+      </button>`;
+    }).join('');
+
+    const activeTags = state.tags.filter(tag => tag.category === state.activeTagCategory).sort(compareTags);
+    els.conditionPanel.hidden = !activeTags.length;
+    els.conditionPanel.innerHTML = activeTags.length ? `
+      <div class="food-condition-panel__heading"><strong>${escapeHtml(TAG_CATEGORY_LABELS[state.activeTagCategory])}</strong><span>여러 조건을 함께 선택할 수 있어요.</span></div>
+      <div class="food-condition-tags">${activeTags.map(tag => {
+        const selected = state.selectedTagIds.includes(String(tag.id));
+        return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
+      }).join('')}</div>` : '';
+
+    const selectedTags = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
+    els.selectedConditions.hidden = !selectedTags.length;
+    els.conditionReset.hidden = !selectedTags.length;
+    els.selectedConditions.innerHTML = selectedTags.length ? `
+      <p><strong>선택한 조건</strong><span>${selectedTags.length}개 조건의 교집합</span></p>
+      <div>${selectedTags.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
+  }
+
+  function toggleTag(tagId) {
+    const id = String(tagId || '');
+    if (!state.tags.some(tag => String(tag.id) === id)) return;
+    state.selectedTagIds = state.selectedTagIds.includes(id)
+      ? state.selectedTagIds.filter(value => value !== id)
+      : [...state.selectedTagIds, id];
+    state.matchingFeedIds = null;
+    renderConditionFinder();
+    writeListStateToUrl(true);
+    loadFeeds(true);
+  }
+
+  async function resolveMatchingFeedIds() {
+    if (!state.selectedTagIds.length) return null;
+    const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const { data, error } = await foodSb
+      .from(mappingTable)
+      .select(`${feedIdColumn},tag_id`)
+      .in('tag_id', state.selectedTagIds);
+    if (error) throw error;
+
+    const required = new Set(state.selectedTagIds);
+    const matchesByFeed = new Map();
+    (data || []).forEach(row => {
+      const feedId = String(row[feedIdColumn] || '');
+      const tagId = String(row.tag_id || '');
+      if (!feedId || !required.has(tagId)) return;
+      if (!matchesByFeed.has(feedId)) matchesByFeed.set(feedId, new Set());
+      matchesByFeed.get(feedId).add(tagId);
+    });
+    return [...matchesByFeed.entries()]
+      .filter(([, ids]) => ids.size === required.size)
+      .map(([feedId]) => feedId);
+  }
+
   function buildListQuery(from, to) {
     let query = foodSb
       .from(getTable())
@@ -284,6 +446,9 @@
     if (state.query) {
       const pattern = buildSearchPattern(state.query);
       query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`);
+    }
+    if (Array.isArray(state.matchingFeedIds)) {
+      query = state.matchingFeedIds.length ? query.in('id', state.matchingFeedIds) : query.eq('id', '00000000-0000-0000-0000-000000000000');
     }
 
     if (state.sort === 'product') {
@@ -313,6 +478,21 @@
       els.loadMore.disabled = true;
     }
 
+    if (reset) {
+      try {
+        const matchingFeedIds = await resolveMatchingFeedIds();
+        if (serial !== state.requestSerial) return;
+        state.matchingFeedIds = matchingFeedIds;
+      } catch (error) {
+        if (serial !== state.requestSerial) return;
+        state.loading = false;
+        els.results.innerHTML = '';
+        els.resultsCount.textContent = '사료 목록';
+        els.listStatus.textContent = `조건 검색을 완료하지 못했습니다. ${error.message || ''}`.trim();
+        return;
+      }
+    }
+
     const from = reset ? 0 : state.rows.length;
     const to = from + PAGE_SIZE - 1;
     const { data, error, count } = await buildListQuery(from, to);
@@ -337,13 +517,14 @@
   function renderResults() {
     const species = getSpeciesLabel();
     const searchSuffix = state.query ? ` · “${state.query}” 검색` : '';
-    els.resultsCount.textContent = `${formatNumber(state.total, 0)}개의 ${species} 사료${searchSuffix}`;
+    const conditionSuffix = state.selectedTagIds.length ? ` · 조건 ${state.selectedTagIds.length}개` : '';
+    els.resultsCount.textContent = `${formatNumber(state.total, 0)}개의 ${species} 사료${searchSuffix}${conditionSuffix}`;
 
     if (!state.rows.length) {
       els.results.innerHTML = `
         <div class="food-empty">
           <strong>검색 결과가 없습니다.</strong>
-          <span>브랜드 또는 제품명을 바꿔 검색해 보세요.</span>
+          <span>${state.selectedTagIds.length ? '선택한 조건을 하나씩 줄여보세요.' : '브랜드 또는 제품명을 바꿔 검색해 보세요.'}</span>
         </div>`;
       els.loadMore.hidden = true;
       return;
@@ -569,8 +750,13 @@
     bindEvents();
 
     const detailId = new URLSearchParams(window.location.search).get('id');
-    if (detailId) await loadDetail(detailId);
-    else await loadFeeds(true);
+    const conditionTagsPromise = loadConditionTags();
+    if (detailId) {
+      await loadDetail(detailId);
+      return;
+    }
+    if (state.selectedTagIds.length) await conditionTagsPromise;
+    await loadFeeds(true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
