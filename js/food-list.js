@@ -343,7 +343,13 @@
 
     state.tagsLoading = false;
     if (error) {
+      if (state.selectedTagIds.length) {
+        state.selectedTagIds = [];
+        state.matchingFeedIds = null;
+        writeListStateToUrl(true);
+      }
       els.conditionStatus.textContent = '조건을 불러오지 못했습니다.';
+      renderConditionFinder();
       return;
     }
 
@@ -474,7 +480,9 @@
 
     if (reset) {
       try {
-        state.matchingFeedIds = await resolveMatchingFeedIds();
+        const matchingFeedIds = await resolveMatchingFeedIds();
+        if (serial !== state.requestSerial) return;
+        state.matchingFeedIds = matchingFeedIds;
       } catch (error) {
         if (serial !== state.requestSerial) return;
         state.loading = false;
@@ -741,10 +749,14 @@
     syncControls();
     bindEvents();
 
-    await loadConditionTags();
     const detailId = new URLSearchParams(window.location.search).get('id');
-    if (detailId) await loadDetail(detailId);
-    else await loadFeeds(true);
+    const conditionTagsPromise = loadConditionTags();
+    if (detailId) {
+      await loadDetail(detailId);
+      return;
+    }
+    if (state.selectedTagIds.length) await conditionTagsPromise;
+    await loadFeeds(true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
