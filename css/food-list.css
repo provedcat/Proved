@@ -177,6 +177,7 @@ button { cursor: pointer; }
 }
 
 .food-condition-finder {
+  scroll-margin-top: 24px;
   padding: 38px 0 42px;
   border-top: 1px solid var(--food-line);
 }
