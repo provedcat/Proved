@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>조건으로 사료 찾기 | 프루브</title>
+  <meta name="description" content="주 단백질원, 생애주기, 영양 관리, 제조 방식 등 원하는 조건을 조합해 고양이·강아지 사료를 찾습니다.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://proved.kr/food/conditions/">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#3568FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260829-condition-page-v1">
+  <link rel="stylesheet" href="/css/food-list.css?v=20260829-food-list-v2">
+  <link rel="stylesheet" href="/css/food-condition-page.css?v=20260829-condition-page-v1">
+  <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
+  <script defer src="/js/proved-header.js?v=20260829-condition-page-v1"></script>
+  <script defer src="/js/food-condition-page.js?v=20260829-condition-page-v1"></script>
+</head>
+<body>
+  <div class="food-shell condition-shell">
+    <header data-proved-header="food"></header>
+
+    <main class="condition-main">
+      <header class="condition-hero">
+        <p class="condition-eyebrow">CONDITION FINDER</p>
+        <h1>조건으로 찾기</h1>
+        <p>폴더를 열어 원하는 조건을 골라보세요. 선택한 조건을 모두 만족하는 사료만 보여줍니다.</p>
+      </header>
+
+      <section class="condition-workspace" aria-labelledby="conditionGroupsTitle">
+        <div class="condition-toolbar">
+          <fieldset class="condition-species">
+            <legend>대상</legend>
+            <div id="conditionSpecies">
+              <button type="button" data-species="cat" aria-pressed="true">고양이</button>
+              <button type="button" data-species="dog" aria-pressed="false">강아지</button>
+            </div>
+          </fieldset>
+          <button id="conditionReset" class="condition-reset" type="button" hidden>선택 전체 해제</button>
+        </div>
+
+        <h2 id="conditionGroupsTitle" class="sr-only">조건 그룹</h2>
+        <div id="conditionFolders" class="condition-folders" aria-label="조건 그룹"></div>
+        <div id="conditionTagPanel" class="condition-tag-panel" hidden></div>
+        <div id="conditionSelected" class="condition-selected" aria-live="polite" hidden></div>
+        <p id="conditionStatus" class="condition-status" role="status">조건을 불러오는 중입니다.</p>
+      </section>
+
+      <section class="condition-results" aria-labelledby="conditionResultCount">
+        <div class="condition-results__heading">
+          <div>
+            <p id="conditionResultCount" aria-live="polite">0개의 고양이 사료</p>
+            <span id="conditionResultGuide">조건을 선택하면 검색 결과가 표시됩니다.</span>
+          </div>
+          <p>검수 전 제품은 별도로 표시합니다.</p>
+        </div>
+        <div id="conditionResultList" class="food-results"></div>
+        <p id="conditionResultStatus" class="food-list-status" role="status"></p>
+        <button id="conditionLoadMore" class="food-load-more" type="button" hidden>더 보기</button>
+      </section>
+    </main>
+
+    <footer data-proved-footer></footer>
+  </div>
+</body>
+</html>

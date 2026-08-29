@@ -156,7 +156,7 @@
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
     state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
-    state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').filter(Boolean))].slice(0, 20);
+    state.selectedTagIds = [];
   }
 
   function writeListStateToUrl(replace = true) {
@@ -277,25 +277,25 @@
       loadFeeds(true);
     });
 
-    els.conditionFolders.addEventListener('click', event => {
+    els.conditionFolders?.addEventListener('click', event => {
       const button = event.target.closest('[data-tag-category]');
       if (!button) return;
       state.activeTagCategory = state.activeTagCategory === button.dataset.tagCategory ? '' : button.dataset.tagCategory;
       renderConditionFinder();
     });
 
-    els.conditionPanel.addEventListener('click', event => {
+    els.conditionPanel?.addEventListener('click', event => {
       const button = event.target.closest('[data-tag-id]');
       if (!button) return;
       toggleTag(button.dataset.tagId);
     });
 
-    els.selectedConditions.addEventListener('click', event => {
+    els.selectedConditions?.addEventListener('click', event => {
       const button = event.target.closest('[data-remove-tag-id]');
       if (button) toggleTag(button.dataset.removeTagId);
     });
 
-    els.conditionReset.addEventListener('click', () => {
+    els.conditionReset?.addEventListener('click', () => {
       state.selectedTagIds = [];
       state.matchingFeedIds = null;
       renderConditionFinder();
@@ -750,7 +750,7 @@
     bindEvents();
 
     const detailId = new URLSearchParams(window.location.search).get('id');
-    const conditionTagsPromise = loadConditionTags();
+    const conditionTagsPromise = els.conditionFolders ? loadConditionTags() : Promise.resolve();
     if (detailId) {
       await loadDetail(detailId);
       return;

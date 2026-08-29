@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260821-editorial-v1';
+const CACHE_NAME = 'proved-pwa-20260829-condition-page-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -10,6 +10,7 @@ const CORE_ASSETS = [
   './css/feed-reading.css',
   './css/editorial.css',
   './css/food-list.css',
+  './css/food-condition-page.css',
   './css/food-compare.css',
   './css/food-detail-refinements.css',
   './css/food-mobile-nutrition-v2.css',
@@ -19,6 +20,7 @@ const CORE_ASSETS = [
   './js/calculator.js',
   './js/feed-search.js',
   './js/food-list.js',
+  './js/food-condition-page.js',
   './js/food-compare.js',
   './js/food-detail-refinements.js',
   './js/food-mobile-nutrition-v2.js',
@@ -37,6 +39,7 @@ const CORE_ASSETS = [
   './dog-food-calculator/',
   './feed-registration/',
   './food/',
+  './food/conditions/',
   './food/compare/',
   './guide/calculation-method/',
   './guide/feed-reading/',
