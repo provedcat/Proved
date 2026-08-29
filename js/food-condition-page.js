@@ -27,6 +27,7 @@
     selectedTagIds: [],
     activeCategory: '',
     matchingFeedIds: [],
+    allRows: [],
     rows: [],
     total: 0,
     loading: false,
@@ -146,6 +147,7 @@
 
   function renderInitialResults() {
     state.rows = [];
+    state.allRows = [];
     state.total = 0;
     els.resultCount.textContent = `0개의 ${getSpeciesLabel()} 사료`;
     els.resultGuide.textContent = '조건을 선택하면 검색 결과가 표시됩니다.';
@@ -181,14 +183,21 @@
     return [...byFeed.entries()].filter(([, ids]) => ids.size === required.size).map(([id]) => id);
   }
 
-  function buildFeedQuery(from, to) {
-    return sb.from(getTable())
-      .select(LIST_COLUMNS, { count: 'exact' })
-      .or('verified.eq.true,searchable_before_review.eq.true')
-      .in('id', state.matchingFeedIds)
-      .order('제조사', { ascending: true })
-      .order('제품명', { ascending: true })
-      .range(from, to);
+  async function loadMatchingFeeds(ids) {
+    const rows = [];
+    const chunkSize = 100;
+    for (let index = 0; index < ids.length; index += chunkSize) {
+      const { data, error } = await sb.from(getTable())
+        .select(LIST_COLUMNS)
+        .or('verified.eq.true,searchable_before_review.eq.true')
+        .in('id', ids.slice(index, index + chunkSize));
+      if (error) throw error;
+      rows.push(...(data || []));
+    }
+    return rows.sort((a, b) => {
+      const brandOrder = getBrand(a).localeCompare(getBrand(b), 'ko');
+      return brandOrder || String(a.제품명 || '').localeCompare(String(b.제품명 || ''), 'ko');
+    });
   }
 
   async function loadResults(reset) {
@@ -197,12 +206,18 @@
       return;
     }
     if (state.loading && !reset) return;
+    if (!reset) {
+      state.rows = state.allRows.slice(0, state.rows.length + PAGE_SIZE);
+      renderResults();
+      return;
+    }
     const serial = ++state.requestSerial;
     state.loading = true;
     els.resultStatus.textContent = '';
     els.loadMore.hidden = true;
     if (reset) {
       state.rows = [];
+      state.allRows = [];
       state.total = 0;
       els.resultCount.textContent = `${getSpeciesLabel()} 사료를 찾는 중입니다.`;
       els.resultGuide.textContent = `${state.selectedTagIds.length}개 조건의 교집합을 확인하고 있어요.`;
@@ -225,18 +240,20 @@
       renderResults();
       return;
     }
-    const from = reset ? 0 : state.rows.length;
-    const { data, error, count } = await buildFeedQuery(from, from + PAGE_SIZE - 1);
-    if (serial !== state.requestSerial) return;
-    state.loading = false;
-    if (error) {
+    try {
+      const rows = await loadMatchingFeeds(state.matchingFeedIds);
+      if (serial !== state.requestSerial) return;
+      state.allRows = rows;
+      state.rows = rows.slice(0, PAGE_SIZE);
+      state.total = rows.length;
+      state.loading = false;
+      renderResults();
+    } catch (error) {
+      if (serial !== state.requestSerial) return;
+      state.loading = false;
       els.results.innerHTML = '';
       els.resultStatus.textContent = error.message || '검색 결과를 불러오지 못했습니다.';
-      return;
     }
-    state.rows = reset ? (data || []) : state.rows.concat(data || []);
-    state.total = Number(count) || 0;
-    renderResults();
   }
 
   function renderResults() {
