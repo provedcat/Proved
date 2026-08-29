@@ -36,8 +36,8 @@
     ],
     food: [
       { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
-      { label: '사료 목록', href: '/food/', match: '/food/' },
-      { label: '조건으로 찾기', disabled: true }
+      { label: '사료 목록', href: '/food/', match: '/food/', hashAbsent: true },
+      { label: '조건으로 찾기', href: '/food/#foodConditionFinder', match: '/food/', hash: '#foodConditionFinder' }
     ],
     archive: [
       { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
@@ -89,8 +89,12 @@
     }
 
     const path = normalizedPath();
-    const isCurrent = item.match
-      ? path === item.match
+    const isCurrent = item.hash
+      ? path === item.match && window.location.hash === item.hash
+      : item.hashAbsent
+        ? path === item.match && !window.location.hash
+        : item.match
+          ? path === item.match
       : Array.isArray(item.matches)
         ? item.matches.some(match => path.startsWith(match))
         : false;
