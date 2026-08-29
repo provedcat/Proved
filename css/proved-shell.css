@@ -445,3 +445,52 @@
   #provedEntry .proved-site-footer { padding: 26px 20px calc(30px + env(safe-area-inset-bottom)) !important; grid-template-columns: 1fr !important; gap: 18px !important; }
   #provedEntry .proved-site-footer__nav { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px 18px !important; }
 }
+
+/* Feed picker layout safety net: prevents the bottom sheet from starting at 50vw when utility transforms fail. */
+#feedPickerModal > section[role="dialog"] {
+  left: 50% !important;
+  right: auto !important;
+  width: min(100%, 640px) !important;
+  max-width: 640px !important;
+  min-width: 0 !important;
+  transform: translateX(-50%) !important;
+  box-sizing: border-box;
+}
+
+#feedPickerModal #feedPickerList,
+#feedPickerModal #feedPickerList > *,
+#feedPickerModal #feedPickerList button {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#feedPickerModal #feedPickerList button {
+  overflow: hidden;
+}
+
+#feedPickerModal #feedPickerList button * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 760px) {
+  #feedPickerModal > section[role="dialog"] {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  #feedPickerModal #feedPickerList {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
