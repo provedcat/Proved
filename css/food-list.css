@@ -176,6 +176,159 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 
+.food-condition-finder {
+  padding: 38px 0 42px;
+  border-top: 1px solid var(--food-line);
+}
+.food-condition-finder__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.food-condition-finder__eyebrow {
+  margin: 0 0 8px;
+  color: var(--food-blue);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+.food-condition-finder h2 {
+  margin: 0;
+  color: var(--food-blue-dark);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -.045em;
+}
+.food-condition-finder__guide {
+  max-width: 640px;
+  margin: 12px 0 26px;
+  color: var(--food-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.food-condition-reset {
+  padding: 0 0 3px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--food-blue);
+  font-size: 11px;
+  font-weight: 800;
+}
+.food-condition-folders {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+}
+.food-condition-folder {
+  position: relative;
+  min-height: 70px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 28px 16px 13px;
+  border: 1px solid #cad5f5;
+  border-radius: 0;
+  background: #eef3ff;
+  color: var(--food-blue-dark);
+  text-align: left;
+  transition: transform .18s ease, background-color .18s ease, color .18s ease;
+}
+.food-condition-folder::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -1px;
+  width: 43%;
+  height: 11px;
+  border: 1px solid #cad5f5;
+  border-bottom: 0;
+  background: inherit;
+}
+.food-condition-folder:hover { transform: translateY(-3px); }
+.food-condition-folder.is-open {
+  min-height: 78px;
+  background: var(--food-blue);
+  color: #fff;
+  transform: translateY(-4px);
+}
+.food-condition-folder span { font-size: 14px; font-weight: 800; }
+.food-condition-folder b {
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--food-blue);
+  font-size: 10px;
+}
+.food-condition-panel {
+  margin-top: 10px;
+  padding: 22px;
+  border: 1px solid var(--food-blue);
+  background: #f8faff;
+}
+.food-condition-panel__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 17px;
+}
+.food-condition-panel__heading strong { color: var(--food-blue-dark); font-size: 13px; }
+.food-condition-panel__heading span { color: var(--food-muted); font-size: 11px; }
+.food-condition-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.food-condition-tags button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid #ccd5e6;
+  border-radius: 0;
+  background: #fff;
+  color: #596477;
+  font-size: 12px;
+  font-weight: 700;
+}
+.food-condition-tags button:hover,
+.food-condition-tags button[aria-pressed="true"] { border-color: var(--food-blue); color: var(--food-blue); }
+.food-condition-tags button[aria-pressed="true"] { background: #edf2ff; font-weight: 850; }
+.food-selected-conditions {
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-left: 3px solid var(--food-blue);
+  background: var(--food-soft);
+}
+.food-selected-conditions > p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 12px;
+}
+.food-selected-conditions > p strong { color: var(--food-blue-dark); font-size: 12px; }
+.food-selected-conditions > p span { color: var(--food-muted); font-size: 11px; }
+.food-selected-conditions > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.food-selected-conditions button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  border: 0;
+  background: var(--food-blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+}
+.food-selected-conditions button span { font-size: 16px; font-weight: 400; }
+.food-condition-status { margin: 12px 0 0; color: var(--food-muted); font-size: 12px; }
+.food-condition-status:empty { display: none; }
+.food-condition-empty { grid-column: 1 / -1; margin: 0; color: var(--food-muted); font-size: 12px; }
+
 .food-results-section { padding: 42px 56px 92px; }
 .food-results-heading {
   min-height: 34px;
@@ -506,6 +659,7 @@ button { cursor: pointer; }
 
 @media (max-width: 900px) {
   .food-filter-grid { grid-template-columns: 1fr 1fr; }
+  .food-condition-folders { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .food-result { grid-template-columns: 120px minmax(0, 1fr); gap: 22px; }
   .food-result__stats { grid-column: 2; justify-content: start; margin-top: -6px; }
   .food-basic-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -522,6 +676,14 @@ button { cursor: pointer; }
   .food-search-field input { font-size: 19px; }
   .food-filter-grid { grid-template-columns: 1fr; gap: 24px; padding: 28px 0 32px; }
   .food-filter-options { gap: 6px 16px; }
+  .food-condition-finder { padding: 34px 0 38px; }
+  .food-condition-folders { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .food-condition-folder { min-height: 64px; padding: 24px 12px 11px; }
+  .food-condition-folder.is-open { min-height: 70px; }
+  .food-condition-panel { padding: 18px 14px; }
+  .food-condition-panel__heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .food-condition-tags { gap: 7px; }
+  .food-condition-tags button { min-height: 40px; }
   .food-results-section { padding: 30px 20px 64px; }
   .food-results-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
   .food-result { min-height: 0; grid-template-columns: 1fr; gap: 11px; padding: 24px 0; }
