@@ -172,6 +172,13 @@
     history[replace ? 'replaceState' : 'pushState']({}, '', url);
   }
 
+  function removeTagsFromCurrentUrl() {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('tags');
+    const queryString = params.toString();
+    history.replaceState({}, '', `${window.location.pathname}${queryString ? `?${queryString}` : ''}`);
+  }
+
   function writeDetailUrl(id) {
     const params = new URLSearchParams();
     params.set('species', state.species);
@@ -346,7 +353,7 @@
       if (state.selectedTagIds.length) {
         state.selectedTagIds = [];
         state.matchingFeedIds = null;
-        writeListStateToUrl(true);
+        removeTagsFromCurrentUrl();
       }
       els.conditionStatus.textContent = '조건을 불러오지 못했습니다.';
       renderConditionFinder();
@@ -415,15 +422,24 @@
     if (!state.selectedTagIds.length) return null;
     const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
     const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
-    const { data, error } = await foodSb
-      .from(mappingTable)
-      .select(`${feedIdColumn},tag_id`)
-      .in('tag_id', state.selectedTagIds);
-    if (error) throw error;
+    const PAGE_LIMIT = 1000;
+    const data = [];
+    for (let from = 0; ; from += PAGE_LIMIT) {
+      const { data: page, error } = await foodSb
+        .from(mappingTable)
+        .select(`${feedIdColumn},tag_id`)
+        .in('tag_id', state.selectedTagIds)
+        .order('tag_id', { ascending: true })
+        .order(feedIdColumn, { ascending: true })
+        .range(from, from + PAGE_LIMIT - 1);
+      if (error) throw error;
+      data.push(...(page || []));
+      if (!page || page.length < PAGE_LIMIT) break;
+    }
 
     const required = new Set(state.selectedTagIds);
     const matchesByFeed = new Map();
-    (data || []).forEach(row => {
+    data.forEach(row => {
       const feedId = String(row[feedIdColumn] || '');
       const tagId = String(row.tag_id || '');
       if (!feedId || !required.has(tagId)) return;
