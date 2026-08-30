@@ -73,49 +73,61 @@
 .condition-reset { border-bottom-color: currentColor; color: var(--food-blue); font-size: 11px; }
 
 .condition-folders {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 24px;
 }
 .condition-folder {
   position: relative;
   z-index: calc(10 - var(--folder-index));
-  min-height: 108px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: -1px;
-  padding: 34px 24px 20px;
+  min-height: 88px;
+  margin-top: -18px;
   border: 1px solid #c9d4f0;
-  border-radius: 0;
   background: #f0f3fc;
   color: var(--food-blue);
-  text-align: left;
-  transition: transform .18s ease, background-color .18s ease, color .18s ease;
+  box-shadow: 0 -8px 18px rgba(45, 72, 140, .055);
+  transition: transform .22s ease, background-color .22s ease, min-height .22s ease;
 }
 .condition-folder::before {
   content: "";
   position: absolute;
-  top: -18px;
-  left: -1px;
-  width: 43%;
-  height: 18px;
+  top: -24px;
+  left: var(--tab-position);
+  width: min(36%, 190px);
+  height: 25px;
   border: 1px solid #c9d4f0;
   border-bottom: 0;
-  border-radius: 15px 15px 0 0;
+  border-radius: 18px 18px 0 0;
   background: inherit;
 }
-.condition-folder:nth-child(even)::before { left: auto; right: -1px; }
-.condition-folder:hover { transform: translateY(-4px); }
 .condition-folder.is-open {
-  z-index: 20;
-  background: var(--food-blue);
-  color: #fff;
-  transform: translateY(-7px);
+  z-index: 50;
+  min-height: 250px;
+  margin-top: 6px;
+  background: #fff;
+  transform: translateY(-8px);
+  box-shadow: 0 -12px 28px rgba(45, 72, 140, .12);
 }
-.condition-folder span { font-size: 18px; font-weight: 820; }
-.condition-folder b {
+.condition-folder__tab {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 28px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.condition-folder__tab:hover { color: var(--food-blue-dark); }
+.condition-folder.is-open .condition-folder__tab { min-height: 70px; border-bottom: 1px solid #dce3f3; }
+.condition-folder__tab > span { font-size: 18px; font-weight: 820; }
+.condition-folder__tab b {
   min-width: 24px;
   height: 24px;
   display: grid;
@@ -124,23 +136,18 @@
   color: var(--food-blue);
   font-size: 10px;
 }
-.condition-tag-panel {
-  position: relative;
-  z-index: 30;
-  margin-top: 16px;
-  padding: 24px;
-  border: 1px solid var(--food-blue);
-  background: #fff;
+.condition-folder__body {
+  padding: 23px 28px 30px;
 }
-.condition-tag-panel__heading {
+.condition-folder__heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 18px;
 }
-.condition-tag-panel__heading strong { color: var(--food-blue); font-size: 14px; }
-.condition-tag-panel__heading span { color: var(--food-muted); font-size: 11px; }
+.condition-folder__heading strong { color: var(--food-blue); font-size: 14px; }
+.condition-folder__heading span { color: var(--food-muted); font-size: 11px; }
 .condition-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .condition-tags button {
   min-height: 40px;
@@ -214,11 +221,12 @@
   .condition-hero h1 { font-size: 44px; }
   .condition-hero > p:last-child { margin-top: 22px; font-size: 15px; line-height: 1.72; }
   .condition-workspace { padding: 30px 40px 46px; }
-  .condition-folders { gap: 0 10px; }
-  .condition-folder { min-height: 102px; padding: 31px 18px 18px; }
-  .condition-folder span { font-size: 16px; }
-  .condition-tag-panel { padding: 19px 16px; }
-  .condition-tag-panel__heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .condition-folder { min-height: 78px; margin-top: -15px; }
+  .condition-folder.is-open { min-height: 238px; margin-top: 4px; }
+  .condition-folder__tab { min-height: 78px; padding: 18px 20px; }
+  .condition-folder__tab > span { font-size: 16px; }
+  .condition-folder__body { padding: 19px 20px 24px; }
+  .condition-folder__heading { align-items: flex-start; flex-direction: column; gap: 5px; }
   .condition-results { padding: 42px 40px 70px; }
   .condition-results__heading { align-items: flex-start; flex-direction: column; gap: 10px; }
 }
@@ -227,6 +235,6 @@
   .condition-hero,
   .condition-workspace,
   .condition-results { padding-left: 24px; padding-right: 24px; }
-  .condition-folder { min-height: 96px; padding-left: 14px; padding-right: 14px; }
-  .condition-folder span { font-size: 15px; }
+  .condition-folder__tab { padding-left: 16px; padding-right: 16px; }
+  .condition-folder__tab > span { font-size: 15px; }
 }
