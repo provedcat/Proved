@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260830-layered-folders-v2';
+const CACHE_NAME = 'proved-pwa-20260830-reference-stack-v3';
 const CORE_ASSETS = [
   './',
   './manifest.json',

@@ -135,7 +135,7 @@
           <span>${CATEGORY_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
         </button>
         <div class="condition-folder__body" ${active ? '' : 'hidden'}>
-          <div class="condition-folder__heading"><strong>${CATEGORY_LABELS[category]}</strong><span>태그를 다시 누르면 선택이 해제돼요.</span></div>
+          <p class="condition-folder__guide">원하는 태그를 골라보세요. 선택한 태그를 다시 누르면 선택이 해제돼요.</p>
           <div class="condition-tags">${tags.map(tag => {
             const selected = state.selectedTagIds.includes(String(tag.id));
             return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
