@@ -115,6 +115,9 @@
     state.tags = (data || []).filter(tag => tag.id && tag.label_ko && CATEGORY_LABELS[tag.category]);
     const available = new Set(state.tags.map(tag => String(tag.id)));
     state.selectedTagIds = state.selectedTagIds.filter(id => available.has(id));
+    if (!state.activeCategory) {
+      state.activeCategory = CATEGORY_ORDER.find(category => state.tags.some(tag => tag.category === category)) || '';
+    }
     els.status.textContent = '';
     renderFinder();
     return true;
@@ -130,7 +133,8 @@
       const active = category === state.activeCategory;
       const tags = state.tags.filter(tag => tag.category === category);
       const tabPosition = (CATEGORY_ORDER.indexOf(category) * 17) % 58;
-      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--folder-index:${index};--tab-position:${tabPosition}%">
+      const stackOffset = index > 0 ? (index - 1) * 68 : 0;
+      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--folder-index:${index};--tab-position:${tabPosition}%;--stack-offset:${stackOffset}px">
         <button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}">
           <span>${CATEGORY_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
         </button>
