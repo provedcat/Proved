@@ -70,7 +70,6 @@
     els.species = $('conditionSpecies');
     els.reset = $('conditionReset');
     els.folders = $('conditionFolders');
-    els.panel = $('conditionTagPanel');
     els.selected = $('conditionSelected');
     els.status = $('conditionStatus');
     els.resultCount = $('conditionResultCount');
@@ -129,15 +128,21 @@
     els.folders.innerHTML = ordered.map((category, index) => {
       const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
       const active = category === state.activeCategory;
-      return `<button class="condition-folder${active ? ' is-open' : ''}" type="button" data-category="${category}" aria-expanded="${active}" style="--folder-index:${index}"><span>${CATEGORY_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}</button>`;
+      const tags = state.tags.filter(tag => tag.category === category);
+      const tabPosition = (CATEGORY_ORDER.indexOf(category) * 17) % 58;
+      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--folder-index:${index};--tab-position:${tabPosition}%">
+        <button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}">
+          <span>${CATEGORY_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
+        </button>
+        <div class="condition-folder__body" ${active ? '' : 'hidden'}>
+          <div class="condition-folder__heading"><strong>${CATEGORY_LABELS[category]}</strong><span>태그를 다시 누르면 선택이 해제돼요.</span></div>
+          <div class="condition-tags">${tags.map(tag => {
+            const selected = state.selectedTagIds.includes(String(tag.id));
+            return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
+          }).join('')}</div>
+        </div>
+      </section>`;
     }).join('');
-
-    const tags = state.tags.filter(tag => tag.category === state.activeCategory);
-    els.panel.hidden = !tags.length;
-    els.panel.innerHTML = tags.length ? `<div class="condition-tag-panel__heading"><strong>${CATEGORY_LABELS[state.activeCategory]}</strong><span>여러 조건을 함께 선택할 수 있어요.</span></div><div class="condition-tags">${tags.map(tag => {
-      const selected = state.selectedTagIds.includes(String(tag.id));
-      return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
-    }).join('')}</div>` : '';
 
     const selected = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
     els.reset.hidden = !selected.length;
@@ -296,14 +301,15 @@
       loadResults(true);
     });
     els.folders.addEventListener('click', event => {
+      const tagButton = event.target.closest('[data-tag-id]');
+      if (tagButton) {
+        toggleTag(String(tagButton.dataset.tagId));
+        return;
+      }
       const button = event.target.closest('[data-category]');
       if (!button) return;
-      state.activeCategory = state.activeCategory === button.dataset.category ? '' : button.dataset.category;
+      state.activeCategory = button.dataset.category;
       renderFinder();
-    });
-    els.panel.addEventListener('click', event => {
-      const button = event.target.closest('[data-tag-id]');
-      if (button) toggleTag(String(button.dataset.tagId));
     });
     els.selected.addEventListener('click', event => {
       const button = event.target.closest('[data-remove-tag-id]');
