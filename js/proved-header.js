@@ -12,7 +12,18 @@
     if (themeMeta) themeMeta.setAttribute('content', '#3568FF');
   }
 
+  function ensureLayoutSystem() {
+    if (document.querySelector('link[data-proved-layout]')) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/css/proved-layout.css?v=20260830-layout-system-v1';
+    link.dataset.provedLayout = 'true';
+    document.head.appendChild(link);
+  }
+
   ensureColorSystem();
+  ensureLayoutSystem();
 
   const globalItems = [
     { label: '고양이', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
