@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260830-reference-stack-v3';
+const CACHE_NAME = 'proved-pwa-20260830-visible-tabs-v4';
 const CORE_ASSETS = [
   './',
   './manifest.json',

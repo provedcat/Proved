@@ -81,7 +81,8 @@
 }
 .condition-folder {
   position: relative;
-  z-index: calc(10 - var(--folder-index));
+  /* 아래 레이어가 앞 면 위로 돌출되어 각 탭을 누를 수 있어야 합니다. */
+  z-index: calc(10 + var(--folder-index));
   min-height: 94px;
   margin-top: -26px;
   border: 0;
@@ -110,7 +111,6 @@
 .condition-folder:nth-child(5) { background: #8199e4; color: #fff; }
 .condition-folder:nth-child(6) { background: #4f6fd1; color: #fff; }
 .condition-folder.is-open {
-  z-index: 50;
   min-height: 300px;
   margin-top: 0;
   border-radius: 0 0 24px 24px;
