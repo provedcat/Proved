@@ -14,6 +14,14 @@
     ingredient_condition: '원재료 조건',
     preparation_type: '급여 형태'
   };
+  const CATEGORY_TAB_LABELS = {
+    protein_source: '단백질',
+    life_stage: '생애',
+    management_purpose: '영양',
+    processing_method: '제조',
+    ingredient_condition: '원재료',
+    preparation_type: '급여'
+  };
   const LIST_COLUMNS = [
     'id', 'type', '제조사', '제품명', '완전식여부', '메인단백질',
     'final_me', 'ca_p_ratio', 'verified', 'searchable_before_review',
@@ -125,20 +133,16 @@
 
   function renderFinder() {
     const categories = CATEGORY_ORDER.filter(category => state.tags.some(tag => tag.category === category));
-    const ordered = state.activeCategory
-      ? [state.activeCategory, ...categories.filter(category => category !== state.activeCategory)]
-      : categories;
-    els.folders.innerHTML = ordered.map((category, index) => {
+    els.folders.innerHTML = categories.map((category, index) => {
       const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
       const active = category === state.activeCategory;
       const tags = state.tags.filter(tag => tag.category === category);
-      const tabPosition = (CATEGORY_ORDER.indexOf(category) * 17) % 58;
-      const stackOffset = index > 0 ? (index - 1) * 68 : 0;
-      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--folder-index:${index};--tab-position:${tabPosition}%;--stack-offset:${stackOffset}px">
+      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}">
         <button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}">
-          <span>${CATEGORY_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
+          <span>${CATEGORY_TAB_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
         </button>
         <div class="condition-folder__body" ${active ? '' : 'hidden'}>
+          <h2>${CATEGORY_LABELS[category]}</h2>
           <p class="condition-folder__guide">원하는 태그를 골라보세요. 선택한 태그를 다시 누르면 선택이 해제돼요.</p>
           <div class="condition-tags">${tags.map(tag => {
             const selected = state.selectedTagIds.includes(String(tag.id));
