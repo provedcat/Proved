@@ -142,6 +142,8 @@
 }
 .condition-folder__body h2 { margin: 0 0 12px; color: inherit; font-size: 18px; }
 .condition-folder__guide { margin: 0 0 22px; color: var(--food-muted); font-size: 12px; line-height: 1.6; }
+.condition-folder:nth-child(5) .condition-folder__guide,
+.condition-folder:nth-child(6) .condition-folder__guide { color: rgba(255, 255, 255, .84); }
 .condition-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .condition-tags button {
   min-height: 40px;
