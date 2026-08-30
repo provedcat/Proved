@@ -8,7 +8,7 @@
   --proved-subnav-height: 90px;
   --proved-hero-block-start: 72px;
   --proved-hero-block-end: 56px;
-  --proved-title-size: clamp(52px, 7vw, 80px);
+  --proved-title-size: clamp(48px, 5.4vw, 72px);
   --proved-title-leading: 1.04;
   --proved-title-tracking: -.055em;
   --proved-copy-size: 17px;
@@ -76,6 +76,7 @@ body {
 .food-list-hero,
 .condition-hero,
 .registration-hero__copy {
+  box-sizing: border-box !important;
   padding: var(--proved-hero-block-start) var(--proved-content-inset) var(--proved-hero-block-end) !important;
 }
 
@@ -126,6 +127,7 @@ body {
   margin-top: 24px !important;
   color: var(--proved-layout-text) !important;
   font-size: var(--proved-copy-size) !important;
+  font-weight: 520 !important;
   line-height: var(--proved-copy-leading) !important;
 }
 
@@ -149,8 +151,10 @@ body {
 .fr-intro,
 .ed-index-hero,
 .ed-article-hero {
+  box-sizing: border-box !important;
   width: min(100%, var(--proved-hero-max)) !important;
   margin: 0 auto 56px !important;
+  padding: 0 !important;
 }
 
 /* Calculator steps are sections, not unrelated mini page templates. */
@@ -182,7 +186,7 @@ body {
     --proved-subnav-height: 64px;
     --proved-hero-block-start: 52px;
     --proved-hero-block-end: 42px;
-    --proved-title-size: clamp(42px, 12vw, 58px);
+    --proved-title-size: clamp(44px, 12vw, 52px);
     --proved-copy-size: 15px;
   }
 
@@ -205,6 +209,17 @@ body {
     padding: var(--proved-hero-block-start) var(--proved-content-inset) 0 !important;
   }
 
+  .guide-hero,
+  .fr-intro,
+  .ed-index-hero,
+  .ed-article-hero {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 48px !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
   .food-list-hero,
   .condition-hero,
   .registration-hero__copy {
@@ -220,10 +235,6 @@ body {
     display: none !important;
   }
 
-  .ed-index-hero,
-  .fr-intro {
-    text-align: left !important;
-  }
 
   .pc-page-container {
     padding: 32px 12px 0 !important;
