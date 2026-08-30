@@ -1,0 +1,231 @@
+:root {
+  --proved-layout-max: 1124px;
+  --proved-layout-gutter: 28px;
+  --proved-content-inset: 40px;
+  --proved-reading-max: 980px;
+  --proved-hero-max: 760px;
+  --proved-header-height: 80px;
+  --proved-subnav-height: 90px;
+  --proved-hero-block-start: 72px;
+  --proved-hero-block-end: 56px;
+  --proved-title-size: clamp(52px, 7vw, 80px);
+  --proved-title-leading: 1.04;
+  --proved-title-tracking: -.055em;
+  --proved-copy-size: 17px;
+  --proved-copy-leading: 1.75;
+  --proved-layout-blue: var(--proved-color-blue, var(--brand-primary, #3568ff));
+  --proved-layout-text: var(--proved-color-text, var(--text-secondary, #727b8b));
+  --proved-layout-line: var(--proved-color-line, #dce2ea);
+  --proved-layout-bg: var(--proved-color-bg, var(--page-background, #f5f7fa));
+}
+
+html,
+body {
+  background: var(--proved-layout-bg) !important;
+}
+
+/* Every product area shares one outer grid. Page-specific CSS owns content,
+   but may not change the site chrome or the page's horizontal origin. */
+.pc-app-shell,
+.registration-shell,
+.food-shell,
+.guide-shell,
+.fr-shell,
+.ed-shell {
+  box-sizing: border-box !important;
+  width: min(calc(100% - (2 * var(--proved-layout-gutter))), var(--proved-layout-max)) !important;
+  max-width: var(--proved-layout-max) !important;
+  margin-inline: auto !important;
+  padding-inline: 0 !important;
+  background: transparent !important;
+}
+
+.proved-global-header,
+.proved-section-subnav {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.proved-global-header {
+  min-height: var(--proved-header-height) !important;
+  padding-inline: 0 !important;
+}
+
+.proved-section-subnav {
+  min-height: var(--proved-subnav-height) !important;
+}
+
+.proved-section-subnav__item {
+  min-height: calc(var(--proved-subnav-height) - 2px) !important;
+}
+
+/* Shared content origin. Wide functional controls may remain wide, while
+   titles and prose align to the same inset on every page family. */
+.food-main,
+.condition-main,
+.registration-shell > .registration-hero,
+.registration-shell > .registration-complete,
+.pc-page-container {
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+
+.food-list-hero,
+.condition-hero,
+.registration-hero__copy {
+  padding: var(--proved-hero-block-start) var(--proved-content-inset) var(--proved-hero-block-end) !important;
+}
+
+.food-controls,
+.condition-workspace,
+.condition-results,
+.registration-routes,
+.registration-photo-guide {
+  padding-inline: var(--proved-content-inset) !important;
+}
+
+/* Index/tool page hero: same hierarchy, spacing and measure. */
+.food-eyebrow,
+.condition-eyebrow,
+.registration-hero__index,
+.ed-kicker {
+  margin: 0 0 16px !important;
+  color: var(--proved-layout-blue) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: .14em !important;
+}
+
+.food-list-hero h1,
+.condition-hero h1,
+.registration-hero h1,
+.guide-hero h1,
+.fr-intro h1,
+.ed-index-hero h1,
+.ed-article-hero h1 {
+  color: var(--proved-layout-blue) !important;
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: var(--proved-title-size) !important;
+  font-weight: 800 !important;
+  line-height: var(--proved-title-leading) !important;
+  letter-spacing: var(--proved-title-tracking) !important;
+}
+
+.food-list-hero__lead,
+.condition-hero > p:last-child,
+.registration-hero__lead,
+.hero-copy,
+.fr-intro p,
+.ed-index-hero > p,
+.ed-article-hero > p {
+  max-width: 680px !important;
+  margin-top: 24px !important;
+  color: var(--proved-layout-text) !important;
+  font-size: var(--proved-copy-size) !important;
+  line-height: var(--proved-copy-leading) !important;
+}
+
+/* Archive pages keep editorial differences inside a single document grid. */
+.guide-shell > .proved-section-subnav,
+.fr-shell > .proved-section-subnav,
+.ed-shell > .proved-section-subnav {
+  margin-bottom: 0 !important;
+}
+
+.guide-shell > main,
+.fr-main,
+.ed-main {
+  box-sizing: border-box;
+  width: min(100%, var(--proved-reading-max)) !important;
+  margin-inline: auto !important;
+  padding-top: var(--proved-hero-block-start) !important;
+}
+
+.guide-hero,
+.fr-intro,
+.ed-index-hero,
+.ed-article-hero {
+  width: min(100%, var(--proved-hero-max)) !important;
+  margin: 0 auto 56px !important;
+}
+
+/* Calculator steps are sections, not unrelated mini page templates. */
+.pc-page-container {
+  padding-top: 40px !important;
+}
+
+.pc-section-heading {
+  align-items: start !important;
+}
+
+.pc-section-title {
+  color: var(--proved-layout-blue) !important;
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -.04em !important;
+}
+
+.pc-section-heading > p,
+.pc-section-heading > div > p {
+  color: var(--proved-layout-text) !important;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --proved-layout-gutter: 12px;
+    --proved-content-inset: 24px;
+    --proved-header-height: 68px;
+    --proved-subnav-height: 64px;
+    --proved-hero-block-start: 52px;
+    --proved-hero-block-end: 42px;
+    --proved-title-size: clamp(42px, 12vw, 58px);
+    --proved-copy-size: 15px;
+  }
+
+  .proved-global-header {
+    gap: 18px !important;
+    padding-inline: 6px !important;
+  }
+
+  .proved-global-header__nav {
+    gap: 14px !important;
+  }
+
+  .proved-section-subnav__item {
+    padding-inline: 4px !important;
+  }
+
+  .guide-shell > main,
+  .fr-main,
+  .ed-main {
+    padding: var(--proved-hero-block-start) var(--proved-content-inset) 0 !important;
+  }
+
+  .food-list-hero,
+  .condition-hero,
+  .registration-hero__copy {
+    min-height: 0 !important;
+  }
+
+  .registration-hero {
+    display: block !important;
+    min-height: 0 !important;
+  }
+
+  .registration-hero__aside {
+    display: none !important;
+  }
+
+  .ed-index-hero,
+  .fr-intro {
+    text-align: left !important;
+  }
+
+  .pc-page-container {
+    padding: 32px 12px 0 !important;
+  }
+}
