@@ -12,6 +12,10 @@ function loadInventory() {
   return JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
 }
 
+function canonicalRuleLine(rule) {
+  return `- **[${rule.id}] ${rule.strength.toUpperCase()} · ${rule.implementation_status} · ${rule.scope}** — ${rule.rule}`;
+}
+
 test('design rule inventory is internally consistent', () => {
   const inventory = loadInventory();
   const active = inventory.rules.filter((rule) => rule.status === 'active');
@@ -42,6 +46,30 @@ test('DESIGN.md is byte-for-byte identical to the generated inventory artifact',
     generated,
     'DESIGN.md drifted from design/rules-inventory.json; run `node scripts/generate-design.js` and commit the result'
   );
+});
+
+test('compiled rule fields and text exactly match the inventory independently of the generator', () => {
+  const inventory = loadInventory();
+  const designLines = fs.readFileSync(designPath, 'utf8').split(/\r?\n/);
+  const active = inventory.rules.filter((rule) => rule.status === 'active');
+  const inactive = inventory.rules.filter((rule) => rule.status !== 'active');
+
+  for (const rule of active) {
+    const expected = canonicalRuleLine(rule);
+    const matches = designLines.filter((line) => line === expected);
+    assert.equal(
+      matches.length,
+      1,
+      `${rule.id} must appear exactly once with inventory strength, implementation_status, scope, and rule text`
+    );
+  }
+
+  for (const rule of inactive) {
+    assert.ok(
+      !designLines.some((line) => line.includes(`[${rule.id}]`)),
+      `${rule.id} is not active and must not appear in DESIGN.md`
+    );
+  }
 });
 
 test('historical rules are explicitly mapped to active replacements', () => {
