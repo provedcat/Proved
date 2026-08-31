@@ -17,7 +17,7 @@
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/css/proved-layout.css?v=20260830-layout-system-v1';
+    link.href = '/css/proved-layout.css?v=20260831-content-layout-v3';
     link.dataset.provedLayout = 'true';
     document.head.appendChild(link);
   }
