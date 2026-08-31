@@ -1,0 +1,38 @@
+name: Design Contract
+
+on:
+  pull_request:
+    paths:
+      - 'DESIGN.md'
+      - 'design/rules-inventory.json'
+      - 'design/README.md'
+      - 'scripts/generate-design.js'
+      - 'tests/design-rules.test.js'
+      - '.github/workflows/design-contract.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'DESIGN.md'
+      - 'design/rules-inventory.json'
+      - 'scripts/generate-design.js'
+      - 'tests/design-rules.test.js'
+      - '.github/workflows/design-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-design-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify inventory and generated DESIGN.md
+        run: node --test tests/design-rules.test.js
