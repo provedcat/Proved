@@ -32,12 +32,12 @@ test('design rule inventory is internally consistent', () => {
   assert.equal(inventory.coverage.unresolved_conflicts, 0, 'inventory declares unresolved design conflicts');
 });
 
-test('DESIGN.md is the exact generated artifact from the inventory', () => {
+test('DESIGN.md is byte-for-byte identical to the generated inventory artifact', () => {
   const inventory = loadInventory();
-  const committed = fs.readFileSync(designPath, 'utf8');
-  const generated = renderDesign(inventory);
+  const committed = fs.readFileSync(designPath);
+  const generated = Buffer.from(renderDesign(inventory), 'utf8');
 
-  assert.equal(
+  assert.deepEqual(
     committed,
     generated,
     'DESIGN.md drifted from design/rules-inventory.json; run `node scripts/generate-design.js` and commit the result'
