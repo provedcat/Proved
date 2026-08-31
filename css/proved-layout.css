@@ -157,6 +157,20 @@ body {
   padding: 0 !important;
 }
 
+
+/* Editorial index may use the full reading width so its title stays on one
+   line on wide screens, then wraps naturally as the viewport narrows. */
+.ed-index-hero {
+  width: min(100%, var(--proved-layout-max)) !important;
+  max-width: none !important;
+}
+
+@media (min-width: 1000px) {
+  .ed-index-hero h1 {
+    white-space: nowrap;
+  }
+}
+
 /* Calculator steps are sections, not unrelated mini page templates. */
 .pc-page-container {
   padding-top: 40px !important;
