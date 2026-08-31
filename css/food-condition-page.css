@@ -73,7 +73,7 @@
 .condition-reset { border-bottom-color: currentColor; color: var(--food-blue); font-size: 11px; }
 
 .condition-folders {
-  --front-height: clamp(430px, 58vh, 560px);
+  --front-height: clamp(260px, 34vh, 320px);
   position: relative;
   height: calc(var(--front-height) + 44px);
   padding-top: 44px;
