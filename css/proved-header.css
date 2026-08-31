@@ -10,12 +10,12 @@
 .proved-global-header {
   box-sizing: border-box;
   width: 100%;
-  min-height: 80px;
+  min-height: calc(80px + env(safe-area-inset-top));
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 32px;
-  padding: 0 28px;
+  padding: env(safe-area-inset-top) max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--proved-header-line);
   background: var(--proved-header-surface);
   font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -218,9 +218,9 @@ body:has(.guide-shell) {
 
 @media (max-width: 720px) {
   .proved-global-header {
-    min-height: 68px;
+    min-height: calc(68px + env(safe-area-inset-top));
     gap: 18px;
-    padding: 0 18px;
+    padding: env(safe-area-inset-top) max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
   }
 
   .proved-global-header__brand {
