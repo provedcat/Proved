@@ -43,6 +43,7 @@ for (const selector of [
 for (const relativePath of pages) {
   const html = fs.readFileSync(path.join(root, relativePath), 'utf8');
   assert.match(html, /\/js\/proved-header\.js/, `${relativePath} must load the shared header/layout entrypoint`);
+  assert.match(html, /SUIT-Variable\\.css/, `${relativePath} must load the shared SUIT Variable font file`);
 }
 
 console.log('layout contract tests passed');
