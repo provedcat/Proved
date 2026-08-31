@@ -11,6 +11,6 @@
 5. Run `node --test tests/*.test.js`.
 6. For visual changes, render the affected screen at the required responsive widths when browser tooling is available.
 
-Do not edit `DESIGN.md` as an independent source of truth. Its rule lines are compiled from the inventory. `tests/design-rules.test.js` compares the committed file with a fresh generator render byte-for-byte, so changing a rule's text, strength, scope, implementation status, active status, or membership without regeneration fails the test.
+Do not edit `DESIGN.md` as an independent source of truth. Its rule lines are compiled from the inventory. `tests/design-rules.test.js` compares the committed UTF-8 bytes with a fresh generator render, so changing a rule's text, strength, scope, implementation status, active status, or membership without regeneration fails the test.
 
 If a new `PD-*` rule does not belong to one of the ranges defined in `scripts/generate-design.js`, generation fails rather than silently omitting it.
