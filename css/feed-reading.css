@@ -65,10 +65,22 @@ summary:focus-visible {
 }
 
 .fr-intro p {
-  margin: 0;
+  max-width: 720px;
+  margin-inline: auto !important;
   color: var(--fr-text);
   font-size: 17px;
   line-height: 1.8;
+  text-align: center !important;
+  text-wrap: balance;
+}
+
+.fr-intro__lead {
+  margin-block: 0 !important;
+}
+
+.fr-intro__statement {
+  max-width: 680px !important;
+  margin-block: 22px 0 !important;
 }
 
 .fr-intro strong {
