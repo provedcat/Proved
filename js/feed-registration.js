@@ -49,8 +49,19 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnDwg1b9u_JVoKnxUrcTfS944QOYwJFn7hO4TKNjkzMQrtHU-enpGTFdA/exec';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const registrationState = { species: 'cat', type: 'dry', userId: null, busy: false, imageFile: null, previewUrl: null };
+const PROVED_PENDING_REGISTERED_FEED_KEY = 'proved.pendingRegisteredFeed.v1';
+const CALCULATOR_PATHS = new Set(['/', '/cat-food-calculator/', '/dog-food-calculator/']);
+const registrationState = {
+  species: 'cat',
+  type: 'dry',
+  userId: null,
+  busy: false,
+  imageFile: null,
+  previewUrl: null,
+  returnTo: ''
+};
 let textWaitTimers = [];
+let calculatorReturnTimer = null;
 
 function escapeHtml(value) {
   const node = document.createElement('div');
@@ -82,8 +93,88 @@ async function parseResponse(response) {
   return data;
 }
 
-function showReturnNotice() {
+function normalizeCalculatorReturnPath(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(value, window.location.origin);
+    const normalizedPath = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+    if (url.origin !== window.location.origin || !CALCULATOR_PATHS.has(normalizedPath)) return '';
+    return normalizedPath;
+  } catch (_) {
+    return '';
+  }
+}
+
+function getDefaultCalculatorPath() {
+  return registrationState.species === 'dog' ? '/dog-food-calculator/' : '/cat-food-calculator/';
+}
+
+function getRegisteredFeedId(result) {
+  const values = [
+    result?.registered_feed_id,
+    result?.feed_id,
+    result?.registeredFeedId,
+    result?.등록된사료ID,
+    result?.사료ID,
+    Array.isArray(result?.result_feed_ids) ? result.result_feed_ids[0] : null,
+    Array.isArray(result?.feed_ids) ? result.feed_ids[0] : null
+  ];
+  return values.find(value => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''))) || null;
+}
+
+function getRegisteredProductName(result, fallbackName = '') {
+  const value = Array.isArray(result?.제품명) ? result.제품명[0] : result?.제품명;
+  return String(value || fallbackName || '').trim();
+}
+
+function savePendingRegisteredFeed(result, fallbackName) {
+  const pending = {
+    version: 1,
+    species: registrationState.species,
+    type: registrationState.type,
+    feedId: getRegisteredFeedId(result),
+    productName: getRegisteredProductName(result, fallbackName),
+    savedAt: Date.now()
+  };
+  if (!pending.feedId && !pending.productName) return;
+
+  try {
+    sessionStorage.setItem(PROVED_PENDING_REGISTERED_FEED_KEY, JSON.stringify(pending));
+  } catch (error) {
+    console.warn('Registered feed return state could not be saved.', error);
+  }
+}
+
+function returnToCalculator() {
+  if (calculatorReturnTimer) window.clearTimeout(calculatorReturnTimer);
+  const destination = registrationState.returnTo || getDefaultCalculatorPath();
+  window.location.replace(destination);
+}
+
+function showReturnNotice({ result = {}, fallbackName = '', searchable = true } = {}) {
   const complete = document.getElementById('registrationComplete');
+  const message = document.getElementById('registrationReturnMessage');
+  const button = document.getElementById('registrationReturnButton');
+  if (!complete || !message || !button) return;
+
+  if (!searchable) {
+    message.textContent = '제품 자료를 저장했습니다. 검수가 끝나면 계산기에서 검색할 수 있습니다.';
+    button.hidden = true;
+    complete.classList.add('is-visible');
+    complete.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
+  savePendingRegisteredFeed(result, fallbackName);
+  button.hidden = false;
+  button.textContent = '지금 계산기로 돌아가기';
+  button.onclick = returnToCalculator;
+  if (registrationState.returnTo) {
+    message.textContent = '등록이 완료되었습니다. 3초 후 계산기 화면으로 돌아갑니다.';
+    calculatorReturnTimer = window.setTimeout(returnToCalculator, 3000);
+  } else {
+    message.textContent = '등록이 완료되었습니다. 계산기로 돌아가 방금 등록한 제품으로 계산할 수 있습니다.';
+  }
   complete?.classList.add('is-visible');
   complete?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -172,7 +263,7 @@ async function submitTextRegistration() {
     }
     if (result.중복) {
       renderMessage('feedTextRequestMsg', `${result.verified ? '이미 등록된' : '이미 검수 전으로 등록된'} 제품입니다. ${result.제품명 || ''}`.trim(), result.verified ? 'success' : 'warning');
-      showReturnNotice();
+      showReturnNotice({ result, fallbackName: query, searchable: result.검색가능 !== false });
       return;
     }
     if (!result.성공) throw new Error(result.오류 || '제품 정보를 등록하지 못했습니다.');
@@ -181,7 +272,7 @@ async function submitTextRegistration() {
       ? `${names} 자료를 저장했습니다. 검수 후 검색에 표시됩니다.`
       : `${names} 등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.`, result.검색가능 === false ? 'warning' : 'success');
     input.value = '';
-    showReturnNotice();
+    showReturnNotice({ result, fallbackName: names, searchable: result.검색가능 !== false });
   } catch (error) {
     console.error(error);
     renderMessage('feedTextRequestMsg', '제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
@@ -222,11 +313,13 @@ async function submitImageRegistration() {
       body:JSON.stringify({ action:'upload', base64Data:base64, mimeType:file.type, fileName:file.name, type:registrationState.type, species:registrationState.species })
     }));
     if (!result.성공) throw new Error(result.안내 || result.오류 || '등록하지 못했습니다.');
-    renderMessage('uploadMsg', '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.', 'success');
+    renderMessage('uploadMsg', result.검색가능 === false
+      ? '제품 자료를 저장했습니다. 검수 후 검색에 표시됩니다.'
+      : '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.', result.검색가능 === false ? 'warning' : 'success');
     document.getElementById('uploadInput').value = '';
     registrationState.imageFile = null;
     document.getElementById('uploadPrompt').textContent = '분석 완료';
-    showReturnNotice();
+    showReturnNotice({ result, searchable: result.검색가능 !== false });
   } catch (error) {
     console.error(error);
     renderMessage('uploadMsg', error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
@@ -260,6 +353,7 @@ function validateImageFile(file) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
+  registrationState.returnTo = normalizeCalculatorReturnPath(params.get('return_to'));
   setChoice('species', params.get('species') === 'dog' ? 'dog' : 'cat');
   setChoice('type', params.get('type') === 'wet' ? 'wet' : 'dry');
   document.querySelectorAll('[data-species]').forEach(button => button.addEventListener('click', () => setChoice('species', button.dataset.species)));
