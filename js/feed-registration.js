@@ -58,6 +58,7 @@ const registrationState = {
   busy: false,
   imageFile: null,
   previewUrl: null,
+  slotIndex: 0,
   returnTo: ''
 };
 let textWaitTimers = [];
@@ -132,6 +133,7 @@ function savePendingRegisteredFeed(result, fallbackName) {
     version: 1,
     species: registrationState.species,
     type: registrationState.type,
+    slotIndex: registrationState.slotIndex,
     feedId: getRegisteredFeedId(result),
     productName: getRegisteredProductName(result, fallbackName),
     savedAt: Date.now()
@@ -354,6 +356,7 @@ function validateImageFile(file) {
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
   registrationState.returnTo = normalizeCalculatorReturnPath(params.get('return_to'));
+  registrationState.slotIndex = Math.max(0, Math.min(2, Number(params.get('slot')) || 0));
   setChoice('species', params.get('species') === 'dog' ? 'dog' : 'cat');
   setChoice('type', params.get('type') === 'wet' ? 'wet' : 'dry');
   document.querySelectorAll('[data-species]').forEach(button => button.addEventListener('click', () => setChoice('species', button.dataset.species)));

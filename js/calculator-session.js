@@ -20,18 +20,30 @@ function readCalculatorDraftFields() {
   return fields;
 }
 
+function buildWetFeedDraft(slotIds = [], wetFeedMap = {}, readValue = () => '') {
+  return slotIds.slice(0, 3).map(slotId => ({
+    slotId,
+    feed: wetFeedMap[slotId] || null,
+    input: readValue(`wetInput_${slotId}`) || '',
+    ratio: readValue(`wetPct_${slotId}`) || ''
+  }));
+}
+
+function mapWetFeedDraftToSlots(wetFeeds = [], targetSlotIds = []) {
+  return wetFeeds.slice(0, 3).map((saved, index) => ({
+    ...saved,
+    slotId: targetSlotIds[index]
+  })).filter(saved => saved.slotId != null);
+}
+
 function saveCalculatorDraft() {
   if (typeof state === 'undefined') return;
 
-  const firstWetSlotId = Array.isArray(state.wetSlotIds) ? state.wetSlotIds[0] : null;
-  const wetFeeds = firstWetSlotId == null
-    ? []
-    : [{
-        slotId: firstWetSlotId,
-        feed: state.wetFeedMap[firstWetSlotId] || null,
-        input: document.getElementById(`wetInput_${firstWetSlotId}`)?.value || '',
-        ratio: ''
-      }];
+  const wetFeeds = buildWetFeedDraft(
+    Array.isArray(state.wetSlotIds) ? state.wetSlotIds : [],
+    state.wetFeedMap || {},
+    id => document.getElementById(id)?.value || ''
+  );
 
   const draft = {
     version: 1,
@@ -101,6 +113,7 @@ async function restorePendingRegisteredFeed() {
   if (requestedSpecies && requestedSpecies !== species) return;
 
   const table = species === 'dog' ? 'dog_feeds' : 'feeds';
+  showRegisteredFeedReturnStatus('방금 등록한 사료를 불러오는 중입니다.');
   let query = sb
     .from(table)
     .select(getFeedSearchColumns())
@@ -124,8 +137,11 @@ async function restorePendingRegisteredFeed() {
   }
 
   if (data?.length === 1) {
-    const slotId = type === 'dry' ? 0 : state.wetSlotIds[0];
-    const listId = type === 'dry' ? 'dryList1' : `wetList_${slotId}`;
+    const requestedSlotIndex = Math.max(0, Number(pending.slotIndex) || 0);
+    const slotId = type === 'dry'
+      ? Math.min(requestedSlotIndex, 1)
+      : state.wetSlotIds[Math.min(requestedSlotIndex, state.wetSlotIds.length - 1)];
+    const listId = type === 'dry' ? `dryList${slotId + 1}` : `wetList_${slotId}`;
     if (slotId != null && selectFeed(type, slotId, data[0], listId)) {
       sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY);
       saveCalculatorDraft();
@@ -134,7 +150,11 @@ async function restorePendingRegisteredFeed() {
     return;
   }
 
-  const inputId = type === 'dry' ? 'dryInput1' : `wetInput_${state.wetSlotIds[0]}`;
+  const requestedSlotIndex = Math.max(0, Number(pending.slotIndex) || 0);
+  const fallbackSlotId = type === 'dry'
+    ? Math.min(requestedSlotIndex, 1)
+    : state.wetSlotIds[Math.min(requestedSlotIndex, state.wetSlotIds.length - 1)];
+  const inputId = type === 'dry' ? `dryInput${fallbackSlotId + 1}` : `wetInput_${fallbackSlotId}`;
   const input = document.getElementById(inputId);
   if (input && pending.productName) {
     input.value = pending.productName;
@@ -200,14 +220,14 @@ function resetWetSlotsToDefault() {
 }
 
 function restoreCalculatorDraft() {
-  resetWetSlotsToDefault();
-
   let draft;
   try {
     draft = JSON.parse(sessionStorage.getItem(PROVED_CALCULATOR_SESSION_KEY) || 'null');
   } catch (_) {
+    resetWetSlotsToDefault();
     return;
   }
+  resetWetSlotsToDefault();
   if (!draft || draft.version !== 1 || typeof state === 'undefined') return;
 
   Object.entries(draft.fields || {}).forEach(([key, value]) => restoreFieldValue(key, value));
@@ -221,14 +241,19 @@ function restoreCalculatorDraft() {
     });
   }
 
-  const firstWetFeed = Array.isArray(draft.wetFeeds) ? draft.wetFeeds[0] : null;
-  const firstWetSlotId = state.wetSlotIds[0];
-  if (firstWetFeed && firstWetSlotId != null) {
-    state.wetFeedMap[firstWetSlotId] = firstWetFeed.feed || null;
-    const input = document.getElementById(`wetInput_${firstWetSlotId}`);
-    if (input) input.value = firstWetFeed.input || firstWetFeed.feed?.display || firstWetFeed.feed?.name || '';
-    renderRestoredFeed('wet', firstWetSlotId, firstWetFeed.feed);
-  }
+  const savedWetFeeds = Array.isArray(draft.wetFeeds) ? draft.wetFeeds.slice(0, 3) : [];
+  const targetWetSlotCount = Math.max(1, savedWetFeeds.length);
+  while (state.wetSlotIds.length < targetWetSlotCount && typeof addWetSlot === 'function') addWetSlot();
+
+  state.wetFeedMap = {};
+  mapWetFeedDraftToSlots(savedWetFeeds, state.wetSlotIds).forEach(saved => {
+    state.wetFeedMap[saved.slotId] = saved.feed || null;
+    const input = document.getElementById(`wetInput_${saved.slotId}`);
+    if (input) input.value = saved.input || saved.feed?.display || saved.feed?.name || '';
+    const ratio = document.getElementById(`wetPct_${saved.slotId}`);
+    if (ratio && saved.ratio !== '') ratio.value = saved.ratio;
+    renderRestoredFeed('wet', saved.slotId, saved.feed);
+  });
 
   toggleDrySwitching();
   updateRatio(document.getElementById('ratioSlider')?.value || 60);
@@ -241,17 +266,20 @@ function restoreCalculatorDraft() {
 }
 
 let preferredRegistrationType = 'dry';
+let preferredRegistrationSlotIndex = 0;
 
 function getPreferredRegistrationType() {
   return preferredRegistrationType;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  resetWetSlotsToDefault();
+function getPreferredRegistrationSlotIndex() {
+  return preferredRegistrationSlotIndex;
+}
+
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', async () => {
   restoreCalculatorDraft();
 
   requestAnimationFrame(() => {
-    resetWetSlotsToDefault();
     saveCalculatorDraft();
   });
 
@@ -259,8 +287,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('calculatorPage')?.addEventListener('change', saveCalculatorDraft);
   document.getElementById('calculatorPage')?.addEventListener('focusin', event => {
     const id = event.target?.id || '';
-    if (id.startsWith('wet')) preferredRegistrationType = 'wet';
-    if (id.startsWith('dry')) preferredRegistrationType = 'dry';
+    const wetMatch = id.match(/^wetInput_(\d+)$/);
+    const dryMatch = id.match(/^dryInput(\d+)$/);
+    if (wetMatch) {
+      preferredRegistrationType = 'wet';
+      preferredRegistrationSlotIndex = Math.max(0, state.wetSlotIds.indexOf(Number(wetMatch[1])));
+    }
+    if (dryMatch) {
+      preferredRegistrationType = 'dry';
+      preferredRegistrationSlotIndex = Math.max(0, Number(dryMatch[1]) - 1);
+    }
   });
   document.querySelectorAll('[data-feed-registration-link]').forEach(link => {
     link.addEventListener('click', () => {
@@ -270,6 +306,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams({
         species,
         type,
+        slot: String(getPreferredRegistrationSlotIndex()),
         return_to: getCalculatorReturnPath()
       });
       link.href = `/feed-registration/?${params.toString()}`;
@@ -278,3 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await restorePendingRegisteredFeed();
   window.addEventListener('pagehide', saveCalculatorDraft);
 });
+
+if (typeof module !== 'undefined') {
+  module.exports = { buildWetFeedDraft, mapWetFeedDraftToSlots };
+}
