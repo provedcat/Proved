@@ -1,4 +1,6 @@
 const PROVED_CALCULATOR_SESSION_KEY = 'proved.calculatorDraft.v1';
+const PROVED_PENDING_REGISTERED_FEED_KEY = 'proved.pendingRegisteredFeed.v1';
+const PROVED_PENDING_REGISTERED_FEED_MAX_AGE_MS = 15 * 60 * 1000;
 
 const calculatorDraftFieldSelectors = [
   '#catName', '#catBirth', '#catWeight', '#catNeutered',
@@ -18,18 +20,30 @@ function readCalculatorDraftFields() {
   return fields;
 }
 
+function buildWetFeedDraft(slotIds = [], wetFeedMap = {}, readValue = () => '') {
+  return slotIds.slice(0, 3).map(slotId => ({
+    slotId,
+    feed: wetFeedMap[slotId] || null,
+    input: readValue(`wetInput_${slotId}`) || '',
+    ratio: readValue(`wetPct_${slotId}`) || ''
+  }));
+}
+
+function mapWetFeedDraftToSlots(wetFeeds = [], targetSlotIds = []) {
+  return wetFeeds.slice(0, 3).map((saved, index) => ({
+    ...saved,
+    slotId: targetSlotIds[index]
+  })).filter(saved => saved.slotId != null);
+}
+
 function saveCalculatorDraft() {
   if (typeof state === 'undefined') return;
 
-  const firstWetSlotId = Array.isArray(state.wetSlotIds) ? state.wetSlotIds[0] : null;
-  const wetFeeds = firstWetSlotId == null
-    ? []
-    : [{
-        slotId: firstWetSlotId,
-        feed: state.wetFeedMap[firstWetSlotId] || null,
-        input: document.getElementById(`wetInput_${firstWetSlotId}`)?.value || '',
-        ratio: ''
-      }];
+  const wetFeeds = buildWetFeedDraft(
+    Array.isArray(state.wetSlotIds) ? state.wetSlotIds : [],
+    state.wetFeedMap || {},
+    id => document.getElementById(id)?.value || ''
+  );
 
   const draft = {
     version: 1,
@@ -45,6 +59,107 @@ function saveCalculatorDraft() {
     sessionStorage.setItem(PROVED_CALCULATOR_SESSION_KEY, JSON.stringify(draft));
   } catch (error) {
     console.warn('Calculator draft could not be saved.', error);
+  }
+}
+
+function getCalculatorReturnPath() {
+  const allowedPaths = new Set(['/', '/cat-food-calculator/', '/dog-food-calculator/']);
+  const normalizedPath = window.location.pathname.endsWith('/')
+    ? window.location.pathname
+    : `${window.location.pathname}/`;
+  return allowedPaths.has(normalizedPath) ? normalizedPath : '/';
+}
+
+function readPendingRegisteredFeed() {
+  try {
+    const pending = JSON.parse(sessionStorage.getItem(PROVED_PENDING_REGISTERED_FEED_KEY) || 'null');
+    if (!pending || pending.version !== 1) return null;
+    if (!Number.isFinite(pending.savedAt) || Date.now() - pending.savedAt > PROVED_PENDING_REGISTERED_FEED_MAX_AGE_MS) {
+      sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY);
+      return null;
+    }
+    return pending;
+  } catch (_) {
+    sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY);
+    return null;
+  }
+}
+
+function showRegisteredFeedReturnStatus(message, tone = 'success') {
+  const registrationCard = document.querySelector('.pc-feed-registration-card');
+  if (!registrationCard || !message) return;
+
+  let status = document.getElementById('registeredFeedReturnStatus');
+  if (!status) {
+    status = document.createElement('p');
+    status.id = 'registeredFeedReturnStatus';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    registrationCard.insertAdjacentElement('beforebegin', status);
+  }
+  status.className = tone === 'success' ? 'pc-registration-return-status' : 'pc-registration-return-status is-warning';
+  status.textContent = message;
+}
+
+async function restorePendingRegisteredFeed() {
+  if (typeof state === 'undefined' || typeof sb === 'undefined' || typeof selectFeed !== 'function') return;
+
+  const pending = readPendingRegisteredFeed();
+  if (!pending) return;
+
+  const species = pending.species === 'dog' ? 'dog' : 'cat';
+  const type = pending.type === 'wet' ? 'wet' : 'dry';
+  const requestedSpecies = typeof provedGetRequestedSpecies === 'function' ? provedGetRequestedSpecies() : null;
+  if (requestedSpecies && requestedSpecies !== species) return;
+
+  const table = species === 'dog' ? 'dog_feeds' : 'feeds';
+  showRegisteredFeedReturnStatus('방금 등록한 사료를 불러오는 중입니다.');
+  let query = sb
+    .from(table)
+    .select(getFeedSearchColumns())
+    .eq('type', type)
+    .or('verified.eq.true,searchable_before_review.eq.true')
+    .gt('final_me', 0)
+    .limit(2);
+
+  if (pending.feedId) {
+    query = query.eq('id', pending.feedId);
+  } else if (pending.productName) {
+    query = query.eq('제품명', pending.productName);
+  } else {
+    return;
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.warn('Registered feed could not be restored.', error);
+    return;
+  }
+
+  if (data?.length === 1) {
+    const requestedSlotIndex = Math.max(0, Number(pending.slotIndex) || 0);
+    const slotId = type === 'dry'
+      ? Math.min(requestedSlotIndex, 1)
+      : state.wetSlotIds[Math.min(requestedSlotIndex, state.wetSlotIds.length - 1)];
+    const listId = type === 'dry' ? `dryList${slotId + 1}` : `wetList_${slotId}`;
+    if (slotId != null && selectFeed(type, slotId, data[0], listId)) {
+      sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY);
+      saveCalculatorDraft();
+      showRegisteredFeedReturnStatus('방금 등록한 사료를 선택했습니다. 반려동물 정보를 확인하고 계산을 이어가세요.');
+    }
+    return;
+  }
+
+  const requestedSlotIndex = Math.max(0, Number(pending.slotIndex) || 0);
+  const fallbackSlotId = type === 'dry'
+    ? Math.min(requestedSlotIndex, 1)
+    : state.wetSlotIds[Math.min(requestedSlotIndex, state.wetSlotIds.length - 1)];
+  const inputId = type === 'dry' ? `dryInput${fallbackSlotId + 1}` : `wetInput_${fallbackSlotId}`;
+  const input = document.getElementById(inputId);
+  if (input && pending.productName) {
+    input.value = pending.productName;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    showRegisteredFeedReturnStatus('등록한 사료명을 불러왔습니다. 검색 결과에서 제품을 선택해 주세요.', 'warning');
   }
 }
 
@@ -105,14 +220,14 @@ function resetWetSlotsToDefault() {
 }
 
 function restoreCalculatorDraft() {
-  resetWetSlotsToDefault();
-
   let draft;
   try {
     draft = JSON.parse(sessionStorage.getItem(PROVED_CALCULATOR_SESSION_KEY) || 'null');
   } catch (_) {
+    resetWetSlotsToDefault();
     return;
   }
+  resetWetSlotsToDefault();
   if (!draft || draft.version !== 1 || typeof state === 'undefined') return;
 
   Object.entries(draft.fields || {}).forEach(([key, value]) => restoreFieldValue(key, value));
@@ -126,14 +241,19 @@ function restoreCalculatorDraft() {
     });
   }
 
-  const firstWetFeed = Array.isArray(draft.wetFeeds) ? draft.wetFeeds[0] : null;
-  const firstWetSlotId = state.wetSlotIds[0];
-  if (firstWetFeed && firstWetSlotId != null) {
-    state.wetFeedMap[firstWetSlotId] = firstWetFeed.feed || null;
-    const input = document.getElementById(`wetInput_${firstWetSlotId}`);
-    if (input) input.value = firstWetFeed.input || firstWetFeed.feed?.display || firstWetFeed.feed?.name || '';
-    renderRestoredFeed('wet', firstWetSlotId, firstWetFeed.feed);
-  }
+  const savedWetFeeds = Array.isArray(draft.wetFeeds) ? draft.wetFeeds.slice(0, 3) : [];
+  const targetWetSlotCount = Math.max(1, savedWetFeeds.length);
+  while (state.wetSlotIds.length < targetWetSlotCount && typeof addWetSlot === 'function') addWetSlot();
+
+  state.wetFeedMap = {};
+  mapWetFeedDraftToSlots(savedWetFeeds, state.wetSlotIds).forEach(saved => {
+    state.wetFeedMap[saved.slotId] = saved.feed || null;
+    const input = document.getElementById(`wetInput_${saved.slotId}`);
+    if (input) input.value = saved.input || saved.feed?.display || saved.feed?.name || '';
+    const ratio = document.getElementById(`wetPct_${saved.slotId}`);
+    if (ratio && saved.ratio !== '') ratio.value = saved.ratio;
+    renderRestoredFeed('wet', saved.slotId, saved.feed);
+  });
 
   toggleDrySwitching();
   updateRatio(document.getElementById('ratioSlider')?.value || 60);
@@ -146,17 +266,20 @@ function restoreCalculatorDraft() {
 }
 
 let preferredRegistrationType = 'dry';
+let preferredRegistrationSlotIndex = 0;
 
 function getPreferredRegistrationType() {
   return preferredRegistrationType;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  resetWetSlotsToDefault();
+function getPreferredRegistrationSlotIndex() {
+  return preferredRegistrationSlotIndex;
+}
+
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', async () => {
   restoreCalculatorDraft();
 
   requestAnimationFrame(() => {
-    resetWetSlotsToDefault();
     saveCalculatorDraft();
   });
 
@@ -164,16 +287,35 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('calculatorPage')?.addEventListener('change', saveCalculatorDraft);
   document.getElementById('calculatorPage')?.addEventListener('focusin', event => {
     const id = event.target?.id || '';
-    if (id.startsWith('wet')) preferredRegistrationType = 'wet';
-    if (id.startsWith('dry')) preferredRegistrationType = 'dry';
+    const wetMatch = id.match(/^wetInput_(\d+)$/);
+    const dryMatch = id.match(/^dryInput(\d+)$/);
+    if (wetMatch) {
+      preferredRegistrationType = 'wet';
+      preferredRegistrationSlotIndex = Math.max(0, state.wetSlotIds.indexOf(Number(wetMatch[1])));
+    }
+    if (dryMatch) {
+      preferredRegistrationType = 'dry';
+      preferredRegistrationSlotIndex = Math.max(0, Number(dryMatch[1]) - 1);
+    }
   });
   document.querySelectorAll('[data-feed-registration-link]').forEach(link => {
     link.addEventListener('click', () => {
       saveCalculatorDraft();
       const species = state.selectedPetSpecies === 'dog' ? 'dog' : 'cat';
       const type = getPreferredRegistrationType();
-      link.href = `/feed-registration/?species=${species}&type=${type}`;
+      const params = new URLSearchParams({
+        species,
+        type,
+        slot: String(getPreferredRegistrationSlotIndex()),
+        return_to: getCalculatorReturnPath()
+      });
+      link.href = `/feed-registration/?${params.toString()}`;
     });
   });
+  await restorePendingRegisteredFeed();
   window.addEventListener('pagehide', saveCalculatorDraft);
 });
+
+if (typeof module !== 'undefined') {
+  module.exports = { buildWetFeedDraft, mapWetFeedDraftToSlots };
+}

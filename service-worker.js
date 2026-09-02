@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260830-z-axis-stack-v6';
+const CACHE_NAME = 'proved-pwa-20260902-registration-return-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
