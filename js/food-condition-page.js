@@ -9,7 +9,7 @@
   const CATEGORY_LABELS = {
     protein_source: '주 단백질원',
     life_stage: '생애주기',
-    management_purpose: '영양 관리',
+    management_purpose: '수의사의 진단을 바탕으로 처방되는 기능성 사료',
     processing_method: '제조 방식',
     ingredient_condition: '원재료 조건',
     preparation_type: '급여 형태'
@@ -17,7 +17,7 @@
   const CATEGORY_TAB_LABELS = {
     protein_source: '단백질',
     life_stage: '생애',
-    management_purpose: '영양',
+    management_purpose: '기능',
     processing_method: '제조',
     ingredient_condition: '원재료',
     preparation_type: '급여'
