@@ -578,7 +578,9 @@
           .select('id,slug,label_ko,label_en,category,sort_order,is_active')
           .in('id', ids)
           .eq('is_active', true);
-        if (!tagError && Array.isArray(tagRows)) realTags = tagRows;
+        if (!tagError && Array.isArray(tagRows)) {
+          realTags = tagRows.filter(tag => !['carrageenan_free', 'gum_agar_free'].includes(tag.slug));
+        }
       }
     }
 
