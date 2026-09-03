@@ -2,7 +2,7 @@
   'use strict';
 
   const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoicXBrbHZ0Z25ocmRtenh6bHN0cHAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NTk2MTUyMiwiZXhwIjoyMDkxNTM3NTIyfQ.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const MAX_TAGS = 8;
   const SVG_VIEWBOX = '0 0 620 760';
   const LABEL_FONT_SIZE = 29;
@@ -233,7 +233,7 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
+      .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
 
