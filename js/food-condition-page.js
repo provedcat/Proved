@@ -150,12 +150,11 @@
         </button>
         <div class="condition-folder__body" ${active ? '' : 'hidden'}>
           <h2>${CATEGORY_LABELS[category]}</h2>
-          <label class="condition-tag-search">
-            <span class="sr-only">${CATEGORY_LABELS[category]} 조건 검색</span>
+          <div class="condition-tag-search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
-            <input type="search" data-condition-search data-category="${category}" value="${escapeHtml(query)}" placeholder="조건 검색" autocomplete="off" spellcheck="false">
+            <input type="search" data-condition-search data-category="${category}" value="${escapeHtml(query)}" placeholder="조건 검색" aria-label="${CATEGORY_LABELS[category]} 조건 검색" autocomplete="off" spellcheck="false">
             <button class="condition-tag-search__clear" type="button" data-condition-search-clear data-category="${category}" ${query ? '' : 'hidden'}>지우기</button>
-          </label>
+          </div>
           <div class="condition-tags">${tags.map(tag => {
             const selected = state.selectedTagIds.includes(String(tag.id));
             const searchText = normalizeConditionSearch(tag.label_ko);
@@ -363,7 +362,7 @@
         toggleTag(String(tagButton.dataset.tagId));
         return;
       }
-      const button = event.target.closest('[data-category]');
+      const button = event.target.closest('.condition-folder__tab[data-category]');
       if (!button) return;
       state.activeCategory = button.dataset.category;
       renderFinder();
