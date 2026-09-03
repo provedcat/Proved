@@ -200,6 +200,9 @@
   font-weight: 700;
 }
 .condition-tags button[aria-pressed="true"] { border-color: var(--food-blue); background: #edf2ff; color: var(--food-blue); font-weight: 850; }
+.condition-tags button[hidden],
+.condition-tag-search__clear[hidden],
+.condition-tags-empty[hidden] { display: none !important; }
 .condition-tags-empty {
   flex-basis: 100%;
   margin: 8px 0 0;
