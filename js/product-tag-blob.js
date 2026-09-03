@@ -26,6 +26,11 @@
     preparation_type: 1,
     protein_source: 3
   };
+  const BLOB_TAG_PRIORITY = {
+    thickener_free: 0,
+    gum_agar_free: 1,
+    carrageenan_free: 2
+  };
   const CATEGORY_BASE_HUE = {
     product_class: 220,
     food_form: 188,
@@ -52,6 +57,9 @@
     grain_free: '#7DB38D',
     chicken_free: '#74AE92',
     meal_free: '#6FAF9A',
+    carrageenan_free: '#82B79B',
+    gum_agar_free: '#74AF95',
+    thickener_free: '#68A98E',
     oven_baked: '#9A7DDF',
     adult_cat: '#E5C84E',
     adult_dog: '#E5C84E'
@@ -62,7 +70,8 @@
     '고양이 전연령': '전연령',
     '강아지 전연령': '전연령',
     '피부·알레르기': '피부·알레르기',
-    '無육분': 'Meal-free\n無 육분'
+    '無육분': 'Meal-free\n無 육분',
+    '무점증제': 'Thickener-free\n無 점증제'
   };
 
   const PRESETS = {
@@ -331,6 +340,9 @@
   }
 
   function compareTags(a, b) {
+    const aPriority = BLOB_TAG_PRIORITY[a.slug] ?? 100;
+    const bPriority = BLOB_TAG_PRIORITY[b.slug] ?? 100;
+    if (aPriority !== bPriority) return aPriority - bPriority;
     const aOrder = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 9999;
     const bOrder = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 9999;
     if (aOrder !== bOrder) return aOrder - bOrder;
