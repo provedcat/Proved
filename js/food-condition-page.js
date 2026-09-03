@@ -34,6 +34,7 @@
     tags: [],
     selectedTagIds: [],
     activeCategory: '',
+    tagSearchQueries: {},
     matchingFeedIds: [],
     allRows: [],
     rows: [],
@@ -53,6 +54,9 @@
     const number = Number(value);
     if (!Number.isFinite(number)) return '—';
     return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: digits }).format(number);
+  }
+  function normalizeConditionSearch(value) {
+    return String(value || '').trim().toLocaleLowerCase('ko-KR');
   }
   function getSpeciesLabel() { return state.species === 'dog' ? '강아지' : '고양이'; }
   function getTable() { return state.species === 'dog' ? 'dog_feeds' : 'feeds'; }
@@ -137,16 +141,27 @@
       const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
       const active = category === state.activeCategory;
       const tags = state.tags.filter(tag => tag.category === category);
+      const query = String(state.tagSearchQueries[category] || '');
+      const normalizedQuery = normalizeConditionSearch(query);
+      const visibleCount = tags.filter(tag => !normalizedQuery || normalizeConditionSearch(tag.label_ko).includes(normalizedQuery)).length;
       return `<section class="condition-folder${active ? ' is-open' : ''}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}">
         <button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}">
           <span>${CATEGORY_TAB_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
         </button>
         <div class="condition-folder__body" ${active ? '' : 'hidden'}>
           <h2>${CATEGORY_LABELS[category]}</h2>
+          <label class="condition-tag-search">
+            <span class="sr-only">${CATEGORY_LABELS[category]} 조건 검색</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+            <input type="search" data-condition-search data-category="${category}" value="${escapeHtml(query)}" placeholder="조건 검색" autocomplete="off" spellcheck="false">
+            <button class="condition-tag-search__clear" type="button" data-condition-search-clear data-category="${category}" ${query ? '' : 'hidden'}>지우기</button>
+          </label>
           <div class="condition-tags">${tags.map(tag => {
             const selected = state.selectedTagIds.includes(String(tag.id));
-            return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
-          }).join('')}</div>
+            const searchText = normalizeConditionSearch(tag.label_ko);
+            const hidden = normalizedQuery && !searchText.includes(normalizedQuery);
+            return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" data-tag-search-text="${escapeHtml(searchText)}" aria-pressed="${selected}" ${hidden ? 'hidden' : ''}>${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
+          }).join('')}<p class="condition-tags-empty" ${visibleCount ? 'hidden' : ''}>일치하는 조건이 없습니다.</p></div>
         </div>
       </section>`;
     }).join('');
@@ -155,6 +170,22 @@
     els.reset.hidden = !selected.length;
     els.selected.hidden = !selected.length;
     els.selected.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
+  }
+
+  function applyConditionTagSearch(input) {
+    const body = input.closest('.condition-folder__body');
+    if (!body) return;
+    const query = normalizeConditionSearch(input.value);
+    let visibleCount = 0;
+    body.querySelectorAll('[data-tag-id]').forEach(button => {
+      const visible = !query || String(button.dataset.tagSearchText || '').includes(query);
+      button.hidden = !visible;
+      if (visible) visibleCount += 1;
+    });
+    const empty = body.querySelector('.condition-tags-empty');
+    if (empty) empty.hidden = visibleCount > 0;
+    const clear = body.querySelector('[data-condition-search-clear]');
+    if (clear) clear.hidden = !input.value;
   }
 
   function renderInitialResults() {
@@ -307,7 +338,26 @@
       writeUrl();
       loadResults(true);
     });
+    els.folders.addEventListener('input', event => {
+      const input = event.target.closest('[data-condition-search]');
+      if (!input) return;
+      const category = String(input.dataset.category || state.activeCategory || '');
+      if (category) state.tagSearchQueries[category] = input.value;
+      applyConditionTagSearch(input);
+    });
     els.folders.addEventListener('click', event => {
+      const clearButton = event.target.closest('[data-condition-search-clear]');
+      if (clearButton) {
+        const body = clearButton.closest('.condition-folder__body');
+        const input = body?.querySelector('[data-condition-search]');
+        if (!input) return;
+        input.value = '';
+        const category = String(input.dataset.category || state.activeCategory || '');
+        if (category) state.tagSearchQueries[category] = '';
+        applyConditionTagSearch(input);
+        input.focus();
+        return;
+      }
       const tagButton = event.target.closest('[data-tag-id]');
       if (tagButton) {
         toggleTag(String(tagButton.dataset.tagId));
