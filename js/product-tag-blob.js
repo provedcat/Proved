@@ -51,6 +51,7 @@
     rabbit: '#C99B7C',
     grain_free: '#7DB38D',
     chicken_free: '#74AE92',
+    meal_free: '#6FAF9A',
     oven_baked: '#9A7DDF',
     adult_cat: '#E5C84E',
     adult_dog: '#E5C84E'
@@ -60,7 +61,8 @@
     '단일 동물성 단백질': '단일단백질',
     '고양이 전연령': '전연령',
     '강아지 전연령': '전연령',
-    '피부·알레르기': '피부·알레르기'
+    '피부·알레르기': '피부·알레르기',
+    '無육분': 'Meal-free\n無 육분'
   };
 
   const PRESETS = {
@@ -398,6 +400,12 @@
   }
 
   function renderText(label, slot) {
+    const explicitLines = String(label).split('\n');
+    if (explicitLines.length > 1) {
+      const line1 = escapeHtml(explicitLines[0]);
+      const line2 = escapeHtml(explicitLines.slice(1).join(' '));
+      return `<text x="${slot.labelX}" y="${slot.labelY}" font-size="${LABEL_FONT_SIZE}"><tspan x="${slot.labelX}" dy="-0.58em">${line1}</tspan><tspan x="${slot.labelX}" dy="1.16em">${line2}</tspan></text>`;
+    }
     const safe = escapeHtml(label);
     const chars = Array.from(label);
     if (chars.length <= 8) {

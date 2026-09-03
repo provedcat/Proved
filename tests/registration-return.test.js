@@ -30,7 +30,7 @@ assert.match(registrationScript, /window\.setTimeout\(returnToCalculator, 3000\)
 assert.match(registrationScript, /window\.location\.replace\(destination\)/, 'registration must be removed from browser history when returning');
 assert.match(registrationScript, /CALCULATOR_PATHS/, 'return destinations must be restricted to calculator paths');
 assert.doesNotMatch(registrationPage, /window\.close\(\)/, 'registration must not rely on closing a separate browser tab');
-assert.match(serviceWorker, /proved-pwa-20260902-registration-return-v1/, 'PWA cache must be refreshed for the new navigation flow');
+assert.match(serviceWorker, /proved-pwa-20260903-meal-free-v1/, 'PWA cache must include the latest frontend assets');
 
 const wetFeedsBySlot = {
   4: { id: 'wet-a', name: '습식 A' },
