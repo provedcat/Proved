@@ -392,41 +392,116 @@
     return selected.slice(0, MAX_TAGS);
   }
 
-  function assignTagsToSlots(tags, slots) {
-    if (tags.length < 5) {
-      return tags
-        .map(tag => ({ ...tag, visualColor: getVisualColor(tag) }))
-        .sort((a, b) => hexToHue(a.visualColor) - hexToHue(b.visualColor))
-        .map((tag, index) => ({ tag, slot: slots[index] }));
-    }
+  function getRenderedLabelLines(label) {
+    const text = String(label || '');
+    const explicitLines = text.split('\n');
+    if (explicitLines.length > 1) return [explicitLines[0], explicitLines.slice(1).join(' ')];
+    const chars = Array.from(text);
+    if (chars.length <= 8) return [text];
+    const cut = Math.ceil(chars.length / 2);
+    return [chars.slice(0, cut).join(''), chars.slice(cut).join('')];
+  }
 
-    const centerTag = { ...tags[0], visualColor: getVisualColor(tags[0]) };
-    const outerTags = tags.slice(1)
+  function estimateLabelLineWidth(line) {
+    const width = Array.from(String(line || '')).reduce((total, char) => {
+      if (/\s/u.test(char)) return total + LABEL_FONT_SIZE * 0.34;
+      if (/[\u1100-\u11ff\u3130-\u318f\u3400-\u9fff\uac00-\ud7af]/u.test(char)) return total + LABEL_FONT_SIZE;
+      if (/[A-Z]/u.test(char)) return total + LABEL_FONT_SIZE * 0.66;
+      if (/[a-z0-9]/u.test(char)) return total + LABEL_FONT_SIZE * 0.56;
+      if (/[-–—·/.,:'’]/u.test(char)) return total + LABEL_FONT_SIZE * 0.34;
+      return total + LABEL_FONT_SIZE * 0.62;
+    }, 0);
+    return width * 1.04;
+  }
+
+  function estimateTagLabelWidth(tag) {
+    return Math.max(...getRenderedLabelLines(getBlobLabel(tag)).map(estimateLabelLineWidth), 0);
+  }
+
+  function getSlotUsableLabelWidth(slot) {
+    const rx = Number(slot.rx) || 0;
+    const ry = Number(slot.ry) || 0;
+    if (!rx || !ry) return 0;
+
+    const angle = (Number(slot.rot) || 0) * Math.PI / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const labelX = Number.isFinite(Number(slot.labelX)) ? Number(slot.labelX) : Number(slot.cx) || 0;
+    const labelY = Number.isFinite(Number(slot.labelY)) ? Number(slot.labelY) : Number(slot.cy) || 0;
+    const cx = Number(slot.cx) || 0;
+    const cy = Number(slot.cy) || 0;
+    const dy = labelY - cy;
+    const invRx2 = 1 / (rx * rx);
+    const invRy2 = 1 / (ry * ry);
+    const a = cos * cos * invRx2 + sin * sin * invRy2;
+    const b = 2 * dy * cos * sin * (invRx2 - invRy2);
+    const c = dy * dy * (sin * sin * invRx2 + cos * cos * invRy2) - 1;
+    const discriminant = b * b - 4 * a * c;
+    if (!Number.isFinite(discriminant) || discriminant <= 0) return rx * 1.4;
+
+    const root = Math.sqrt(discriminant);
+    const dx1 = (-b - root) / (2 * a);
+    const dx2 = (-b + root) / (2 * a);
+    const left = cx + Math.min(dx1, dx2);
+    const right = cx + Math.max(dx1, dx2);
+    const halfWidth = Math.min(labelX - left, right - labelX);
+    if (!Number.isFinite(halfWidth) || halfWidth <= 0) return rx * 1.2;
+
+    return halfWidth * 2 * 0.82;
+  }
+
+  function assignWidthAwareTags(tags, slots) {
+    const orderedTags = tags
       .map(tag => ({ ...tag, visualColor: getVisualColor(tag) }))
       .sort((a, b) => hexToHue(a.visualColor) - hexToHue(b.visualColor));
+    const slotMeta = slots.map((slot, index) => ({ slot, index, usableWidth: getSlotUsableLabelWidth(slot) }));
+    const tagMeta = orderedTags.map((tag, index) => ({ tag, baseIndex: index, labelWidth: estimateTagLabelWidth(tag) }));
+    const longLabelThreshold = LABEL_FONT_SIZE * 5.25;
+    const longTags = tagMeta
+      .filter(item => item.labelWidth >= longLabelThreshold)
+      .sort((a, b) => b.labelWidth - a.labelWidth || a.baseIndex - b.baseIndex);
+    const assignedBySlot = new Map();
+    const usedTags = new Set();
+    const usedSlots = new Set();
 
+    longTags.forEach(item => {
+      const candidate = slotMeta
+        .filter(meta => !usedSlots.has(meta.index))
+        .sort((a, b) => b.usableWidth - a.usableWidth || Math.abs(a.index - item.baseIndex) - Math.abs(b.index - item.baseIndex))[0];
+      if (!candidate) return;
+      assignedBySlot.set(candidate.index, item.tag);
+      usedTags.add(item.tag);
+      usedSlots.add(candidate.index);
+    });
+
+    const remainingTags = tagMeta.filter(item => !usedTags.has(item.tag)).sort((a, b) => a.baseIndex - b.baseIndex);
+    const remainingSlots = slotMeta.filter(meta => !usedSlots.has(meta.index)).sort((a, b) => a.index - b.index);
+    remainingSlots.forEach((meta, index) => assignedBySlot.set(meta.index, remainingTags[index]?.tag));
+
+    return slotMeta
+      .sort((a, b) => a.index - b.index)
+      .map(meta => ({ tag: assignedBySlot.get(meta.index), slot: meta.slot }))
+      .filter(entry => entry.tag);
+  }
+
+  function assignTagsToSlots(tags, slots) {
+    if (tags.length < 5) return assignWidthAwareTags(tags, slots);
+
+    const centerTag = { ...tags[0], visualColor: getVisualColor(tags[0]) };
     return [
       { tag: centerTag, slot: slots[0] },
-      ...outerTags.map((tag, index) => ({ tag, slot: slots[index + 1] }))
+      ...assignWidthAwareTags(tags.slice(1), slots.slice(1))
     ];
   }
 
   function renderText(label, slot) {
-    const explicitLines = String(label).split('\n');
-    if (explicitLines.length > 1) {
-      const line1 = escapeHtml(explicitLines[0]);
-      const line2 = escapeHtml(explicitLines.slice(1).join(' '));
+    const lines = getRenderedLabelLines(label);
+    if (lines.length > 1) {
+      const line1 = escapeHtml(lines[0]);
+      const line2 = escapeHtml(lines[1]);
       return `<text x="${slot.labelX}" y="${slot.labelY}" font-size="${LABEL_FONT_SIZE}"><tspan x="${slot.labelX}" dy="-0.58em">${line1}</tspan><tspan x="${slot.labelX}" dy="1.16em">${line2}</tspan></text>`;
     }
-    const safe = escapeHtml(label);
-    const chars = Array.from(label);
-    if (chars.length <= 8) {
-      return `<text x="${slot.labelX}" y="${slot.labelY}" font-size="${LABEL_FONT_SIZE}">${safe}</text>`;
-    }
-    const cut = Math.ceil(chars.length / 2);
-    const line1 = escapeHtml(chars.slice(0, cut).join(''));
-    const line2 = escapeHtml(chars.slice(cut).join(''));
-    return `<text x="${slot.labelX}" y="${slot.labelY}" font-size="${LABEL_FONT_SIZE}"><tspan x="${slot.labelX}" dy="-0.58em">${line1}</tspan><tspan x="${slot.labelX}" dy="1.16em">${line2}</tspan></text>`;
+    return `<text x="${slot.labelX}" y="${slot.labelY}" font-size="${LABEL_FONT_SIZE}">${escapeHtml(lines[0] || '')}</text>`;
   }
 
   function renderBlobSvg(tags) {
