@@ -47,7 +47,7 @@
   function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function formatNumber(value, digits = 0) {
     const number = Number(value);
@@ -137,15 +137,15 @@
       const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
       const active = category === state.activeCategory;
       const tags = state.tags.filter(tag => tag.category === category);
-      return `<section class=\"condition-folder${active ? ' is-open' : ''}\" style=\"--tab-index:${index};--layer-z:${active ? 60 : 10 + index}\">
-        <button class=\"condition-folder__tab\" type=\"button\" data-category=\"${category}\" aria-expanded=\"${active}\">
+      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}">
+        <button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}">
           <span>${CATEGORY_TAB_LABELS[category]}</span>${count ? `<b>${count}</b>` : ''}
         </button>
-        <div class=\"condition-folder__body\" ${active ? '' : 'hidden'}>
+        <div class="condition-folder__body" ${active ? '' : 'hidden'}>
           <h2>${CATEGORY_LABELS[category]}</h2>
-          <div class=\"condition-tags\">${tags.map(tag => {
+          <div class="condition-tags">${tags.map(tag => {
             const selected = state.selectedTagIds.includes(String(tag.id));
-            return `<button type=\"button\" data-tag-id=\"${escapeHtml(tag.id)}\" aria-pressed=\"${selected}\">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden=\"true\">✓</span>' : ''}</button>`;
+            return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
           }).join('')}</div>
         </div>
       </section>`;
@@ -154,7 +154,7 @@
     const selected = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
     els.reset.hidden = !selected.length;
     els.selected.hidden = !selected.length;
-    els.selected.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type=\"button\" data-remove-tag-id=\"${escapeHtml(tag.id)}\">${escapeHtml(tag.label_ko)}<span aria-hidden=\"true\">×</span></button>`).join('')}</div>` : '';
+    els.selected.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
   }
 
   function renderInitialResults() {
@@ -163,7 +163,7 @@
     state.total = 0;
     els.resultCount.textContent = `0개의 ${getSpeciesLabel()} 사료`;
     els.resultGuide.textContent = '조건을 선택하면 검색 결과가 표시됩니다.';
-    els.results.innerHTML = '<div class=\"condition-initial-empty\">폴더를 열고 하나 이상의 조건을 선택해 주세요.</div>';
+    els.results.innerHTML = '<div class="condition-initial-empty">폴더를 열고 하나 이상의 조건을 선택해 주세요.</div>';
     els.resultStatus.textContent = '';
     els.loadMore.hidden = true;
   }
@@ -233,7 +233,7 @@
       state.total = 0;
       els.resultCount.textContent = `${getSpeciesLabel()} 사료를 찾는 중입니다.`;
       els.resultGuide.textContent = `${state.selectedTagIds.length}개 조건의 교집합을 확인하고 있어요.`;
-      els.results.innerHTML = Array.from({ length: 4 }, () => '<div class=\"food-skeleton\" aria-hidden=\"true\"></div>').join('');
+      els.results.innerHTML = Array.from({ length: 4 }, () => '<div class="food-skeleton" aria-hidden="true"></div>').join('');
       try {
         const ids = await resolveFeedIds();
         if (serial !== state.requestSerial) return;
@@ -272,7 +272,7 @@
     els.resultCount.textContent = `${formatNumber(state.total)}개의 ${getSpeciesLabel()} 사료`;
     els.resultGuide.textContent = `${state.selectedTagIds.length}개 조건을 모두 만족하는 결과입니다.`;
     if (!state.rows.length) {
-      els.results.innerHTML = '<div class=\"food-empty\"><strong>조건을 만족하는 사료가 없습니다.</strong><span>선택한 조건을 하나씩 줄여보세요.</span></div>';
+      els.results.innerHTML = '<div class="food-empty"><strong>조건을 만족하는 사료가 없습니다.</strong><span>선택한 조건을 하나씩 줄여보세요.</span></div>';
       els.loadMore.hidden = true;
       return;
     }
@@ -284,7 +284,7 @@
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
     const meta = [getTypeLabel(feed.type), feed.완전식여부 || '분류 확인중', feed.메인단백질 || '주 단백질 확인중'];
-    return `<a class=\"food-result\" href=\"/food/?species=${state.species}&id=${encodeURIComponent(feed.id)}\" aria-label=\"${escapeHtml(brand)} ${escapeHtml(product.primary)} 상세 보기\"><span class=\"food-result__brand\">${escapeHtml(brand)}</span><span class=\"food-result__title-wrap\"><span class=\"food-result__title\">${escapeHtml(product.primary)}${feed.verified === true ? '' : '<span class=\"food-review-badge\">검수 전</span>'}</span>${product.secondary ? `<span class=\"food-result__secondary-title\">${escapeHtml(product.secondary)}</span>` : ''}<span class=\"food-result__meta\">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span></span><span class=\"food-result__stats\"><span class=\"food-result-stat\"><span class=\"food-result-stat__label\">열량</span><span class=\"food-result-stat__value\">${escapeHtml(formatKcal(feed.final_me))}</span></span><span class=\"food-result-stat\"><span class=\"food-result-stat__label\">Ca:P</span><span class=\"food-result-stat__value\">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span><svg class=\"food-result__arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 5 7 7-7 7\"></path></svg></span></a>`;
+    return `<a class="food-result" href="/food/?species=${state.species}&id=${encodeURIComponent(feed.id)}" aria-label="${escapeHtml(brand)} ${escapeHtml(product.primary)} 상세 보기"><span class="food-result__brand">${escapeHtml(brand)}</span><span class="food-result__title-wrap"><span class="food-result__title">${escapeHtml(product.primary)}${feed.verified === true ? '' : '<span class="food-review-badge">검수 전</span>'}</span>${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ''}<span class="food-result__meta">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span></span><span class="food-result__stats"><span class="food-result-stat"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span><span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span><svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></span></a>`;
   }
 
   function toggleTag(id) {
