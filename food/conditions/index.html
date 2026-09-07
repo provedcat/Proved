@@ -15,10 +15,10 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="/css/proved-header.css?v=20260829-condition-page-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260829-food-list-v2">
-  <link rel="stylesheet" href="/css/food-condition-page.css?v=20260903-condition-search-v1">
+  <link rel="stylesheet" href="/css/food-condition-page.css?v=20260907-feed-type-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <script defer src="/js/proved-header.js?v=20260831-content-layout-v3"></script>
-  <script defer src="/js/food-condition-page.js?v=20260903-condition-search-v1"></script>
+  <script defer src="/js/food-condition-page.js?v=20260907-feed-type-v1"></script>
 </head>
 <body>
   <div class="food-shell condition-shell">
@@ -33,13 +33,24 @@
 
       <section class="condition-workspace" aria-labelledby="conditionGroupsTitle">
         <div class="condition-toolbar">
-          <fieldset class="condition-species">
-            <legend>대상</legend>
-            <div id="conditionSpecies">
-              <button type="button" data-species="cat" aria-pressed="true">고양이</button>
-              <button type="button" data-species="dog" aria-pressed="false">강아지</button>
-            </div>
-          </fieldset>
+          <div class="condition-scope-controls">
+            <fieldset class="condition-species">
+              <legend>대상</legend>
+              <div id="conditionSpecies">
+                <button type="button" data-species="cat" aria-pressed="true">고양이</button>
+                <button type="button" data-species="dog" aria-pressed="false">강아지</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="condition-feed-type">
+              <legend>사료 형태</legend>
+              <div id="conditionFeedType">
+                <button type="button" data-feed-type="all" aria-pressed="true">전체</button>
+                <button type="button" data-feed-type="dry" aria-pressed="false">건사료</button>
+                <button type="button" data-feed-type="wet" aria-pressed="false">습식사료</button>
+              </div>
+            </fieldset>
+          </div>
           <button id="conditionReset" class="condition-reset" type="button" hidden>선택 전체 해제</button>
         </div>
 
@@ -53,7 +64,7 @@
         <div class="condition-results__heading">
           <div>
             <p id="conditionResultCount" aria-live="polite">0개의 고양이 사료</p>
-            <span id="conditionResultGuide">조건을 선택하면 검색 결과가 표시됩니다.</span>
+            <span id="conditionResultGuide">사료 형태를 고르거나 조건을 선택하면 검색 결과가 표시됩니다.</span>
           </div>
           <p>검수 전 제품은 별도로 표시합니다.</p>
         </div>
