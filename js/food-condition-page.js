@@ -31,6 +31,7 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const state = {
     species: 'cat',
+    feedType: 'all',
     tags: [],
     selectedTagIds: [],
     activeCategory: '',
@@ -59,6 +60,29 @@
     return String(value || '').trim().toLocaleLowerCase('ko-KR');
   }
   function getSpeciesLabel() { return state.species === 'dog' ? '강아지' : '고양이'; }
+  function getFeedTypeLabel() {
+    return state.feedType === 'dry' ? '건사료' : state.feedType === 'wet' ? '습식사료' : '전체';
+  }
+  function getResultLabel() {
+    return state.feedType === 'all' ? `${getSpeciesLabel()} 사료` : `${getSpeciesLabel()} ${getFeedTypeLabel()}`;
+  }
+  function hasActiveSearch() {
+    return state.feedType !== 'all' || state.selectedTagIds.length > 0;
+  }
+  function getResultGuide() {
+    if (state.feedType !== 'all' && state.selectedTagIds.length) {
+      return `${getFeedTypeLabel()} · ${state.selectedTagIds.length}개 조건을 모두 만족하는 결과입니다.`;
+    }
+    if (state.feedType !== 'all') return `${getFeedTypeLabel()} 전체 결과입니다.`;
+    return `${state.selectedTagIds.length}개 조건을 모두 만족하는 결과입니다.`;
+  }
+  function getLoadingGuide() {
+    if (state.feedType !== 'all' && state.selectedTagIds.length) {
+      return `${getFeedTypeLabel()} · ${state.selectedTagIds.length}개 조건의 교집합을 확인하고 있어요.`;
+    }
+    if (state.feedType !== 'all') return `${getFeedTypeLabel()} 제품을 확인하고 있어요.`;
+    return `${state.selectedTagIds.length}개 조건의 교집합을 확인하고 있어요.`;
+  }
   function getTable() { return state.species === 'dog' ? 'dog_feeds' : 'feeds'; }
   function getMappingConfig() {
     return state.species === 'dog'
@@ -80,6 +104,7 @@
 
   function cacheElements() {
     els.species = $('conditionSpecies');
+    els.feedType = $('conditionFeedType');
     els.reset = $('conditionReset');
     els.folders = $('conditionFolders');
     els.selected = $('conditionSelected');
@@ -94,12 +119,15 @@
   function readUrl() {
     const params = new URLSearchParams(window.location.search);
     state.species = params.get('species') === 'dog' ? 'dog' : 'cat';
+    const feedType = params.get('type');
+    state.feedType = feedType === 'dry' || feedType === 'wet' ? feedType : 'all';
     state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').filter(Boolean))].slice(0, 20);
   }
 
   function writeUrl() {
     const params = new URLSearchParams();
     if (state.species === 'dog') params.set('species', 'dog');
+    if (state.feedType !== 'all') params.set('type', state.feedType);
     if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     const query = params.toString();
     history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
@@ -108,6 +136,12 @@
   function syncSpecies() {
     els.species.querySelectorAll('[data-species]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.species === state.species));
+    });
+  }
+
+  function syncFeedType() {
+    els.feedType.querySelectorAll('[data-feed-type]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.feedType === state.feedType));
     });
   }
 
@@ -166,7 +200,7 @@
     }).join('');
 
     const selected = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
-    els.reset.hidden = !selected.length;
+    els.reset.hidden = !selected.length && state.feedType === 'all';
     els.selected.hidden = !selected.length;
     els.selected.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
   }
@@ -191,9 +225,9 @@
     state.rows = [];
     state.allRows = [];
     state.total = 0;
-    els.resultCount.textContent = `0개의 ${getSpeciesLabel()} 사료`;
-    els.resultGuide.textContent = '조건을 선택하면 검색 결과가 표시됩니다.';
-    els.results.innerHTML = '<div class="condition-initial-empty">폴더를 열고 하나 이상의 조건을 선택해 주세요.</div>';
+    els.resultCount.textContent = `0개의 ${getResultLabel()}`;
+    els.resultGuide.textContent = '사료 형태를 고르거나 조건을 선택하면 검색 결과가 표시됩니다.';
+    els.results.innerHTML = '<div class="condition-initial-empty">건사료·습식사료를 고르거나 폴더를 열고 조건을 선택해 주세요.</div>';
     els.resultStatus.textContent = '';
     els.loadMore.hidden = true;
   }
@@ -228,14 +262,34 @@
   async function loadMatchingFeeds(ids) {
     const rows = [];
     const chunkSize = 100;
-    for (let index = 0; index < ids.length; index += chunkSize) {
-      const { data, error } = await sb.from(getTable())
-        .select(LIST_COLUMNS)
-        .or('verified.eq.true,searchable_before_review.eq.true')
-        .in('id', ids.slice(index, index + chunkSize));
-      if (error) throw error;
-      rows.push(...(data || []));
+
+    if (Array.isArray(ids)) {
+      if (!ids.length) return [];
+      for (let index = 0; index < ids.length; index += chunkSize) {
+        let query = sb.from(getTable())
+          .select(LIST_COLUMNS)
+          .or('verified.eq.true,searchable_before_review.eq.true')
+          .in('id', ids.slice(index, index + chunkSize));
+        if (state.feedType !== 'all') query = query.eq('type', state.feedType);
+        const { data, error } = await query;
+        if (error) throw error;
+        rows.push(...(data || []));
+      }
+    } else {
+      for (let from = 0; ; from += MAPPING_PAGE_SIZE) {
+        let query = sb.from(getTable())
+          .select(LIST_COLUMNS)
+          .or('verified.eq.true,searchable_before_review.eq.true');
+        if (state.feedType !== 'all') query = query.eq('type', state.feedType);
+        const { data, error } = await query
+          .order('id', { ascending: true })
+          .range(from, from + MAPPING_PAGE_SIZE - 1);
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < MAPPING_PAGE_SIZE) break;
+      }
     }
+
     return rows.sort((a, b) => {
       const brandOrder = getBrand(a).localeCompare(getBrand(b), 'ko');
       return brandOrder || String(a.제품명 || '').localeCompare(String(b.제품명 || ''), 'ko');
@@ -243,7 +297,11 @@
   }
 
   async function loadResults(reset) {
-    if (!state.selectedTagIds.length) {
+    if (reset) state.requestSerial += 1;
+    const serial = state.requestSerial;
+
+    if (!hasActiveSearch()) {
+      state.loading = false;
       renderInitialResults();
       return;
     }
@@ -253,17 +311,18 @@
       renderResults();
       return;
     }
-    const serial = ++state.requestSerial;
+
     state.loading = true;
     els.resultStatus.textContent = '';
     els.loadMore.hidden = true;
-    if (reset) {
-      state.rows = [];
-      state.allRows = [];
-      state.total = 0;
-      els.resultCount.textContent = `${getSpeciesLabel()} 사료를 찾는 중입니다.`;
-      els.resultGuide.textContent = `${state.selectedTagIds.length}개 조건의 교집합을 확인하고 있어요.`;
-      els.results.innerHTML = Array.from({ length: 4 }, () => '<div class="food-skeleton" aria-hidden="true"></div>').join('');
+    state.rows = [];
+    state.allRows = [];
+    state.total = 0;
+    els.resultCount.textContent = `${getResultLabel()}를 찾는 중입니다.`;
+    els.resultGuide.textContent = getLoadingGuide();
+    els.results.innerHTML = Array.from({ length: 4 }, () => '<div class="food-skeleton" aria-hidden="true"></div>').join('');
+
+    if (state.selectedTagIds.length) {
       try {
         const ids = await resolveFeedIds();
         if (serial !== state.requestSerial) return;
@@ -276,14 +335,18 @@
         els.resultStatus.textContent = error.message || '잠시 후 다시 시도해 주세요.';
         return;
       }
+
+      if (!state.matchingFeedIds.length) {
+        state.loading = false;
+        renderResults();
+        return;
+      }
+    } else {
+      state.matchingFeedIds = null;
     }
-    if (!state.matchingFeedIds.length) {
-      state.loading = false;
-      renderResults();
-      return;
-    }
+
     try {
-      const rows = await loadMatchingFeeds(state.matchingFeedIds);
+      const rows = await loadMatchingFeeds(state.selectedTagIds.length ? state.matchingFeedIds : null);
       if (serial !== state.requestSerial) return;
       state.allRows = rows;
       state.rows = rows.slice(0, PAGE_SIZE);
@@ -294,15 +357,16 @@
       if (serial !== state.requestSerial) return;
       state.loading = false;
       els.results.innerHTML = '';
-      els.resultStatus.textContent = error.message || '검색 결과를 불러오지 못했습니다.';
+      els.resultCount.textContent = '검색 결과를 불러오지 못했습니다.';
+      els.resultStatus.textContent = error.message || '잠시 후 다시 시도해 주세요.';
     }
   }
 
   function renderResults() {
-    els.resultCount.textContent = `${formatNumber(state.total)}개의 ${getSpeciesLabel()} 사료`;
-    els.resultGuide.textContent = `${state.selectedTagIds.length}개 조건을 모두 만족하는 결과입니다.`;
+    els.resultCount.textContent = `${formatNumber(state.total)}개의 ${getResultLabel()}`;
+    els.resultGuide.textContent = getResultGuide();
     if (!state.rows.length) {
-      els.results.innerHTML = '<div class="food-empty"><strong>조건을 만족하는 사료가 없습니다.</strong><span>선택한 조건을 하나씩 줄여보세요.</span></div>';
+      els.results.innerHTML = '<div class="food-empty"><strong>조건을 만족하는 사료가 없습니다.</strong><span>사료 형태나 선택한 조건을 바꿔보세요.</span></div>';
       els.loadMore.hidden = true;
       return;
     }
@@ -337,6 +401,18 @@
       writeUrl();
       loadResults(true);
     });
+
+    els.feedType.addEventListener('click', event => {
+      const button = event.target.closest('[data-feed-type]');
+      if (!button || button.dataset.feedType === state.feedType) return;
+      state.feedType = button.dataset.feedType === 'dry' || button.dataset.feedType === 'wet' ? button.dataset.feedType : 'all';
+      state.matchingFeedIds = [];
+      syncFeedType();
+      writeUrl();
+      renderFinder();
+      loadResults(true);
+    });
+
     els.folders.addEventListener('input', event => {
       const input = event.target.closest('[data-condition-search]');
       if (!input) return;
@@ -373,7 +449,11 @@
     });
     els.reset.addEventListener('click', () => {
       state.selectedTagIds = [];
+      state.feedType = 'all';
       state.matchingFeedIds = [];
+      state.requestSerial += 1;
+      state.loading = false;
+      syncFeedType();
       writeUrl();
       renderFinder();
       renderInitialResults();
@@ -385,10 +465,11 @@
     cacheElements();
     readUrl();
     syncSpecies();
+    syncFeedType();
     bindEvents();
     renderInitialResults();
-    const loaded = await loadTags();
-    if (loaded && state.selectedTagIds.length) await loadResults(true);
+    await loadTags();
+    if (hasActiveSearch()) await loadResults(true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
