@@ -80,7 +80,26 @@ create table if not exists public.food_reference_prices (
       (reference_method = 'single_unit' and source_pack_count = 1)
       or
       (reference_method = 'pack_normalized' and source_pack_count > 1)
-    )
+    ),
+  constraint food_reference_prices_wet_basis_check
+    check (
+      selection_basis not in ('wet_single_unit', 'wet_smallest_pack')
+      or (selection_basis = 'wet_single_unit' and reference_method = 'single_unit' and source_pack_count = 1)
+      or (selection_basis = 'wet_smallest_pack' and reference_method = 'pack_normalized' and source_pack_count > 1)
+    ),
+  constraint food_reference_prices_dry_1_2kg_check
+    check (
+      selection_basis <> 'dry_1_2kg'
+      or unit_weight_g between 1000 and 2000
+    ),
+  constraint food_reference_prices_dry_nearest_2kg_check
+    check (
+      selection_basis <> 'dry_nearest_2kg'
+      or unit_weight_g < 1000
+      or unit_weight_g > 2000
+    ),
+  constraint food_reference_prices_verified_before_checked_check
+    check (verified_at <= last_checked_at)
 );
 
 create unique index if not exists food_reference_prices_feed_id_uidx
