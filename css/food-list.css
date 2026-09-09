@@ -493,6 +493,51 @@ button { cursor: pointer; }
   text-decoration: none;
 }
 .food-brand-link svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.food-coupang-cta {
+  width: min(100%, 430px);
+  margin-right: 56px;
+  margin-left: auto;
+  padding: 28px 0 54px;
+}
+.food-coupang-cta__row {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.35fr);
+  min-height: 44px;
+}
+.food-coupang-cta__label,
+.food-coupang-cta__button {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.food-coupang-cta__label {
+  border: 1px solid var(--food-line);
+  border-right: 0;
+  background: var(--food-soft);
+  color: var(--food-muted);
+}
+.food-coupang-cta__button {
+  background: var(--food-blue);
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+.food-coupang-cta__button:hover { background: var(--food-blue-dark); }
+.food-coupang-cta__button:focus-visible { outline: 2px solid rgba(53, 104, 255, .45); outline-offset: 4px; }
+.food-coupang-cta svg { width: 15px; height: 15px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.food-coupang-cta__disclosure {
+  margin: 9px 0 0;
+  color: var(--food-muted);
+  font-size: 11px;
+  font-weight: 520;
+  line-height: 1.55;
+}
 .food-detail-hero h1 {
   max-width: 940px;
   margin: 0;
@@ -700,6 +745,10 @@ button { cursor: pointer; }
   .food-detail-hero__brand-row { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 18px; }
   .food-detail-hero h1 { font-size: clamp(32px, 10vw, 44px); }
   .food-detail-section { padding: 42px 20px 46px; }
+  .food-coupang-cta { width: 100%; margin-right: 0; padding: 24px 20px 42px; }
+  .food-coupang-cta__row { grid-template-columns: minmax(0, .82fr) minmax(0, 1.38fr); }
+  .food-coupang-cta__label,
+  .food-coupang-cta__button { padding-inline: 10px; }
   .food-section-heading { margin-bottom: 24px; }
   .food-basic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .food-basic-item { min-height: 96px; padding: 16px; }

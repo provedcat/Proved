@@ -47,9 +47,13 @@
     'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
     'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
     'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
-    'calorie_confidence', 'calorie_note', 'needs_calorie_review', 'brand_id',
+    'calorie_confidence', 'calorie_note', 'needs_calorie_review', '쿠팡_링크', 'brand_id',
     'brands(name,official_url)'
   ].join(',');
+  const detailColumnsWithoutCoupang = detailColumns
+    .split(',')
+    .filter(column => column !== '쿠팡_링크')
+    .join(',');
 
   const els = {};
   let searchTimer = null;
@@ -568,12 +572,13 @@
     els.detailStatus.textContent = '제품 정보를 불러오는 중입니다.';
     window.scrollTo({ top: 0, behavior: 'auto' });
 
-    const { data, error } = await foodSb
-      .from(getTable())
-      .select(detailColumns)
-      .eq('id', id)
-      .or('verified.eq.true,searchable_before_review.eq.true')
-      .maybeSingle();
+    let { data, error } = await fetchDetail(id, detailColumns);
+
+    // Older dog_feeds schemas may not have the optional affiliate-link column yet.
+    // Retry without it so the shared dog detail page continues to work.
+    if (error && String(error.message || '').includes('쿠팡_링크')) {
+      ({ data, error } = await fetchDetail(id, detailColumnsWithoutCoupang));
+    }
 
     if (error || !data) {
       els.detailStatus.textContent = error
@@ -584,6 +589,15 @@
 
     els.detailStatus.textContent = '';
     renderDetail(data);
+  }
+
+  function fetchDetail(id, columns) {
+    return foodSb
+      .from(getTable())
+      .select(columns)
+      .eq('id', id)
+      .or('verified.eq.true,searchable_before_review.eq.true')
+      .maybeSingle();
   }
 
   function showList(fromPopState) {
@@ -627,6 +641,22 @@
     const calorieSourceLabel = getCalorieSourceLabel(feed.cal_source);
     const officialLink = brand.officialUrl
       ? `<a class="food-brand-link" href="${escapeHtml(brand.officialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(brand.name)} 공식 홈페이지 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"></path><path d="m10 14 9-9"></path><path d="M19 13v6H5V5h6"></path></svg></a>`
+      : '';
+    const coupangLink = String(feed.쿠팡_링크 ?? '');
+    const coupangCta = coupangLink.trim()
+      ? `<aside class="food-coupang-cta" aria-label="쿠팡 파트너스 구매 링크">
+          <div class="food-coupang-cta__row">
+            <span class="food-coupang-cta__label">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg>
+              <span>파트너스 링크</span>
+            </span>
+            <a class="food-coupang-cta__button" href="${escapeHtml(coupangLink)}" target="_blank" rel="noopener noreferrer sponsored" aria-label="${escapeHtml(product.primary)} 쿠팡에서 구매하기(새 탭)">
+              <span>쿠팡에서 구매하기</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"></path><path d="m10 14 9-9"></path><path d="M19 13v6H5V5h6"></path></svg>
+            </a>
+          </div>
+          <p class="food-coupang-cta__disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+        </aside>`
       : '';
 
     document.title = `${product.primary} | 프루브 사료 목록`;
@@ -700,6 +730,7 @@
             ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 메모</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ''}
           </dl>
         </section>
+        ${coupangCta}
       </article>`;
   }
 
