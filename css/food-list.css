@@ -356,7 +356,9 @@ button { cursor: pointer; }
   border-radius: 0;
   background: var(--food-paper);
   color: inherit;
+  font: inherit;
   text-align: left;
+  text-decoration: none;
   transition: background-color .18s ease, padding-left .18s ease;
 }
 .food-result:hover { padding-left: 16px; background: #f7f9ff; }
