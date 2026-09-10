@@ -43,6 +43,16 @@
   border-bottom: 1px solid var(--food-line);
   background: #f7f8fc;
 }
+.food-condition-workspace { padding-right: 56px; padding-left: 56px; }
+.food-condition-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+.food-condition-heading h2 { margin: 0; color: var(--food-blue); font-size: 25px; letter-spacing: -.025em; }
+.food-condition-heading p { margin: 8px 0 0; color: var(--food-muted); font-size: 13px; line-height: 1.6; }
 .condition-toolbar {
   display: flex;
   align-items: flex-end;
@@ -152,7 +162,8 @@
   scrollbar-gutter: stable;
   pointer-events: auto;
 }
-.condition-folder__body h2 { margin: 0 0 12px; color: inherit; font-size: 18px; }
+.condition-folder__body h2,
+.condition-folder__body h3 { margin: 0 0 12px; color: inherit; font-size: 18px; }
 .condition-folder__guide { margin: 0 0 22px; color: var(--food-muted); font-size: 12px; line-height: 1.6; }
 .condition-tag-search {
   width: min(440px, 100%);
@@ -199,7 +210,7 @@
 }
 .condition-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .condition-tags button {
-  min-height: 40px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -224,7 +235,7 @@
 .condition-selected {
   margin-top: 14px;
   padding: 19px 21px;
-  border-left: 3px solid var(--food-blue);
+  border-top: 1px solid var(--food-blue);
   background: #fff;
 }
 .condition-selected > p {
@@ -279,6 +290,8 @@
   .condition-hero h1 { font-size: 44px; }
   .condition-hero > p:last-child { margin-top: 22px; font-size: 15px; line-height: 1.72; }
   .condition-workspace { padding: 30px 40px 46px; }
+  .food-condition-workspace { padding: 30px 40px 46px; }
+  .food-condition-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
   .condition-toolbar { align-items: flex-start; gap: 18px; }
   .condition-scope-controls { gap: 24px 32px; }
   .condition-folders {
@@ -300,6 +313,7 @@
   .condition-hero,
   .condition-workspace,
   .condition-results { padding-left: 24px; padding-right: 24px; }
+  .food-condition-workspace { padding-left: 24px; padding-right: 24px; }
   .condition-scope-controls { gap: 20px 28px; }
   .condition-folder__tab > span,
   .condition-folder__tab b { font-size: 10px; }

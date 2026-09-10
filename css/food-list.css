@@ -301,7 +301,7 @@ button { cursor: pointer; }
 .food-selected-conditions {
   margin-top: 14px;
   padding: 18px 20px;
-  border-left: 3px solid var(--food-blue);
+  border-top: 1px solid var(--food-blue);
   background: var(--food-soft);
 }
 .food-selected-conditions > p {
@@ -359,9 +359,9 @@ button { cursor: pointer; }
   font: inherit;
   text-align: left;
   text-decoration: none;
-  transition: background-color .18s ease, padding-left .18s ease;
+  transition: background-color .18s ease;
 }
-.food-result:hover { padding-left: 16px; background: #f7f9ff; }
+.food-result:hover { background: #f7f9ff; }
 .food-result__brand {
   align-self: start;
   padding-top: 4px;
@@ -458,11 +458,12 @@ button { cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--food-blue);
+  text-decoration: none;
   font-size: 13px;
   font-weight: 800;
 }
@@ -679,6 +680,17 @@ button { cursor: pointer; }
 }
 .food-empty strong { display: block; color: var(--food-ink); font-size: 19px; }
 .food-empty span { display: block; margin-top: 10px; color: var(--food-muted); font-size: 13px; }
+.food-empty__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.food-empty__actions button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--food-blue);
+  background: #fff;
+  color: var(--food-blue);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+}
 .food-skeleton {
   min-height: 132px;
   border-bottom: 1px solid var(--food-line);

@@ -20,22 +20,25 @@
     ingredient_condition: '원재료 조건',
     preparation_type: '급여 형태'
   };
+  const TAG_CATEGORY_TAB_LABELS = { protein_source: '단백질', life_stage: '생애', management_purpose: '기능', processing_method: '제조', ingredient_condition: '원재료', preparation_type: '급여' };
 
   const foodSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const state = {
-    species: 'cat',
+    species: 'all',
     type: 'all',
     role: 'all',
     sort: 'brand',
     query: '',
     total: 0,
+    loaded: PAGE_SIZE,
     rows: [],
     loading: false,
     requestSerial: 0,
     tags: [],
     selectedTagIds: [],
     activeTagCategory: '',
-    matchingFeedIds: null,
+    tagSearchQueries: {},
+    matchingFeedIds: { cat: null, dog: null },
     tagsLoading: false
   };
 
@@ -92,8 +95,9 @@
     return `${base}--${stableId || 'detail'}`;
   }
 
-  function buildProductPath(feed, species = state.species) {
-    return `/food/${species === 'dog' ? 'dog' : 'cat'}/${buildProductSlug(feed)}/`;
+  function buildProductPath(feed, species) {
+    const targetSpecies = species || feed?.species || state.species;
+    return `/food/${targetSpecies === 'dog' ? 'dog' : 'cat'}/${buildProductSlug(feed)}/`;
   }
 
   function normalizePathname(pathname) {
@@ -144,12 +148,12 @@
     return quotePostgrestFilterValue(`*${query}*`);
   }
 
-  function getTable() {
-    return state.species === 'dog' ? 'dog_feeds' : 'feeds';
+  function getTable(species = state.species) {
+    return species === 'dog' ? 'dog_feeds' : 'feeds';
   }
 
   function getSpeciesLabel(species = state.species) {
-    return species === 'dog' ? '강아지' : '고양이';
+    return species === 'all' ? '전체' : species === 'dog' ? '강아지' : '고양이';
   }
 
   function getTypeLabel(type) {
@@ -158,7 +162,7 @@
 
   function getFeedSemanticClass(feed) {
     const type = feed?.type === 'wet' ? 'wet' : feed?.type === 'dry' ? 'dry' : '';
-    return type ? `is-${state.species}-${type}` : '';
+    return type ? `is-${feed?.species || 'cat'}-${type}` : '';
   }
 
   function getRoleLabel(role) {
@@ -219,17 +223,19 @@
   function readStateFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const detailRoute = readDetailRoute();
-    state.species = detailRoute?.species || normalizeEnum(params.get('species'), ['cat', 'dog'], 'cat');
+    state.species = detailRoute?.species || normalizeEnum(params.get('species'), ['cat', 'dog'], 'all');
     state.type = normalizeEnum(params.get('type'), ['all', 'dry', 'wet'], 'all');
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
     state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
-    state.selectedTagIds = String(params.get('tags') || '').split(',').map(value => value.trim()).filter(Boolean);
+    state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').map(value => value.trim()).filter(Boolean))].slice(0, 20);
+    state.loaded = Math.max(PAGE_SIZE, Number(history.state?.foodFinder?.loaded) || PAGE_SIZE);
   }
 
   function writeListStateToUrl(replace = true) {
+    if (readDetailRoute()) return;
     const params = new URLSearchParams();
-    if (state.species !== 'cat') params.set('species', state.species);
+    if (state.species !== 'all') params.set('species', state.species);
     if (state.type !== 'all') params.set('type', state.type);
     if (state.role !== 'all') params.set('role', state.role);
     if (state.sort !== 'brand') params.set('sort', state.sort);
@@ -237,15 +243,16 @@
     if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     const queryString = params.toString();
     const url = `${FOOD_LIST_PATH}${queryString ? `?${queryString}` : ''}`;
-    history[replace ? 'replaceState' : 'pushState']({ view: 'list' }, '', url);
+    history[replace ? 'replaceState' : 'pushState']({ ...(history.state || {}), view: 'list', foodFinder: { url, scrollY: window.scrollY, loaded: state.loaded } }, '', url);
   }
 
   function writeDetailUrl(feed) {
     history.pushState({
       view: 'detail',
       feedId: String(feed.id),
-      species: state.species
-    }, '', buildProductPath(feed));
+      species: feed.species,
+      foodFinder: { url: `${window.location.pathname}${window.location.search}`, scrollY: window.scrollY, loaded: state.loaded }
+    }, '', buildProductPath(feed, feed.species));
   }
 
   function cacheElements() {
@@ -265,7 +272,6 @@
     els.detailContent = $('foodDetailContent');
     els.detailStatus = $('foodDetailStatus');
     els.conditionFolders = $('foodConditionFolders');
-    els.conditionPanel = $('foodConditionPanel');
     els.selectedConditions = $('foodSelectedConditions');
     els.conditionStatus = $('foodConditionStatus');
     els.conditionReset = $('foodConditionReset');
@@ -292,100 +298,83 @@
       state.query = els.searchInput.value.trim().slice(0, 120);
       els.searchClear.hidden = !state.query;
       clearTimeout(searchTimer);
-      searchTimer = window.setTimeout(() => {
-        writeListStateToUrl(true);
-        loadFeeds(true);
-      }, 280);
+      searchTimer = window.setTimeout(() => updateFinder(true), 280);
     });
-
     els.searchClear.addEventListener('click', () => {
-      clearTimeout(searchTimer);
-      state.query = '';
-      els.searchInput.value = '';
-      els.searchClear.hidden = true;
-      writeListStateToUrl(true);
-      loadFeeds(true);
-      els.searchInput.focus();
+      clearTimeout(searchTimer); state.query = ''; els.searchInput.value = ''; els.searchClear.hidden = true;
+      updateFinder(true); els.searchInput.focus();
     });
-
-    els.speciesFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-species]');
-      if (!button || button.dataset.species === state.species) return;
-      state.species = button.dataset.species;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
+    els.speciesFilters.addEventListener('click', event => setButtonFilter(event, 'species'));
+    els.typeFilters.addEventListener('click', event => setButtonFilter(event, 'type'));
+    els.roleFilters.addEventListener('click', event => setButtonFilter(event, 'role'));
+    els.sortSelect.addEventListener('change', () => { state.sort = normalizeEnum(els.sortSelect.value, ['brand', 'product'], 'brand'); updateFinder(true); });
+    els.conditionFolders?.addEventListener('input', event => {
+      const input = event.target.closest('[data-condition-search]');
+      if (!input) return;
+      state.tagSearchQueries[input.dataset.category] = input.value;
+      applyConditionTagSearch(input);
     });
-
-    els.typeFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-type]');
-      if (!button || button.dataset.type === state.type) return;
-      state.type = button.dataset.type;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.roleFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-role]');
-      if (!button || button.dataset.role === state.role) return;
-      state.role = button.dataset.role;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.sortSelect.addEventListener('change', () => {
-      state.sort = normalizeEnum(els.sortSelect.value, ['brand', 'product'], 'brand');
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
     els.conditionFolders?.addEventListener('click', event => {
-      const button = event.target.closest('[data-tag-category]');
-      if (!button) return;
-      state.activeTagCategory = state.activeTagCategory === button.dataset.tagCategory ? '' : button.dataset.tagCategory;
-      renderConditionFinder();
+      const clear = event.target.closest('[data-condition-search-clear]');
+      if (clear) {
+        const input = clear.closest('.condition-folder__body')?.querySelector('[data-condition-search]');
+        if (input) { input.value = ''; state.tagSearchQueries[input.dataset.category] = ''; applyConditionTagSearch(input); input.focus(); }
+        return;
+      }
+      const tag = event.target.closest('[data-tag-id]');
+      if (tag) { toggleTag(tag.dataset.tagId, tag.dataset.tagId); return; }
+      const tab = event.target.closest('[data-category]');
+      if (tab) { state.activeTagCategory = tab.dataset.category; renderConditionFinder(); restoreFinderFocus(`[data-category=\"${CSS.escape(tab.dataset.category)}\"]`); }
     });
-
-    els.conditionPanel?.addEventListener('click', event => {
-      const button = event.target.closest('[data-tag-id]');
-      if (!button) return;
-      toggleTag(button.dataset.tagId);
-    });
-
     els.selectedConditions?.addEventListener('click', event => {
-      const button = event.target.closest('[data-remove-tag-id]');
-      if (button) toggleTag(button.dataset.removeTagId);
+      const button = event.target.closest('[data-remove-tag-id]'); if (button) toggleTag(button.dataset.removeTagId);
     });
-
-    els.conditionReset?.addEventListener('click', () => {
-      state.selectedTagIds = [];
-      state.matchingFeedIds = null;
-      renderConditionFinder();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
+    els.conditionReset?.addEventListener('click', clearAllTags);
     els.results.addEventListener('click', event => {
+      const action = event.target.closest('[data-recovery]');
+      if (action) { applyRecovery(action.dataset.recovery); return; }
       const link = event.target.closest('a[data-feed-id]');
       if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      const feed = state.rows.find(row => String(row.id) === String(link.dataset.feedId));
+      const feed = state.rows.find(row => String(row.id) === String(link.dataset.feedId) && row.species === link.dataset.species);
       if (!feed) return;
-      event.preventDefault();
-      openDetail(feed);
+      event.preventDefault(); openDetail(feed);
     });
-
     els.loadMore.addEventListener('click', () => loadFeeds(false));
-    els.back.addEventListener('click', () => showList(false));
-
-    window.addEventListener('popstate', event => {
-      readStateFromUrl();
-      syncControls();
-      const detailRoute = readDetailRoute(event.state);
-      if (detailRoute?.id) loadDetail(detailRoute.id);
-      else showList(true);
+    els.back.addEventListener('click', event => {
+      const finder = history.state?.foodFinder;
+      if (finder?.url) { event.preventDefault(); history.back(); }
     });
+    window.addEventListener('scroll', persistFinderPosition, { passive: true });
+    window.addEventListener('popstate', async event => {
+      const detailRoute = readDetailRoute(event.state);
+      if (detailRoute?.id) { state.species = detailRoute.species; syncControls(); await loadDetail(detailRoute.id); return; }
+      readStateFromUrl(); syncControls(); await loadFeeds(true); showList(true, event.state?.foodFinder);
+    });
+  }
+
+  function setButtonFilter(event, key) {
+    const button = event.target.closest(`[data-${key}]`);
+    if (!button || button.dataset[key] === state[key]) return;
+    state[key] = button.dataset[key]; syncControls(); updateFinder(true);
+  }
+
+  function updateFinder(reset) { state.loaded = PAGE_SIZE; writeListStateToUrl(true); loadFeeds(reset); }
+
+  function persistFinderPosition() {
+    if (readDetailRoute()) return;
+    const current = history.state || {};
+    history.replaceState({ ...current, foodFinder: { url: `${location.pathname}${location.search}`, scrollY: window.scrollY, loaded: state.loaded } }, '', location.href);
+  }
+
+  function clearAllTags() { state.selectedTagIds = []; state.matchingFeedIds = { cat: null, dog: null }; renderConditionFinder(); updateFinder(true); }
+
+  function applyRecovery(kind) {
+    if (kind === 'query') { state.query = ''; els.searchInput.value = ''; }
+    if (kind === 'tags') state.selectedTagIds = [];
+    if (kind === 'species') state.species = 'all';
+    if (kind === 'type') state.type = 'all';
+    if (kind === 'role') state.role = 'all';
+    syncControls(); updateFinder(true);
   }
 
   function renderSkeletons() {
@@ -412,7 +401,7 @@
     if (error) {
       if (state.selectedTagIds.length) {
         state.selectedTagIds = [];
-        state.matchingFeedIds = null;
+        state.matchingFeedIds = { cat: null, dog: null };
         writeListStateToUrl(true);
       }
       els.conditionStatus.textContent = '조건을 불러오지 못했습니다.';
@@ -432,153 +421,106 @@
     const categories = TAG_CATEGORY_ORDER.filter(category => state.tags.some(tag => tag.category === category));
     if (!categories.length) {
       els.conditionFolders.innerHTML = state.tagsLoading ? '' : '<p class="food-condition-empty">사용 가능한 조건이 아직 없습니다.</p>';
-      els.conditionPanel.hidden = true;
-      els.selectedConditions.hidden = true;
-      els.conditionReset.hidden = true;
-      return;
+      els.selectedConditions.hidden = true; els.conditionReset.hidden = true; return;
     }
-
-    const orderedCategories = state.activeTagCategory
-      ? [state.activeTagCategory, ...categories.filter(category => category !== state.activeTagCategory)]
-      : categories;
-    els.conditionFolders.innerHTML = orderedCategories.map((category, index) => {
+    if (!categories.includes(state.activeTagCategory)) state.activeTagCategory = categories[0];
+    els.conditionFolders.innerHTML = categories.map((category, index) => {
       const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
       const active = category === state.activeTagCategory;
-      return `<button class="food-condition-folder${active ? ' is-open' : ''}" type="button" data-tag-category="${escapeHtml(category)}" aria-expanded="${active}" style="--folder-index:${index}">
-        <span>${escapeHtml(TAG_CATEGORY_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}
-      </button>`;
+      const tags = state.tags.filter(tag => tag.category === category).sort(compareTags);
+      const query = String(state.tagSearchQueries[category] || '');
+      const normalized = normalizeConditionSearch(query);
+      const visible = tags.filter(tag => !normalized || normalizeConditionSearch(tag.label_ko).includes(normalized)).length;
+      return `<section class="condition-folder${active ? ' is-open' : ''}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}">
+        <button class="condition-folder__tab" type="button" data-category="${escapeHtml(category)}" aria-expanded="${active}" aria-controls="food-condition-${escapeHtml(category)}"><span>${escapeHtml(TAG_CATEGORY_TAB_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}</button>
+        <div id="food-condition-${escapeHtml(category)}" class="condition-folder__body" ${active ? '' : 'hidden'}>
+          <h3>${escapeHtml(TAG_CATEGORY_LABELS[category])}</h3>
+          <div class="condition-tag-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input type="search" data-condition-search data-category="${escapeHtml(category)}" value="${escapeHtml(query)}" placeholder="조건 검색" aria-label="${escapeHtml(TAG_CATEGORY_LABELS[category])} 조건 검색" autocomplete="off"><button class="condition-tag-search__clear" type="button" data-condition-search-clear ${query ? '' : 'hidden'}>지우기</button></div>
+          <div class="condition-tags">${tags.map(tag => { const selected = state.selectedTagIds.includes(String(tag.id)); const searchText = normalizeConditionSearch(tag.label_ko); return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" data-tag-search-text="${escapeHtml(searchText)}" aria-pressed="${selected}" ${normalized && !searchText.includes(normalized) ? 'hidden' : ''}>${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`; }).join('')}<p class="condition-tags-empty" ${visible ? 'hidden' : ''}>일치하는 조건이 없습니다.</p></div>
+        </div></section>`;
     }).join('');
-
-    const activeTags = state.tags.filter(tag => tag.category === state.activeTagCategory).sort(compareTags);
-    els.conditionPanel.hidden = !activeTags.length;
-    els.conditionPanel.innerHTML = activeTags.length ? `
-      <div class="food-condition-panel__heading"><strong>${escapeHtml(TAG_CATEGORY_LABELS[state.activeTagCategory])}</strong><span>여러 조건을 함께 선택할 수 있어요.</span></div>
-      <div class="food-condition-tags">${activeTags.map(tag => {
-        const selected = state.selectedTagIds.includes(String(tag.id));
-        return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
-      }).join('')}</div>` : '';
-
-    const selectedTags = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
-    els.selectedConditions.hidden = !selectedTags.length;
-    els.conditionReset.hidden = !selectedTags.length;
-    els.selectedConditions.innerHTML = selectedTags.length ? `
-      <p><strong>선택한 조건</strong><span>${selectedTags.length}개 조건의 교집합</span></p>
-      <div>${selectedTags.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
+    const selected = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
+    els.conditionReset.hidden = !selected.length; els.selectedConditions.hidden = !selected.length;
+    els.selectedConditions.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
   }
 
-  function toggleTag(tagId) {
+  function normalizeConditionSearch(value) { return String(value || '').trim().toLocaleLowerCase('ko-KR'); }
+  function applyConditionTagSearch(input) {
+    const body = input.closest('.condition-folder__body'); if (!body) return;
+    const query = normalizeConditionSearch(input.value); let visible = 0;
+    body.querySelectorAll('[data-tag-id]').forEach(button => { const show = !query || button.dataset.tagSearchText.includes(query); button.hidden = !show; if (show) visible += 1; });
+    body.querySelector('.condition-tags-empty').hidden = visible > 0; body.querySelector('[data-condition-search-clear]').hidden = !input.value;
+  }
+
+  function toggleTag(tagId, focusTagId = '') {
     const id = String(tagId || '');
     if (!state.tags.some(tag => String(tag.id) === id)) return;
     state.selectedTagIds = state.selectedTagIds.includes(id)
       ? state.selectedTagIds.filter(value => value !== id)
       : [...state.selectedTagIds, id];
-    state.matchingFeedIds = null;
+    state.matchingFeedIds = { cat: null, dog: null };
     renderConditionFinder();
-    writeListStateToUrl(true);
-    loadFeeds(true);
+    if (focusTagId) restoreFinderFocus(`[data-tag-id=\"${CSS.escape(focusTagId)}\"]`);
+    updateFinder(true);
   }
 
-  async function resolveMatchingFeedIds() {
+  function restoreFinderFocus(selector) { requestAnimationFrame(() => els.conditionFolders?.querySelector(selector)?.focus()); }
+
+  async function resolveMatchingFeedIds(species) {
     if (!state.selectedTagIds.length) return null;
-    const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
-    const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
-    const { data, error } = await foodSb
-      .from(mappingTable)
-      .select(`${feedIdColumn},tag_id`)
-      .in('tag_id', state.selectedTagIds);
-    if (error) throw error;
-
-    const required = new Set(state.selectedTagIds);
-    const matchesByFeed = new Map();
-    (data || []).forEach(row => {
-      const feedId = String(row[feedIdColumn] || '');
-      const tagId = String(row.tag_id || '');
-      if (!feedId || !required.has(tagId)) return;
-      if (!matchesByFeed.has(feedId)) matchesByFeed.set(feedId, new Set());
-      matchesByFeed.get(feedId).add(tagId);
-    });
-    return [...matchesByFeed.entries()]
-      .filter(([, ids]) => ids.size === required.size)
-      .map(([feedId]) => feedId);
+    const mappingTable = species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const feedIdColumn = species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const rows = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await foodSb.from(mappingTable).select(`${feedIdColumn},tag_id`).in('tag_id', state.selectedTagIds).range(from, from + 999);
+      if (error) throw error; rows.push(...(data || [])); if (!data || data.length < 1000) break;
+    }
+    const required = new Set(state.selectedTagIds); const matches = new Map();
+    rows.forEach(row => { const id = String(row[feedIdColumn] || ''); const tag = String(row.tag_id || ''); if (!id || !required.has(tag)) return; if (!matches.has(id)) matches.set(id, new Set()); matches.get(id).add(tag); });
+    return [...matches].filter(([, tags]) => tags.size === required.size).map(([id]) => id);
   }
 
-  function buildListQuery(from, to) {
-    let query = foodSb
-      .from(getTable())
-      .select(listColumns, { count: 'exact' })
-      .or('verified.eq.true,searchable_before_review.eq.true');
-
+  function buildListQuery(species, limit) {
+    let query = foodSb.from(getTable(species)).select(listColumns, { count: 'exact' }).or('verified.eq.true,searchable_before_review.eq.true');
     if (state.type !== 'all') query = query.eq('type', state.type);
     if (state.role !== 'all') query = query.eq('완전식여부', state.role);
-    if (state.query) {
-      const pattern = buildSearchPattern(state.query);
-      query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`);
-    }
-    if (Array.isArray(state.matchingFeedIds)) {
-      query = state.matchingFeedIds.length ? query.in('id', state.matchingFeedIds) : query.eq('id', '00000000-0000-0000-0000-000000000000');
-    }
-
-    if (state.sort === 'product') {
-      query = query.order('제품명', { ascending: true }).order('제조사', { ascending: true });
-    } else {
-      query = query.order('제조사', { ascending: true }).order('제품명', { ascending: true });
-    }
-
-    return query.range(from, to);
+    if (state.query) { const pattern = buildSearchPattern(state.query); query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`); }
+    const ids = state.matchingFeedIds[species];
+    if (Array.isArray(ids)) query = ids.length ? query.in('id', ids) : query.eq('id', '00000000-0000-0000-0000-000000000000');
+    if (state.sort === 'product') query = query.order('제품명').order('제조사').order('id');
+    else query = query.order('제조사').order('제품명').order('id');
+    return query.range(0, limit - 1);
   }
 
   async function loadFeeds(reset) {
     if (state.loading && !reset) return;
-    const serial = ++state.requestSerial;
-    state.loading = true;
-    els.listStatus.textContent = '';
-    els.loadMore.hidden = true;
-
-    if (reset) {
-      state.rows = [];
-      state.total = 0;
-      renderSkeletons();
-      els.resultsCount.textContent = `${getSpeciesLabel()} 사료를 불러오는 중입니다.`;
-    } else {
-      els.loadMore.textContent = '불러오는 중…';
-      els.loadMore.hidden = false;
-      els.loadMore.disabled = true;
-    }
-
-    if (reset) {
-      try {
-        const matchingFeedIds = await resolveMatchingFeedIds();
-        if (serial !== state.requestSerial) return;
-        state.matchingFeedIds = matchingFeedIds;
-      } catch (error) {
-        if (serial !== state.requestSerial) return;
-        state.loading = false;
-        els.results.innerHTML = '';
-        els.resultsCount.textContent = '사료 목록';
-        els.listStatus.textContent = `조건 검색을 완료하지 못했습니다. ${error.message || ''}`.trim();
-        return;
+    const serial = ++state.requestSerial; state.loading = true; els.listStatus.textContent = ''; els.loadMore.hidden = true;
+    if (reset) { state.rows = []; state.total = 0; renderSkeletons(); }
+    else { state.loaded += PAGE_SIZE; els.loadMore.textContent = '불러오는 중…'; els.loadMore.hidden = false; els.loadMore.disabled = true; }
+    const speciesList = state.species === 'all' ? ['cat', 'dog'] : [state.species];
+    try {
+      if (reset || state.selectedTagIds.length) {
+        const idSets = await Promise.all(speciesList.map(species => resolveMatchingFeedIds(species)));
+        speciesList.forEach((species, index) => { state.matchingFeedIds[species] = idSets[index]; });
       }
+      const responses = await Promise.all(speciesList.map(species => buildListQuery(species, state.loaded)));
+      if (serial !== state.requestSerial) return;
+      const failed = responses.find(response => response.error); if (failed) throw failed.error;
+      const combined = responses.flatMap((response, index) => (response.data || []).map(row => ({ ...row, species: speciesList[index] })));
+      combined.sort(compareFeedRows);
+      state.rows = combined.slice(0, state.loaded); state.total = responses.reduce((sum, response) => sum + (Number(response.count) || 0), 0);
+      state.loading = false; els.loadMore.disabled = false; els.loadMore.textContent = '더 보기'; renderResults(); persistFinderPosition();
+    } catch (error) {
+      if (serial !== state.requestSerial) return; state.loading = false; els.results.innerHTML = ''; els.resultsCount.textContent = '사료 목록'; els.listStatus.textContent = `사료 목록을 불러오지 못했습니다. ${error.message || ''}`.trim();
     }
+  }
 
-    const from = reset ? 0 : state.rows.length;
-    const to = from + PAGE_SIZE - 1;
-    const { data, error, count } = await buildListQuery(from, to);
-
-    if (serial !== state.requestSerial) return;
-    state.loading = false;
-    els.loadMore.disabled = false;
-    els.loadMore.textContent = '더 보기';
-
-    if (error) {
-      if (reset) els.results.innerHTML = '';
-      els.listStatus.textContent = `사료 목록을 불러오지 못했습니다. ${error.message || ''}`.trim();
-      els.resultsCount.textContent = '사료 목록';
-      return;
-    }
-
-    state.rows = reset ? (data || []) : state.rows.concat(data || []);
-    state.total = Number(count) || 0;
-    renderResults();
+  function compareFeedRows(a, b) {
+    const primaryA = state.sort === 'product' ? String(a.제품명 || '') : getBrand(a).name;
+    const primaryB = state.sort === 'product' ? String(b.제품명 || '') : getBrand(b).name;
+    const secondaryA = state.sort === 'product' ? getBrand(a).name : String(a.제품명 || '');
+    const secondaryB = state.sort === 'product' ? getBrand(b).name : String(b.제품명 || '');
+    return primaryA.localeCompare(primaryB, 'ko') || secondaryA.localeCompare(secondaryB, 'ko') || a.species.localeCompare(b.species) || String(a.id).localeCompare(String(b.id));
   }
 
   function renderResults() {
@@ -588,11 +530,14 @@
     els.resultsCount.textContent = `${formatNumber(state.total, 0)}개의 ${species} 사료${searchSuffix}${conditionSuffix}`;
 
     if (!state.rows.length) {
-      els.results.innerHTML = `
-        <div class="food-empty">
-          <strong>검색 결과가 없습니다.</strong>
-          <span>${state.selectedTagIds.length ? '선택한 조건을 하나씩 줄여보세요.' : '브랜드 또는 제품명을 바꿔 검색해 보세요.'}</span>
-        </div>`;
+      const actions = [
+        state.query && ['query', '검색어 지우기'],
+        state.selectedTagIds.length && ['tags', '조건 전체 해제'],
+        state.species !== 'all' && ['species', '전체 사료에서 찾기'],
+        state.type !== 'all' && ['type', '전체 형태로 보기'],
+        state.role !== 'all' && ['role', '전체 분류로 보기']
+      ].filter(Boolean);
+      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><span>조건을 하나씩 넓혀 다시 찾아보세요.</span><div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
       els.loadMore.hidden = true;
       return;
     }
@@ -604,10 +549,10 @@
   function renderResultRow(feed) {
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
-    const meta = [getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
+    const meta = [getSpeciesLabel(feed.species), getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
     const semanticClass = getFeedSemanticClass(feed);
     return `
-      <a class="food-result" href="${escapeHtml(buildProductPath(feed))}" data-feed-id="${escapeHtml(feed.id)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
+      <a class="food-result" href="${escapeHtml(buildProductPath(feed))}" data-feed-id="${escapeHtml(feed.id)}" data-species="${escapeHtml(feed.species)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
         <span class="food-result__brand">${escapeHtml(brand.name)}</span>
         <span class="food-result__title-wrap">
           <span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</span>
@@ -624,6 +569,7 @@
 
   async function openDetail(feed) {
     if (!feed?.id) return;
+    state.species = feed.species;
     writeDetailUrl(feed);
     await loadDetail(feed.id);
   }
@@ -631,6 +577,8 @@
   async function loadDetail(id) {
     els.listView.hidden = true;
     els.detailView.hidden = false;
+    const hasFinderContext = Boolean(history.state?.foodFinder?.url);
+    els.back.lastChild.textContent = hasFinderContext ? ' 검색 결과로 돌아가기' : ' 사료 찾기로 돌아가기';
     const hasPrerenderedDetail = String(els.detailContent.dataset.prerenderedFeedId || '') === String(id)
       && els.detailContent.childElementCount > 0;
     if (!hasPrerenderedDetail) {
@@ -764,7 +712,7 @@
     });
   }
 
-  function showList(fromPopState) {
+  function showList(fromPopState, finderState = history.state?.foodFinder) {
     updateListMetadata();
     els.detailView.hidden = true;
     els.listView.hidden = false;
@@ -775,8 +723,8 @@
     if (!fromPopState) writeListStateToUrl(false);
     if (!state.rows.length) loadFeeds(true);
     requestAnimationFrame(() => {
-      const top = els.listView.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: Math.max(0, top - 12), behavior: 'auto' });
+      const target = fromPopState && finderState ? Number(finderState.scrollY) || 0 : 0;
+      window.scrollTo({ top: target, behavior: 'auto' });
     });
   }
 
@@ -968,6 +916,8 @@
     }
     if (state.selectedTagIds.length) await conditionTagsPromise;
     await loadFeeds(true);
+    const finder = history.state?.foodFinder;
+    if (finder) requestAnimationFrame(() => window.scrollTo({ top: Number(finder.scrollY) || 0, behavior: 'auto' }));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
