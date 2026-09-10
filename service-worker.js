@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260903-veterinary-function-v1';
+const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',

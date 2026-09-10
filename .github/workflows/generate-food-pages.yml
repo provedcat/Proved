@@ -1,0 +1,77 @@
+name: Generate food product pages
+
+on:
+  pull_request:
+    paths:
+      - 'food/index.html'
+      - 'js/food-list.js'
+      - 'scripts/generate-food-pages.mjs'
+      - 'tests/food-seo-pages.test.js'
+      - '.github/workflows/generate-food-pages.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'food/index.html'
+      - 'js/food-list.js'
+      - 'scripts/generate-food-pages.mjs'
+      - 'tests/food-seo-pages.test.js'
+      - '.github/workflows/generate-food-pages.yml'
+  schedule:
+    - cron: '20 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: generate-food-product-pages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Test product page generation
+        run: node --test tests/food-seo-pages.test.js
+
+  refresh-pages:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate searchable food pages
+        run: node scripts/generate-food-pages.mjs
+
+      - name: Commit generated pages when changed
+        shell: bash
+        run: |
+          git add -A -- food/cat food/dog sitemap-foods.xml
+          if git diff --cached --quiet; then
+            echo "Food pages are already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: refresh generated food product pages"
+          git push origin HEAD:main

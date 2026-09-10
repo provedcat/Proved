@@ -4,6 +4,10 @@
   const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const PAGE_SIZE = 24;
+  const SITE_ORIGIN = 'https://proved.kr';
+  const FOOD_LIST_PATH = '/food/';
+  const FOOD_LIST_TITLE = '고양이·강아지 사료 목록 | 프루브';
+  const FOOD_LIST_DESCRIPTION = '프루브에 등록된 고양이·강아지 사료를 브랜드와 제품명으로 검색하고 열량, 수분, 칼슘·인 비율과 상세 영양정보를 확인합니다.';
   const TAG_CATEGORY_ORDER = [
     'protein_source', 'life_stage', 'management_purpose', 'processing_method',
     'ingredient_condition', 'preparation_type'
@@ -67,6 +71,65 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function slugify(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9가-힣]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-')
+      .slice(0, 96)
+      .replace(/-+$/g, '') || 'food';
+  }
+
+  function buildProductSlug(feed) {
+    const brand = getBrand(feed).name;
+    const base = slugify(`${brand} ${feed?.제품명 || ''}`);
+    const stableId = String(feed?.id || '').replace(/-/g, '').slice(0, 8).toLowerCase();
+    return `${base}--${stableId || 'detail'}`;
+  }
+
+  function buildProductPath(feed, species = state.species) {
+    return `/food/${species === 'dog' ? 'dog' : 'cat'}/${buildProductSlug(feed)}/`;
+  }
+
+  function normalizePathname(pathname) {
+    const normalized = `${String(pathname || FOOD_LIST_PATH).replace(/\/+$/, '')}/`;
+    try {
+      return decodeURI(normalized);
+    } catch (error) {
+      return normalized;
+    }
+  }
+
+  function readDetailRoute(historyState = window.history.state) {
+    const match = window.location.pathname.match(/^\/food\/(cat|dog)\/([^/]+)\/?$/);
+    const pageConfig = window.__PROVED_FOOD_PAGE__;
+    if (match) {
+      const species = match[1];
+      const normalizedPath = normalizePathname(window.location.pathname);
+      if (pageConfig?.id && pageConfig.species === species && pageConfig.path === normalizedPath) {
+        return { species, id: String(pageConfig.id), slug: match[2], source: 'prerendered' };
+      }
+      if (historyState?.feedId && historyState.species === species) {
+        return { species, id: String(historyState.feedId), slug: match[2], source: 'history' };
+      }
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const legacyId = params.get('id');
+    if (legacyId) {
+      return {
+        species: normalizeEnum(params.get('species'), ['cat', 'dog'], 'cat'),
+        id: legacyId,
+        slug: '',
+        source: 'legacy-query'
+      };
+    }
+    return null;
   }
 
   function normalizeEnum(value, allowed, fallback) {
@@ -155,12 +218,13 @@
 
   function readStateFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    state.species = normalizeEnum(params.get('species'), ['cat', 'dog'], 'cat');
+    const detailRoute = readDetailRoute();
+    state.species = detailRoute?.species || normalizeEnum(params.get('species'), ['cat', 'dog'], 'cat');
     state.type = normalizeEnum(params.get('type'), ['all', 'dry', 'wet'], 'all');
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
     state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
-    state.selectedTagIds = [];
+    state.selectedTagIds = String(params.get('tags') || '').split(',').map(value => value.trim()).filter(Boolean);
   }
 
   function writeListStateToUrl(replace = true) {
@@ -172,20 +236,16 @@
     if (state.query) params.set('q', state.query);
     if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     const queryString = params.toString();
-    const url = `${window.location.pathname}${queryString ? `?${queryString}` : ''}`;
-    history[replace ? 'replaceState' : 'pushState']({}, '', url);
+    const url = `${FOOD_LIST_PATH}${queryString ? `?${queryString}` : ''}`;
+    history[replace ? 'replaceState' : 'pushState']({ view: 'list' }, '', url);
   }
 
-  function writeDetailUrl(id) {
-    const params = new URLSearchParams();
-    params.set('species', state.species);
-    params.set('id', id);
-    if (state.type !== 'all') params.set('type', state.type);
-    if (state.role !== 'all') params.set('role', state.role);
-    if (state.sort !== 'brand') params.set('sort', state.sort);
-    if (state.query) params.set('q', state.query);
-    if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
-    history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+  function writeDetailUrl(feed) {
+    history.pushState({
+      view: 'detail',
+      feedId: String(feed.id),
+      species: state.species
+    }, '', buildProductPath(feed));
   }
 
   function cacheElements() {
@@ -308,19 +368,22 @@
     });
 
     els.results.addEventListener('click', event => {
-      const button = event.target.closest('[data-feed-id]');
-      if (!button) return;
-      openDetail(button.dataset.feedId);
+      const link = event.target.closest('a[data-feed-id]');
+      if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const feed = state.rows.find(row => String(row.id) === String(link.dataset.feedId));
+      if (!feed) return;
+      event.preventDefault();
+      openDetail(feed);
     });
 
     els.loadMore.addEventListener('click', () => loadFeeds(false));
     els.back.addEventListener('click', () => showList(false));
 
-    window.addEventListener('popstate', () => {
+    window.addEventListener('popstate', event => {
       readStateFromUrl();
       syncControls();
-      const id = new URLSearchParams(window.location.search).get('id');
-      if (id) loadDetail(id);
+      const detailRoute = readDetailRoute(event.state);
+      if (detailRoute?.id) loadDetail(detailRoute.id);
       else showList(true);
     });
   }
@@ -544,7 +607,7 @@
     const meta = [getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
     const semanticClass = getFeedSemanticClass(feed);
     return `
-      <button class="food-result" type="button" data-feed-id="${escapeHtml(feed.id)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
+      <a class="food-result" href="${escapeHtml(buildProductPath(feed))}" data-feed-id="${escapeHtml(feed.id)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
         <span class="food-result__brand">${escapeHtml(brand.name)}</span>
         <span class="food-result__title-wrap">
           <span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</span>
@@ -556,20 +619,26 @@
           <span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span>
           <svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
         </span>
-      </button>`;
+      </a>`;
   }
 
-  async function openDetail(id) {
-    if (!id) return;
-    writeDetailUrl(id);
-    await loadDetail(id);
+  async function openDetail(feed) {
+    if (!feed?.id) return;
+    writeDetailUrl(feed);
+    await loadDetail(feed.id);
   }
 
   async function loadDetail(id) {
     els.listView.hidden = true;
     els.detailView.hidden = false;
-    els.detailContent.innerHTML = '';
-    els.detailStatus.textContent = '제품 정보를 불러오는 중입니다.';
+    const hasPrerenderedDetail = String(els.detailContent.dataset.prerenderedFeedId || '') === String(id)
+      && els.detailContent.childElementCount > 0;
+    if (!hasPrerenderedDetail) {
+      els.detailContent.innerHTML = '';
+      els.detailStatus.textContent = '제품 정보를 불러오는 중입니다.';
+    } else {
+      els.detailStatus.textContent = '';
+    }
     window.scrollTo({ top: 0, behavior: 'auto' });
 
     let { data, error } = await fetchDetail(id, detailColumns);
@@ -581,6 +650,7 @@
     }
 
     if (error || !data) {
+      if (hasPrerenderedDetail) return;
       els.detailStatus.textContent = error
         ? `제품 정보를 불러오지 못했습니다. ${error.message || ''}`.trim()
         : '제품 정보를 찾지 못했습니다.';
@@ -600,11 +670,106 @@
       .maybeSingle();
   }
 
+  function setMetaContent(selector, value) {
+    const element = document.head.querySelector(selector);
+    if (element) element.setAttribute('content', value);
+  }
+
+  function setCanonicalUrl(url) {
+    const canonical = document.head.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', url);
+  }
+
+  function setStructuredData(value) {
+    let script = document.getElementById('foodStructuredData');
+    if (!value) {
+      script?.remove();
+      return;
+    }
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'foodStructuredData';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(value).replace(/</g, '\\u003c');
+  }
+
+  function buildSeoDescription(feed, brand, product) {
+    const parts = [
+      `${brand.name} ${product.primary} ${getSpeciesLabel()} ${getTypeLabel(feed.type)} 성분 정보.`,
+      isPresent(feed.final_me) ? `열량 ${formatNumber(feed.final_me, 1)} kcal/kg,` : '',
+      isPresent(feed.dm_단백) ? `DM 단백질 ${formatNumber(feed.dm_단백, 2)}%,` : '',
+      isPresent(feed.ca_p_ratio) ? `칼슘·인 비율 ${formatNumber(feed.ca_p_ratio, 2)}:1을` : '영양정보를',
+      '프루브에서 확인하세요.'
+    ].filter(Boolean).join(' ').replace(/,\s+프루브/, '을 프루브');
+    return parts.length > 160 ? `${parts.slice(0, 157).trim()}…` : parts;
+  }
+
+  function updateListMetadata() {
+    document.title = FOOD_LIST_TITLE;
+    setMetaContent('meta[name="description"]', FOOD_LIST_DESCRIPTION);
+    setMetaContent('meta[name="robots"]', 'index,follow,max-image-preview:large');
+    setMetaContent('meta[property="og:type"]', 'website');
+    setMetaContent('meta[property="og:title"]', FOOD_LIST_TITLE);
+    setMetaContent('meta[property="og:description"]', '브랜드와 제품명으로 사료를 찾고 등록된 영양정보를 확인하세요.');
+    setMetaContent('meta[property="og:url"]', `${SITE_ORIGIN}${FOOD_LIST_PATH}`);
+    setMetaContent('meta[name="twitter:title"]', FOOD_LIST_TITLE);
+    setMetaContent('meta[name="twitter:description"]', '브랜드와 제품명으로 사료를 찾고 등록된 영양정보를 확인하세요.');
+    setCanonicalUrl(`${SITE_ORIGIN}${FOOD_LIST_PATH}`);
+    setStructuredData(null);
+  }
+
+  function updateDetailMetadata(feed, brand, product) {
+    const path = buildProductPath(feed);
+    const canonicalUrl = new URL(path, SITE_ORIGIN).href;
+    const title = `${brand.name} ${product.primary} 성분·칼로리 | 프루브`;
+    const description = buildSeoDescription(feed, brand, product);
+    const additionalProperty = [
+      ['대상', getSpeciesLabel()],
+      ['형태', getTypeLabel(feed.type)],
+      ['분류', getRoleLabel(feed.완전식여부)],
+      ['열량', isPresent(feed.final_me) ? `${formatNumber(feed.final_me, 1)} kcal/kg` : ''],
+      ['조단백', isPresent(feed.조단백) ? formatPercent(feed.조단백) : ''],
+      ['DM 단백질', isPresent(feed.dm_단백) ? formatPercent(feed.dm_단백) : ''],
+      ['조지방', isPresent(feed.조지방) ? formatPercent(feed.조지방) : ''],
+      ['칼슘', isPresent(feed.칼슘) ? formatPercent(feed.칼슘, 3) : ''],
+      ['인', isPresent(feed.인) ? formatPercent(feed.인, 3) : ''],
+      ['칼슘:인', isPresent(feed.ca_p_ratio) ? formatRatio(feed.ca_p_ratio) : '']
+    ].filter(([, value]) => value).map(([name, value]) => ({
+      '@type': 'PropertyValue',
+      name,
+      value
+    }));
+
+    document.title = title;
+    setMetaContent('meta[name="description"]', description);
+    setMetaContent('meta[name="robots"]', 'index,follow,max-image-preview:large');
+    setMetaContent('meta[property="og:type"]', 'product');
+    setMetaContent('meta[property="og:title"]', title);
+    setMetaContent('meta[property="og:description"]', description);
+    setMetaContent('meta[property="og:url"]', canonicalUrl);
+    setMetaContent('meta[name="twitter:title"]', title);
+    setMetaContent('meta[name="twitter:description"]', description);
+    setCanonicalUrl(canonicalUrl);
+    setStructuredData({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: `${brand.name} ${product.primary}`,
+      description,
+      url: canonicalUrl,
+      category: `${getSpeciesLabel()} ${getTypeLabel(feed.type)}`,
+      brand: { '@type': 'Brand', name: brand.name },
+      additionalProperty
+    });
+  }
+
   function showList(fromPopState) {
-    document.title = '고양이·강아지 사료 목록 | 프루브';
+    updateListMetadata();
     els.detailView.hidden = true;
     els.listView.hidden = false;
     els.detailContent.innerHTML = '';
+    delete els.detailContent.dataset.prerenderedFeedId;
     els.detailStatus.textContent = '';
 
     if (!fromPopState) writeListStateToUrl(false);
@@ -659,7 +824,16 @@
         </aside>`
       : '';
 
-    document.title = `${product.primary} | 프루브 사료 목록`;
+    const detailPath = buildProductPath(feed);
+    const detailRoute = readDetailRoute();
+    if (detailRoute?.source === 'legacy-query') {
+      history.replaceState({
+        view: 'detail',
+        feedId: String(feed.id),
+        species: state.species
+      }, '', detailPath);
+    }
+    updateDetailMetadata(feed, brand, product);
 
     els.detailContent.innerHTML = `
       <article class="food-detail-article">
@@ -732,6 +906,7 @@
         </section>
         ${coupangCta}
       </article>`;
+    els.detailContent.dataset.prerenderedFeedId = String(feed.id);
   }
 
   function sectionHeading(number, title, id) {
@@ -780,10 +955,15 @@
     syncControls();
     bindEvents();
 
-    const detailId = new URLSearchParams(window.location.search).get('id');
+    const detailRoute = readDetailRoute();
     const conditionTagsPromise = els.conditionFolders ? loadConditionTags() : Promise.resolve();
-    if (detailId) {
-      await loadDetail(detailId);
+    if (detailRoute?.id) {
+      history.replaceState({
+        view: 'detail',
+        feedId: String(detailRoute.id),
+        species: detailRoute.species
+      }, '', window.location.href);
+      await loadDetail(detailRoute.id);
       return;
     }
     if (state.selectedTagIds.length) await conditionTagsPromise;
