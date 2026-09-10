@@ -774,3 +774,122 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+/* Unified finder: utility search flows into the signature folder stage. */
+.food-list-hero h1,
+.food-detail-hero h1 {
+  color: var(--food-blue);
+}
+.food-controls {
+  padding-bottom: 38px;
+}
+.food-condition-section.condition-workspace {
+  padding: 42px 56px 50px;
+  background: #f7f8fc;
+}
+.food-condition-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.food-condition-heading > div {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.food-condition-heading__number {
+  margin: 0;
+  color: var(--food-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.food-condition-heading h2 {
+  margin: 0;
+  color: var(--food-blue);
+  font-size: clamp(26px, 3vw, 36px);
+  letter-spacing: -0.045em;
+}
+.condition-folder__tab,
+.condition-tags button,
+.condition-tag-search,
+.condition-tag-search__clear,
+.condition-reset,
+.condition-selected button {
+  min-height: 44px;
+}
+.food-result__species {
+  display: block;
+  margin-bottom: 7px;
+  color: currentColor;
+  font-size: 10px;
+  font-weight: 800;
+}
+.food-result.is-cat-dry .food-result__species {
+  color: #b85a00;
+}
+.food-result.is-cat-wet .food-result__species {
+  color: #1f5cc4;
+}
+.food-result.is-dog-dry .food-result__species {
+  color: #9a5b34;
+}
+.food-result.is-dog-wet .food-result__species {
+  color: #388255;
+}
+.food-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 18px;
+  margin-top: 18px;
+}
+.food-empty__actions button {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--food-blue);
+  font-weight: 750;
+}
+.condition-folder__tab:focus-visible,
+.condition-tags button:focus-visible,
+.condition-tag-search__clear:focus-visible,
+.condition-reset:focus-visible,
+.condition-selected button:focus-visible,
+.food-empty__actions button:focus-visible {
+  outline: 2px solid rgba(53, 104, 255, 0.5);
+  outline-offset: 3px;
+}
+@media (max-width: 720px) {
+  .food-controls {
+    padding-bottom: 28px;
+  }
+  .food-condition-section.condition-workspace {
+    padding: 34px 40px 44px;
+  }
+  .food-condition-heading {
+    align-items: flex-start;
+  }
+  .food-condition-heading > div {
+    display: block;
+  }
+  .food-condition-heading__number {
+    margin-bottom: 5px;
+  }
+}
+@media (max-width: 420px) {
+  .food-condition-section.condition-workspace {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+  .condition-folder__tab {
+    min-width: 0;
+  }
+  .condition-folder__tab > span,
+  .condition-folder__tab b {
+    font-size: 9px;
+  }
+}
