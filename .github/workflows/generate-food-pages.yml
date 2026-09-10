@@ -5,6 +5,7 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'tests/unified-food-finder.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'tests/food-seo-pages.test.js'
       - '.github/workflows/generate-food-pages.yml'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'tests/unified-food-finder.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'tests/food-seo-pages.test.js'
       - '.github/workflows/generate-food-pages.yml'
@@ -41,7 +43,7 @@ jobs:
           node-version: '20'
 
       - name: Test product page generation
-        run: node --test tests/food-seo-pages.test.js
+        run: node --test tests/food-seo-pages.test.js tests/unified-food-finder.test.js
 
   refresh-pages:
     if: github.event_name != 'pull_request'

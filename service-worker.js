@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1';
+const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1-unified-finder-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -20,7 +20,6 @@ const CORE_ASSETS = [
   './js/calculator.js',
   './js/feed-search.js',
   './js/food-list.js',
-  './js/food-condition-page.js',
   './js/food-compare.js',
   './js/food-detail-refinements.js',
   './js/food-mobile-nutrition-v2.js',
