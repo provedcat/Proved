@@ -27,7 +27,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="/css/proved-header.css?v=20260818-food-index-v1">
-  <link rel="stylesheet" href="/css/food-list.css?v=20260910-product-pages-v1">
+  <link rel="stylesheet" href="/css/food-list.css?v=20260910-unified-finder-v1">
+  <link rel="stylesheet" href="/css/food-condition-page.css?v=20260910-unified-finder-v1">
   <link rel="stylesheet" href="/css/food-coupang-cta-desktop.css?v=20260909-desktop-link-v1">
   <link rel="stylesheet" href="/css/food-detail-refinements.css?v=20260828-mobile-metrics-v3">
   <link rel="stylesheet" href="/css/food-mobile-nutrition-v2.css?v=20260819-nutrition-mobile-v3">
@@ -37,7 +38,7 @@
   <link rel="stylesheet" href="/css/food-detail-color-restoration.css?v=20260828-detail-colors-v1">
   <link rel="stylesheet" href="/css/product-tag-blob-organic-v3.css?v=20260828-organic-v4-round">
   <script defer src="/js/proved-header.js?v=20260831-content-layout-v3"></script>
-  <script defer src="/js/food-list.js?v=20260910-product-pages-v1"></script>
+  <script defer src="/js/food-list.js?v=20260910-unified-finder-v1"></script>
   <script defer src="/js/food-detail-refinements.js?v=20260818-food-detail-v2"></script>
   <script defer src="/js/food-mobile-nutrition-v2.js?v=20260819-nutrition-mobile-v3"></script>
   <script defer src="/js/product-tag-blob.js?v=20260903-thickener-free-v3"></script>
@@ -54,9 +55,9 @@
     <main class="food-main">
       <section id="foodListView" class="food-list-view" aria-labelledby="foodListTitle" hidden>
         <div class="food-list-hero">
-          <p class="food-eyebrow">FOOD INDEX</p>
-          <h1 id="foodListTitle">사료 목록</h1>
-          <p class="food-list-hero__lead">브랜드와 제품명으로 찾고, 필요한 영양정보만 빠르게 확인하세요.</p>
+          <p class="food-eyebrow">FOOD FINDER</p>
+          <h1 id="foodListTitle">사료 찾기</h1>
+          <p class="food-list-hero__lead">이름을 바로 검색하거나, 원하는 조건을 조합해 한곳에서 찾아보세요.</p>
         </div>
 
         <section class="food-controls" aria-label="사료 목록 검색 및 필터">
@@ -73,7 +74,8 @@
             <fieldset class="food-filter-group">
               <legend>대상</legend>
               <div class="food-filter-options" id="foodSpeciesFilters">
-                <button type="button" data-species="cat" aria-pressed="true">고양이</button>
+                <button type="button" data-species="all" aria-pressed="true">전체</button>
+                <button type="button" data-species="cat" aria-pressed="false">고양이</button>
                 <button type="button" data-species="dog" aria-pressed="false">강아지</button>
               </div>
             </fieldset>
@@ -107,6 +109,16 @@
 
         </section>
 
+        <section class="condition-workspace food-condition-workspace" aria-labelledby="foodConditionTitle">
+          <div class="food-condition-heading">
+            <div><h2 id="foodConditionTitle">조건으로 좁히기</h2><p>폴더를 열어 조건을 검색하고 여러 개를 함께 선택할 수 있습니다.</p></div>
+            <button id="foodConditionReset" class="condition-reset" type="button" hidden>선택 전체 해제</button>
+          </div>
+          <div id="foodConditionFolders" class="condition-folders" aria-label="조건 그룹"></div>
+          <div id="foodSelectedConditions" class="condition-selected" aria-live="polite" hidden></div>
+          <p id="foodConditionStatus" class="condition-status" role="status">조건을 불러오는 중입니다.</p>
+        </section>
+
         <section class="food-results-section" aria-labelledby="foodResultsHeading">
           <div class="food-results-heading">
             <p id="foodResultsHeading" class="food-results-count" aria-live="polite">사료 목록을 불러오는 중입니다.</p>
@@ -120,10 +132,10 @@
 
       <section id="foodDetailView" class="food-detail-view" aria-labelledby="foodDetailTitle">
         <div class="food-detail-toolbar">
-          <button id="foodBackToList" class="food-back-button" type="button">
+          <a id="foodBackToList" class="food-back-button" href="/food/">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-            사료 목록
-          </button>
+            사료 찾기로 돌아가기
+          </a>
         </div>
 
         <div id="foodDetailContent" data-prerendered-feed-id="14e16825-0cd2-4a04-8836-0c8a16561a9e"><article class="food-detail-article">
