@@ -15,6 +15,7 @@ const extraTags = fs.readFileSync(
   path.join(root, "js/food-basic-extra-tags.js"),
   "utf8",
 );
+const routes = fs.readFileSync(path.join(root, "js/food-route.js"), "utf8");
 
 assert.match(
   html,
@@ -53,14 +54,24 @@ assert.match(
 );
 assert.match(
   script,
-  /feed_species/,
-  "detail URLs must preserve row species separately from list scope",
+  /buildProductPath\(feed, feed\.species\)/,
+  "result routes must use the row species",
 );
 assert.match(
   script,
-  /foodScrollY/,
+  /foodFinder[\s\S]*?scrollY[\s\S]*?loaded/,
   "detail navigation must retain list scroll position",
 );
+assert.match(script, /\.select\(listColumns, \{ count: "exact" \}\)/, "each species query must return an exact filtered count");
+assert.match(script, /제품명\.ilike\.\$\{pattern\},제조사\.ilike\.\$\{pattern\}/, "search must be applied by Supabase");
+assert.match(script, /\.range\(0, state\.loaded - 1\)/, "catalog reads must be bounded to the requested result window");
+const feedQuery = script.slice(script.indexOf("async function fetchSpeciesRows"), script.indexOf("function sortRows"));
+assert.doesNotMatch(feedQuery, /for \(let from = 0; ;/, "feed tables must not be downloaded to exhaustion");
+assert.match(script, /<a class="food-result \$\{semantic\}" href="\$\{escapeHtml\(productPath\)\}"/, "results must be crawlable product links");
+assert.doesNotMatch(script, /stateParams\(true|feed_species/, "canonical details must not use Finder query identity");
+assert.match(routes, /PRODUCT_ROUTE_RE/);
+assert.match(routes, /__PROVED_FOOD_PAGE__/);
+assert.match(routes, /function readDetailRoute/);
 assert.match(
   legacy,
   /location\.replace\(["']\/food\/["']\s*\+\s*location\.search\s*\+\s*location\.hash\)/,
@@ -73,7 +84,7 @@ assert.doesNotMatch(
 );
 assert.match(header, /label:\s*["']사료 찾기["'],\s*href:\s*["']\/food\/["']/);
 assert.doesNotMatch(header, /label:\s*["']조건으로 찾기["']/);
-assert.match(blob, /params\.get\('feed_species'\) \|\| params\.get\('species'\)/);
-assert.match(extraTags, /params\.get\('feed_species'\) \|\| params\.get\('species'\)/);
+assert.match(blob, /ProvedFoodRoutes\?\.readDetailRoute\(\)/);
+assert.match(extraTags, /ProvedFoodRoutes\?\.readDetailRoute\(\)/);
 
 console.log("unified food finder tests passed");

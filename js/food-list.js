@@ -42,14 +42,11 @@
     tagSearchQueries: {},
     total: 0,
     rows: [],
-    allRows: [],
     loaded: PAGE_SIZE,
     loading: false,
     requestSerial: 0,
     tags: [],
     tagsLoading: false,
-    restoreScrollY: 0,
-    detailSpecies: "",
   };
   const listColumns = [
     "id",
@@ -212,6 +209,22 @@
       .toLocaleLowerCase("ko-KR");
   }
 
+  function buildSearchPattern(query) {
+    return `"*${String(query).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}*"`;
+  }
+
+  function buildProductSlug(value) {
+    return window.ProvedFoodRoutes.buildProductSlug(value);
+  }
+
+  function buildProductPath(feed, species) {
+    return window.ProvedFoodRoutes.buildProductPath(feed, species);
+  }
+
+  function readDetailRoute() {
+    return window.ProvedFoodRoutes.readDetailRoute();
+  }
+
   function readStateFromUrl() {
     const params = new URLSearchParams(location.search);
     state.species = normalizeEnum(params.get("species"), ["cat", "dog"], "all");
@@ -222,13 +235,8 @@
       .trim()
       .slice(0, 120);
     state.selectedTagIds = uniqueIds(params.get("tags"));
-    state.detailSpecies = normalizeEnum(
-      params.get("feed_species"),
-      ["cat", "dog"],
-      "",
-    );
   }
-  function stateParams(includeDetail = false, id = "", detailSpecies = "") {
+  function stateParams() {
     const params = new URLSearchParams();
     if (state.species !== "all") params.set("species", state.species);
     if (state.type !== "all") params.set("type", state.type);
@@ -237,13 +245,10 @@
     if (state.query) params.set("q", state.query);
     if (state.selectedTagIds.length)
       params.set("tags", state.selectedTagIds.join(","));
-    if (includeDetail) {
-      params.set("id", id);
-      params.set("feed_species", detailSpecies);
-    }
     return params;
   }
   function writeListStateToUrl(replace = true, extraState = {}) {
+    if (readDetailRoute()) return;
     const query = stateParams().toString();
     history[replace ? "replaceState" : "pushState"](
       { ...history.state, ...extraState },
@@ -378,33 +383,20 @@
       resetAndLoad();
     });
     els.results.addEventListener("click", (event) => {
-      const b = event.target.closest("[data-feed-id]");
-      if (b) openDetail(b.dataset.feedId, b.dataset.feedSpecies);
+      const link = event.target.closest("[data-product-path]");
+      if (link) saveFinderReturn(link.dataset.productPath);
     });
     els.loadMore.addEventListener("click", () => {
       state.loaded += PAGE_SIZE;
-      renderResults();
-    });
-    els.back.addEventListener("click", () => {
-      if (history.state?.foodDetail) {
-        history.back();
-        return;
-      }
-      writeListStateToUrl(true);
-      showList(true);
-      loadFeeds(true);
+      loadFeeds(false);
     });
     window.addEventListener("popstate", async (event) => {
+      if (readDetailRoute()) return;
       readStateFromUrl();
       syncControls();
-      const id = new URLSearchParams(location.search).get("id");
-      if (id) await loadDetail(id, state.detailSpecies);
-      else {
-        showList(true);
-        state.loaded = Number(event.state?.foodLoaded) || PAGE_SIZE;
-        await loadFeeds(true);
-        restoreScroll(event.state?.foodScrollY);
-      }
+      state.loaded = Number(event.state?.foodFinder?.loaded) || PAGE_SIZE;
+      await loadFeeds(true);
+      restoreScroll(event.state?.foodFinder?.scrollY);
     });
   }
   function compareTags(a, b) {
@@ -537,41 +529,46 @@
   }
   async function fetchSpeciesRows(species) {
     const ids = await resolveFeedIds(species);
-    if (Array.isArray(ids) && !ids.length) return [];
-    const rows = [];
+    if (Array.isArray(ids) && !ids.length) return { rows: [], count: 0 };
     const idChunks = Array.isArray(ids)
       ? Array.from({ length: Math.ceil(ids.length / 100) }, (_, i) =>
           ids.slice(i * 100, i * 100 + 100),
         )
       : [null];
-    for (const chunk of idChunks) {
-      for (let from = 0; ; from += FETCH_PAGE_SIZE) {
+    const responses = await Promise.all(
+      idChunks.map(async (chunk) => {
         let query = foodSb
           .from(species === "dog" ? "dog_feeds" : "feeds")
-          .select(listColumns)
+          .select(listColumns, { count: "exact" })
           .or("verified.eq.true,searchable_before_review.eq.true");
         if (state.type !== "all") query = query.eq("type", state.type);
         if (state.role !== "all") query = query.eq("완전식여부", state.role);
+        if (state.query) {
+          const pattern = buildSearchPattern(state.query);
+          query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`);
+        }
         if (chunk) query = query.in("id", chunk);
-        const { data, error } = await query.range(
-          from,
-          from + FETCH_PAGE_SIZE - 1,
-        );
+        query = state.sort === "product"
+          ? query.order("제품명", { ascending: true }).order("제조사", { ascending: true })
+          : query.order("제조사", { ascending: true }).order("제품명", { ascending: true });
+        const { data, error, count } = await query.order("id", { ascending: true }).range(0, state.loaded - 1);
         if (error) throw error;
-        rows.push(...(data || []).map((row) => ({ ...row, species })));
-        if (!data || data.length < FETCH_PAGE_SIZE) break;
-      }
-    }
-    return rows;
+        return { rows: (data || []).map((row) => ({ ...row, species })), count: Number(count) || 0 };
+      }),
+    );
+    return {
+      rows: responses.flatMap((response) => response.rows),
+      count: responses.reduce((sum, response) => sum + response.count, 0),
+    };
   }
   function sortRows(rows) {
     const key =
       state.sort === "product"
         ? (f) => String(f.제품명 || "")
-        : (f) => getBrand(f).name;
+        : (f) => String(f.제조사 || getBrand(f).name);
     const secondary =
       state.sort === "product"
-        ? (f) => getBrand(f).name
+        ? (f) => String(f.제조사 || getBrand(f).name)
         : (f) => String(f.제품명 || "");
     return rows.sort(
       (a, b) =>
@@ -587,7 +584,6 @@
     els.loadMore.hidden = true;
     if (reset) {
       state.rows = [];
-      state.allRows = [];
       els.results.innerHTML = Array.from(
         { length: 5 },
         () => '<div class="food-skeleton" aria-hidden="true"></div>',
@@ -597,17 +593,10 @@
     try {
       const species =
         state.species === "all" ? ["cat", "dog"] : [state.species];
-      let rows = (await Promise.all(species.map(fetchSpeciesRows))).flat();
+      const responses = await Promise.all(species.map(fetchSpeciesRows));
       if (serial !== state.requestSerial) return;
-      const q = normalizeSearch(state.query);
-      if (q)
-        rows = rows.filter((feed) =>
-          normalizeSearch(
-            `${getBrand(feed).name} ${feed.제조사 || ""} ${feed.제품명 || ""}`,
-          ).includes(q),
-        );
-      state.allRows = sortRows(rows);
-      state.total = state.allRows.length;
+      state.rows = sortRows(responses.flatMap((response) => response.rows)).slice(0, state.loaded);
+      state.total = responses.reduce((sum, response) => sum + response.count, 0);
       state.loading = false;
       renderResults();
     } catch (error) {
@@ -620,7 +609,6 @@
     }
   }
   function renderResults() {
-    state.rows = state.allRows.slice(0, state.loaded);
     const suffix = [
       state.query && `“${state.query}” 검색`,
       state.selectedTagIds.length && `조건 ${state.selectedTagIds.length}개`,
@@ -668,98 +656,68 @@
     );
   }
   function renderResultRow(feed) {
-    const brand = getBrand(feed),
-      product = splitProductName(feed.제품명),
-      semantic = getFeedSemanticClass(feed);
-    const meta = [
-      getSpeciesLabel(feed.species),
-      getTypeLabel(feed.type),
-      getRoleLabel(feed.완전식여부),
-      feed.메인단백질 || "주 단백질 확인중",
-    ];
-    return `<button class="food-result ${semantic}" type="button" data-feed-id="${escapeHtml(feed.id)}" data-feed-species="${feed.species}" aria-label="${escapeHtml(getSpeciesLabel(feed.species))} ${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기"><span class="food-result__brand"><span class="food-result__species">${getSpeciesLabel(feed.species)}</span>${escapeHtml(brand.name)}</span><span class="food-result__title-wrap"><span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ""}</span>${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ""}<span class="food-result__meta">${meta
-      .slice(1)
-      .map((x) => `<span>${escapeHtml(x)}</span>`)
-      .join(
-        "",
-      )}</span></span><span class="food-result__stats"><span class="food-result-stat food-result-stat--energy ${semantic}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span><span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span><svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></span></button>`;
+    const brand = getBrand(feed);
+    const product = splitProductName(feed.제품명);
+    const semantic = getFeedSemanticClass(feed);
+    const productPath = buildProductPath(feed, feed.species);
+    const meta = [getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || "주 단백질 확인중"];
+    return `<a class="food-result ${semantic}" href="${escapeHtml(productPath)}" data-product-path="${escapeHtml(productPath)}" aria-label="${escapeHtml(getSpeciesLabel(feed.species))} ${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기"><span class="food-result__brand"><span class="food-result__species">${getSpeciesLabel(feed.species)}</span>${escapeHtml(brand.name)}</span><span class="food-result__title-wrap"><span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ""}</span>${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ""}<span class="food-result__meta">${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</span></span><span class="food-result__stats"><span class="food-result-stat food-result-stat--energy ${semantic}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span><span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span><svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></span></a>`;
   }
-  async function openDetail(id, species) {
-    history.replaceState(
-      {
-        ...history.state,
-        foodScrollY: window.scrollY,
-        foodLoaded: state.loaded,
-      },
-      "",
-      location.href,
-    );
-    const params = stateParams(true, id, species);
-    history.pushState(
-      { foodDetail: true },
-      "",
-      `${location.pathname}?${params}`,
-    );
-    await loadDetail(id, species);
+
+  function saveFinderReturn(productPath) {
+    const foodFinder = {
+      url: `${location.pathname}${location.search}`,
+      scrollY: window.scrollY,
+      loaded: state.loaded,
+      productPath,
+      savedAt: Date.now(),
+    };
+    history.replaceState({ ...history.state, foodFinder }, "", location.href);
+    sessionStorage.setItem("provedFoodFinderReturn", JSON.stringify(foodFinder));
   }
-  async function loadDetail(id, species) {
-    species = normalizeEnum(
-      species,
-      ["cat", "dog"],
-      state.species === "all" ? "cat" : state.species,
-    );
-    state.detailSpecies = species;
-    els.listView.hidden = true;
-    els.detailView.hidden = false;
-    els.detailContent.innerHTML = "";
-    els.detailStatus.textContent = "제품 정보를 불러오는 중입니다.";
-    els.back.lastChild.textContent =
-      state.query ||
-      state.selectedTagIds.length ||
-      state.type !== "all" ||
-      state.role !== "all"
-        ? " 검색 결과로 돌아가기"
-        : " 사료 찾기로 돌아가기";
-    scrollTo({ top: 0, behavior: "auto" });
-    let { data, error } = await fetchDetail(id, detailColumns, species);
-    if (error && String(error.message || "").includes("쿠팡_링크"))
-      ({ data, error } = await fetchDetail(
-        id,
-        detailColumnsWithoutCoupang,
-        species,
-      ));
-    if (error || !data) {
-      els.detailStatus.textContent = error
-        ? `제품 정보를 불러오지 못했습니다. ${error.message || ""}`.trim()
-        : "제품 정보를 찾지 못했습니다.";
+
+  function getFinderReturn(productPath = location.pathname) {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("provedFoodFinderReturn") || "null");
+      return saved?.productPath === productPath && Date.now() - saved.savedAt < 1800000 ? saved : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function loadDetail(route) {
+    if (!route.id) {
+      els.detailStatus.textContent = "제품 주소를 확인하지 못했습니다.";
       return;
     }
-    data.species = species;
+    let { data, error } = await fetchDetail(route.id, detailColumns, route.species);
+    if (error && String(error.message || "").includes("쿠팡_링크")) {
+      ({ data, error } = await fetchDetail(route.id, detailColumnsWithoutCoupang, route.species));
+    }
+    if (error || !data) {
+      els.detailStatus.textContent = error ? `제품 정보를 불러오지 못했습니다. ${error.message || ""}`.trim() : "제품 정보를 찾지 못했습니다.";
+      return;
+    }
+    data.species = route.species;
+    if (route.legacy) {
+      location.replace(buildProductPath(data, route.species));
+      return;
+    }
     els.detailStatus.textContent = "";
     renderDetail(data);
   }
+
   function fetchDetail(id, columns, species) {
-    return foodSb
-      .from(species === "dog" ? "dog_feeds" : "feeds")
-      .select(columns)
-      .eq("id", id)
-      .or("verified.eq.true,searchable_before_review.eq.true")
-      .maybeSingle();
+    return foodSb.from(species === "dog" ? "dog_feeds" : "feeds").select(columns).eq("id", id)
+      .or("verified.eq.true,searchable_before_review.eq.true").maybeSingle();
   }
-  function showList(fromPopState) {
-    document.title = "고양이·강아지 사료 찾기 | 프루브";
-    els.detailView.hidden = true;
-    els.listView.hidden = false;
-    els.detailContent.innerHTML = "";
-    els.detailStatus.textContent = "";
-    if (!fromPopState) writeListStateToUrl(false);
-    renderResults();
-  }
-  function restoreScroll(value) {
-    const y = Number(value);
-    requestAnimationFrame(() =>
-      scrollTo({ top: Number.isFinite(y) ? y : 0, behavior: "auto" }),
-    );
+
+  function enhanceProductBackLink() {
+    if (!els.back) return;
+    const saved = getFinderReturn();
+    if (!saved) return;
+    els.back.href = saved.url;
+    els.back.textContent = "검색 결과로 돌아가기";
   }
 
   function renderDetail(feed) {
@@ -806,7 +764,7 @@
         </aside>`
       : "";
 
-    document.title = `${product.primary} | 프루브 사료 목록`;
+    document.title = `${product.primary} | 프루브`;
 
     els.detailContent.innerHTML = `
       <article class="food-detail-article">
@@ -937,23 +895,23 @@
 
   async function init() {
     cacheElements();
+    const detailRoute = readDetailRoute();
+    if (detailRoute) {
+      enhanceProductBackLink();
+      await loadDetail(detailRoute);
+      return;
+    }
     readStateFromUrl();
     syncControls();
     bindEvents();
-    const tagsPromise = loadConditionTags();
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    if (id) {
-      await tagsPromise;
-      await loadDetail(id, state.detailSpecies);
-      return;
-    }
-    await tagsPromise;
+    await loadConditionTags();
     await loadFeeds(true);
-    if (history.state?.foodLoaded)
-      state.loaded = Number(history.state.foodLoaded) || PAGE_SIZE;
-    renderResults();
-    restoreScroll(history.state?.foodScrollY);
+    const saved = history.state?.foodFinder;
+    if (saved?.url === `${location.pathname}${location.search}`) {
+      state.loaded = Number(saved.loaded) || PAGE_SIZE;
+      if (state.loaded > PAGE_SIZE) await loadFeeds(false);
+      restoreScroll(saved.scrollY);
+    }
   }
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", init, { once: true });

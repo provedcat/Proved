@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260903-meal-free-v1';
+const CACHE_NAME = 'proved-pwa-20260910-food-seo-finder-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -20,6 +20,7 @@ const CORE_ASSETS = [
   './js/calculator.js',
   './js/feed-search.js',
   './js/food-list.js',
+  './js/food-route.js',
   './js/food-condition-page.js',
   './js/food-compare.js',
   './js/food-detail-refinements.js',

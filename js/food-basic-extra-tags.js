@@ -27,11 +27,8 @@
   }
 
   function getContext() {
-    const params = new URLSearchParams(window.location.search);
-    const feedId = params.get('id');
-    const speciesParam = params.get('feed_species') || params.get('species');
-    const species = speciesParam === 'dog' ? 'dog' : 'cat';
-    return { feedId, species };
+    const route = window.ProvedFoodRoutes?.readDetailRoute();
+    return { feedId: route?.id || '', species: route?.species || 'cat' };
   }
 
   function ensureSixthCell() {

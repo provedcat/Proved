@@ -610,10 +610,9 @@
     const article = content?.querySelector('.food-detail-article');
     if (!content || !toolbar || !article || article.dataset.tagBlobEnhanced === 'true') return;
 
-    const params = new URLSearchParams(window.location.search);
-    const feedId = params.get('id');
-    const speciesParam = params.get('feed_species') || params.get('species');
-    const species = speciesParam === 'dog' ? 'dog' : 'cat';
+    const route = window.ProvedFoodRoutes?.readDetailRoute();
+    const feedId = route?.id;
+    const species = route?.species;
     if (!feedId) return;
 
     const hero = article.querySelector('.food-detail-hero');
