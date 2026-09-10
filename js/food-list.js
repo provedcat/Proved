@@ -1,618 +1,765 @@
 (function () {
-  'use strict';
+  "use strict";
 
-  const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
+  const SUPABASE_URL = "https://qpklvtgnhrdmzxzlstpp.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM";
   const PAGE_SIZE = 24;
+  const FETCH_PAGE_SIZE = 1000;
   const TAG_CATEGORY_ORDER = [
-    'protein_source', 'life_stage', 'management_purpose', 'processing_method',
-    'ingredient_condition', 'preparation_type'
+    "protein_source",
+    "life_stage",
+    "management_purpose",
+    "processing_method",
+    "ingredient_condition",
+    "preparation_type",
   ];
   const TAG_CATEGORY_LABELS = {
-    protein_source: '주 단백질원',
-    life_stage: '생애주기',
-    management_purpose: '영양 관리',
-    processing_method: '제조 방식',
-    ingredient_condition: '원재료 조건',
-    preparation_type: '급여 형태'
+    protein_source: "주 단백질원",
+    life_stage: "생애주기",
+    management_purpose: "수의사의 진단을 바탕으로 처방되는 기능성 사료",
+    processing_method: "제조 방식",
+    ingredient_condition: "원재료 조건",
+    preparation_type: "급여 형태",
   };
-
+  const TAG_TAB_LABELS = {
+    protein_source: "단백질",
+    life_stage: "생애",
+    management_purpose: "기능",
+    processing_method: "제조",
+    ingredient_condition: "원재료",
+    preparation_type: "급여",
+  };
   const foodSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const state = {
-    species: 'cat',
-    type: 'all',
-    role: 'all',
-    sort: 'brand',
-    query: '',
+    species: "all",
+    type: "all",
+    role: "all",
+    sort: "brand",
+    query: "",
+    selectedTagIds: [],
+    activeTagCategory: "",
+    tagSearchQueries: {},
     total: 0,
     rows: [],
+    allRows: [],
+    loaded: PAGE_SIZE,
     loading: false,
     requestSerial: 0,
     tags: [],
-    selectedTagIds: [],
-    activeTagCategory: '',
-    matchingFeedIds: null,
-    tagsLoading: false
+    tagsLoading: false,
+    restoreScrollY: 0,
+    detailSpecies: "",
   };
-
   const listColumns = [
-    'id', 'type', '제조사', '제품명', '완전식여부', '메인단백질',
-    'final_me', 'ca_p_ratio', 'verified', 'verification_status',
-    'searchable_before_review', 'brand_id', 'brands(name,official_url)'
-  ].join(',');
-
+    "id",
+    "type",
+    "제조사",
+    "제품명",
+    "완전식여부",
+    "메인단백질",
+    "final_me",
+    "ca_p_ratio",
+    "verified",
+    "verification_status",
+    "searchable_before_review",
+    "brand_id",
+    "brands(name,official_url)",
+  ].join(",");
+  // Compatibility contract: 'needs_calorie_review', '쿠팡_링크', 'brand_id'
   const detailColumns = [
-    'id', 'type', '제조사', '원산지', '제품명', '완전식여부', '메인단백질', '전성분',
-    '조단백', '조지방', '조회분', '조섬유', '수분', '칼슘', '인', 'ca_p_ratio',
-    'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
-    'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
-    'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
-    'calorie_confidence', 'calorie_note', 'needs_calorie_review', '쿠팡_링크', 'brand_id',
-    'brands(name,official_url)'
-  ].join(',');
+    "id",
+    "type",
+    "제조사",
+    "원산지",
+    "제품명",
+    "완전식여부",
+    "메인단백질",
+    "전성분",
+    "조단백",
+    "조지방",
+    "조회분",
+    "조섬유",
+    "수분",
+    "칼슘",
+    "인",
+    "ca_p_ratio",
+    "dm_단백",
+    "dm_지방",
+    "dm_회분",
+    "dm_섬유",
+    "dm_칼슘",
+    "dm_인",
+    "겔화제",
+    "final_me",
+    "cal_unit",
+    "cal_source",
+    "eb_단백",
+    "eb_지방",
+    "eb_탄수화물",
+    "eb_칼슘",
+    "eb_인",
+    "verified",
+    "verification_status",
+    "searchable_before_review",
+    "calorie_confidence",
+    "calorie_note",
+    "needs_calorie_review",
+    "쿠팡_링크",
+    "brand_id",
+    "brands(name,official_url)",
+  ].join(",");
   const detailColumnsWithoutCoupang = detailColumns
-    .split(',')
-    .filter(column => column !== '쿠팡_링크')
-    .join(',');
-
+    .split(",")
+    .filter((column) => column !== "쿠팡_링크")
+    .join(",");
   const els = {};
-  let searchTimer = null;
+  let searchTimer;
 
-  function $(id) { return document.getElementById(id); }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+  function $(id) {
+    return document.getElementById(id);
   }
-
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
   function normalizeEnum(value, allowed, fallback) {
     return allowed.includes(value) ? value : fallback;
   }
-
-  function quotePostgrestFilterValue(value) {
-    return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  function uniqueIds(value) {
+    return [
+      ...new Set(
+        String(value || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    ].slice(0, 20);
   }
-
-  function buildSearchPattern(query) {
-    return quotePostgrestFilterValue(`*${query}*`);
-  }
-
-  function getTable() {
-    return state.species === 'dog' ? 'dog_feeds' : 'feeds';
-  }
-
-  function getSpeciesLabel(species = state.species) {
-    return species === 'dog' ? '강아지' : '고양이';
-  }
-
-  function getTypeLabel(type) {
-    return type === 'wet' ? '습식사료' : type === 'dry' ? '건사료' : '형태 확인중';
-  }
-
-  function getFeedSemanticClass(feed) {
-    const type = feed?.type === 'wet' ? 'wet' : feed?.type === 'dry' ? 'dry' : '';
-    return type ? `is-${state.species}-${type}` : '';
-  }
-
-  function getRoleLabel(role) {
-    return role || '분류 확인중';
-  }
-
   function isPresent(value) {
-    return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+    return (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      Number.isFinite(Number(value))
+    );
   }
-
   function formatNumber(value, maxFraction = 2) {
-    if (!isPresent(value)) return '—';
-    return new Intl.NumberFormat('ko-KR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: maxFraction
-    }).format(Number(value));
+    return isPresent(value)
+      ? new Intl.NumberFormat("ko-KR", {
+          maximumFractionDigits: maxFraction,
+        }).format(Number(value))
+      : "—";
   }
-
   function formatKcal(value) {
-    if (!isPresent(value)) return '—';
-    return `${formatNumber(value, 1)} kcal/kg`;
+    return isPresent(value) ? `${formatNumber(value, 1)} kcal/kg` : "—";
   }
-
   function formatPercent(value, maxFraction = 2) {
-    if (!isPresent(value)) return '—';
-    return `${formatNumber(value, maxFraction)}%`;
+    return isPresent(value) ? `${formatNumber(value, maxFraction)}%` : "—";
   }
-
   function formatRatio(value) {
-    if (!isPresent(value) || Number(value) <= 0) return '—';
-    return `${formatNumber(value, 2)} : 1`;
+    return isPresent(value) && Number(value) > 0
+      ? `${formatNumber(value, 2)} : 1`
+      : "—";
   }
-
   function safeHttpUrl(value) {
-    const text = String(value || '').trim();
+    const text = String(value || "").trim();
     return /^https?:\/\//i.test(text) ? text : null;
   }
-
   function getBrand(feed) {
-    const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
+    const relation = Array.isArray(feed?.brands)
+      ? feed.brands[0]
+      : feed?.brands;
     return {
-      name: relation?.name || feed?.제조사 || '브랜드 정보 없음',
-      officialUrl: safeHttpUrl(relation?.official_url)
+      name: relation?.name || feed?.제조사 || "브랜드 정보 없음",
+      officialUrl: safeHttpUrl(relation?.official_url),
     };
   }
-
   function splitProductName(name) {
-    const text = String(name || '').trim();
+    const text = String(name || "").trim();
     const match = text.match(/^(.+?)\s*\(([^()]*)\)\s*$/);
-    if (!match) return { primary: text || '제품명 정보 없음', secondary: '' };
-    return { primary: match[1].trim(), secondary: match[2].trim() };
+    return match
+      ? { primary: match[1].trim(), secondary: match[2].trim() }
+      : { primary: text || "제품명 정보 없음", secondary: "" };
   }
-
+  function getSpeciesLabel(species = state.species) {
+    return species === "cat" ? "고양이" : species === "dog" ? "강아지" : "전체";
+  }
+  function getTypeLabel(type) {
+    return type === "wet"
+      ? "습식사료"
+      : type === "dry"
+        ? "건사료"
+        : "형태 확인중";
+  }
+  function getRoleLabel(role) {
+    return role || "분류 확인중";
+  }
   function isProvisional(feed) {
     return feed?.verified !== true;
   }
+  function getFeedSemanticClass(feed) {
+    const type = ["dry", "wet"].includes(feed?.type) ? feed.type : "";
+    return type && feed.species ? `is-${feed.species}-${type}` : "";
+  }
+  function normalizeSearch(value) {
+    return String(value || "")
+      .trim()
+      .toLocaleLowerCase("ko-KR");
+  }
 
   function readStateFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    state.species = normalizeEnum(params.get('species'), ['cat', 'dog'], 'cat');
-    state.type = normalizeEnum(params.get('type'), ['all', 'dry', 'wet'], 'all');
-    state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
-    state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
-    state.query = String(params.get('q') || '').trim().slice(0, 120);
-    state.selectedTagIds = [];
+    const params = new URLSearchParams(location.search);
+    state.species = normalizeEnum(params.get("species"), ["cat", "dog"], "all");
+    state.type = normalizeEnum(params.get("type"), ["dry", "wet"], "all");
+    state.role = normalizeEnum(params.get("role"), ["주식", "보조식"], "all");
+    state.sort = normalizeEnum(params.get("sort"), ["product"], "brand");
+    state.query = String(params.get("q") || "")
+      .trim()
+      .slice(0, 120);
+    state.selectedTagIds = uniqueIds(params.get("tags"));
+    state.detailSpecies = normalizeEnum(
+      params.get("feed_species"),
+      ["cat", "dog"],
+      "",
+    );
   }
-
-  function writeListStateToUrl(replace = true) {
+  function stateParams(includeDetail = false, id = "", detailSpecies = "") {
     const params = new URLSearchParams();
-    if (state.species !== 'cat') params.set('species', state.species);
-    if (state.type !== 'all') params.set('type', state.type);
-    if (state.role !== 'all') params.set('role', state.role);
-    if (state.sort !== 'brand') params.set('sort', state.sort);
-    if (state.query) params.set('q', state.query);
-    if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
-    const queryString = params.toString();
-    const url = `${window.location.pathname}${queryString ? `?${queryString}` : ''}`;
-    history[replace ? 'replaceState' : 'pushState']({}, '', url);
+    if (state.species !== "all") params.set("species", state.species);
+    if (state.type !== "all") params.set("type", state.type);
+    if (state.role !== "all") params.set("role", state.role);
+    if (state.sort !== "brand") params.set("sort", state.sort);
+    if (state.query) params.set("q", state.query);
+    if (state.selectedTagIds.length)
+      params.set("tags", state.selectedTagIds.join(","));
+    if (includeDetail) {
+      params.set("id", id);
+      params.set("feed_species", detailSpecies);
+    }
+    return params;
   }
-
-  function writeDetailUrl(id) {
-    const params = new URLSearchParams();
-    params.set('species', state.species);
-    params.set('id', id);
-    if (state.type !== 'all') params.set('type', state.type);
-    if (state.role !== 'all') params.set('role', state.role);
-    if (state.sort !== 'brand') params.set('sort', state.sort);
-    if (state.query) params.set('q', state.query);
-    if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
-    history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+  function writeListStateToUrl(replace = true, extraState = {}) {
+    const query = stateParams().toString();
+    history[replace ? "replaceState" : "pushState"](
+      { ...history.state, ...extraState },
+      "",
+      `${location.pathname}${query ? `?${query}` : ""}`,
+    );
   }
-
   function cacheElements() {
-    els.listView = $('foodListView');
-    els.detailView = $('foodDetailView');
-    els.searchInput = $('foodSearchInput');
-    els.searchClear = $('foodSearchClear');
-    els.speciesFilters = $('foodSpeciesFilters');
-    els.typeFilters = $('foodTypeFilters');
-    els.roleFilters = $('foodRoleFilters');
-    els.sortSelect = $('foodSortSelect');
-    els.results = $('foodResults');
-    els.resultsCount = $('foodResultsHeading');
-    els.listStatus = $('foodListStatus');
-    els.loadMore = $('foodLoadMore');
-    els.back = $('foodBackToList');
-    els.detailContent = $('foodDetailContent');
-    els.detailStatus = $('foodDetailStatus');
-    els.conditionFolders = $('foodConditionFolders');
-    els.conditionPanel = $('foodConditionPanel');
-    els.selectedConditions = $('foodSelectedConditions');
-    els.conditionStatus = $('foodConditionStatus');
-    els.conditionReset = $('foodConditionReset');
+    Object.assign(els, {
+      listView: $("foodListView"),
+      detailView: $("foodDetailView"),
+      searchInput: $("foodSearchInput"),
+      searchClear: $("foodSearchClear"),
+      speciesFilters: $("foodSpeciesFilters"),
+      typeFilters: $("foodTypeFilters"),
+      roleFilters: $("foodRoleFilters"),
+      sortSelect: $("foodSortSelect"),
+      results: $("foodResults"),
+      resultsCount: $("foodResultsHeading"),
+      listStatus: $("foodListStatus"),
+      loadMore: $("foodLoadMore"),
+      back: $("foodBackToList"),
+      detailContent: $("foodDetailContent"),
+      detailStatus: $("foodDetailStatus"),
+      conditionFolders: $("foodConditionFolders"),
+      selectedConditions: $("foodSelectedConditions"),
+      conditionStatus: $("foodConditionStatus"),
+      conditionReset: $("foodConditionReset"),
+    });
   }
-
   function syncControls() {
     els.searchInput.value = state.query;
     els.searchClear.hidden = !state.query;
     els.sortSelect.value = state.sort;
-    renderConditionFinder();
-    document.querySelectorAll('[data-species]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.species === state.species));
-    });
-    document.querySelectorAll('[data-type]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.type === state.type));
-    });
-    document.querySelectorAll('[data-role]').forEach(button => {
-      button.setAttribute('aria-pressed', String(button.dataset.role === state.role));
-    });
-  }
-
-  function bindEvents() {
-    els.searchInput.addEventListener('input', () => {
-      state.query = els.searchInput.value.trim().slice(0, 120);
-      els.searchClear.hidden = !state.query;
-      clearTimeout(searchTimer);
-      searchTimer = window.setTimeout(() => {
-        writeListStateToUrl(true);
-        loadFeeds(true);
-      }, 280);
-    });
-
-    els.searchClear.addEventListener('click', () => {
-      clearTimeout(searchTimer);
-      state.query = '';
-      els.searchInput.value = '';
-      els.searchClear.hidden = true;
-      writeListStateToUrl(true);
-      loadFeeds(true);
-      els.searchInput.focus();
-    });
-
-    els.speciesFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-species]');
-      if (!button || button.dataset.species === state.species) return;
-      state.species = button.dataset.species;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.typeFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-type]');
-      if (!button || button.dataset.type === state.type) return;
-      state.type = button.dataset.type;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.roleFilters.addEventListener('click', event => {
-      const button = event.target.closest('[data-role]');
-      if (!button || button.dataset.role === state.role) return;
-      state.role = button.dataset.role;
-      syncControls();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.sortSelect.addEventListener('change', () => {
-      state.sort = normalizeEnum(els.sortSelect.value, ['brand', 'product'], 'brand');
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.conditionFolders?.addEventListener('click', event => {
-      const button = event.target.closest('[data-tag-category]');
-      if (!button) return;
-      state.activeTagCategory = state.activeTagCategory === button.dataset.tagCategory ? '' : button.dataset.tagCategory;
-      renderConditionFinder();
-    });
-
-    els.conditionPanel?.addEventListener('click', event => {
-      const button = event.target.closest('[data-tag-id]');
-      if (!button) return;
-      toggleTag(button.dataset.tagId);
-    });
-
-    els.selectedConditions?.addEventListener('click', event => {
-      const button = event.target.closest('[data-remove-tag-id]');
-      if (button) toggleTag(button.dataset.removeTagId);
-    });
-
-    els.conditionReset?.addEventListener('click', () => {
-      state.selectedTagIds = [];
-      state.matchingFeedIds = null;
-      renderConditionFinder();
-      writeListStateToUrl(true);
-      loadFeeds(true);
-    });
-
-    els.results.addEventListener('click', event => {
-      const button = event.target.closest('[data-feed-id]');
-      if (!button) return;
-      openDetail(button.dataset.feedId);
-    });
-
-    els.loadMore.addEventListener('click', () => loadFeeds(false));
-    els.back.addEventListener('click', () => showList(false));
-
-    window.addEventListener('popstate', () => {
-      readStateFromUrl();
-      syncControls();
-      const id = new URLSearchParams(window.location.search).get('id');
-      if (id) loadDetail(id);
-      else showList(true);
-    });
-  }
-
-  function renderSkeletons() {
-    els.results.innerHTML = Array.from({ length: 5 }, () => '<div class="food-skeleton" aria-hidden="true"></div>').join('');
-  }
-
-  function compareTags(a, b) {
-    const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 9999;
-    const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 9999;
-    return orderA - orderB || String(a.label_ko).localeCompare(String(b.label_ko), 'ko');
-  }
-
-  async function loadConditionTags() {
-    state.tagsLoading = true;
-    els.conditionStatus.textContent = '조건을 불러오는 중입니다.';
-    const { data, error } = await foodSb
-      .from('food_tags')
-      .select('id,label_ko,category,sort_order,is_active')
-      .eq('is_active', true)
-      .in('category', TAG_CATEGORY_ORDER)
-      .order('sort_order', { ascending: true });
-
-    state.tagsLoading = false;
-    if (error) {
-      if (state.selectedTagIds.length) {
-        state.selectedTagIds = [];
-        state.matchingFeedIds = null;
-        writeListStateToUrl(true);
-      }
-      els.conditionStatus.textContent = '조건을 불러오지 못했습니다.';
-      renderConditionFinder();
-      return;
-    }
-
-    state.tags = (data || []).filter(tag => tag.id && tag.label_ko && TAG_CATEGORY_LABELS[tag.category]);
-    const availableIds = new Set(state.tags.map(tag => String(tag.id)));
-    state.selectedTagIds = state.selectedTagIds.filter(id => availableIds.has(String(id)));
-    els.conditionStatus.textContent = '';
+    document
+      .querySelectorAll("[data-species]")
+      .forEach((b) =>
+        b.setAttribute(
+          "aria-pressed",
+          String(b.dataset.species === state.species),
+        ),
+      );
+    document
+      .querySelectorAll("[data-type]")
+      .forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.type === state.type)),
+      );
+    document
+      .querySelectorAll("[data-role]")
+      .forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.role === state.role)),
+      );
     renderConditionFinder();
   }
-
-  function renderConditionFinder() {
-    if (!els.conditionFolders) return;
-    const categories = TAG_CATEGORY_ORDER.filter(category => state.tags.some(tag => tag.category === category));
-    if (!categories.length) {
-      els.conditionFolders.innerHTML = state.tagsLoading ? '' : '<p class="food-condition-empty">사용 가능한 조건이 아직 없습니다.</p>';
-      els.conditionPanel.hidden = true;
-      els.selectedConditions.hidden = true;
-      els.conditionReset.hidden = true;
-      return;
-    }
-
-    const orderedCategories = state.activeTagCategory
-      ? [state.activeTagCategory, ...categories.filter(category => category !== state.activeTagCategory)]
-      : categories;
-    els.conditionFolders.innerHTML = orderedCategories.map((category, index) => {
-      const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
-      const active = category === state.activeTagCategory;
-      return `<button class="food-condition-folder${active ? ' is-open' : ''}" type="button" data-tag-category="${escapeHtml(category)}" aria-expanded="${active}" style="--folder-index:${index}">
-        <span>${escapeHtml(TAG_CATEGORY_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}
-      </button>`;
-    }).join('');
-
-    const activeTags = state.tags.filter(tag => tag.category === state.activeTagCategory).sort(compareTags);
-    els.conditionPanel.hidden = !activeTags.length;
-    els.conditionPanel.innerHTML = activeTags.length ? `
-      <div class="food-condition-panel__heading"><strong>${escapeHtml(TAG_CATEGORY_LABELS[state.activeTagCategory])}</strong><span>여러 조건을 함께 선택할 수 있어요.</span></div>
-      <div class="food-condition-tags">${activeTags.map(tag => {
-        const selected = state.selectedTagIds.includes(String(tag.id));
-        return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" aria-pressed="${selected}">${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
-      }).join('')}</div>` : '';
-
-    const selectedTags = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
-    els.selectedConditions.hidden = !selectedTags.length;
-    els.conditionReset.hidden = !selectedTags.length;
-    els.selectedConditions.innerHTML = selectedTags.length ? `
-      <p><strong>선택한 조건</strong><span>${selectedTags.length}개 조건의 교집합</span></p>
-      <div>${selectedTags.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
-  }
-
-  function toggleTag(tagId) {
-    const id = String(tagId || '');
-    if (!state.tags.some(tag => String(tag.id) === id)) return;
-    state.selectedTagIds = state.selectedTagIds.includes(id)
-      ? state.selectedTagIds.filter(value => value !== id)
-      : [...state.selectedTagIds, id];
-    state.matchingFeedIds = null;
-    renderConditionFinder();
+  function resetAndLoad() {
+    state.loaded = PAGE_SIZE;
     writeListStateToUrl(true);
     loadFeeds(true);
   }
-
-  async function resolveMatchingFeedIds() {
-    if (!state.selectedTagIds.length) return null;
-    const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
-    const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
-    const { data, error } = await foodSb
-      .from(mappingTable)
-      .select(`${feedIdColumn},tag_id`)
-      .in('tag_id', state.selectedTagIds);
-    if (error) throw error;
-
-    const required = new Set(state.selectedTagIds);
-    const matchesByFeed = new Map();
-    (data || []).forEach(row => {
-      const feedId = String(row[feedIdColumn] || '');
-      const tagId = String(row.tag_id || '');
-      if (!feedId || !required.has(tagId)) return;
-      if (!matchesByFeed.has(feedId)) matchesByFeed.set(feedId, new Set());
-      matchesByFeed.get(feedId).add(tagId);
+  function bindEvents() {
+    els.searchInput.addEventListener("input", () => {
+      state.query = els.searchInput.value.trim().slice(0, 120);
+      els.searchClear.hidden = !state.query;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(resetAndLoad, 280);
     });
-    return [...matchesByFeed.entries()]
-      .filter(([, ids]) => ids.size === required.size)
-      .map(([feedId]) => feedId);
-  }
-
-  function buildListQuery(from, to) {
-    let query = foodSb
-      .from(getTable())
-      .select(listColumns, { count: 'exact' })
-      .or('verified.eq.true,searchable_before_review.eq.true');
-
-    if (state.type !== 'all') query = query.eq('type', state.type);
-    if (state.role !== 'all') query = query.eq('완전식여부', state.role);
-    if (state.query) {
-      const pattern = buildSearchPattern(state.query);
-      query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`);
-    }
-    if (Array.isArray(state.matchingFeedIds)) {
-      query = state.matchingFeedIds.length ? query.in('id', state.matchingFeedIds) : query.eq('id', '00000000-0000-0000-0000-000000000000');
-    }
-
-    if (state.sort === 'product') {
-      query = query.order('제품명', { ascending: true }).order('제조사', { ascending: true });
-    } else {
-      query = query.order('제조사', { ascending: true }).order('제품명', { ascending: true });
-    }
-
-    return query.range(from, to);
-  }
-
-  async function loadFeeds(reset) {
-    if (state.loading && !reset) return;
-    const serial = ++state.requestSerial;
-    state.loading = true;
-    els.listStatus.textContent = '';
-    els.loadMore.hidden = true;
-
-    if (reset) {
-      state.rows = [];
-      state.total = 0;
-      renderSkeletons();
-      els.resultsCount.textContent = `${getSpeciesLabel()} 사료를 불러오는 중입니다.`;
-    } else {
-      els.loadMore.textContent = '불러오는 중…';
-      els.loadMore.hidden = false;
-      els.loadMore.disabled = true;
-    }
-
-    if (reset) {
-      try {
-        const matchingFeedIds = await resolveMatchingFeedIds();
-        if (serial !== state.requestSerial) return;
-        state.matchingFeedIds = matchingFeedIds;
-      } catch (error) {
-        if (serial !== state.requestSerial) return;
-        state.loading = false;
-        els.results.innerHTML = '';
-        els.resultsCount.textContent = '사료 목록';
-        els.listStatus.textContent = `조건 검색을 완료하지 못했습니다. ${error.message || ''}`.trim();
+    els.searchClear.addEventListener("click", () => {
+      clearTimeout(searchTimer);
+      state.query = "";
+      els.searchInput.value = "";
+      els.searchClear.hidden = true;
+      resetAndLoad();
+      els.searchInput.focus();
+    });
+    [
+      [els.speciesFilters, "species"],
+      [els.typeFilters, "type"],
+      [els.roleFilters, "role"],
+    ].forEach(([root, key]) =>
+      root.addEventListener("click", (event) => {
+        const b = event.target.closest(`[data-${key}]`);
+        if (!b || b.dataset[key] === state[key]) return;
+        state[key] = b.dataset[key];
+        syncControls();
+        resetAndLoad();
+      }),
+    );
+    els.sortSelect.addEventListener("change", () => {
+      state.sort = normalizeEnum(els.sortSelect.value, ["product"], "brand");
+      resetAndLoad();
+    });
+    els.conditionFolders.addEventListener("click", (event) => {
+      const tab = event.target.closest(".condition-folder__tab[data-category]");
+      if (tab) {
+        state.activeTagCategory = tab.dataset.category;
+        renderConditionFinder();
         return;
       }
-    }
-
-    const from = reset ? 0 : state.rows.length;
-    const to = from + PAGE_SIZE - 1;
-    const { data, error, count } = await buildListQuery(from, to);
-
-    if (serial !== state.requestSerial) return;
-    state.loading = false;
-    els.loadMore.disabled = false;
-    els.loadMore.textContent = '더 보기';
-
+      const clear = event.target.closest("[data-condition-search-clear]");
+      if (clear) {
+        const input = clear
+          .closest(".condition-folder__body")
+          .querySelector("[data-condition-search]");
+        input.value = "";
+        state.tagSearchQueries[input.dataset.category] = "";
+        renderConditionFinder();
+        requestAnimationFrame(() =>
+          els.conditionFolders
+            .querySelector(
+              `[data-condition-search][data-category="${CSS.escape(input.dataset.category)}"]`,
+            )
+            ?.focus(),
+        );
+        return;
+      }
+      const tag = event.target.closest("[data-tag-id]");
+      if (tag) toggleTag(tag.dataset.tagId);
+    });
+    els.conditionFolders.addEventListener("input", (event) => {
+      const input = event.target.closest("[data-condition-search]");
+      if (!input) return;
+      state.tagSearchQueries[input.dataset.category] = input.value;
+      filterVisibleTags(input);
+    });
+    els.selectedConditions.addEventListener("click", (event) => {
+      const b = event.target.closest("[data-remove-tag-id]");
+      if (b) toggleTag(b.dataset.removeTagId);
+    });
+    els.conditionReset.addEventListener("click", () => {
+      state.selectedTagIds = [];
+      renderConditionFinder();
+      resetAndLoad();
+    });
+    els.results.addEventListener("click", (event) => {
+      const b = event.target.closest("[data-feed-id]");
+      if (b) openDetail(b.dataset.feedId, b.dataset.feedSpecies);
+    });
+    els.loadMore.addEventListener("click", () => {
+      state.loaded += PAGE_SIZE;
+      renderResults();
+    });
+    els.back.addEventListener("click", () => {
+      if (history.state?.foodDetail) {
+        history.back();
+        return;
+      }
+      writeListStateToUrl(true);
+      showList(true);
+      loadFeeds(true);
+    });
+    window.addEventListener("popstate", async (event) => {
+      readStateFromUrl();
+      syncControls();
+      const id = new URLSearchParams(location.search).get("id");
+      if (id) await loadDetail(id, state.detailSpecies);
+      else {
+        showList(true);
+        state.loaded = Number(event.state?.foodLoaded) || PAGE_SIZE;
+        await loadFeeds(true);
+        restoreScroll(event.state?.foodScrollY);
+      }
+    });
+  }
+  function compareTags(a, b) {
+    return (
+      (Number(a.sort_order) || 9999) - (Number(b.sort_order) || 9999) ||
+      String(a.label_ko).localeCompare(String(b.label_ko), "ko")
+    );
+  }
+  async function loadConditionTags() {
+    state.tagsLoading = true;
+    const { data, error } = await foodSb
+      .from("food_tags")
+      .select("id,label_ko,category,sort_order,is_active")
+      .eq("is_active", true)
+      .in("category", TAG_CATEGORY_ORDER)
+      .order("sort_order", { ascending: true });
+    state.tagsLoading = false;
     if (error) {
-      if (reset) els.results.innerHTML = '';
-      els.listStatus.textContent = `사료 목록을 불러오지 못했습니다. ${error.message || ''}`.trim();
-      els.resultsCount.textContent = '사료 목록';
+      els.conditionStatus.textContent = "조건을 불러오지 못했습니다.";
       return;
     }
-
-    state.rows = reset ? (data || []) : state.rows.concat(data || []);
-    state.total = Number(count) || 0;
-    renderResults();
+    state.tags = (data || []).filter(
+      (t) => t.id && t.label_ko && TAG_CATEGORY_LABELS[t.category],
+    );
+    const available = new Set(state.tags.map((t) => String(t.id)));
+    state.selectedTagIds = state.selectedTagIds.filter((id) =>
+      available.has(id),
+    );
+    state.activeTagCategory =
+      TAG_CATEGORY_ORDER.find((c) =>
+        state.tags.some((t) => t.category === c),
+      ) || "";
+    els.conditionStatus.textContent = "";
+    renderConditionFinder();
+    writeListStateToUrl(true);
   }
-
+  function renderConditionFinder() {
+    if (!els.conditionFolders) return;
+    const categories = TAG_CATEGORY_ORDER.filter((c) =>
+      state.tags.some((t) => t.category === c),
+    );
+    if (!categories.length) {
+      els.conditionFolders.innerHTML = state.tagsLoading
+        ? ""
+        : '<p class="food-condition-empty">사용 가능한 조건이 아직 없습니다.</p>';
+      return;
+    }
+    if (!categories.includes(state.activeTagCategory))
+      state.activeTagCategory = categories[0];
+    els.conditionFolders.innerHTML = categories
+      .map((category, index) => {
+        const active = category === state.activeTagCategory;
+        const tags = state.tags
+          .filter((t) => t.category === category)
+          .sort(compareTags);
+        const q = String(state.tagSearchQueries[category] || "");
+        const nq = normalizeSearch(q);
+        const visible = tags.filter(
+          (t) => !nq || normalizeSearch(t.label_ko).includes(nq),
+        ).length;
+        const count = state.selectedTagIds.filter((id) =>
+          tags.some((t) => String(t.id) === id),
+        ).length;
+        return `<section class="condition-folder${active ? " is-open" : ""}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}"><button class="condition-folder__tab" type="button" data-category="${category}" aria-expanded="${active}"><span>${TAG_TAB_LABELS[category]}</span>${count ? `<b>${count}</b>` : ""}</button><div class="condition-folder__body" ${active ? "" : "hidden"}><h2>${escapeHtml(TAG_CATEGORY_LABELS[category])}</h2><div class="condition-tag-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input type="search" data-condition-search data-category="${category}" value="${escapeHtml(q)}" placeholder="조건 검색" aria-label="${escapeHtml(TAG_CATEGORY_LABELS[category])} 조건 검색" autocomplete="off"><button class="condition-tag-search__clear" type="button" data-condition-search-clear ${q ? "" : "hidden"}>지우기</button></div><div class="condition-tags">${tags
+          .map((tag) => {
+            const selected = state.selectedTagIds.includes(String(tag.id));
+            const hidden = nq && !normalizeSearch(tag.label_ko).includes(nq);
+            return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" data-tag-search-text="${escapeHtml(normalizeSearch(tag.label_ko))}" aria-pressed="${selected}" ${hidden ? "hidden" : ""}>${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ""}</button>`;
+          })
+          .join(
+            "",
+          )}<p class="condition-tags-empty" ${visible ? "hidden" : ""}>일치하는 조건이 없습니다.</p></div></div></section>`;
+      })
+      .join("");
+    const selected = state.selectedTagIds
+      .map((id) => state.tags.find((t) => String(t.id) === id))
+      .filter(Boolean);
+    els.conditionReset.hidden = !selected.length;
+    els.selectedConditions.hidden = !selected.length;
+    els.selectedConditions.innerHTML = selected.length
+      ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map((t) => `<button type="button" data-remove-tag-id="${escapeHtml(t.id)}">${escapeHtml(t.label_ko)}<span aria-hidden="true">×</span></button>`).join("")}</div>`
+      : "";
+  }
+  function filterVisibleTags(input) {
+    const body = input.closest(".condition-folder__body");
+    const q = normalizeSearch(input.value);
+    let visible = 0;
+    body.querySelectorAll("[data-tag-id]").forEach((b) => {
+      b.hidden = Boolean(q && !b.dataset.tagSearchText.includes(q));
+      if (!b.hidden) visible++;
+    });
+    body.querySelector(".condition-tags-empty").hidden = visible > 0;
+    body.querySelector("[data-condition-search-clear]").hidden = !input.value;
+  }
+  function toggleTag(id) {
+    id = String(id);
+    state.selectedTagIds = state.selectedTagIds.includes(id)
+      ? state.selectedTagIds.filter((v) => v !== id)
+      : [...state.selectedTagIds, id];
+    renderConditionFinder();
+    resetAndLoad();
+  }
+  async function resolveFeedIds(species) {
+    if (!state.selectedTagIds.length) return null;
+    const table = species === "dog" ? "dog_feed_food_tags" : "feed_food_tags";
+    const col = species === "dog" ? "dog_feed_id" : "feed_id";
+    const rows = [];
+    for (let from = 0; ; from += FETCH_PAGE_SIZE) {
+      const { data, error } = await foodSb
+        .from(table)
+        .select(`${col},tag_id`)
+        .in("tag_id", state.selectedTagIds)
+        .range(from, from + FETCH_PAGE_SIZE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < FETCH_PAGE_SIZE) break;
+    }
+    const required = new Set(state.selectedTagIds),
+      byFeed = new Map();
+    rows.forEach((row) => {
+      const fid = String(row[col] || ""),
+        tid = String(row.tag_id || "");
+      if (!fid || !required.has(tid)) return;
+      if (!byFeed.has(fid)) byFeed.set(fid, new Set());
+      byFeed.get(fid).add(tid);
+    });
+    return [...byFeed]
+      .filter(([, ids]) => ids.size === required.size)
+      .map(([id]) => id);
+  }
+  async function fetchSpeciesRows(species) {
+    const ids = await resolveFeedIds(species);
+    if (Array.isArray(ids) && !ids.length) return [];
+    const rows = [];
+    const idChunks = Array.isArray(ids)
+      ? Array.from({ length: Math.ceil(ids.length / 100) }, (_, i) =>
+          ids.slice(i * 100, i * 100 + 100),
+        )
+      : [null];
+    for (const chunk of idChunks) {
+      for (let from = 0; ; from += FETCH_PAGE_SIZE) {
+        let query = foodSb
+          .from(species === "dog" ? "dog_feeds" : "feeds")
+          .select(listColumns)
+          .or("verified.eq.true,searchable_before_review.eq.true");
+        if (state.type !== "all") query = query.eq("type", state.type);
+        if (state.role !== "all") query = query.eq("완전식여부", state.role);
+        if (chunk) query = query.in("id", chunk);
+        const { data, error } = await query.range(
+          from,
+          from + FETCH_PAGE_SIZE - 1,
+        );
+        if (error) throw error;
+        rows.push(...(data || []).map((row) => ({ ...row, species })));
+        if (!data || data.length < FETCH_PAGE_SIZE) break;
+      }
+    }
+    return rows;
+  }
+  function sortRows(rows) {
+    const key =
+      state.sort === "product"
+        ? (f) => String(f.제품명 || "")
+        : (f) => getBrand(f).name;
+    const secondary =
+      state.sort === "product"
+        ? (f) => getBrand(f).name
+        : (f) => String(f.제품명 || "");
+    return rows.sort(
+      (a, b) =>
+        key(a).localeCompare(key(b), "ko") ||
+        secondary(a).localeCompare(secondary(b), "ko") ||
+        a.species.localeCompare(b.species) ||
+        String(a.id).localeCompare(String(b.id)),
+    );
+  }
+  async function loadFeeds(reset) {
+    const serial = ++state.requestSerial;
+    state.loading = true;
+    els.loadMore.hidden = true;
+    if (reset) {
+      state.rows = [];
+      state.allRows = [];
+      els.results.innerHTML = Array.from(
+        { length: 5 },
+        () => '<div class="food-skeleton" aria-hidden="true"></div>',
+      ).join("");
+      els.resultsCount.textContent = "사료를 불러오는 중입니다.";
+    }
+    try {
+      const species =
+        state.species === "all" ? ["cat", "dog"] : [state.species];
+      let rows = (await Promise.all(species.map(fetchSpeciesRows))).flat();
+      if (serial !== state.requestSerial) return;
+      const q = normalizeSearch(state.query);
+      if (q)
+        rows = rows.filter((feed) =>
+          normalizeSearch(
+            `${getBrand(feed).name} ${feed.제조사 || ""} ${feed.제품명 || ""}`,
+          ).includes(q),
+        );
+      state.allRows = sortRows(rows);
+      state.total = state.allRows.length;
+      state.loading = false;
+      renderResults();
+    } catch (error) {
+      if (serial !== state.requestSerial) return;
+      state.loading = false;
+      els.results.innerHTML = "";
+      els.resultsCount.textContent = "사료 찾기";
+      els.listStatus.textContent =
+        `사료 목록을 불러오지 못했습니다. ${error.message || ""}`.trim();
+    }
+  }
   function renderResults() {
-    const species = getSpeciesLabel();
-    const searchSuffix = state.query ? ` · “${state.query}” 검색` : '';
-    const conditionSuffix = state.selectedTagIds.length ? ` · 조건 ${state.selectedTagIds.length}개` : '';
-    els.resultsCount.textContent = `${formatNumber(state.total, 0)}개의 ${species} 사료${searchSuffix}${conditionSuffix}`;
-
+    state.rows = state.allRows.slice(0, state.loaded);
+    const suffix = [
+      state.query && `“${state.query}” 검색`,
+      state.selectedTagIds.length && `조건 ${state.selectedTagIds.length}개`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    els.resultsCount.textContent = `${formatNumber(state.total, 0)}개의 ${getSpeciesLabel()} 사료${suffix ? ` · ${suffix}` : ""}`;
+    els.listStatus.textContent = "";
     if (!state.rows.length) {
-      els.results.innerHTML = `
-        <div class="food-empty">
-          <strong>검색 결과가 없습니다.</strong>
-          <span>${state.selectedTagIds.length ? '선택한 조건을 하나씩 줄여보세요.' : '브랜드 또는 제품명을 바꿔 검색해 보세요.'}</span>
-        </div>`;
+      const actions = [];
+      if (state.query)
+        actions.push(
+          '<button type="button" data-empty-action="query">검색어 지우기</button>',
+        );
+      if (state.selectedTagIds.length)
+        actions.push(
+          '<button type="button" data-empty-action="tags">조건 전체 해제</button>',
+        );
+      if (state.species !== "all")
+        actions.push(
+          '<button type="button" data-empty-action="species">전체 사료에서도 찾아보기</button>',
+        );
+      if (state.type !== "all")
+        actions.push(
+          '<button type="button" data-empty-action="type">전체 형태로 보기</button>',
+        );
+      els.results.innerHTML = `<div class="food-empty"><strong>조건을 만족하는 사료가 없습니다.</strong><span>${state.selectedTagIds.length ? "선택한 조건을 하나씩 줄여보세요." : "적용한 검색과 필터를 조정해 보세요."}</span><div class="food-empty__actions">${actions.join("")}</div></div>`;
+      bindEmptyActions();
       els.loadMore.hidden = true;
       return;
     }
-
-    els.results.innerHTML = state.rows.map(renderResultRow).join('');
+    els.results.innerHTML = state.rows.map(renderResultRow).join("");
     els.loadMore.hidden = state.rows.length >= state.total;
   }
-
+  function bindEmptyActions() {
+    els.results.querySelectorAll("[data-empty-action]").forEach((b) =>
+      b.addEventListener("click", () => {
+        if (b.dataset.emptyAction === "query") state.query = "";
+        if (b.dataset.emptyAction === "tags") state.selectedTagIds = [];
+        if (b.dataset.emptyAction === "species") state.species = "all";
+        if (b.dataset.emptyAction === "type") state.type = "all";
+        syncControls();
+        resetAndLoad();
+      }),
+    );
+  }
   function renderResultRow(feed) {
-    const brand = getBrand(feed);
-    const product = splitProductName(feed.제품명);
-    const meta = [getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
-    const semanticClass = getFeedSemanticClass(feed);
-    return `
-      <button class="food-result" type="button" data-feed-id="${escapeHtml(feed.id)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
-        <span class="food-result__brand">${escapeHtml(brand.name)}</span>
-        <span class="food-result__title-wrap">
-          <span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</span>
-          ${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ''}
-          <span class="food-result__meta">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span>
-        </span>
-        <span class="food-result__stats">
-          <span class="food-result-stat food-result-stat--energy ${semanticClass}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span>
-          <span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span>
-          <svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
-        </span>
-      </button>`;
+    const brand = getBrand(feed),
+      product = splitProductName(feed.제품명),
+      semantic = getFeedSemanticClass(feed);
+    const meta = [
+      getSpeciesLabel(feed.species),
+      getTypeLabel(feed.type),
+      getRoleLabel(feed.완전식여부),
+      feed.메인단백질 || "주 단백질 확인중",
+    ];
+    return `<button class="food-result ${semantic}" type="button" data-feed-id="${escapeHtml(feed.id)}" data-feed-species="${feed.species}" aria-label="${escapeHtml(getSpeciesLabel(feed.species))} ${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기"><span class="food-result__brand"><span class="food-result__species">${getSpeciesLabel(feed.species)}</span>${escapeHtml(brand.name)}</span><span class="food-result__title-wrap"><span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ""}</span>${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ""}<span class="food-result__meta">${meta
+      .slice(1)
+      .map((x) => `<span>${escapeHtml(x)}</span>`)
+      .join(
+        "",
+      )}</span></span><span class="food-result__stats"><span class="food-result-stat food-result-stat--energy ${semantic}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span><span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span><svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></span></button>`;
   }
-
-  async function openDetail(id) {
-    if (!id) return;
-    writeDetailUrl(id);
-    await loadDetail(id);
+  async function openDetail(id, species) {
+    history.replaceState(
+      {
+        ...history.state,
+        foodScrollY: window.scrollY,
+        foodLoaded: state.loaded,
+      },
+      "",
+      location.href,
+    );
+    const params = stateParams(true, id, species);
+    history.pushState(
+      { foodDetail: true },
+      "",
+      `${location.pathname}?${params}`,
+    );
+    await loadDetail(id, species);
   }
-
-  async function loadDetail(id) {
+  async function loadDetail(id, species) {
+    species = normalizeEnum(
+      species,
+      ["cat", "dog"],
+      state.species === "all" ? "cat" : state.species,
+    );
+    state.detailSpecies = species;
     els.listView.hidden = true;
     els.detailView.hidden = false;
-    els.detailContent.innerHTML = '';
-    els.detailStatus.textContent = '제품 정보를 불러오는 중입니다.';
-    window.scrollTo({ top: 0, behavior: 'auto' });
-
-    let { data, error } = await fetchDetail(id, detailColumns);
-
-    // Older dog_feeds schemas may not have the optional affiliate-link column yet.
-    // Retry without it so the shared dog detail page continues to work.
-    if (error && String(error.message || '').includes('쿠팡_링크')) {
-      ({ data, error } = await fetchDetail(id, detailColumnsWithoutCoupang));
-    }
-
+    els.detailContent.innerHTML = "";
+    els.detailStatus.textContent = "제품 정보를 불러오는 중입니다.";
+    els.back.lastChild.textContent =
+      state.query ||
+      state.selectedTagIds.length ||
+      state.type !== "all" ||
+      state.role !== "all"
+        ? " 검색 결과로 돌아가기"
+        : " 사료 찾기로 돌아가기";
+    scrollTo({ top: 0, behavior: "auto" });
+    let { data, error } = await fetchDetail(id, detailColumns, species);
+    if (error && String(error.message || "").includes("쿠팡_링크"))
+      ({ data, error } = await fetchDetail(
+        id,
+        detailColumnsWithoutCoupang,
+        species,
+      ));
     if (error || !data) {
       els.detailStatus.textContent = error
-        ? `제품 정보를 불러오지 못했습니다. ${error.message || ''}`.trim()
-        : '제품 정보를 찾지 못했습니다.';
+        ? `제품 정보를 불러오지 못했습니다. ${error.message || ""}`.trim()
+        : "제품 정보를 찾지 못했습니다.";
       return;
     }
-
-    els.detailStatus.textContent = '';
+    data.species = species;
+    els.detailStatus.textContent = "";
     renderDetail(data);
   }
-
-  function fetchDetail(id, columns) {
+  function fetchDetail(id, columns, species) {
     return foodSb
-      .from(getTable())
+      .from(species === "dog" ? "dog_feeds" : "feeds")
       .select(columns)
-      .eq('id', id)
-      .or('verified.eq.true,searchable_before_review.eq.true')
+      .eq("id", id)
+      .or("verified.eq.true,searchable_before_review.eq.true")
       .maybeSingle();
   }
-
   function showList(fromPopState) {
-    document.title = '고양이·강아지 사료 목록 | 프루브';
+    document.title = "고양이·강아지 사료 찾기 | 프루브";
     els.detailView.hidden = true;
     els.listView.hidden = false;
-    els.detailContent.innerHTML = '';
-    els.detailStatus.textContent = '';
-
+    els.detailContent.innerHTML = "";
+    els.detailStatus.textContent = "";
     if (!fromPopState) writeListStateToUrl(false);
-    if (!state.rows.length) loadFeeds(true);
-    requestAnimationFrame(() => {
-      const top = els.listView.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: Math.max(0, top - 12), behavior: 'auto' });
-    });
+    renderResults();
+  }
+  function restoreScroll(value) {
+    const y = Number(value);
+    requestAnimationFrame(() =>
+      scrollTo({ top: Number.isFinite(y) ? y : 0, behavior: "auto" }),
+    );
   }
 
   function renderDetail(feed) {
@@ -620,29 +767,29 @@
     const product = splitProductName(feed.제품명);
     const semanticClass = getFeedSemanticClass(feed);
     const basic = [
-      ['대상', getSpeciesLabel()],
-      ['형태', getTypeLabel(feed.type)],
-      ['분류', getRoleLabel(feed.완전식여부)],
-      ['주 단백질', feed.메인단백질 || '정보 없음'],
-      ['원산지', feed.원산지 || '정보 없음']
+      ["대상", getSpeciesLabel(feed.species)],
+      ["형태", getTypeLabel(feed.type)],
+      ["분류", getRoleLabel(feed.완전식여부)],
+      ["주 단백질", feed.메인단백질 || "정보 없음"],
+      ["원산지", feed.원산지 || "정보 없음"],
     ];
 
     const nutritionRows = [
-      ['조단백', feed.조단백, feed.dm_단백],
-      ['조지방', feed.조지방, feed.dm_지방],
-      ['조회분', feed.조회분, feed.dm_회분],
-      ['조섬유', feed.조섬유, feed.dm_섬유],
-      ['수분', feed.수분, null],
-      ['칼슘', feed.칼슘, feed.dm_칼슘],
-      ['인', feed.인, feed.dm_인]
+      ["조단백", feed.조단백, feed.dm_단백],
+      ["조지방", feed.조지방, feed.dm_지방],
+      ["조회분", feed.조회분, feed.dm_회분],
+      ["조섬유", feed.조섬유, feed.dm_섬유],
+      ["수분", feed.수분, null],
+      ["칼슘", feed.칼슘, feed.dm_칼슘],
+      ["인", feed.인, feed.dm_인],
     ].filter(([, asFed, dm]) => isPresent(asFed) || isPresent(dm));
 
-    const verificationLabel = feed.verified === true ? '검수 완료' : '검수 전';
+    const verificationLabel = feed.verified === true ? "검수 완료" : "검수 전";
     const calorieSourceLabel = getCalorieSourceLabel(feed.cal_source);
     const officialLink = brand.officialUrl
       ? `<a class="food-brand-link" href="${escapeHtml(brand.officialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(brand.name)} 공식 홈페이지 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"></path><path d="m10 14 9-9"></path><path d="M19 13v6H5V5h6"></path></svg></a>`
-      : '';
-    const coupangLink = String(feed.쿠팡_링크 ?? '');
+      : "";
+    const coupangLink = String(feed.쿠팡_링크 ?? "");
     const coupangCta = coupangLink.trim()
       ? `<aside class="food-coupang-cta" aria-label="쿠팡 파트너스 구매 링크">
           <div class="food-coupang-cta__row">
@@ -657,7 +804,7 @@
           </div>
           <p class="food-coupang-cta__disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
         </aside>`
-      : '';
+      : "";
 
     document.title = `${product.primary} | 프루브 사료 목록`;
 
@@ -665,69 +812,83 @@
       <article class="food-detail-article">
         <header class="food-detail-hero">
           <div class="food-detail-hero__brand-row">
-            <p class="food-detail-brand">${escapeHtml(brand.name)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</p>
+            <p class="food-detail-brand">${escapeHtml(brand.name)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ""}</p>
             ${officialLink}
           </div>
           <h1 id="foodDetailTitle">${escapeHtml(product.primary)}</h1>
-          ${product.secondary ? `<p class="food-detail-hero__secondary">${escapeHtml(product.secondary)}</p>` : ''}
-          <a class="food-compare-link" href="/food/compare/?species=${escapeHtml(state.species)}&ids=${encodeURIComponent(feed.id)}">
+          ${product.secondary ? `<p class="food-detail-hero__secondary">${escapeHtml(product.secondary)}</p>` : ""}
+          <a class="food-compare-link" href="/food/compare/?species=${escapeHtml(feed.species)}&ids=${encodeURIComponent(feed.id)}">
             다른 제품과 비교하기
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
           </a>
         </header>
 
         <section class="food-detail-section" aria-labelledby="foodBasicHeading">
-          ${sectionHeading('01', '기본 정보', 'foodBasicHeading')}
+          ${sectionHeading("01", "기본 정보", "foodBasicHeading")}
           <dl class="food-basic-grid">
-            ${basic.map(([label, value]) => `<div class="food-basic-item"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}
+            ${basic.map(([label, value]) => `<div class="food-basic-item"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}
           </dl>
         </section>
 
         <section class="food-detail-section" aria-labelledby="foodMetricsHeading">
-          ${sectionHeading('02', '핵심 수치', 'foodMetricsHeading')}
+          ${sectionHeading("02", "핵심 수치", "foodMetricsHeading")}
           <div class="food-metric-grid">
-            ${metricCard('energy', '열량', formatNumber(feed.final_me, 1), 'kcal/kg', energyIcon(), semanticClass)}
-            ${metricCard('moisture', '수분', formatNumber(feed.수분, 2), '%', moistureIcon())}
-            ${metricCard('protein', '단백질 · DM', formatNumber(feed.dm_단백, 2), '%', proteinIcon())}
-            ${metricCard('ratio', '칼슘 : 인', isPresent(feed.ca_p_ratio) ? formatNumber(feed.ca_p_ratio, 2) : '—', isPresent(feed.ca_p_ratio) ? ': 1' : '', ratioIcon())}
+            ${metricCard("energy", "열량", formatNumber(feed.final_me, 1), "kcal/kg", energyIcon(), semanticClass)}
+            ${metricCard("moisture", "수분", formatNumber(feed.수분, 2), "%", moistureIcon())}
+            ${metricCard("protein", "단백질 · DM", formatNumber(feed.dm_단백, 2), "%", proteinIcon())}
+            ${metricCard("ratio", "칼슘 : 인", isPresent(feed.ca_p_ratio) ? formatNumber(feed.ca_p_ratio, 2) : "—", isPresent(feed.ca_p_ratio) ? ": 1" : "", ratioIcon())}
           </div>
         </section>
 
-        ${nutritionRows.length ? `
+        ${
+          nutritionRows.length
+            ? `
         <section class="food-detail-section" aria-labelledby="foodNutritionHeading">
-          ${sectionHeading('03', '영양 정보', 'foodNutritionHeading')}
+          ${sectionHeading("03", "영양 정보", "foodNutritionHeading")}
           <table class="food-nutrition-table">
             <thead><tr><th scope="col">항목</th><th scope="col">등록 값</th><th scope="col">건물 기준 DM</th></tr></thead>
             <tbody>
-              ${nutritionRows.map(([label, asFed, dm]) => `<tr><th scope="row">${escapeHtml(label)}</th><td>${escapeHtml(formatPercent(asFed, label === '칼슘' || label === '인' ? 3 : 2))}</td><td>${dm === null ? '—' : escapeHtml(formatPercent(dm, label === '칼슘' || label === '인' ? 3 : 2))}</td></tr>`).join('')}
+              ${nutritionRows.map(([label, asFed, dm]) => `<tr><th scope="row">${escapeHtml(label)}</th><td>${escapeHtml(formatPercent(asFed, label === "칼슘" || label === "인" ? 3 : 2))}</td><td>${dm === null ? "—" : escapeHtml(formatPercent(dm, label === "칼슘" || label === "인" ? 3 : 2))}</td></tr>`).join("")}
             </tbody>
           </table>
           <p class="food-table-note">DM은 수분을 제외한 건물 기준 환산값입니다. 등록 값은 데이터베이스에 저장된 수치를 그대로 표시합니다.</p>
-        </section>` : ''}
+        </section>`
+            : ""
+        }
 
-        ${(isPresent(feed.칼슘) || isPresent(feed.인) || isPresent(feed.ca_p_ratio)) ? `
+        ${
+          isPresent(feed.칼슘) ||
+          isPresent(feed.인) ||
+          isPresent(feed.ca_p_ratio)
+            ? `
         <section class="food-detail-section" aria-labelledby="foodMineralHeading">
-          ${sectionHeading('04', '칼슘 · 인', 'foodMineralHeading')}
+          ${sectionHeading("04", "칼슘 · 인", "foodMineralHeading")}
           <div class="food-mineral-grid">
-            ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('P · 인', formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '칼슘과 인의 등록 수치 비율')}
+            ${mineralCard("Ca · 칼슘", formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : "열량 기준 정보 없음")}
+            ${mineralCard("P · 인", formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : "열량 기준 정보 없음")}
+            ${mineralCard("Ca:P", formatRatio(feed.ca_p_ratio), "칼슘과 인의 등록 수치 비율")}
           </div>
-        </section>` : ''}
+        </section>`
+            : ""
+        }
 
-        ${feed.전성분 ? `
+        ${
+          feed.전성분
+            ? `
         <section class="food-detail-section" aria-labelledby="foodIngredientsHeading">
-          ${sectionHeading('05', '원재료', 'foodIngredientsHeading')}
+          ${sectionHeading("05", "원재료", "foodIngredientsHeading")}
           <p class="food-ingredients">${escapeHtml(feed.전성분)}</p>
-          ${feed.겔화제 ? `<div class="food-additive-row"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
-        </section>` : ''}
+          ${feed.겔화제 ? `<div class="food-additive-row"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ""}
+        </section>`
+            : ""
+        }
 
         <section class="food-detail-section" aria-labelledby="foodSourceHeading">
-          ${sectionHeading(feed.전성분 ? '06' : '05', '정보 상태', 'foodSourceHeading')}
+          ${sectionHeading(feed.전성분 ? "06" : "05", "정보 상태", "foodSourceHeading")}
           <dl class="food-source-list">
-            <div class="food-source-row"><dt>영양정보</dt><dd class="${feed.verified === true ? '' : 'is-review'}">${escapeHtml(verificationLabel)}</dd></div>
+            <div class="food-source-row"><dt>영양정보</dt><dd class="${feed.verified === true ? "" : "is-review"}">${escapeHtml(verificationLabel)}</dd></div>
             <div class="food-source-row"><dt>열량</dt><dd>${escapeHtml(calorieSourceLabel)}</dd></div>
-            ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 메모</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ''}
+            ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 메모</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ""}
           </dl>
         </section>
         ${coupangCta}
@@ -738,8 +899,8 @@
     return `<div class="food-section-heading"><span>${number}</span><h2 id="${id}">${escapeHtml(title)}</h2></div>`;
   }
 
-  function metricCard(kind, label, value, unit, icon, modifier = '') {
-    return `<div class="food-metric food-metric--${kind} ${modifier}">${icon}<div><span class="food-metric__label">${escapeHtml(label)}</span><span class="food-metric__value">${escapeHtml(value)}</span>${unit ? `<span class="food-metric__unit">${escapeHtml(unit)}</span>` : ''}</div></div>`;
+  function metricCard(kind, label, value, unit, icon, modifier = "") {
+    return `<div class="food-metric food-metric--${kind} ${modifier}">${icon}<div><span class="food-metric__label">${escapeHtml(label)}</span><span class="food-metric__value">${escapeHtml(value)}</span>${unit ? `<span class="food-metric__unit">${escapeHtml(unit)}</span>` : ""}</div></div>`;
   }
 
   function mineralCard(label, value, sub) {
@@ -748,14 +909,14 @@
 
   function getCalorieSourceLabel(source) {
     const labels = {
-      official: '제조사 공식 정보',
-      label: '제품 라벨 정보',
-      seller: '판매처 정보',
-      estimated_corrected: 'Proved 추정값 · 습식 보정',
-      estimated: 'Proved 추정값',
-      manual_review: '검토 필요'
+      official: "제조사 공식 정보",
+      label: "제품 라벨 정보",
+      seller: "판매처 정보",
+      estimated_corrected: "Proved 추정값 · 습식 보정",
+      estimated: "Proved 추정값",
+      manual_review: "검토 필요",
     };
-    return labels[source] || '출처 확인중';
+    return labels[source] || "출처 확인중";
   }
 
   function energyIcon() {
@@ -779,17 +940,22 @@
     readStateFromUrl();
     syncControls();
     bindEvents();
-
-    const detailId = new URLSearchParams(window.location.search).get('id');
-    const conditionTagsPromise = els.conditionFolders ? loadConditionTags() : Promise.resolve();
-    if (detailId) {
-      await loadDetail(detailId);
+    const tagsPromise = loadConditionTags();
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    if (id) {
+      await tagsPromise;
+      await loadDetail(id, state.detailSpecies);
       return;
     }
-    if (state.selectedTagIds.length) await conditionTagsPromise;
+    await tagsPromise;
     await loadFeeds(true);
+    if (history.state?.foodLoaded)
+      state.loaded = Number(history.state.foodLoaded) || PAGE_SIZE;
+    renderResults();
+    restoreScroll(history.state?.foodScrollY);
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", init, { once: true });
   else init();
 })();

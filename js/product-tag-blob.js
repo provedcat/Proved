@@ -612,7 +612,8 @@
 
     const params = new URLSearchParams(window.location.search);
     const feedId = params.get('id');
-    const species = params.get('species') === 'dog' ? 'dog' : 'cat';
+    const speciesParam = params.get('feed_species') || params.get('species');
+    const species = speciesParam === 'dog' ? 'dog' : 'cat';
     if (!feedId) return;
 
     const hero = article.querySelector('.food-detail-hero');
