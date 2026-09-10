@@ -17,6 +17,9 @@ const { pathToFileURL } = require('node:url');
   assert.match(html, /application\/ld\+json/);
   assert.match(html, /window\.__PROVED_FOOD_PAGE__/);
   assert.match(html, /id="foodBackToList"[^>]+href="\/food\/"/);
+  assert.match(html, /href="\/food\/compare\/\?species=cat&amp;ids=12345678/);
+  assert.match(html, /<dt>열량<\/dt><dd>—<\/dd>/);
+  assert.match(html, /<dt>Ca:P<\/dt><dd>—<\/dd>/);
 
   const temp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'proved-food-pages-'));
   const generated = await module.generateFoodPages({ root: temp, feedsBySpecies: { cat: [feed], dog: [{ ...feed, id: 'abcdef12-aaaa-bbbb-cccc-123456789abc', 제품명: 'Dog Food' }] } });

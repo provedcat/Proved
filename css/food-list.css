@@ -818,7 +818,11 @@ button { cursor: pointer; }
 .condition-tag-search,
 .condition-tag-search__clear,
 .condition-reset,
-.condition-selected button {
+.condition-selected button,
+.food-filter-options button,
+.food-search-clear,
+.food-sort-group select,
+.food-back-button {
   min-height: 44px;
 }
 .food-result__species {

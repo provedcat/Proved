@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "food/index.html"), "utf8");
@@ -16,6 +17,7 @@ const extraTags = fs.readFileSync(
   "utf8",
 );
 const routes = fs.readFileSync(path.join(root, "js/food-route.js"), "utf8");
+const styles = fs.readFileSync(path.join(root, "css/food-list.css"), "utf8");
 
 assert.match(
   html,
@@ -86,5 +88,32 @@ assert.match(header, /label:\s*["']사료 찾기["'],\s*href:\s*["']\/food\/["']
 assert.doesNotMatch(header, /label:\s*["']조건으로 찾기["']/);
 assert.match(blob, /ProvedFoodRoutes\?\.readDetailRoute\(\)/);
 assert.match(extraTags, /ProvedFoodRoutes\?\.readDetailRoute\(\)/);
+assert.equal((html.match(/\/js\/food-route\.js/g) || []).length, 1, "the shared route helper must load exactly once");
+for (const selector of [".food-filter-options button", ".food-sort-group select", ".food-back-button"]) {
+  assert.match(styles, new RegExp(`${selector.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}[\\s\\S]*?min-height: 44px`), `${selector} must keep a 44px touch target`);
+}
+
+const routeContext = {
+  URLSearchParams,
+  window: { location: { pathname: "/food/", search: "" } },
+};
+vm.runInNewContext(routes, routeContext);
+const routeApi = routeContext.window.ProvedFoodRoutes;
+const sample = { id: "abcdef12-3456-7890-abcd-ef1234567890", 제품명: "Royal Canin Medium Adult" };
+assert.equal(routeApi.buildProductPath(sample, "dog"), "/food/dog/royal-canin-medium-adult--abcdef12/");
+assert.deepEqual(
+  JSON.parse(JSON.stringify(routeApi.readDetailRoute(
+    { pathname: "/food/dog/royal-canin-medium-adult--abcdef12/", search: "" },
+    { id: sample.id, species: "dog" },
+  ))),
+  { id: sample.id, species: "dog", prerendered: true, legacy: false },
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(routeApi.readDetailRoute(
+    { pathname: "/food/", search: `?species=cat&id=${sample.id}` },
+    null,
+  ))),
+  { id: sample.id, species: "cat", prerendered: false, legacy: true },
+);
 
 console.log("unified food finder tests passed");

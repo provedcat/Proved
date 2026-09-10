@@ -686,6 +686,13 @@
   }
 
   async function loadDetail(route) {
+    if (!route.id && route.idPrefix) {
+      const table = route.species === "dog" ? "dog_feeds" : "feeds";
+      const lowerBound = `${route.idPrefix}-0000-0000-0000-000000000000`;
+      const { data, error } = await foodSb.from(table).select("id").gte("id", lowerBound)
+        .order("id", { ascending: true }).limit(1).maybeSingle();
+      if (!error && String(data?.id || "").toLowerCase().startsWith(route.idPrefix)) route.id = data.id;
+    }
     if (!route.id) {
       els.detailStatus.textContent = "제품 주소를 확인하지 못했습니다.";
       return;
