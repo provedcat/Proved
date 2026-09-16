@@ -74,6 +74,15 @@
 
   let rafId = 0;
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function parseNumber(text) {
     const match = String(text || '').replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
     if (!match) return null;
@@ -91,8 +100,7 @@
   function normalizeRatio(caOverP) {
     const ratio = Number(caOverP);
     if (!Number.isFinite(ratio) || ratio <= 0) return '—';
-    const phosphorusRelative = 1 / ratio;
-    return `1:${trimFixed(phosphorusRelative, 2)}`;
+    return `1:${trimFixed(1 / ratio, 2)}`;
   }
 
   function readOriginalRatio(root) {
@@ -197,7 +205,7 @@
   }
 
   function statusMarkup(status) {
-    return `<span class="food-guideline-status ${status.className}" title="${status.title}">${status.text}</span>`;
+    return `<span class="food-guideline-status ${status.className}" title="${escapeHtml(status.title)}">${escapeHtml(status.text)}</span>`;
   }
 
   function statusCell(status) {
@@ -217,44 +225,57 @@
     };
   }
 
-  function renderMobileGuidelineGroup(name, statuses, life, collapseMatching) {
-    const isMatching = statuses.growth.text === statuses.adult.text;
-    const states = collapseMatching && isMatching
-      ? `<div class="food-mobile-guideline-group__summary">${statusMarkup(statuses.growth)}</div>`
-      : `<div class="food-mobile-guideline-group__states">
-          <div><span class="food-mobile-guideline-state__life">${life.growth}</span>${statusMarkup(statuses.growth)}</div>
-          <div><span class="food-mobile-guideline-state__life">${life.adult}</span>${statusMarkup(statuses.adult)}</div>
-        </div>`;
-
-    return `<section class="food-mobile-guideline-group" aria-label="${name} 기준">
-      <h4 class="food-mobile-guideline-group__title">${name}</h4>
-      ${states}
-    </section>`;
-  }
-
   function renderMobileNutrition(rows, life) {
+    const comparableRows = rows.filter(row => row.guidelines);
     const mobile = document.createElement('div');
     mobile.className = 'food-nutrition-mobile';
     mobile.setAttribute('aria-label', '모바일 영양정보');
-    mobile.innerHTML = rows.map(row => {
-      const values = row.isRatio
-        ? `<span class="food-mobile-nutrient__ratio">${row.registeredValue}</span>`
-        : `<span class="food-mobile-nutrient__registered">${row.registeredValue}</span><span class="food-mobile-nutrient__dm">DM ${row.dmValue}</span>`;
-      const guidelineGroups = row.guidelines
-        ? `<div class="food-mobile-guideline-groups">
-            ${renderMobileGuidelineGroup('AAFCO', row.guidelines.aafco, life, row.isRatio)}
-            ${renderMobileGuidelineGroup('FEDIAF', row.guidelines.fediaf, life, row.isRatio)}
-          </div>`
-        : '';
-
-      return `<article class="food-mobile-nutrient${row.isRatio ? ' food-mobile-nutrient--ratio' : ''}">
-        <div class="food-mobile-nutrient__values">
-          <h3>${row.label}</h3>
-          ${values}
-        </div>
-        ${guidelineGroups}
-      </article>`;
-    }).join('');
+    mobile.dataset.compactTableLayout = 'v2';
+    mobile.innerHTML = `
+      <div class="food-mobile-values-block">
+        <table class="food-mobile-values-table">
+          <colgroup><col class="food-mobile-values-table__label-col"><col><col></colgroup>
+          <thead><tr><th scope="col">항목</th><th scope="col">등록 값</th><th scope="col">건물 기준 DM</th></tr></thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr${row.isRatio ? ' class="is-ratio"' : ''}>
+                <th scope="row">${escapeHtml(row.label)}</th>
+                <td>${escapeHtml(row.registeredValue)}</td>
+                <td>${escapeHtml(row.dmValue)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${comparableRows.length ? `
+      <div class="food-mobile-comparison-block">
+        <h3>주요 영양성분 기준 비교</h3>
+        <table class="food-mobile-comparison-table">
+          <colgroup><col class="food-mobile-comparison-table__label-col"><col><col><col><col></colgroup>
+          <thead>
+            <tr>
+              <th scope="col" rowspan="2">항목</th>
+              <th scope="colgroup" colspan="2">AAFCO</th>
+              <th scope="colgroup" colspan="2">FEDIAF</th>
+            </tr>
+            <tr>
+              <th scope="col">${escapeHtml(life.growth)}</th>
+              <th scope="col">${escapeHtml(life.adult)}</th>
+              <th scope="col">${escapeHtml(life.growth)}</th>
+              <th scope="col">${escapeHtml(life.adult)}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${comparableRows.map(row => `
+              <tr>
+                <th scope="row">${escapeHtml(row.label)}</th>
+                <td>${statusMarkup(row.guidelines.aafco.growth)}</td>
+                <td>${statusMarkup(row.guidelines.aafco.adult)}</td>
+                <td>${statusMarkup(row.guidelines.fediaf.growth)}</td>
+                <td>${statusMarkup(row.guidelines.fediaf.adult)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : ''}`;
     return mobile;
   }
 
@@ -358,8 +379,12 @@
 
   function enhance() {
     normalizeRatioDisplays();
-    const rawRatio = readOriginalRatio(document.getElementById('foodDetailContent') || document);
+    const detail = document.getElementById('foodDetailContent');
+    const rawRatio = readOriginalRatio(detail || document);
     addGuidelineColumns(rawRatio);
+    if (detail?.querySelector('.food-detail-article')) {
+      document.dispatchEvent(new CustomEvent('proved:food-detail-enhanced'));
+    }
   }
 
   function scheduleEnhance() {
