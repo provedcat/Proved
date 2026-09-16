@@ -58,8 +58,7 @@ test('legacy conditions route는 query와 hash를 보존해 canonical Finder로 
   const html = await read('food/conditions/index.html');
   assert.match(html, /noindex,follow/);
   assert.match(html, /canonical" href="https:\/\/proved\.kr\/food\/"/);
-  assert.match(html, /'\/food\/' \+ window\.location\.search \+ window\.location\.hash/);
-  assert.match(html, /window\.location\.replace\(target\)/);
+  assert.match(html, /window\.location\.replace\('\/food\/' \+ window\.location\.search \+ window\.location\.hash\)/);
 });
 
 test('SEO product href와 Finder history 복원 계약을 유지한다', async () => {
@@ -72,6 +71,27 @@ test('SEO product href와 Finder history 복원 계약을 유지한다', async (
   assert.match(source, /aria-controls="food-condition-/);
   assert.match(source, /restoreFinderFocus/);
   assert.match(source, /if \(readDetailRoute\(\)\) return;/);
+});
+
+test('상세 화면 후처리는 공용 렌더 observer 하나를 재사용한다', async () => {
+  const [html, refinements, mobile, visual, organic] = await Promise.all([
+    read('food/index.html'),
+    read('js/food-detail-refinements.js'),
+    read('js/food-mobile-nutrition-v2.js'),
+    read('js/food-detail-visual-polish.js'),
+    read('js/product-tag-blob-organic-v3.js')
+  ]);
+
+  assert.doesNotMatch(html, /food-mobile-nutrition-v2\.js/);
+  assert.match(refinements, /food-mobile-values-table/);
+  assert.match(refinements, /food-mobile-comparison-table/);
+  assert.match(refinements, /new CustomEvent\('proved:food-detail-enhanced'\)/);
+  assert.equal((refinements.match(/new MutationObserver/g) || []).length, 1);
+  assert.equal((mobile.match(/new MutationObserver/g) || []).length, 0);
+  assert.equal((visual.match(/new MutationObserver/g) || []).length, 0);
+  assert.equal((organic.match(/new MutationObserver/g) || []).length, 0);
+  assert.match(visual, /proved:food-detail-enhanced/);
+  assert.match(organic, /proved:food-detail-enhanced/);
 });
 
 test('사료 하위 메뉴는 사료 찾기와 등록 요청만 노출한다', async () => {

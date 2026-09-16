@@ -2,7 +2,6 @@
   'use strict';
 
   const NS = 'http://www.w3.org/2000/svg';
-  let rafId = 0;
 
   function hashString(value) {
     let hash = 2166136261;
@@ -246,20 +245,9 @@
     document.querySelectorAll('#foodDetailContent .food-tag-blob__svg').forEach(tuneBlob);
   }
 
-  function schedule() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => {
-      rafId = 0;
-      enhance();
-    });
-  }
-
   function init() {
-    const root = document.getElementById('foodDetailContent');
-    if (!root) return;
-    const observer = new MutationObserver(schedule);
-    observer.observe(root, { childList: true, subtree: true });
-    schedule();
+    document.addEventListener('proved:food-detail-enhanced', enhance);
+    enhance();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
