@@ -306,6 +306,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/cat/%EB%B8%8C%EB%9E%9C%EB%93%9C-%EC%A0%95%EB%B3%B4-%EC%97%86%EC%9D%8C-hfc-%ED%95%98%EC%9D%B4-%EC%97%90%ED%94%BC%ED%83%80%EC%9D%B4%EC%A7%95-%EC%BA%A3-%EC%A0%95%EC%96%B4%EB%A6%AC--5827a1d7/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/cat/%EC%84%B8%EB%9D%BC%ED%94%BC%EB%93%9C-%EC%84%B8%EB%9D%BC%ED%94%BC%EB%93%9C-%EA%B3%A0%EC%96%91%EC%9D%B4-%EA%B7%B8%EB%A0%88%EC%9D%B8%ED%94%84%EB%A6%AC-%EC%B2%B4%EC%A4%91%EA%B4%80%EB%A6%AC--0d501016/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -511,11 +516,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/almo-nature-%EC%95%8C%EB%AA%A8%EB%84%A4%EC%9D%B4%EC%B3%90-%EC%8A%A4%ED%85%8C%EB%9F%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EB%8B%AD-hfc-our-best-adult-sterilised-fresh-chicken--6081dbc6/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://proved.kr/food/cat/almo-nature-%EC%95%8C%EB%AA%A8%EB%84%A4%EC%9D%B4%EC%B3%90-%EC%95%8C%EB%AA%A8%EB%84%A4%EC%9D%B4%EC%B3%90-hfc-%EB%82%B4%EC%B8%84%EB%9F%B4-%EB%8B%AD%EA%B3%A0%EA%B8%B0%EC%99%80-%EC%B0%B8%EC%B9%98--2b454348/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -527,6 +527,86 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/almo-nature-%EC%95%8C%EB%AA%A8%EB%84%A4%EC%9D%B4%EC%B3%90-hfc-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%BA%A3-%ED%83%9C%ED%8F%89%EC%96%91%EC%B0%B8%EC%B9%98--569f8a17/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-%EC%95%8C%EB%AA%A8%EB%84%A4%EC%9D%B4%EC%B3%90-hfc-%EC%95%84%EC%9B%8C-%EB%B2%A0%EC%8A%A4%ED%8A%B8-%EC%96%B4%EB%8D%9C%ED%8A%B8-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%8B%A0%EC%84%A0%ED%95%9C-%EB%8B%AD%EA%B3%A0%EA%B8%B0-hfc-our-best-adult-sterilised-fresh-chicken--6081dbc6/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%BA%A3-%EB%8B%AD%EA%B3%A0%EA%B8%B0%EC%82%B4--718136bc/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%BA%A3-%EB%8B%AD%EA%B3%A0%EA%B8%B0%EC%99%80-%EC%B0%B8%EC%B9%98--faeba9b5/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%BA%A3-%EB%8C%80%EC%84%9C%EC%96%91%EC%B0%B8%EC%B9%98--005e49a5/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%BA%A3-%ED%83%9C%ED%8F%89%EC%96%91%EC%B0%B8%EC%B9%98--5da32285/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%95%84%EC%9B%8C-%EB%B2%A0%EC%8A%A4%ED%8A%B8-%EC%96%B4%EB%8D%9C%ED%8A%B8-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%8B%A0%EC%84%A0%ED%95%9C-%EB%8F%BC%EC%A7%80%EA%B3%A0%EA%B8%B0--1033dade/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%95%84%EC%9B%8C-%EB%B2%A0%EC%8A%A4%ED%8A%B8-%ED%82%A4%ED%8A%BC-%EC%8B%A0%EC%84%A0%ED%95%9C-%EB%8B%AD%EA%B3%A0%EA%B8%B0--250f6901/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%95%84%EC%9B%8C-%EB%B2%A0%EC%8A%A4%ED%8A%B8-%ED%95%98%EC%9D%B4-%EC%97%90%ED%94%BC%ED%83%80%EC%9D%B4%EC%A7%95-%EC%8B%A0%EC%84%A0%ED%95%9C-%EC%97%B0%EC%96%B4--af64b717/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%95%84%EC%9C%84-%EB%B2%A0%EC%8A%A4%ED%8A%B8-%EC%96%B4%EB%8D%9C%ED%8A%B8-%EC%8A%A4%ED%85%8C%EB%A6%B4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%8B%A0%EC%84%A0%ED%95%9C-%EB%8F%BC%EC%A7%80%EA%B3%A0%EA%B8%B0--cd93974a/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-%ED%97%AC%ED%94%84-%EC%BA%A3-%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4-%EC%9C%84%EB%93%9C-%ED%81%AC%EB%9E%9C%EB%B2%A0%EB%A6%AC--d1c436e1/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-%ED%97%AC%ED%94%84-%EC%BA%A3-%EB%8B%AD%EC%95%88%EC%8B%AC%EC%82%B4-%EC%9C%84%EB%93%9C-%ED%81%AC%EB%9E%9C%EB%B2%A0%EB%A6%AC--39a024dc/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-%ED%97%AC%ED%94%84-%EC%BA%A3-%EB%8C%80%EC%84%9C%EC%96%91%EC%B0%B8%EC%B9%98-%EC%9C%84%EB%93%9C-%ED%81%AC%EB%9E%9C%EB%B2%A0%EB%A6%AC--a79e4f74/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-%ED%97%AC%ED%94%84-%EC%BA%A3-%ED%83%9C%ED%8F%89%EC%96%91%EC%B0%B8%EC%B9%98-%EC%9C%84%EB%93%9C-%ED%81%AC%EB%9E%9C%EB%B2%A0%EB%A6%AC--542ea27b/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%ED%95%98%EC%9D%B4-%EC%97%90%ED%94%BC%ED%83%80%EC%9D%B4%EC%A7%95-%EC%BA%A3-%EA%B3%A0%EB%93%B1%EC%96%B4--8f2fb99c/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%ED%95%98%EC%9D%B4-%EC%97%90%ED%94%BC%ED%83%80%EC%9D%B4%EC%A7%95-%EC%BA%A3-%EB%8B%AD%EC%95%88%EC%8B%AC%EC%82%B4--9ae285bb/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/almo-nature-hfc-%ED%95%98%EC%9D%B4-%EC%97%90%ED%94%BC%ED%83%80%EC%9D%B4%EC%A7%95-%EC%BA%A3-%EB%8C%80%EC%84%9C%EC%96%91%EC%B0%B8%EC%B9%98--6829d8a6/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
