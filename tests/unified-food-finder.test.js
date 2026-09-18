@@ -73,6 +73,15 @@ test('SEO product href와 Finder history 복원 계약을 유지한다', async (
   assert.match(source, /if \(readDetailRoute\(\)\) return;/);
 });
 
+test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제품 id를 찾는다', async () => {
+  const [html, blob] = await Promise.all([read('food/index.html'), read('js/product-tag-blob.js')]);
+  assert.match(blob, /window\.__PROVED_FOOD_PAGE__/);
+  assert.match(blob, /history\.state/);
+  assert.match(blob, /params\.get\('id'\)/);
+  assert.match(blob, /const \{ feedId, species \} = target/);
+  assert.match(html, /product-tag-blob\.js\?v=20260918-detail-route-v1/);
+});
+
 test('상세 화면 후처리는 공용 렌더 observer 하나를 재사용한다', async () => {
   const [html, refinements, mobile, visual, organic] = await Promise.all([
     read('food/index.html'),
