@@ -604,16 +604,32 @@
     toolbar.appendChild(mobileCompare);
   }
 
+  function getDetailTarget() {
+    const page = window.__PROVED_FOOD_PAGE__;
+    if (page?.id) {
+      return { feedId: String(page.id), species: page.species === 'dog' ? 'dog' : 'cat' };
+    }
+
+    const state = window.history.state;
+    if (state?.feedId) {
+      return { feedId: String(state.feedId), species: state.species === 'dog' ? 'dog' : 'cat' };
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const feedId = params.get('id');
+    if (!feedId) return null;
+    return { feedId, species: params.get('species') === 'dog' ? 'dog' : 'cat' };
+  }
+
   async function enhanceDetail() {
     const content = document.getElementById('foodDetailContent');
     const toolbar = document.querySelector('.food-detail-toolbar');
     const article = content?.querySelector('.food-detail-article');
     if (!content || !toolbar || !article || article.dataset.tagBlobEnhanced === 'true') return;
 
-    const params = new URLSearchParams(window.location.search);
-    const feedId = params.get('id');
-    const species = params.get('species') === 'dog' ? 'dog' : 'cat';
-    if (!feedId) return;
+    const target = getDetailTarget();
+    if (!target) return;
+    const { feedId, species } = target;
 
     const hero = article.querySelector('.food-detail-hero');
     const basicSection = article.querySelector('.food-detail-section');
