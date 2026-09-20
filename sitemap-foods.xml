@@ -106,6 +106,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EB%A0%88%EB%82%A0-%EC%8A%A4%ED%8E%98%EC%85%9C-%EA%B1%B4%EC%8B%9D--1d36c13e/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EB%A7%88%EB%8D%94-and-%EB%B2%A0%EC%9D%B4%EB%B9%84-10kg-%EB%A9%B4%EC%97%AD%EC%A6%9D%EC%A7%84--effc6854/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -401,7 +406,17 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/%EC%B1%94%ED%94%BC%EC%98%A8%ED%8E%AB%ED%91%B8%EB%93%9C-champion-petfoods-%EC%95%84%EC%B9%B4%EB%82%98-%EC%BA%A3-%ED%95%98%EC%9D%B4%ED%94%84%EB%A1%9C%ED%8B%B4-%ED%82%A4%ED%8A%BC--2e312928/</loc>
+    <loc>https://proved.kr/food/cat/%EC%A3%BC%EC%8B%9D%ED%9A%8C%EC%82%AC-%EB%AF%B8%EC%86%8C-%EB%9D%BC%EC%9D%B4%ED%8E%AB-%EB%94%9C%EB%9D%BC%EC%9E%87-%EB%A1%9C%EC%9A%B0-%ED%94%84%EB%A1%9C%ED%8B%B4-%EC%BA%94--6bfc8cba/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EC%A3%BC%EC%8B%9D%ED%9A%8C%EC%82%AC-%EC%8B%AD%EC%9D%BC%EB%A6%AC%ED%84%B0-%EB%9D%BC%EC%9D%B4%ED%8E%AB-%EB%94%9C%EB%9D%BC%EC%9E%87-%EB%A1%9C%EC%9A%B0-%ED%8C%BB-%EC%8A%A4%ED%8B%B1--a3b6c158/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EC%A3%BC%EC%8B%9D%ED%9A%8C%EC%82%AC-%EC%8B%AD%EC%9D%BC%EB%A6%AC%ED%84%B0-%EB%9D%BC%EC%9D%B4%ED%8E%AB-%EB%94%9C%EB%9D%BC%EC%9E%87-%EB%A1%9C%EC%9A%B0-%ED%94%84%EB%A1%9C%ED%8B%B4-%EC%8A%A4%ED%8B%B1--dd60b115/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1276,7 +1291,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/monge-%EB%AA%AC%EC%A7%80-%EB%B2%B3%EC%86%94%EB%A3%A8%EC%85%98-%ED%97%A4%ED%8C%8C%ED%8B%B1-%EA%B3%A0%EC%96%91%EC%9D%B4-monge-vetsolution-hepatic-feline--d188eb73/</loc>
+    <loc>https://proved.kr/food/cat/monge-%EB%AA%AC%EC%A7%80-%EB%B2%B3%EC%86%94%EB%A3%A8%EC%85%98-%ED%97%A4%ED%8C%8C%ED%8B%B1-%EA%B3%A0%EC%96%91%EC%9D%B4--d188eb73/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1397,11 +1412,6 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/orijen-%EC%98%A4%EB%A6%AC%EC%A0%A0-%EC%98%A4%EB%A6%AC%EC%A7%80%EB%84%90-%EC%BA%A3--4b4cfcc7/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/orijen-%EC%98%A4%EB%A6%AC%EC%A0%A0-%ED%82%A4%ED%8A%BC--12075e55/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
