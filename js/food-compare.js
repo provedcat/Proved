@@ -54,8 +54,28 @@
   function getProductMarker(index) { return index === 0 ? 'A 제품' : 'B 제품'; }
   function getFeedIndex(feed) { return state.feeds.indexOf(feed); }
   function getShortName(feed) {
-    const index = getFeedIndex(feed);
-    return index >= 0 ? getProductMarker(index) : getBrand(feed);
+    const raw = String(feed?.제품명 || getBrand(feed) || '').trim();
+    if (!raw) return '제품';
+    let name = raw
+      .replace(/^파미나\s*/i, '')
+      .replace(/^N&D\s*/i, '')
+      .replace(/\([^)]*[A-Za-z][^)]*\)/g, '')
+      .replace(/\bN&D\b/gi, '')
+      .replace(/\bCat\b/gi, '캣')
+      .replace(/\bDog\b/gi, '독')
+      .replace(/\bQuinoa\b/gi, '퀴노아')
+      .replace(/\bUrinary\b/gi, '유리너리')
+      .replace(/\bDuck\b/gi, '오리')
+      .replace(/\bChicken\b/gi, '닭고기')
+      .replace(/[A-Za-z][A-Za-z0-9&'\-]*(?:\s+[A-Za-z][A-Za-z0-9&'\-]*)*/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (name.length > 28) {
+      const chunks = name.split(/\s+/);
+      while (chunks.join(' ').length > 28 && chunks.length > 3) chunks.shift();
+      name = chunks.join(' ');
+    }
+    return name || raw;
   }
   function comparisonTableHead() {
     return `<thead><tr><th>항목</th><th>A 제품</th><th>B 제품</th></tr></thead>`;
@@ -300,29 +320,33 @@
       ? makeDisplayRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1', 2)
       : '';
 
-    const proteinDiff = hasPair(a, b, '조단백') ? Math.abs(Number(a.조단백) - Number(b.조단백)) : null;
-    const fatDiff = hasPair(a, b, '조지방') ? Math.abs(Number(a.조지방) - Number(b.조지방)) : null;
-    const proteinInsight = compareInsight(
-      a.조단백,
-      b.조단백,
-      '단백질',
-      'g',
-      '같은 100g을 급여하면',
-      1,
-      '더 급여 가능합니다'
-    );
-    const fatInsight = compareInsight(
-      a.조지방,
-      b.조지방,
-      '지방',
-      'g',
-      '같은 100g을 급여하면',
-      1,
-      '더 급여 가능합니다'
-    );
-    const insight = fatDiff !== null && proteinDiff !== null && fatDiff > proteinDiff
-      ? proteinInsight + fatInsight
-      : proteinInsight;
+    let insight = insightMissing();
+    if (hasPair(a, b, '조단백') && hasPair(a, b, '조지방')) {
+      const proteinDiff = Number(a.조단백) - Number(b.조단백);
+      const fatDiff = Number(a.조지방) - Number(b.조지방);
+      const nameA = getShortName(a);
+      const nameB = getShortName(b);
+      const parts = [];
+      const proteinThreshold = Math.max(Math.abs(Number(a.조단백)), Math.abs(Number(b.조단백)), 1) * 0.02;
+      const fatThreshold = Math.max(Math.abs(Number(a.조지방)), Math.abs(Number(b.조지방)), 1) * 0.02;
+
+      if (Math.abs(proteinDiff) <= proteinThreshold) {
+        parts.push('<strong>단백질</strong>은 큰 차이가 없고');
+      } else {
+        const higher = proteinDiff > 0 ? nameA : nameB;
+        const lower = proteinDiff > 0 ? nameB : nameA;
+        parts.push(`${escapeHtml(lower)}보다 ${escapeHtml(higher)}가 <strong>단백질</strong>은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 급여 가능하고`);
+      }
+
+      if (Math.abs(fatDiff) <= fatThreshold) {
+        parts.push('<strong>지방</strong>도 큰 차이가 없습니다.');
+      } else {
+        const higher = fatDiff > 0 ? nameA : nameB;
+        const lower = fatDiff > 0 ? nameB : nameA;
+        parts.push(`${escapeHtml(lower)}보다 ${escapeHtml(higher)}가 <strong>지방</strong>은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 급여 가능합니다.`);
+      }
+      insight = `<p class="food-compare-insight">같은 100g을 급여하면 ${parts.join(' ')}</p>`;
+    }
 
     return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
       ${insight}
@@ -349,15 +373,15 @@
       const parts = [];
       if (Math.abs(proteinDiff) > Math.max(Math.abs(proteinA), Math.abs(proteinB), 1) * 0.02) {
         const higher = proteinDiff > 0 ? getShortName(a) : getShortName(b);
-        parts.push(`${escapeHtml(higher)}이 단백질은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 많고`);
+        parts.push(`${escapeHtml(higher)}이(가) <strong>단백질</strong>은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 많고`);
       } else {
-        parts.push('단백질은 큰 차이가 없고');
+        parts.push('<strong>단백질</strong>은 큰 차이가 없고');
       }
       if (Math.abs(fatDiff) > Math.max(Math.abs(fatA), Math.abs(fatB), 1) * 0.02) {
         const higher = fatDiff > 0 ? getShortName(a) : getShortName(b);
-        parts.push(`${escapeHtml(higher)}가 지방은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 많습니다.`);
+        parts.push(`${escapeHtml(higher)}이(가) <strong>지방</strong>은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 많습니다.`);
       } else {
-        parts.push('지방도 큰 차이가 없습니다.');
+        parts.push('<strong>지방</strong>도 큰 차이가 없습니다.');
       }
       insight = `<p class="food-compare-insight">같은 100kcal를 먹이면 ${parts.join(' ')}</p>`;
     }
