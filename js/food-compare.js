@@ -51,9 +51,42 @@
     const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
     return relation?.name || feed?.제조사 || '브랜드 정보 없음';
   }
+  function getDisplayBrand(feed) {
+    const raw = String(getBrand(feed) || '').trim();
+    const normalized = raw.toLowerCase();
+    const exactMap = new Map([
+      ['farmina pet foods', 'Farmina'],
+      ["tuffy's pet food, inc", "Tuffy's"],
+      ["tuffy's pet food, inc.", "Tuffy's"],
+      ['natural balance pet foods, inc', '네추럴발란스'],
+      ['natural balance pet foods, inc.', '네추럴발란스'],
+      ["hill's pet nutrition, inc", "Hill's"],
+      ["hill's pet nutrition, inc.", "Hill's"],
+      ['josera erbacher service gmbh', 'Josera'],
+      ['royal canin', '로얄캐닌'],
+      ['로얄캐닌 royal canin', '로얄캐닌'],
+      ['royal canin 로얄캐닌', '로얄캐닌'],
+      ['almo nature 알모네이쳐', '알모네이쳐'],
+      ['알모네이쳐 almo nature', '알모네이쳐']
+    ]);
+    if (exactMap.has(normalized)) return exactMap.get(normalized);
+
+    if (/로얄캐닌/i.test(raw) && /royal\s*canin/i.test(raw)) return '로얄캐닌';
+    if (/알모네이쳐/i.test(raw) && /almo\s*nature/i.test(raw)) return '알모네이쳐';
+
+    return raw
+      .replace(/\s+(Pet Foods?|Pet Nutrition|Service GmbH)\b.*$/i, '')
+      .replace(/,?\s*Inc\.?$/i, '')
+      .trim() || raw;
+  }
   function getProductMarker(index) { return index === 0 ? 'A 제품' : 'B 제품'; }
   function getFeedIndex(feed) { return state.feeds.indexOf(feed); }
   function getShortName(feed) {
+    const other = state.feeds.find(item => item !== feed);
+    const thisBrand = getDisplayBrand(feed);
+    const otherBrand = other ? getDisplayBrand(other) : '';
+    if (other && thisBrand && otherBrand && thisBrand !== otherBrand) return thisBrand;
+
     const raw = String(feed?.제품명 || getBrand(feed) || '').trim();
     if (!raw) return '제품';
     let name = raw
