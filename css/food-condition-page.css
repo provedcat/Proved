@@ -131,8 +131,8 @@
   position: absolute;
   z-index: 3;
   top: -44px;
-  left: calc(var(--tab-index) * 16.4%);
-  width: 17.6%;
+  left: calc(var(--tab-index) * 20%);
+  width: 20%;
   height: 45px;
   display: flex;
   align-items: center;
