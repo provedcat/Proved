@@ -78,6 +78,9 @@
   function hasPair(a, b, key) {
     return isPresent(a?.[key]) && isPresent(b?.[key]);
   }
+  function hasLabeledMineralPair(a, b, key) {
+    return Number(a?.[key]) > 0 && Number(b?.[key]) > 0;
+  }
   function insightMissing() {
     return '<p class="food-compare-insight is-missing">비교할 정보가 부족합니다.</p>';
   }
@@ -261,8 +264,8 @@
   }
 
   function renderDisplayedGroup(a, b) {
-    const calciumRow = hasPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, '%', 3) : '';
-    const phosphorusRow = hasPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, '%', 3) : '';
+    const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, '%', 3) : '';
+    const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>표시성분</h3>
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeDisplayRow('단백질', a.조단백, b.조단백, '%')}
@@ -276,8 +279,8 @@
   }
 
   function renderDmGroup(a, b) {
-    const calciumRow = hasPair(a, b, 'dm_칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
-    const phosphorusRow = hasPair(a, b, 'dm_인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
+    const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
+    const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
       ${dmInsight(a, b)}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
@@ -291,9 +294,35 @@
   }
 
   function renderAsFed100gGroup(a, b) {
-    const calciumRow = hasPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, 'g', 3) : '';
-    const phosphorusRow = hasPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, 'g', 3) : '';
+    const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, 'g', 3) : '';
+    const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, 'g', 3) : '';
+
+    const proteinDiff = hasPair(a, b, '조단백') ? Math.abs(Number(a.조단백) - Number(b.조단백)) : null;
+    const fatDiff = hasPair(a, b, '조지방') ? Math.abs(Number(a.조지방) - Number(b.조지방)) : null;
+    const proteinInsight = compareInsight(
+      a.조단백,
+      b.조단백,
+      '단백질',
+      'g',
+      '같은 100g을 급여하면',
+      1,
+      '더 급여 가능합니다'
+    );
+    const fatInsight = compareInsight(
+      a.조지방,
+      b.조지방,
+      '지방',
+      'g',
+      '같은 100g을 급여하면',
+      1,
+      '더 급여 가능합니다'
+    );
+    const insight = fatDiff !== null && proteinDiff !== null && fatDiff > proteinDiff
+      ? proteinInsight + fatInsight
+      : proteinInsight;
+
     return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
+      ${insight}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeDisplayRow('단백질', a.조단백, b.조단백, 'g')}
         ${makeDisplayRow('지방', a.조지방, b.조지방, 'g')}
@@ -316,11 +345,15 @@
   }
 
   function renderMineralGroup(a, b) {
-    const calciumRow = hasPair(a, b, 'eb_칼슘') ? makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '') : '';
-    const phosphorusRow = hasPair(a, b, 'eb_인') ? makeRow('인', a.eb_인, b.eb_인, '') : '';
-    const ratioRow = hasPair(a, b, 'ca_p_ratio') ? makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1') : '';
+    const calciumAvailable = hasLabeledMineralPair(a, b, '칼슘');
+    const phosphorusAvailable = hasLabeledMineralPair(a, b, '인');
+    const calciumRow = calciumAvailable ? makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '') : '';
+    const phosphorusRow = phosphorusAvailable ? makeRow('인', a.eb_인, b.eb_인, '') : '';
+    const ratioRow = calciumAvailable && phosphorusAvailable && hasPair(a, b, 'ca_p_ratio')
+      ? makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1')
+      : '';
     if (!calciumRow && !phosphorusRow && !ratioRow) return '';
-    const insight = hasPair(a, b, 'eb_인')
+    const insight = phosphorusAvailable && hasPair(a, b, 'eb_인')
       ? compareInsight(a.eb_인, b.eb_인, '인 함량', 'g', '같은 1,000kcal를 급여하면')
       : '';
     return `<div class="food-compare-group"><h3>칼슘 · 인 <span class="food-compare-group__unit">단위: g/1,000kcal</span></h3>
