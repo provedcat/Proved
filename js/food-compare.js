@@ -237,7 +237,9 @@
       <section class="food-compare-products" aria-label="비교 제품">${renderProduct(a, 0)}${renderProduct(b, 1)}</section>
       <section class="food-compare-section" aria-labelledby="compareNutritionHeading">
         <div class="food-compare-section__heading"><span>01</span><h2 id="compareNutritionHeading">영양정보 비교</h2></div>
+        ${renderDisplayedGroup(a, b)}
         ${renderDmGroup(a, b)}
+        ${renderAsFed100gGroup(a, b)}
         ${renderEnergyGroup(a, b)}
         ${renderMineralGroup(a, b)}
         ${renderMoistureGroup(a, b)}
@@ -258,7 +260,24 @@
     updateSimulation();
   }
 
+  function renderDisplayedGroup(a, b) {
+    const calciumRow = hasPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, '%', 3) : '';
+    const phosphorusRow = hasPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, '%', 3) : '';
+    return `<div class="food-compare-group"><h3>표시성분</h3>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
+        ${makeDisplayRow('단백질', a.조단백, b.조단백, '%')}
+        ${makeDisplayRow('지방', a.조지방, b.조지방, '%')}
+        ${makeDisplayRow('섬유', a.조섬유, b.조섬유, '%')}
+        ${makeDisplayRow('회분', a.조회분, b.조회분, '%')}
+        ${makeDisplayRow('수분', a.수분, b.수분, '%')}
+        ${calciumRow}
+        ${phosphorusRow}
+      </tbody></table></div>`;
+  }
+
   function renderDmGroup(a, b) {
+    const calciumRow = hasPair(a, b, 'dm_칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
+    const phosphorusRow = hasPair(a, b, 'dm_인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
       ${dmInsight(a, b)}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
@@ -266,8 +285,21 @@
         ${makeRow('지방', a.dm_지방, b.dm_지방, '%')}
         ${makeRow('섬유', a.dm_섬유, b.dm_섬유, '%')}
         ${makeRow('회분', a.dm_회분, b.dm_회분, '%')}
-        ${makeRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3)}
-        ${makeRow('인', a.dm_인, b.dm_인, '%', 3)}
+        ${calciumRow}
+        ${phosphorusRow}
+      </tbody></table></div>`;
+  }
+
+  function renderAsFed100gGroup(a, b) {
+    const calciumRow = hasPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, 'g', 3) : '';
+    const phosphorusRow = hasPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, 'g', 3) : '';
+    return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
+      <table class="food-compare-table">${comparisonTableHead()}<tbody>
+        ${makeDisplayRow('단백질', a.조단백, b.조단백, 'g')}
+        ${makeDisplayRow('지방', a.조지방, b.조지방, 'g')}
+        ${makeDisplayRow('수분', a.수분, b.수분, 'ml')}
+        ${calciumRow}
+        ${phosphorusRow}
       </tbody></table></div>`;
   }
 
