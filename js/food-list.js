@@ -199,17 +199,17 @@
       .from(mappingTable)
       .select('tag_id')
       .eq(feedIdColumn, feed.id);
-    if (mappingError || !mappings?.length) return [];
+    if (mappingError || !mappings?.length) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const tagIds = [...new Set(mappings.map(row => row.tag_id).filter(Boolean))];
-    if (!tagIds.length) return [];
+    if (!tagIds.length) return feed.type === 'dry' ? ['익스트루전'] : [];
     const { data: tags, error: tagError } = await foodSb
       .from('food_tags')
       .select('id,label_ko,category,sort_order,is_active')
       .in('id', tagIds)
       .eq('is_active', true)
       .in('category', categories);
-    if (tagError) return [];
+    if (tagError) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const sorted = (tags || []).sort(compareTags);
     if (feed.type === 'wet') {
@@ -217,7 +217,9 @@
         .map(tag => String(tag.label_ko || '').trim())
         .filter(label => label && !/프리|없음|무점증제|무겔화제/.test(label));
     }
-    return sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
+    const processing = sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
+    if (!processing.length) return ['익스트루전'];
+    return processing.map(label => /^압출$/i.test(label) ? '익스트루전' : label);
   }
 
   function getRoleLabel(role) {
