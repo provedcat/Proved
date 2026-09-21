@@ -319,3 +319,42 @@
     gap: 12px;
   }
 }
+
+
+.food-ingredient-detail-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.food-ingredient-detail-item {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  padding: 16px 0;
+  border-top: 1px solid var(--food-line);
+}
+
+.food-ingredient-detail-item > strong {
+  color: var(--food-blue);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.food-ingredient-detail-item > span,
+.food-ingredient-detail-item > .food-ingredients {
+  margin: 0;
+  min-width: 0;
+}
+
+.food-ingredient-detail-item--full {
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .food-ingredient-detail-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
