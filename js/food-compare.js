@@ -81,6 +81,16 @@
       .trim() || raw;
   }
   function getProductMarker(index) { return index === 0 ? 'A 제품' : 'B 제품'; }
+  function slugify(value) {
+    return String(value || '').normalize('NFKC').toLowerCase().replace(/&/g, ' and ')
+      .replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-')
+      .slice(0, 96).replace(/-+$/g, '') || 'food';
+  }
+  function buildProductPathForCompare(feed) {
+    const base = slugify(`${getBrand(feed)} ${feed?.제품명 || ''}`);
+    const stableId = String(feed?.id || '').replace(/-/g, '').slice(0, 8).toLowerCase();
+    return `/food/${state.species === 'dog' ? 'dog' : 'cat'}/${base}--${stableId || 'detail'}/`;
+  }
   function getFeedIndex(feed) { return state.feeds.indexOf(feed); }
   function getShortName(feed) {
     const other = state.feeds.find(item => item !== feed);
@@ -279,7 +289,7 @@
     return `<article class="food-compare-product">
       <p class="food-compare-product__marker">${getProductMarker(index)}</p>
       <p class="food-compare-product__brand">${escapeHtml(getBrand(feed))}</p>
-      <h2>${escapeHtml(feed.제품명 || '제품명 정보 없음')}</h2>
+      <h2><a class="food-compare-product__title-link" href="${escapeHtml(buildProductPathForCompare(feed))}">${escapeHtml(feed.제품명 || '제품명 정보 없음')}</a></h2>
       <p class="food-compare-product__meta">${escapeHtml(getSpeciesLabel())} · ${escapeHtml(getTypeLabel(feed.type))} · ${escapeHtml(feed.완전식여부 || '분류 확인중')}</p>
       <button class="food-compare-product__change" type="button" data-change-product="${index}">${getProductMarker(index)} 변경</button>
     </article>`;

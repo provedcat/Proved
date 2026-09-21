@@ -76,6 +76,29 @@
       .replace(/'/g, '&#39;');
   }
 
+  function isAnimalIngredient(text) {
+    const value = String(text || '').trim();
+    if (!value) return false;
+    const animalTerms = [
+      '닭고기','닭가슴살','닭간','닭지방','오리고기','오리육','오리 지방','칠면조','거위','메추리',
+      '쇠고기','소고기','우육','돼지고기','돈육','양고기','염소고기','산양','사슴고기','토끼고기',
+      '말고기','캥거루','연어','참치','고등어','정어리','청어','대구','명태','황태','가자미','광어',
+      '도미','송어','멸치','새우','크릴','오징어','문어','조개','홍합','생선','어류','어유',
+      '계란','달걀','난황','난백'
+    ];
+    if (animalTerms.some(term => value.includes(term))) return true;
+    return /\b(chicken|duck|turkey|goose|quail|beef|pork|lamb|goat|venison|rabbit|salmon|tuna|mackerel|sardine|herring|cod|fish|shrimp|krill|egg)\b/i.test(value);
+  }
+
+  function renderIngredientList(value) {
+    if (!value) return '';
+    return String(value).split(',').map(part => {
+      const trimmed = part.trim();
+      const html = escapeHtml(trimmed);
+      return isAnimalIngredient(trimmed) ? `<strong>${html}</strong>` : html;
+    }).join(', ');
+  }
+
   function slugify(value) {
     return String(value || '')
       .normalize('NFKC')
@@ -176,17 +199,17 @@
       .from(mappingTable)
       .select('tag_id')
       .eq(feedIdColumn, feed.id);
-    if (mappingError || !mappings?.length) return [];
+    if (mappingError || !mappings?.length) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const tagIds = [...new Set(mappings.map(row => row.tag_id).filter(Boolean))];
-    if (!tagIds.length) return [];
+    if (!tagIds.length) return feed.type === 'dry' ? ['익스트루전'] : [];
     const { data: tags, error: tagError } = await foodSb
       .from('food_tags')
       .select('id,label_ko,category,sort_order,is_active')
       .in('id', tagIds)
       .eq('is_active', true)
       .in('category', categories);
-    if (tagError) return [];
+    if (tagError) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const sorted = (tags || []).sort(compareTags);
     if (feed.type === 'wet') {
@@ -194,7 +217,19 @@
         .map(tag => String(tag.label_ko || '').trim())
         .filter(label => label && !/프리|없음|무점증제|무겔화제/.test(label));
     }
-    return sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
+    const processing = sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
+    if (!processing.length) return ['익스트루전'];
+
+    // RAWZ Meal Free Dry Food의 "Dehydrated"는 완제품 공법이 아니라
+    // 렌더링 밀(meal)을 쓰지 않은 탈수 원료 표현이므로 완제품은 익스트루전으로 분류한다.
+    const productName = String(feed.제품명 || '').normalize('NFKC').toLowerCase();
+    const brandName = String(feed.제조사 || '').normalize('NFKC').toLowerCase();
+    const isRawzMealFreeDry = feed.type === 'dry'
+      && (brandName.includes('rawz') || productName.includes('rawz') || productName.includes('로우즈'))
+      && (productName.includes('meal free') || productName.includes('밀프리') || productName.includes('밀 프리'));
+    if (isRawzMealFreeDry) return ['익스트루전'];
+
+    return processing.map(label => /^압출$/i.test(label) ? '익스트루전' : label);
   }
 
   function getRoleLabel(role) {
@@ -770,14 +805,15 @@
     const supplementalTraits = feed.type === 'wet'
       ? [...detailCharacteristics, ...(wetAdditives ? [wetAdditives] : [])]
       : detailCharacteristics;
+    // 기본 정보는 항상 6칸으로 유지한다. 부가특성 값이 없더라도 별도 셀을 추가/삭제하지 않는다.
     const basic = [
       ['대상', getSpeciesLabel()],
       ['형태', getTypeLabel(feed.type)],
       ['분류', getRoleLabel(feed.완전식여부)],
       ['주 단백질', feed.메인단백질 || '정보 없음'],
       ['원산지', feed.원산지 || '정보 없음'],
-      ['부가특성', supplementalTraits.join(' · ')]
-    ].filter(([, value]) => String(value || '').trim());
+      ['부가특성', supplementalTraits.join(' · ') || '—']
+    ];
 
     const nutritionRows = [
       ['조단백', feed.조단백, feed.dm_단백],
@@ -872,15 +908,18 @@
           <div class="food-mineral-grid">
             ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
             ${mineralCard('P · 인', formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '칼슘과 인의 등록 수치 비율')}
+            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '인을 1로 둔 칼슘과 인의 등록 수치 비율')}
           </div>
         </section>` : ''}
 
         ${feed.전성분 ? `
         <section class="food-detail-section" aria-labelledby="foodIngredientsHeading">
           ${sectionHeading('05', '원재료', 'foodIngredientsHeading')}
-          <p class="food-ingredients">${escapeHtml(feed.전성분)}</p>
-          ${feed.겔화제 ? `<div class="food-additive-row"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
+          <div class="food-ingredient-detail-grid">
+            <div class="food-ingredient-detail-item"><strong>주 원료</strong><span>${escapeHtml(feed.메인단백질 || '정보 없음')}</span></div>
+            <div class="food-ingredient-detail-item food-ingredient-detail-item--full"><strong>전체 성분</strong><p class="food-ingredients">${renderIngredientList(feed.전성분)}</p></div>
+            ${feed.type === 'wet' && feed.겔화제 ? `<div class="food-ingredient-detail-item"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
+          </div>
         </section>` : ''}
 
         <section class="food-detail-section" aria-labelledby="foodSourceHeading">
