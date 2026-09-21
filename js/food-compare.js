@@ -324,6 +324,7 @@
     return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
       ${insight}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
+        ${makeDisplayRow('칼로리', isPresent(a.final_me) ? Number(a.final_me) / 10 : null, isPresent(b.final_me) ? Number(b.final_me) / 10 : null, 'kcal', 1)}
         ${makeDisplayRow('단백질', a.조단백, b.조단백, 'g')}
         ${makeDisplayRow('지방', a.조지방, b.조지방, 'g')}
         ${makeDisplayRow('수분', a.수분, b.수분, 'ml')}
