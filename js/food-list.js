@@ -9,8 +9,8 @@
   const FOOD_LIST_TITLE = '고양이·강아지 사료 목록 | 프루브';
   const FOOD_LIST_DESCRIPTION = '프루브에 등록된 고양이·강아지 사료를 브랜드와 제품명으로 검색하고 열량, 수분, 칼슘·인 비율과 상세 영양정보를 확인합니다.';
   const TAG_CATEGORY_ORDER = [
-    'protein_source', 'life_stage', 'management_purpose', 'processing_method',
-    'ingredient_condition', 'preparation_type'
+    'ingredient_condition', 'processing_method', 'preparation_type',
+    'protein_source', 'life_stage'
   ];
   const TAG_CATEGORY_LABELS = {
     protein_source: '주 단백질원',
@@ -20,7 +20,13 @@
     ingredient_condition: '원재료 조건',
     preparation_type: '급여 형태'
   };
-  const TAG_CATEGORY_TAB_LABELS = { protein_source: '단백질', life_stage: '생애', management_purpose: '기능', processing_method: '제조', ingredient_condition: '원재료', preparation_type: '급여' };
+  const TAG_CATEGORY_TAB_LABELS = { protein_source: '단백질', life_stage: '생애', processing_method: '제조', ingredient_condition: '원재료', preparation_type: '제조' };
+  const TAG_FOLDER_ORDER = ['ingredient_condition', 'manufacturing', 'protein_source', 'life_stage'];
+  const TAG_FOLDER_LABELS = { ingredient_condition: '원재료', manufacturing: '제조', protein_source: '단백질', life_stage: '생애' };
+  const TAG_FOLDER_TITLES = { ingredient_condition: '원재료 조건', manufacturing: '제조 방식', protein_source: '주 단백질원', life_stage: '생애주기' };
+  function getTagFolder(category) {
+    return category === 'processing_method' || category === 'preparation_type' ? 'manufacturing' : category;
+  }
 
   const foodSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const state = {
@@ -485,24 +491,24 @@
 
   function renderConditionFinder() {
     if (!els.conditionFolders) return;
-    const categories = TAG_CATEGORY_ORDER.filter(category => state.tags.some(tag => tag.category === category));
+    const categories = TAG_FOLDER_ORDER.filter(folder => state.tags.some(tag => getTagFolder(tag.category) === folder));
     if (!categories.length) {
       els.conditionFolders.innerHTML = state.tagsLoading ? '' : '<p class="food-condition-empty">사용 가능한 조건이 아직 없습니다.</p>';
       els.selectedConditions.hidden = true; els.conditionReset.hidden = true; return;
     }
     if (!categories.includes(state.activeTagCategory)) state.activeTagCategory = categories[0];
     els.conditionFolders.innerHTML = categories.map((category, index) => {
-      const count = state.selectedTagIds.filter(id => state.tags.find(tag => String(tag.id) === id)?.category === category).length;
+      const count = state.selectedTagIds.filter(id => getTagFolder(state.tags.find(tag => String(tag.id) === id)?.category) === category).length;
       const active = category === state.activeTagCategory;
-      const tags = state.tags.filter(tag => tag.category === category).sort(compareTags);
+      const tags = state.tags.filter(tag => getTagFolder(tag.category) === category).sort(compareTags);
       const query = String(state.tagSearchQueries[category] || '');
       const normalized = normalizeConditionSearch(query);
       const visible = tags.filter(tag => !normalized || normalizeConditionSearch(tag.label_ko).includes(normalized)).length;
       return `<section class="condition-folder${active ? ' is-open' : ''}" style="--tab-index:${index};--layer-z:${active ? 60 : 10 + index}">
-        <button class="condition-folder__tab" type="button" data-category="${escapeHtml(category)}" aria-expanded="${active}" aria-controls="food-condition-${escapeHtml(category)}"><span>${escapeHtml(TAG_CATEGORY_TAB_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}</button>
+        <button class="condition-folder__tab" type="button" data-category="${escapeHtml(category)}" aria-expanded="${active}" aria-controls="food-condition-${escapeHtml(category)}"><span>${escapeHtml(TAG_FOLDER_LABELS[category])}</span>${count ? `<b>${count}</b>` : ''}</button>
         <div id="food-condition-${escapeHtml(category)}" class="condition-folder__body" ${active ? '' : 'hidden'}>
-          <h3>${escapeHtml(TAG_CATEGORY_LABELS[category])}</h3>
-          <div class="condition-tag-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input type="search" data-condition-search data-category="${escapeHtml(category)}" value="${escapeHtml(query)}" placeholder="조건 검색" aria-label="${escapeHtml(TAG_CATEGORY_LABELS[category])} 조건 검색" autocomplete="off"><button class="condition-tag-search__clear" type="button" data-condition-search-clear ${query ? '' : 'hidden'}>지우기</button></div>
+          <h3>${escapeHtml(TAG_FOLDER_TITLES[category])}</h3>
+          <div class="condition-tag-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input type="search" data-condition-search data-category="${escapeHtml(category)}" value="${escapeHtml(query)}" placeholder="조건 검색" aria-label="${escapeHtml(TAG_FOLDER_TITLES[category])} 조건 검색" autocomplete="off"><button class="condition-tag-search__clear" type="button" data-condition-search-clear ${query ? '' : 'hidden'}>지우기</button></div>
           <div class="condition-tags">${tags.map(tag => { const selected = state.selectedTagIds.includes(String(tag.id)); const searchText = normalizeConditionSearch(tag.label_ko); return `<button type="button" data-tag-id="${escapeHtml(tag.id)}" data-tag-search-text="${escapeHtml(searchText)}" aria-pressed="${selected}" ${normalized && !searchText.includes(normalized) ? 'hidden' : ''}>${escapeHtml(tag.label_ko)}${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`; }).join('')}<p class="condition-tags-empty" ${visible ? 'hidden' : ''}>일치하는 조건이 없습니다.</p></div>
         </div></section>`;
     }).join('');
