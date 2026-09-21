@@ -72,6 +72,9 @@ button { cursor: pointer; }
 .food-compare-product__marker { margin: 0 0 10px; color: var(--compare-number); font-size: 11px; font-weight: 800; letter-spacing: .04em; }
 .food-compare-product__brand { margin: 0 0 8px; color: var(--compare-muted); font-size: 11px; font-weight: 800; letter-spacing: .05em; }
 .food-compare-product h2 { margin: 0; font-size: clamp(20px, 2.4vw, 30px); font-weight: 780; line-height: 1.3; letter-spacing: -.035em; }
+.food-compare-product__title-link { color: inherit; text-decoration: none; }
+.food-compare-product__title-link:hover { color: var(--compare-blue); }
+.food-compare-product__title-link:focus-visible { outline: 2px solid rgba(53, 104, 255, .42); outline-offset: 3px; }
 .food-compare-product__meta { margin: 12px 0 0; color: var(--compare-muted); font-size: 12px; }
 .food-compare-product__change {
   min-height: 38px;
