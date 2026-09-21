@@ -219,6 +219,16 @@
     }
     const processing = sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
     if (!processing.length) return ['익스트루전'];
+
+    // RAWZ Meal Free Dry Food의 "Dehydrated"는 완제품 공법이 아니라
+    // 렌더링 밀(meal)을 쓰지 않은 탈수 원료 표현이므로 완제품은 익스트루전으로 분류한다.
+    const productName = String(feed.제품명 || '').normalize('NFKC').toLowerCase();
+    const brandName = String(feed.제조사 || '').normalize('NFKC').toLowerCase();
+    const isRawzMealFreeDry = feed.type === 'dry'
+      && (brandName.includes('rawz') || productName.includes('rawz') || productName.includes('로우즈'))
+      && (productName.includes('meal free') || productName.includes('밀프리') || productName.includes('밀 프리'));
+    if (isRawzMealFreeDry) return ['익스트루전'];
+
     return processing.map(label => /^압출$/i.test(label) ? '익스트루전' : label);
   }
 
