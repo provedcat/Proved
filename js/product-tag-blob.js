@@ -27,6 +27,8 @@
     protein_source: 3
   };
   const BLOB_TAG_PRIORITY = {
+    soft_semi_moist: -20,
+    fresh_cooked: -19,
     thickener_free: 0,
     gum_agar_free: 1,
     carrageenan_free: 2
@@ -50,6 +52,8 @@
     dry_food: '#E6A364',
     wet_food: '#76C5D5',
     freeze_dried_food: '#95CBB5',
+    soft_semi_moist: '#A58ADB',
+    fresh_cooked: '#8B9FE3',
     chicken: '#E68968',
     salmon: '#E77888',
     duck: '#CF8B75',
@@ -71,7 +75,9 @@
     '강아지 전연령': '전연령',
     '피부·알레르기': '피부·알레르기',
     '無육분': 'Meal-free\n無 육분',
-    '무점증제': 'Thickener-free\n無 점증제'
+    '무점증제': 'Thickener-free\n無 점증제',
+    '소프트·반습식': '소프트·반습식',
+    '화식': '화식'
   };
 
   const PRESETS = {
