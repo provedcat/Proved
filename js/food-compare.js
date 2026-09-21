@@ -65,8 +65,18 @@
     const formatted = formatValue(value, unit, digits);
     return formatted === null ? missingCell() : escapeHtml(formatted);
   }
+  function displayValueCell(value, unit, digits = 2) {
+    const formatted = formatValue(value, unit, digits);
+    return formatted === null ? '-' : escapeHtml(formatted);
+  }
   function makeRow(label, first, second, unit, digits = 2) {
     return `<tr><th scope="row">${escapeHtml(label)}</th><td>${valueCell(first, unit, digits)}</td><td>${valueCell(second, unit, digits)}</td></tr>`;
+  }
+  function makeDisplayRow(label, first, second, unit, digits = 2) {
+    return `<tr><th scope="row">${escapeHtml(label)}</th><td>${displayValueCell(first, unit, digits)}</td><td>${displayValueCell(second, unit, digits)}</td></tr>`;
+  }
+  function hasPair(a, b, key) {
+    return isPresent(a?.[key]) && isPresent(b?.[key]);
   }
   function insightMissing() {
     return '<p class="food-compare-insight is-missing">비교할 정보가 부족합니다.</p>';
