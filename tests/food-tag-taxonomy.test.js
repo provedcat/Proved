@@ -17,7 +17,7 @@ test('단백질원은 일반 → 해산물 → 특수 그룹 순서를 유지한
   for (const slug of ['goose','bonito','hoki','shrimp','krill','squid','octopus','mussel','shellfish','wallaby']) {
     assert.ok(sql.includes(`'${slug}'`), `${slug} taxonomy가 필요합니다.`);
   }
-  assert.match(sql, /'insect',400.*'horse',410.*'wild_boar',420.*'quail',430.*'bison',440.*'venison',450.*'goat',460.*'kangaroo',480.*'rabbit',490/s);
+  assert.match(sql, /'insect',400.*'horse',410.*'wild_boar',420.*'quail',430.*'bison',440.*'venison',450.*'goat',460.*'wallaby'.*470.*'kangaroo',480.*'rabbit',490/s);
 });
 
 test('확장 단백질원은 신규·수정 사료와 기존 사료 모두에 동기화된다', async () => {
