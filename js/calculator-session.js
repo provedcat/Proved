@@ -241,7 +241,15 @@ function restoreCalculatorDraft() {
     });
   }
 
-  const savedWetFeeds = Array.isArray(draft.wetFeeds) ? draft.wetFeeds.slice(0, 3) : [];
+  // Empty wet slots are UI state, not feeding data. Do not reopen them on restore:
+  // the calculator must start with one wet slot and only expand when the user
+  // explicitly adds another feed (or when a saved slot actually contains data).
+  const savedWetFeeds = Array.isArray(draft.wetFeeds)
+    ? draft.wetFeeds.slice(0, 3).filter(saved => (
+        saved?.feed ||
+        String(saved?.input || '').trim()
+      ))
+    : [];
   const targetWetSlotCount = Math.max(1, savedWetFeeds.length);
   while (state.wetSlotIds.length < targetWetSlotCount && typeof addWetSlot === 'function') addWetSlot();
 
