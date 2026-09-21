@@ -278,8 +278,8 @@
   }
 
   function renderDmGroup(a, b) {
-    const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
-    const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
+    const calciumRow = hasLabeledMineralPair(a, b, '칼슘') && hasPair(a, b, 'dm_칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
+    const phosphorusRow = hasLabeledMineralPair(a, b, '인') && hasPair(a, b, 'dm_인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
       <p class="food-simulation-note">수분 차이를 제거해 사료 자체의 영양 농도를 비교합니다.</p>
       ${dmInsight(a, b)}
