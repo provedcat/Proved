@@ -247,8 +247,7 @@ function restoreCalculatorDraft() {
   const savedWetFeeds = Array.isArray(draft.wetFeeds)
     ? draft.wetFeeds.slice(0, 3).filter(saved => (
         saved?.feed ||
-        String(saved?.input || '').trim() ||
-        String(saved?.ratio || '').trim()
+        String(saved?.input || '').trim()
       ))
     : [];
   const targetWetSlotCount = Math.max(1, savedWetFeeds.length);
