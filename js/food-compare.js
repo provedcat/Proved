@@ -296,7 +296,17 @@
   function renderAsFed100gGroup(a, b) {
     const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, 'g', 3) : '';
     const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, 'g', 3) : '';
+    const insight = compareInsight(
+      a.조단백,
+      b.조단백,
+      '단백질',
+      'g',
+      '같은 100g을 급여하면',
+      1,
+      '더 급여 가능합니다'
+    );
     return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
+      ${insight}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeDisplayRow('단백질', a.조단백, b.조단백, 'g')}
         ${makeDisplayRow('지방', a.조지방, b.조지방, 'g')}
