@@ -793,14 +793,15 @@
     const supplementalTraits = feed.type === 'wet'
       ? [...detailCharacteristics, ...(wetAdditives ? [wetAdditives] : [])]
       : detailCharacteristics;
+    // 기본 정보는 항상 6칸으로 유지한다. 부가특성 값이 없더라도 별도 셀을 추가/삭제하지 않는다.
     const basic = [
       ['대상', getSpeciesLabel()],
       ['형태', getTypeLabel(feed.type)],
       ['분류', getRoleLabel(feed.완전식여부)],
       ['주 단백질', feed.메인단백질 || '정보 없음'],
       ['원산지', feed.원산지 || '정보 없음'],
-      ['부가특성', supplementalTraits.join(' · ')]
-    ].filter(([, value]) => String(value || '').trim());
+      ['부가특성', supplementalTraits.join(' · ') || '—']
+    ];
 
     const nutritionRows = [
       ['조단백', feed.조단백, feed.dm_단백],
