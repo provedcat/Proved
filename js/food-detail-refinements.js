@@ -96,11 +96,11 @@
     return trimmed.includes('.') ? trimmed : `${trimmed}.0`;
   }
 
-  // DB의 ca_p_ratio는 Ca/P 값이다. 화면에서는 Ca를 1로 고정해 1:P 상대값으로 표시한다.
+  // DB의 ca_p_ratio는 Ca/P 값이다. 화면에서는 인(P)을 1로 고정해 Ca:1로 표시한다.
   function normalizeRatio(caOverP) {
     const ratio = Number(caOverP);
     if (!Number.isFinite(ratio) || ratio <= 0) return '—';
-    return `1:${trimFixed(1 / ratio, 2)}`;
+    return `${trimFixed(ratio, 2)}:1`;
   }
 
   function readOriginalRatio(root) {
