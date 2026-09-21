@@ -75,6 +75,17 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+  function isAnimalIngredient(text) {
+    return /(닭고기|닭|오리고기|오리|칠면조|거위|메추리|쇠고기|소고기|우육|돼지고기|돈육|양고기|염소고기|산양|사슴고기|토끼고기|말고기|캥거루|연어|참치|고등어|정어리|청어|대구|명태|황태|가자미|광어|도미|송어|멸치|새우|크릴|오징어|문어|조개|홍합|생선|어류|어유|계란|달걀|난황|난백|chicken|duck|turkey|goose|quail|beef|pork|lamb|goat|venison|rabbit|salmon|tuna|mackerel|sardine|herring|cod|fish|shrimp|krill|egg)/i.test(text);
+  }
+  function renderIngredientList(value) {
+    if (!value) return '';
+    return String(value).split(',').map(part => {
+      const trimmed = part.trim();
+      const html = escapeHtml(trimmed);
+      return isAnimalIngredient(trimmed) ? `<strong>${html}</strong>` : html;
+    }).join(', ');
+  }
 
   function slugify(value) {
     return String(value || '')
@@ -833,14 +844,14 @@
           <div class="food-mineral-grid">
             ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
             ${mineralCard('P · 인', formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '칼슘과 인의 등록 수치 비율')}
+            ${mineralCard('Ca:P', isPresent(feed.ca_p_ratio) ? `${formatNumber(feed.ca_p_ratio, 2)} : 1` : '—', '인을 1로 둔 칼슘과 인의 등록 수치 비율')}
           </div>
         </section>` : ''}
 
         ${feed.전성분 ? `
         <section class="food-detail-section" aria-labelledby="foodIngredientsHeading">
           ${sectionHeading('05', '원재료', 'foodIngredientsHeading')}
-          <p class="food-ingredients">${escapeHtml(feed.전성분)}</p>
+          <p class="food-ingredients">${renderIngredientList(feed.전성분)}</p>
           ${feed.겔화제 ? `<div class="food-additive-row"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
         </section>` : ''}
 
