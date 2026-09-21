@@ -76,6 +76,29 @@
       .replace(/'/g, '&#39;');
   }
 
+  function isAnimalIngredient(text) {
+    const value = String(text || '').trim();
+    if (!value) return false;
+    const animalTerms = [
+      '닭고기','닭가슴살','닭간','닭지방','오리고기','오리육','오리 지방','칠면조','거위','메추리',
+      '쇠고기','소고기','우육','돼지고기','돈육','양고기','염소고기','산양','사슴고기','토끼고기',
+      '말고기','캥거루','연어','참치','고등어','정어리','청어','대구','명태','황태','가자미','광어',
+      '도미','송어','멸치','새우','크릴','오징어','문어','조개','홍합','생선','어류','어유',
+      '계란','달걀','난황','난백'
+    ];
+    if (animalTerms.some(term => value.includes(term))) return true;
+    return /\b(chicken|duck|turkey|goose|quail|beef|pork|lamb|goat|venison|rabbit|salmon|tuna|mackerel|sardine|herring|cod|fish|shrimp|krill|egg)\b/i.test(value);
+  }
+
+  function renderIngredientList(value) {
+    if (!value) return '';
+    return String(value).split(',').map(part => {
+      const trimmed = part.trim();
+      const html = escapeHtml(trimmed);
+      return isAnimalIngredient(trimmed) ? `<strong>${html}</strong>` : html;
+    }).join(', ');
+  }
+
   function slugify(value) {
     return String(value || '')
       .normalize('NFKC')
@@ -872,15 +895,18 @@
           <div class="food-mineral-grid">
             ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
             ${mineralCard('P · 인', formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '칼슘과 인의 등록 수치 비율')}
+            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '인을 1로 둔 칼슘과 인의 등록 수치 비율')}
           </div>
         </section>` : ''}
 
         ${feed.전성분 ? `
         <section class="food-detail-section" aria-labelledby="foodIngredientsHeading">
           ${sectionHeading('05', '원재료', 'foodIngredientsHeading')}
-          <p class="food-ingredients">${escapeHtml(feed.전성분)}</p>
-          ${feed.겔화제 ? `<div class="food-additive-row"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
+          <div class="food-ingredient-detail-grid">
+            <div class="food-ingredient-detail-item"><strong>주 원료</strong><span>${escapeHtml(feed.메인단백질 || '정보 없음')}</span></div>
+            <div class="food-ingredient-detail-item food-ingredient-detail-item--full"><strong>전체 성분</strong><p class="food-ingredients">${renderIngredientList(feed.전성분)}</p></div>
+            ${feed.type === 'wet' && feed.겔화제 ? `<div class="food-ingredient-detail-item"><strong>겔화제 · 점증제</strong><span>${escapeHtml(feed.겔화제)}</span></div>` : ''}
+          </div>
         </section>` : ''}
 
         <section class="food-detail-section" aria-labelledby="foodSourceHeading">
