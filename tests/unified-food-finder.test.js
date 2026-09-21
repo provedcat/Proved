@@ -79,7 +79,7 @@ test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제�
   assert.match(blob, /history\.state/);
   assert.match(blob, /params\.get\('id'\)/);
   assert.match(blob, /const \{ feedId, species \} = target/);
-  assert.match(html, /product-tag-blob\.js\?v=20260918-detail-route-v1/);
+  assert.match(html, /product-tag-blob\.js\?v=20260921-soft-fresh-tags-v1/);
 });
 
 test('상세 화면 후처리는 공용 렌더 observer 하나를 재사용한다', async () => {
@@ -109,4 +109,13 @@ test('사료 하위 메뉴는 사료 찾기와 등록 요청만 노출한다', a
   assert.match(foodBlock, /사료 찾기/);
   assert.match(foodBlock, /등록 요청/);
   assert.doesNotMatch(foodBlock, /조건으로 찾기|사료 목록/);
+});
+
+
+test('소프트·반습식과 화식은 Blob 제조 태그에서 우선 노출한다', async () => {
+  const source = await read('js/product-tag-blob.js');
+  assert.match(source, /soft_semi_moist: -20/);
+  assert.match(source, /fresh_cooked: -19/);
+  assert.match(source, /soft_semi_moist: '#A58ADB'/);
+  assert.match(source, /fresh_cooked: '#8B9FE3'/);
 });
