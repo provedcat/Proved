@@ -316,12 +316,19 @@
   }
 
   function renderMineralGroup(a, b) {
+    const calciumRow = hasPair(a, b, 'eb_칼슘') ? makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '') : '';
+    const phosphorusRow = hasPair(a, b, 'eb_인') ? makeRow('인', a.eb_인, b.eb_인, '') : '';
+    const ratioRow = hasPair(a, b, 'ca_p_ratio') ? makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1') : '';
+    if (!calciumRow && !phosphorusRow && !ratioRow) return '';
+    const insight = hasPair(a, b, 'eb_인')
+      ? compareInsight(a.eb_인, b.eb_인, '인 함량', 'g', '같은 1,000kcal를 급여하면')
+      : '';
     return `<div class="food-compare-group"><h3>칼슘 · 인 <span class="food-compare-group__unit">단위: g/1,000kcal</span></h3>
-      ${compareInsight(a.eb_인, b.eb_인, '인 함량', 'g', '같은 1,000kcal를 급여하면')}
+      ${insight}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
-        ${makeRow('칼슘', a.eb_칼슘, b.eb_칼슘, '')}
-        ${makeRow('인', a.eb_인, b.eb_인, '')}
-        ${makeRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1')}
+        ${calciumRow}
+        ${phosphorusRow}
+        ${ratioRow}
       </tbody></table></div>`;
   }
 
