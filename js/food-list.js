@@ -54,7 +54,7 @@
     'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
     'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
     'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
-    'calorie_confidence', 'calorie_note', 'needs_calorie_review', '쿠팡_링크', 'brand_id',
+    'calorie_confidence', 'needs_calorie_review', '쿠팡_링크', 'brand_id',
     'brands(name,official_url)'
   ].join(',');
   const detailColumnsWithoutCoupang = detailColumns
@@ -163,6 +163,38 @@
   function getFeedSemanticClass(feed) {
     const type = feed?.type === 'wet' ? 'wet' : feed?.type === 'dry' ? 'dry' : '';
     return type ? `is-${feed?.species || 'cat'}-${type}` : '';
+  }
+
+  async function getDetailCharacteristicTags(feed) {
+    if (!feed?.id) return [];
+    const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const categories = feed.type === 'wet'
+      ? ['preparation_type', 'ingredient_condition']
+      : ['processing_method'];
+    const { data: mappings, error: mappingError } = await foodSb
+      .from(mappingTable)
+      .select('tag_id')
+      .eq(feedIdColumn, feed.id);
+    if (mappingError || !mappings?.length) return [];
+
+    const tagIds = [...new Set(mappings.map(row => row.tag_id).filter(Boolean))];
+    if (!tagIds.length) return [];
+    const { data: tags, error: tagError } = await foodSb
+      .from('food_tags')
+      .select('id,label_ko,category,sort_order,is_active')
+      .in('id', tagIds)
+      .eq('is_active', true)
+      .in('category', categories);
+    if (tagError) return [];
+
+    const sorted = (tags || []).sort(compareTags);
+    if (feed.type === 'wet') {
+      return sorted
+        .map(tag => String(tag.label_ko || '').trim())
+        .filter(label => label && !/프리|없음|무점증제|무겔화제/.test(label));
+    }
+    return sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
   }
 
   function getRoleLabel(role) {
@@ -606,6 +638,7 @@
     }
 
     els.detailStatus.textContent = '';
+    data._detailCharacteristics = await getDetailCharacteristicTags(data);
     renderDetail(data);
   }
 
@@ -732,13 +765,19 @@
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
     const semanticClass = getFeedSemanticClass(feed);
+    const detailCharacteristics = Array.isArray(feed._detailCharacteristics) ? feed._detailCharacteristics : [];
+    const wetAdditives = feed.type === 'wet' && feed.겔화제 ? String(feed.겔화제).trim() : '';
+    const supplementalTraits = feed.type === 'wet'
+      ? [...detailCharacteristics, ...(wetAdditives ? [wetAdditives] : [])]
+      : detailCharacteristics;
     const basic = [
       ['대상', getSpeciesLabel()],
       ['형태', getTypeLabel(feed.type)],
       ['분류', getRoleLabel(feed.완전식여부)],
       ['주 단백질', feed.메인단백질 || '정보 없음'],
-      ['원산지', feed.원산지 || '정보 없음']
-    ];
+      ['원산지', feed.원산지 || '정보 없음'],
+      ['부가특성', supplementalTraits.join(' · ')]
+    ].filter(([, value]) => String(value || '').trim());
 
     const nutritionRows = [
       ['조단백', feed.조단백, feed.dm_단백],
@@ -849,7 +888,7 @@
           <dl class="food-source-list">
             <div class="food-source-row"><dt>영양정보</dt><dd class="${feed.verified === true ? '' : 'is-review'}">${escapeHtml(verificationLabel)}</dd></div>
             <div class="food-source-row"><dt>열량</dt><dd>${escapeHtml(calorieSourceLabel)}</dd></div>
-            ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 메모</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ''}
+
           </dl>
         </section>
         ${coupangCta}
