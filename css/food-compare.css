@@ -56,9 +56,9 @@ button { cursor: pointer; }
 }
 
 .food-compare-hero { padding: 48px 56px 54px; border-bottom: 1px solid var(--compare-line); }
-.food-compare-eyebrow { margin: 0 0 15px; color: var(--compare-muted); font-size: 11px; font-weight: 800; letter-spacing: .14em; }
-.food-compare-hero h1 { margin: 0; font-size: clamp(42px, 6vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -.055em; }
-.food-compare-hero > p:last-child { margin: 20px 0 0; color: var(--compare-muted); font-size: 14px; line-height: 1.65; }
+.food-compare-eyebrow { margin: 0 0 15px; color: var(--compare-blue); font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+.food-compare-hero h1 { margin: 0; color: var(--compare-blue); font-size: clamp(42px, 6vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -.055em; }
+.food-compare-hero > p:last-child { margin: 20px 0 0; color: var(--compare-blue); font-size: 14px; line-height: 1.65; }
 .food-compare-status { padding: 70px 56px; color: var(--compare-muted); text-align: center; }
 .food-compare-status:empty { display: none; }
 
