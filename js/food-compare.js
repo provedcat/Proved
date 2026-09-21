@@ -244,7 +244,6 @@
         ${renderDmGroup(a, b)}
         ${renderAsFed100gGroup(a, b)}
         ${renderEnergyGroup(a, b)}
-        ${renderMineralGroup(a, b)}
         ${renderMoistureGroup(a, b)}
         ${renderIngredientGroup(a, b)}
       </section>
@@ -266,7 +265,7 @@
   function renderDisplayedGroup(a, b) {
     const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, '%', 3) : '';
     const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, '%', 3) : '';
-    return `<div class="food-compare-group"><h3>표시성분</h3>
+    return `<div class="food-compare-group"><h3>라벨 표시성분</h3>
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeDisplayRow('단백질', a.조단백, b.조단백, '%')}
         ${makeDisplayRow('지방', a.조지방, b.조지방, '%')}
@@ -282,6 +281,7 @@
     const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
     const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
+      <p class="food-simulation-note">수분 차이를 제거해 사료 자체의 영양 농도를 비교합니다.</p>
       ${dmInsight(a, b)}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('단백질', a.dm_단백, b.dm_단백, '%')}
@@ -296,6 +296,9 @@
   function renderAsFed100gGroup(a, b) {
     const calciumRow = hasLabeledMineralPair(a, b, '칼슘') ? makeDisplayRow('칼슘', a.칼슘, b.칼슘, 'g', 3) : '';
     const phosphorusRow = hasLabeledMineralPair(a, b, '인') ? makeDisplayRow('인', a.인, b.인, 'g', 3) : '';
+    const ratioRow = hasLabeledMineralPair(a, b, '칼슘') && hasLabeledMineralPair(a, b, '인') && hasPair(a, b, 'ca_p_ratio')
+      ? makeDisplayRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1', 2)
+      : '';
 
     const proteinDiff = hasPair(a, b, '조단백') ? Math.abs(Number(a.조단백) - Number(b.조단백)) : null;
     const fatDiff = hasPair(a, b, '조지방') ? Math.abs(Number(a.조지방) - Number(b.조지방)) : null;
@@ -330,17 +333,39 @@
         ${makeDisplayRow('수분', a.수분, b.수분, 'ml')}
         ${calciumRow}
         ${phosphorusRow}
+        ${ratioRow}
       </tbody></table></div>`;
   }
 
   function renderEnergyGroup(a, b) {
     const proteinA = per100Kcal(a, 'eb_단백');
     const proteinB = per100Kcal(b, 'eb_단백');
+    const fatA = per100Kcal(a, 'eb_지방');
+    const fatB = per100Kcal(b, 'eb_지방');
+    let insight = insightMissing();
+    if ([proteinA, proteinB, fatA, fatB].every(isPresent)) {
+      const proteinDiff = Number(proteinA) - Number(proteinB);
+      const fatDiff = Number(fatA) - Number(fatB);
+      const parts = [];
+      if (Math.abs(proteinDiff) > Math.max(Math.abs(proteinA), Math.abs(proteinB), 1) * 0.02) {
+        const higher = proteinDiff > 0 ? getShortName(a) : getShortName(b);
+        parts.push(`${escapeHtml(higher)}이 단백질은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 많고`);
+      } else {
+        parts.push('단백질은 큰 차이가 없고');
+      }
+      if (Math.abs(fatDiff) > Math.max(Math.abs(fatA), Math.abs(fatB), 1) * 0.02) {
+        const higher = fatDiff > 0 ? getShortName(a) : getShortName(b);
+        parts.push(`${escapeHtml(higher)}가 지방은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 많습니다.`);
+      } else {
+        parts.push('지방도 큰 차이가 없습니다.');
+      }
+      insight = `<p class="food-compare-insight">같은 100kcal를 먹이면 ${parts.join(' ')}</p>`;
+    }
     return `<div class="food-compare-group"><h3>같은 100kcal 기준</h3>
-      ${pairValueInsight(proteinA, proteinB, '단백질', 'g', '같은 100kcal를 급여하면')}
+      ${insight}
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('단백질', proteinA, proteinB, 'g')}
-        ${makeRow('지방', per100Kcal(a, 'eb_지방'), per100Kcal(b, 'eb_지방'), 'g')}
+        ${makeRow('지방', fatA, fatB, 'g')}
         ${makeRow('탄수화물 추정치', per100Kcal(a, 'eb_탄수화물'), per100Kcal(b, 'eb_탄수화물'), 'g')}
       </tbody></table></div>`;
   }
@@ -389,12 +414,23 @@
       <div class="food-compare-ingredients">${renderIngredient(a)}${renderIngredient(b)}</div></div>`;
   }
 
+  function isAnimalIngredient(text) {
+    return /(닭|오리|칠면조|거위|메추리|소|쇠고기|우육|돼지|돈육|양고기|양|염소|산양|사슴|토끼|말고기|캥거루|연어|참치|고등어|정어리|청어|대구|명태|황태|가자미|광어|도미|송어|멸치|새우|크릴|오징어|문어|조개|홍합|생선|어류|어유|계란|달걀|난황|난백|chicken|duck|turkey|goose|quail|beef|pork|lamb|goat|venison|rabbit|salmon|tuna|mackerel|sardine|herring|cod|fish|shrimp|krill|egg)/i.test(text);
+  }
+  function renderIngredientList(value) {
+    if (!value) return escapeHtml('비교할 정보가 부족합니다');
+    return String(value).split(',').map(part => {
+      const trimmed = part.trim();
+      const html = escapeHtml(trimmed);
+      return isAnimalIngredient(trimmed) ? `<strong>${html}</strong>` : html;
+    }).join(', ');
+  }
   function renderIngredient(feed) {
     const index = getFeedIndex(feed);
     return `<article class="food-compare-ingredient"><h4>${escapeHtml(getProductMarker(index))} <span>${escapeHtml(getBrand(feed))}</span></h4><dl>
       <div><dt>주 단백질원</dt><dd>${escapeHtml(feed.메인단백질 || '비교할 정보가 부족합니다')}</dd></div>
       <div><dt>겔화제 · 점증제</dt><dd>${escapeHtml(feed.겔화제 || '별도로 확인된 정보가 없습니다')}</dd></div>
-      </dl><p class="food-compare-ingredient__full">${escapeHtml(feed.전성분 || '비교할 정보가 부족합니다')}</p></article>`;
+      </dl><p class="food-compare-ingredient__full">${renderIngredientList(feed.전성분)}</p></article>`;
   }
 
   function renderSimulationControl() {
@@ -422,7 +458,7 @@
     const kcalA = simulationCalories(a, grams);
     const kcalB = simulationCalories(b, grams);
     const sentence = isPresent(kcalA) && isPresent(kcalB)
-      ? `A 제품 ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalA, 1)}kcal, B 제품 ${formatNumber(grams, 0)}g은 약 ${formatNumber(kcalB, 1)}kcal입니다.`
+      ? `현재 ${formatNumber(grams, 0)}g 급여 기준으로는 열량 차이가 약 ${formatNumber(Math.abs(Number(kcalA) - Number(kcalB)), 1)}kcal입니다.`
       : '비교할 정보가 부족합니다.';
     result.innerHTML = `<p class="food-compare-insight${isPresent(kcalA) && isPresent(kcalB) ? '' : ' is-missing'}">${escapeHtml(sentence)}</p>
       <table class="food-compare-table"><thead><tr><th>항목</th><th>A 제품<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th><th>B 제품<br>${isPresent(grams) ? `${formatNumber(grams, 0)}g` : '급여량 확인 필요'}</th></tr></thead><tbody>
