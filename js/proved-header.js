@@ -45,18 +45,16 @@
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
     { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
     { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/editorial/', '/archive/'] },
-    { label: '로그인', auth: true, match: '/my/' }
+    { label: '로그인', auth: true, matches: ['/my/'] }
   ];
 
   const sectionItems = {
     cat: [
       { label: '계산기', id: 'navCalculator', page: 'calculatorPage' },
-      { label: '체중 추이', id: 'navWeightTrend', page: 'weightTrendPage' },
       { label: '습식 탐험', id: 'navWetFoodBeta', page: 'wetFoodBetaPage', hidden: true }
     ],
     dog: [
-      { label: '계산기', id: 'navCalculator', page: 'calculatorPage' },
-      { label: '체중 추이', id: 'navWeightTrend', page: 'weightTrendPage' }
+      { label: '계산기', id: 'navCalculator', page: 'calculatorPage' }
     ],
     food: [
       { label: '사료 찾기', href: '/food/', match: '/food/' },
