@@ -20,9 +20,9 @@
     ingredient_condition: '원재료 조건',
     preparation_type: '급여 형태'
   };
-  const TAG_CATEGORY_TAB_LABELS = { protein_source: '단백질', life_stage: '생애', management_purpose: '기능', processing_method: '제조', ingredient_condition: '원재료', preparation_type: '제조' };
+  const TAG_CATEGORY_TAB_LABELS = { protein_source: '단백질', life_stage: '생애', management_purpose: '기능성', processing_method: '제조', ingredient_condition: '원재료', preparation_type: '제조' };
   const TAG_FOLDER_ORDER = ['ingredient_condition', 'manufacturing', 'protein_source', 'life_stage', 'management_purpose'];
-  const TAG_FOLDER_LABELS = { ingredient_condition: '원재료', manufacturing: '제조', protein_source: '단백질', life_stage: '생애', management_purpose: '기능' };
+  const TAG_FOLDER_LABELS = { ingredient_condition: '원재료', manufacturing: '제조', protein_source: '단백질', life_stage: '생애', management_purpose: '기능성' };
   const TAG_FOLDER_TITLES = { ingredient_condition: '원재료 조건', manufacturing: '제조 방식', protein_source: '주 단백질원', life_stage: '생애주기', management_purpose: '영양 관리' };
   function getTagFolder(category) {
     return category === 'processing_method' || category === 'preparation_type' ? 'manufacturing' : category;
