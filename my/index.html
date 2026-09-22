@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>마이페이지 | 프루브</title>
+  <meta name="description" content="내 반려동물과 관심 사료, 최근 비교 기록을 한곳에서 확인하는 프루브 마이페이지입니다.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#8F92FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260818-color-system-v2">
+  <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
+  <link rel="stylesheet" href="/css/my-page.css?v=20260922-my-foundation-v1">
+  <script defer src="/js/proved-header.js?v=20260922-my-nav-v1"></script>
+  <script defer src="/js/my-page.js?v=20260922-my-foundation-v1"></script>
+</head>
+<body class="my-body">
+  <div class="my-site-shell">
+    <header data-proved-header="my"></header>
+
+    <main class="my-page" id="myPage">
+      <section class="my-auth-gate" id="myAuthGate" hidden aria-labelledby="myAuthTitle">
+        <p class="my-eyebrow">MY PAGE</p>
+        <h1 id="myAuthTitle">내 반려동물의 기록을<br>한곳에서 이어보세요.</h1>
+        <p>로그인하면 저장한 반려동물과 앞으로 추가될 관심 사료, 비교 기록을 같은 계정에서 이어볼 수 있습니다.</p>
+        <div class="my-auth-actions">
+          <button type="button" data-my-login="kakao">카카오로 로그인</button>
+          <button type="button" data-my-login="google">Google로 로그인</button>
+        </div>
+        <p class="my-auth-status" id="myAuthStatus" role="status"></p>
+      </section>
+
+      <div id="myContent" hidden>
+        <header class="my-hero">
+          <div>
+            <p class="my-eyebrow">MY PAGE</p>
+            <h1>마이페이지</h1>
+            <p>내 반려동물과 저장한 선택을 한곳에서 이어봅니다.</p>
+          </div>
+          <div class="my-hero-orb" aria-hidden="true"></div>
+        </header>
+
+        <section class="my-section my-section--pets" aria-labelledby="myPetsTitle">
+          <div class="my-section-heading">
+            <div>
+              <p class="my-section-number">01</p>
+              <h2 id="myPetsTitle">나의 반려동물</h2>
+            </div>
+            <p id="myPetCount" class="my-section-meta"></p>
+          </div>
+
+          <div id="myPetStatus" class="my-status" role="status">반려동물을 불러오는 중입니다.</div>
+          <div id="myPetRail" class="my-pet-rail" aria-live="polite"></div>
+        </section>
+
+        <section class="my-section" aria-labelledby="myFavoritesTitle">
+          <div class="my-section-heading">
+            <div>
+              <p class="my-section-number">02</p>
+              <h2 id="myFavoritesTitle">관심 사료</h2>
+            </div>
+          </div>
+
+          <div class="my-segmented" role="group" aria-label="관심 사료 대상 필터">
+            <button type="button" class="is-active" data-favorite-filter="all" aria-pressed="true">전체</button>
+            <button type="button" data-favorite-filter="cat" aria-pressed="false">고양이</button>
+            <button type="button" data-favorite-filter="dog" aria-pressed="false">강아지</button>
+          </div>
+
+          <div class="my-favorite-rail" id="myFavoriteRail">
+            <article class="my-empty-card my-empty-card--favorite">
+              <div class="my-empty-symbol" aria-hidden="true">♡</div>
+              <strong>아직 저장한 관심 사료가 없습니다.</strong>
+              <p>사료 상세에서 즐겨찾기한 제품이 최근 저장한 순서대로 이곳에 표시됩니다.</p>
+              <a href="/food/">사료 찾기</a>
+            </article>
+          </div>
+        </section>
+
+        <section class="my-section" aria-labelledby="myCompareTitle">
+          <div class="my-section-heading">
+            <div>
+              <p class="my-section-number">03</p>
+              <h2 id="myCompareTitle">최근 비교</h2>
+            </div>
+          </div>
+
+          <div class="my-compare-list" id="myCompareList">
+            <article class="my-empty-compare">
+              <div>
+                <strong>아직 비교 기록이 없습니다.</strong>
+                <p>두 사료를 비교하면 최근 비교한 조합이 시간순으로 이곳에 쌓입니다.</p>
+              </div>
+              <a href="/food/">사료 비교 시작</a>
+            </article>
+          </div>
+        </section>
+
+        <div class="my-account-row">
+          <button type="button" id="myLogoutButton">로그아웃</button>
+          <p id="myAccountStatus" role="status"></p>
+        </div>
+      </div>
+    </main>
+
+    <footer data-proved-footer></footer>
+  </div>
+</body>
+</html>
