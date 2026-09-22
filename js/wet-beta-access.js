@@ -23,7 +23,7 @@ function updateWetBetaNavigation(allowed) {
 
   const nav = button.closest('.proved-section-subnav');
   button.classList.toggle('hidden', !allowed);
-  if (nav) nav.dataset.visibleItems = allowed ? '3' : '2';
+  if (nav) nav.dataset.visibleItems = allowed ? '2' : '1';
 }
 
 function loadWetFoodBetaScript() {
