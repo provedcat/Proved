@@ -47,6 +47,9 @@ async function refreshAuthUI() {
 
   const user = await getCurrentUser();
   if (!user) {
+    if (typeof window.provedSetHeaderAuthState === 'function') {
+      window.provedSetHeaderAuthState(false);
+    }
     resetRecentFeedButtons();
     state.currentUser = null;
     state.selectedSavedCatId = null;
@@ -64,6 +67,9 @@ async function refreshAuthUI() {
   }
 
   state.currentUser = user;
+  if (typeof window.provedSetHeaderAuthState === 'function') {
+    window.provedSetHeaderAuthState(true);
+  }
   loggedOutAuth.classList.add('hidden');
   loggedInAuth.classList.remove('hidden');
   // Do not expose provider metadata or the internal Supabase UUID in the UI.
