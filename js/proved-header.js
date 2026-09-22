@@ -26,13 +26,13 @@
   ensureLayoutSystem();
 
   const globalItems = [
-    { label: '고양이', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
-    { label: '강아지', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
+    { label: '고양이 계산기', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
+    { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
     { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
     { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/editorial/', '/archive/'] },
-    { label: '로그인', auth: true }
+    { label: '로그인', auth: true, match: '/my/' }
   ];
 
   const sectionItems = {
@@ -68,7 +68,12 @@
     return null;
   }
 
-  function runAuthAction() {
+  function runAuthAction(event) {
+    const item = event?.currentTarget;
+    if (item?.dataset.provedAuthState === 'logged-in') {
+      window.location.href = '/my/';
+      return;
+    }
     if (typeof window.openAuthSheet === 'function') {
       window.openAuthSheet();
       return;
@@ -178,8 +183,8 @@
       <p class="proved-site-footer__title">사이트맵</p>
       <nav class="proved-site-footer__nav" aria-label="사이트맵">
         <a href="/">홈</a>
-        <a href="/cat-food-calculator/">고양이</a>
-        <a href="/dog-food-calculator/">강아지</a>
+        <a href="/cat-food-calculator/">고양이 계산기</a>
+        <a href="/dog-food-calculator/">강아지 계산기</a>
         <a href="/food/">사료</a>
         <a href="/guide/calculation-method/">아카이브</a>
       </nav>
@@ -188,7 +193,8 @@
 
   function setAuthLabel(loggedIn) {
     document.querySelectorAll('[data-proved-auth="true"]').forEach(item => {
-      item.textContent = loggedIn ? '로그인됨' : '로그인';
+      item.textContent = loggedIn ? 'MY' : '로그인';
+      item.dataset.provedAuthState = loggedIn ? 'logged-in' : 'logged-out';
     });
   }
 
