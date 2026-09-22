@@ -18,6 +18,11 @@
 
 * { box-sizing: border-box; }
 
+.my-auth-gate[hidden],
+#myContent[hidden] {
+  display: none !important;
+}
+
 html { background: #F7F6FC; }
 
 body.my-body {
