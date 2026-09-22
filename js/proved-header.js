@@ -25,6 +25,19 @@
   ensureColorSystem();
   ensureLayoutSystem();
 
+  const AUTH_STORAGE_KEY = 'sb-qpklvtgnhrdmzxzlstpp-auth-token';
+
+  function hasPersistedAuthSession() {
+    try {
+      const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return false;
+      const stored = JSON.parse(raw);
+      return Boolean(stored && (stored.access_token || stored.refresh_token) && stored.user);
+    } catch (error) {
+      return false;
+    }
+  }
+
   const globalItems = [
     { label: '고양이 계산기', href: '/cat-food-calculator/', match: '/cat-food-calculator/' },
     { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
@@ -187,6 +200,7 @@
         <a href="/dog-food-calculator/">강아지 계산기</a>
         <a href="/food/">사료</a>
         <a href="/guide/calculation-method/">아카이브</a>
+        <a href="/my/">MY</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
   }
@@ -257,7 +271,11 @@
   document.querySelectorAll('[data-proved-header]').forEach(renderHeader);
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
+  setAuthLabel(hasPersistedAuthSession());
   window.addEventListener('proved:auth-state', event => setAuthLabel(Boolean(event.detail?.loggedIn)));
+  window.addEventListener('storage', event => {
+    if (event.key === AUTH_STORAGE_KEY) setAuthLabel(hasPersistedAuthSession());
+  });
   enterSpeciesCalculatorByDefault();
   enhanceFeedPickerSearch();
   if (new URLSearchParams(window.location.search).get('login') === '1') {
