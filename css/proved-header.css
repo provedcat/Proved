@@ -376,6 +376,7 @@ body:has(.guide-shell) {
 .food-shell,
 .guide-shell,
 .ed-shell,
+.my-site-shell,
 .proved-site-footer {
   box-sizing: border-box;
   width: min(calc(100% - (2 * var(--proved-page-gutter))), var(--proved-content-max)) !important;
@@ -403,6 +404,7 @@ body:has(.guide-shell) {
   .food-shell,
   .guide-shell,
   .ed-shell,
+  .my-site-shell,
   .proved-site-footer {
     width: calc(100% - (2 * var(--proved-page-gutter-mobile))) !important;
   }
