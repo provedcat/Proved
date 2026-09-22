@@ -31,7 +31,8 @@ body {
 .food-shell,
 .guide-shell,
 .fr-shell,
-.ed-shell {
+.ed-shell,
+.my-site-shell {
   box-sizing: border-box !important;
   width: min(calc(100% - (2 * var(--proved-layout-gutter))), var(--proved-layout-max)) !important;
   max-width: var(--proved-layout-max) !important;
