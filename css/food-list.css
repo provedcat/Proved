@@ -757,6 +757,56 @@ button { cursor: pointer; }
 .food-source-row dd { margin: 0; color: var(--food-ink); font-size: 13px; font-weight: 700; line-height: 1.55; }
 .food-source-row dd.is-review { color: var(--food-blue); }
 
+.food-source-favorite {
+  appearance: none;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--food-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 760;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.food-source-favorite svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+
+.food-source-favorite path {
+  fill: #ffffff;
+  stroke: #c9baff;
+  stroke-width: .85;
+  stroke-linejoin: round;
+  transition: fill .16s ease, stroke .16s ease;
+}
+
+.food-source-favorite.is-selected {
+  color: var(--food-blue);
+}
+
+.food-source-favorite.is-selected path {
+  fill: #b7a8ff;
+  stroke: #b7a8ff;
+}
+
+.food-source-favorite:focus-visible {
+  outline: 2px solid rgba(53,104,255,.25);
+  outline-offset: 4px;
+}
+
+.food-source-favorite:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
 .food-empty {
   padding: 76px 20px;
   border-bottom: 1px solid var(--food-line);
