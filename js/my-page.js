@@ -14,6 +14,20 @@
     { accent: '#C7B8FF', soft: '#F2EEFF' }
   ];
 
+  const FOOD_PALETTE = [
+    { accent: '#8F92FF', soft: '#EEF0FF', glow: '#C3C7F4' },
+    { accent: '#C8A8E9', soft: '#F3EAFA', glow: '#E3AADD' },
+    { accent: '#E3AADD', soft: '#F8EAF6', glow: '#F6BCBA' },
+    { accent: '#F6BCBA', soft: '#FCEAE8', glow: '#F2DDDC' },
+    { accent: '#C7B8FF', soft: '#F2EEFF', glow: '#C8A8E9' },
+    { accent: '#D9B7C9', soft: '#FAEEF3', glow: '#F2DDDC' }
+  ];
+
+  const state = {
+    favoriteRows: [],
+    favoriteFilter: 'all'
+  };
+
   const els = {};
 
   function $(id) {
@@ -40,6 +54,54 @@
 
   function paletteForPet(pet) {
     return PET_PALETTE[hashText(pet.id || pet.name) % PET_PALETTE.length];
+  }
+
+  function paletteForFood(food) {
+    return FOOD_PALETTE[hashText((food.species || '') + ':' + (food.id || '')) % FOOD_PALETTE.length];
+  }
+
+  function slugify(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9가-힣]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-')
+      .slice(0, 96)
+      .replace(/-+$/g, '') || 'food';
+  }
+
+  function getFoodBrand(food) {
+    const relation = Array.isArray(food?.brands) ? food.brands[0] : food?.brands;
+    return relation?.name || food?.제조사 || '브랜드 정보 없음';
+  }
+
+  function buildFoodPath(food) {
+    const brand = getFoodBrand(food);
+    const base = slugify(brand + ' ' + (food?.제품명 || ''));
+    const stableId = String(food?.id || '').replace(/-/g, '').slice(0, 8).toLowerCase();
+    return '/food/' + (food?.species === 'dog' ? 'dog' : 'cat') + '/' + base + '--' + (stableId || 'detail') + '/';
+  }
+
+  function foodTypeLabel(type) {
+    return type === 'wet' ? '습식사료' : type === 'dry' ? '건사료' : '형태 확인중';
+  }
+
+  function formatFoodKcal(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '—';
+    return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(number) + ' kcal/kg';
+  }
+
+  function formatFoodRatio(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) return '—';
+    return number.toLocaleString('ko-KR', { maximumFractionDigits: 2 }) + ' : 1';
+  }
+
+  function favoriteHeartIcon() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4.7 16.1 2.5 11.7C.7 8.1 2.7 4.5 6.2 4.5c2.1 0 3.8 1.1 4.8 2.8.4.7 1.6.7 2 0 1-1.7 2.7-2.8 4.8-2.8 3.5 0 5.5 3.6 3.7 7.2C19.3 16.1 12 20.5 12 20.5Z"/></svg>';
   }
 
   function speciesLabel(species) {
@@ -161,6 +223,112 @@
     }).join('');
   }
 
+  async function loadFavoriteFoods(userId) {
+    els.favoriteRail.innerHTML = '<div class="my-favorite-loading">관심 사료를 불러오는 중입니다.</div>';
+
+    const favoritesResponse = await sb
+      .from('favorite_foods')
+      .select('id,species,feed_id,dog_feed_id,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (favoritesResponse.error) throw favoritesResponse.error;
+
+    const favorites = favoritesResponse.data || [];
+    if (!favorites.length) {
+      state.favoriteRows = [];
+      renderFavoriteFoods();
+      return;
+    }
+
+    const catIds = favorites
+      .filter(function (row) { return row.species === 'cat' && row.feed_id; })
+      .map(function (row) { return row.feed_id; });
+    const dogIds = favorites
+      .filter(function (row) { return row.species === 'dog' && row.dog_feed_id; })
+      .map(function (row) { return row.dog_feed_id; });
+
+    const selectColumns = 'id,type,제조사,제품명,완전식여부,메인단백질,final_me,ca_p_ratio,brands(name)';
+    const queries = [];
+    queries.push(catIds.length
+      ? sb.from('feeds').select(selectColumns).in('id', catIds)
+      : Promise.resolve({ data: [], error: null }));
+    queries.push(dogIds.length
+      ? sb.from('dog_feeds').select(selectColumns).in('id', dogIds)
+      : Promise.resolve({ data: [], error: null }));
+
+    const results = await Promise.all(queries);
+    const failed = results.find(function (result) { return result.error; });
+    if (failed) throw failed.error;
+
+    const productMap = new Map();
+    (results[0].data || []).forEach(function (food) {
+      productMap.set('cat:' + String(food.id), { ...food, species: 'cat' });
+    });
+    (results[1].data || []).forEach(function (food) {
+      productMap.set('dog:' + String(food.id), { ...food, species: 'dog' });
+    });
+
+    state.favoriteRows = favorites.map(function (favorite) {
+      const productId = favorite.species === 'dog' ? favorite.dog_feed_id : favorite.feed_id;
+      const food = productMap.get(favorite.species + ':' + String(productId));
+      return food ? { ...food, favorite_created_at: favorite.created_at } : null;
+    }).filter(Boolean);
+
+    renderFavoriteFoods();
+  }
+
+  function renderFavoriteFoods() {
+    const filtered = state.favoriteFilter === 'all'
+      ? state.favoriteRows
+      : state.favoriteRows.filter(function (food) { return food.species === state.favoriteFilter; });
+
+    if (!state.favoriteRows.length) {
+      els.favoriteRail.innerHTML =
+        '<article class="my-empty-card my-empty-card--favorite">' +
+        '<div class="my-empty-symbol" aria-hidden="true">♡</div>' +
+        '<strong>아직 저장한 관심 사료가 없습니다.</strong>' +
+        '<p>사료 찾기에서 하트를 누른 제품이 최근 저장한 순서대로 이곳에 표시됩니다.</p>' +
+        '<a href="/food/">사료 찾기</a>' +
+        '</article>';
+      return;
+    }
+
+    if (!filtered.length) {
+      els.favoriteRail.innerHTML =
+        '<article class="my-empty-card my-empty-card--favorite">' +
+        '<div class="my-empty-symbol" aria-hidden="true">♡</div>' +
+        '<strong>' + escapeHtml(state.favoriteFilter === 'dog' ? '저장한 강아지 사료가 없습니다.' : '저장한 고양이 사료가 없습니다.') + '</strong>' +
+        '<p>다른 필터를 선택하거나 사료 찾기에서 관심 제품을 저장해 보세요.</p>' +
+        '<a href="/food/">사료 찾기</a>' +
+        '</article>';
+      return;
+    }
+
+    els.favoriteRail.innerHTML = filtered.map(function (food) {
+      const palette = paletteForFood(food);
+      const brand = getFoodBrand(food);
+      const meta = speciesLabel(food.species) + ' · ' + foodTypeLabel(food.type);
+
+      return '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '" ' +
+        'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';--favorite-glow:' + palette.glow + ';">' +
+        '<div class="my-favorite-card__visual">' +
+          '<span class="my-favorite-card__type">' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
+          '<span class="my-favorite-card__heart">' + favoriteHeartIcon() + '</span>' +
+        '</div>' +
+        '<div class="my-favorite-card__body">' +
+          '<p class="my-favorite-card__meta">' + escapeHtml(meta) + '</p>' +
+          '<p class="my-favorite-card__brand">' + escapeHtml(brand) + '</p>' +
+          '<strong>' + escapeHtml(food.제품명 || '제품명 정보 없음') + '</strong>' +
+          '<div class="my-favorite-card__stats">' +
+            '<span><small>열량</small><b>' + escapeHtml(formatFoodKcal(food.final_me)) + '</b></span>' +
+            '<span><small>Ca:P</small><b>' + escapeHtml(formatFoodRatio(food.ca_p_ratio)) + '</b></span>' +
+          '</div>' +
+        '</div>' +
+      '</a>';
+    }).join('');
+  }
+
   async function renderForCurrentUser() {
     const userResponse = await sb.auth.getUser();
     const user = userResponse.data && userResponse.data.user;
@@ -173,10 +341,18 @@
     showLoggedIn();
 
     try {
-      await loadPets(user.id);
+      await Promise.all([
+        loadPets(user.id),
+        loadFavoriteFoods(user.id)
+      ]);
     } catch (error) {
       console.error('My Page load failed:', error);
-      els.petStatus.textContent = '반려동물 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      if (els.petStatus) {
+        els.petStatus.textContent = '마이페이지 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      }
+      if (els.favoriteRail) {
+        els.favoriteRail.innerHTML = '<div class="my-favorite-loading">관심 사료를 불러오지 못했습니다.</div>';
+      }
     }
   }
 
@@ -223,6 +399,8 @@
           item.classList.toggle('is-active', active);
           item.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
+        state.favoriteFilter = button.dataset.favoriteFilter || 'all';
+        renderFavoriteFoods();
       });
     });
   }
@@ -234,6 +412,7 @@
     els.petStatus = $('myPetStatus');
     els.petRail = $('myPetRail');
     els.petCount = $('myPetCount');
+    els.favoriteRail = $('myFavoriteRail');
     els.logoutButton = $('myLogoutButton');
     els.accountStatus = $('myAccountStatus');
 
@@ -250,7 +429,10 @@
     sb.auth.onAuthStateChange(function (event, session) {
       if (event === 'SIGNED_IN' && session && session.user) {
         showLoggedIn();
-        loadPets(session.user.id).catch(function (error) {
+        Promise.all([
+          loadPets(session.user.id),
+          loadFavoriteFoods(session.user.id)
+        ]).catch(function (error) {
           console.error('My Page reload failed:', error);
         });
       }
