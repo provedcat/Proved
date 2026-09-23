@@ -336,13 +336,19 @@ body.my-body {
   outline-offset: 3px;
 }
 
-.my-favorite-card {
+.my-favorite-card-wrap {
   --favorite-accent: #8F92FF;
   --favorite-soft: #EEF0FF;
   --favorite-glow: #C3C7F4;
   position: relative;
   min-height: 326px;
   scroll-snap-align: start;
+}
+
+.my-favorite-card {
+  position: relative;
+  width: 100%;
+  min-height: 326px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -402,14 +408,21 @@ body.my-body {
 }
 
 .my-favorite-card__heart {
+  appearance: none;
   position: absolute;
-  z-index: 2;
-  right: 17px;
-  top: 15px;
-  width: 34px;
-  height: 34px;
+  z-index: 4;
+  right: 15px;
+  top: 13px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .my-favorite-card__heart svg {
@@ -419,6 +432,19 @@ body.my-body {
 
 .my-favorite-card__heart path {
   fill: var(--favorite-accent);
+  stroke: var(--favorite-accent);
+  stroke-width: .75;
+  stroke-linejoin: round;
+}
+
+.my-favorite-card__heart:focus-visible {
+  outline: 2px solid rgba(53,104,255,.28);
+  outline-offset: 2px;
+}
+
+.my-favorite-card__heart:disabled {
+  opacity: .45;
+  cursor: wait;
 }
 
 .my-favorite-card__body {
@@ -507,12 +533,19 @@ body.my-body {
 }
 
 @media (hover: hover) {
-  .my-favorite-card {
-    transition: transform .18s ease, box-shadow .18s ease;
+  .my-favorite-card-wrap {
+    transition: transform .18s ease;
   }
 
-  .my-favorite-card:hover {
+  .my-favorite-card {
+    transition: box-shadow .18s ease;
+  }
+
+  .my-favorite-card-wrap:hover {
     transform: translateY(-2px);
+  }
+
+  .my-favorite-card-wrap:hover .my-favorite-card {
     box-shadow: 0 20px 48px rgba(83,72,132,.11);
   }
 }
