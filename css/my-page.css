@@ -267,6 +267,10 @@ body.my-body {
   background: linear-gradient(135deg, var(--my-blue), var(--my-periwinkle));
 }
 
+.my-favorite-carousel {
+  position: relative;
+}
+
 .my-favorite-rail {
   display: grid;
   grid-auto-flow: column;
@@ -275,7 +279,61 @@ body.my-body {
   overflow-x: auto;
   padding: 2px 2px 12px;
   scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
   scrollbar-width: none;
+}
+
+.my-favorite-carousel__nav {
+  appearance: none;
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(143,146,255,.22);
+  border-radius: 50%;
+  color: var(--my-blue);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 10px 28px rgba(78,69,126,.12);
+  transform: translateY(-50%);
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.my-favorite-carousel__nav--prev { left: -19px; }
+.my-favorite-carousel__nav--next { right: -19px; }
+
+.my-favorite-carousel__nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.my-favorite-carousel__nav:hover:not(:disabled) {
+  border-color: rgba(53,104,255,.34);
+  background: #fff;
+}
+
+.my-favorite-carousel__nav:disabled {
+  opacity: .28;
+  cursor: default;
+}
+
+.my-favorite-carousel__nav[hidden] {
+  display: none !important;
+}
+
+.my-favorite-carousel__nav:focus-visible {
+  outline: 2px solid rgba(53,104,255,.34);
+  outline-offset: 3px;
 }
 
 .my-favorite-card {
@@ -606,6 +664,10 @@ body.my-body {
 
   .my-favorite-rail {
     grid-auto-columns: minmax(250px, 78%);
+  }
+
+  .my-favorite-carousel__nav {
+    display: none !important;
   }
 
   .my-empty-compare {
