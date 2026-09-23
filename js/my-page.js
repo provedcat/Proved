@@ -221,6 +221,7 @@
         '<span class="my-pet-accent" aria-hidden="true"></span>' +
         '</a>';
     }).join('');
+    resetFavoriteCarousel();
   }
 
   async function loadFavoriteFoods(userId) {
@@ -278,6 +279,35 @@
     renderFavoriteFoods();
   }
 
+  function updateFavoriteCarouselNav() {
+    if (!els.favoriteRail || !els.favoritePrev || !els.favoriteNext) return;
+
+    const maxScroll = Math.max(0, els.favoriteRail.scrollWidth - els.favoriteRail.clientWidth);
+    const hasOverflow = maxScroll > 4;
+    els.favoritePrev.hidden = !hasOverflow;
+    els.favoriteNext.hidden = !hasOverflow;
+
+    if (!hasOverflow) return;
+
+    els.favoritePrev.disabled = els.favoriteRail.scrollLeft <= 4;
+    els.favoriteNext.disabled = els.favoriteRail.scrollLeft >= maxScroll - 4;
+  }
+
+  function resetFavoriteCarousel() {
+    if (!els.favoriteRail) return;
+    els.favoriteRail.scrollLeft = 0;
+    window.requestAnimationFrame(updateFavoriteCarouselNav);
+  }
+
+  function scrollFavoriteCarousel(direction) {
+    if (!els.favoriteRail) return;
+    const card = els.favoriteRail.querySelector('.my-favorite-card, .my-empty-card');
+    const styles = window.getComputedStyle(els.favoriteRail);
+    const gap = parseFloat(styles.columnGap || styles.gap) || 14;
+    const step = card ? card.getBoundingClientRect().width + gap : els.favoriteRail.clientWidth * 0.8;
+    els.favoriteRail.scrollBy({ left: direction * step, behavior: 'smooth' });
+  }
+
   function renderFavoriteFoods() {
     const filtered = state.favoriteFilter === 'all'
       ? state.favoriteRows
@@ -291,6 +321,7 @@
         '<p>사료 찾기에서 하트를 누른 제품이 최근 저장한 순서대로 이곳에 표시됩니다.</p>' +
         '<a href="/food/">사료 찾기</a>' +
         '</article>';
+      resetFavoriteCarousel();
       return;
     }
 
@@ -302,6 +333,7 @@
         '<p>다른 필터를 선택하거나 사료 찾기에서 관심 제품을 저장해 보세요.</p>' +
         '<a href="/food/">사료 찾기</a>' +
         '</article>';
+      resetFavoriteCarousel();
       return;
     }
 
@@ -413,6 +445,8 @@
     els.petRail = $('myPetRail');
     els.petCount = $('myPetCount');
     els.favoriteRail = $('myFavoriteRail');
+    els.favoritePrev = $('myFavoritePrev');
+    els.favoriteNext = $('myFavoriteNext');
     els.logoutButton = $('myLogoutButton');
     els.accountStatus = $('myAccountStatus');
 
@@ -423,6 +457,10 @@
     });
 
     els.logoutButton.addEventListener('click', logout);
+    els.favoritePrev?.addEventListener('click', function () { scrollFavoriteCarousel(-1); });
+    els.favoriteNext?.addEventListener('click', function () { scrollFavoriteCarousel(1); });
+    els.favoriteRail?.addEventListener('scroll', updateFavoriteCarouselNav, { passive: true });
+    window.addEventListener('resize', updateFavoriteCarouselNav);
     bindFavoriteFilters();
     renderForCurrentUser();
 
