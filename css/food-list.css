@@ -441,7 +441,7 @@ button { cursor: pointer; }
   stroke-width: 1.7;
   transition: transform .18s ease;
 }
-.food-result:hover .food-result__arrow { transform: translateX(4px); }
+.food-result:hover .food-result__arrow { opacity: .72; }
 
 .food-result__favorite {
   appearance: none;
