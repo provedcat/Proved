@@ -151,13 +151,13 @@
       const latest = latestWeightByPet.get(String(pet.id));
       const meta = speciesLabel(pet.species) + ' · ' + calculateAgeLabel(pet.birth_date);
 
-      return '<article class="my-pet-card" style="--pet-accent:' + palette.accent + ';--pet-soft:' + palette.soft + ';">' +
+      return '<a class="my-pet-card" href="/my/pet/?id=' + encodeURIComponent(pet.id) + '" style="--pet-accent:' + palette.accent + ';--pet-soft:' + palette.soft + ';">' +
         '<div class="my-pet-icon">' + petIcon(pet.species) + '</div>' +
         '<strong>' + escapeHtml(pet.name || '이름 없음') + '</strong>' +
         '<p>' + escapeHtml(meta) + '</p>' +
         '<p>' + escapeHtml(formatWeight(latest && latest.weight_kg)) + '</p>' +
         '<span class="my-pet-accent" aria-hidden="true"></span>' +
-        '</article>';
+        '</a>';
     }).join('');
   }
 

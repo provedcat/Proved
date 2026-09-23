@@ -161,6 +161,8 @@ body.my-body {
 
 .my-pet-card {
   --pet-accent: #C8A8E9;
+  color: inherit;
+  text-decoration: none;
   --pet-soft: #F2EEFF;
   scroll-snap-align: start;
   min-height: 182px;

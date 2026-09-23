@@ -52,15 +52,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- ✅ html2canvas: 카드 이미지 캡처용 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css?v=20260816-surface-consistency-v1">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260816-surface-consistency-v1">
-  <link rel="stylesheet" href="/css/proved-header.css?v=20260816-surface-consistency-v1">
-  <script defer src="/js/proved-header.js?v=20260814-unified-chrome-v1"></script>
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
+  <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
 </head>
 <body class="flex justify-center">
 <div id="provedEntry" class="proved-entry" aria-label="프루브 시작 화면">
@@ -182,64 +181,6 @@
       <div id="wetFoodBetaRoot"></div>
     </section>
 
-    <section id="weightTrendPage" class="hidden space-y-5">
-      <div class="pc-trend-hero p-6 bg-blue-50 rounded-3xl border border-blue-100 space-y-2">
-        <p class="text-sm font-bold text-gray-500 leading-relaxed">
-          저장된 체중 기록을 날짜별로 확인합니다.
-        </p>
-      </div>
-
-      <div id="weightTrendLoginNotice" class="hidden p-6 bg-gray-50 rounded-3xl border border-gray-100 text-center space-y-4">
-        <div>
-          <p class="text-lg font-black text-gray-800">로그인이 필요합니다</p>
-          <p class="mt-2 text-sm font-bold text-gray-500 leading-relaxed">
-            내 반려동물의 체중 기록과 변화 그래프를 보려면 로그인해 주세요.
-          </p>
-        </div>
-        <button type="button" onclick="openAuthSheet()"
-          class="w-full py-4 bg-[#2F6FED] text-white text-sm font-black rounded-2xl shadow-sm">
-          로그인하기
-        </button>
-      </div>
-
-      <div id="weightTrendContent" class="hidden space-y-5">
-        <section class="pc-trend-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
-          <div>
-            <h3 class="text-base font-black text-gray-800">반려동물 선택</h3>
-            <p class="mt-1 text-xs font-bold text-gray-400">체중 추이를 확인할 반려동물을 선택하세요.</p>
-          </div>
-          <div id="trendCatList" class="grid grid-cols-1 gap-2"></div>
-          <p id="trendCatMsg" class="hidden text-xs font-bold text-gray-400"></p>
-        </section>
-
-        <section id="trendSummaryBox" class="grid grid-cols-3 gap-2">
-          <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-center">
-            <p class="pc-summary-label text-[11px] font-black text-blue-400">최근 체중</p>
-            <p id="trendLatestWeight" class="mt-1 text-lg font-black text-gray-800">—</p>
-          </div>
-          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-center">
-            <p class="pc-summary-label text-[11px] font-black text-gray-400">시작 체중</p>
-            <p id="trendStartWeight" class="mt-1 text-lg font-black text-gray-800">—</p>
-          </div>
-          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-center">
-            <p class="pc-summary-label text-[11px] font-black text-gray-400">변화량</p>
-            <p id="trendWeightDelta" class="mt-1 text-lg font-black text-gray-800">—</p>
-          </div>
-        </section>
-
-        <section class="pc-trend-card p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4">
-          <div>
-            <h3 class="text-base font-black text-gray-800">체중 차트</h3>
-            <p class="mt-1 text-xs font-bold text-gray-400">기록 날짜 기준으로 체중 변화를 표시합니다.</p>
-          </div>
-          <div class="relative h-[260px]">
-            <canvas id="weightTrendChart" aria-label="고양이 체중 추이 그래프" role="img"></canvas>
-          </div>
-          <p id="trendEmptyMsg" class="hidden p-4 bg-gray-50 rounded-2xl text-center text-sm font-bold text-gray-400"></p>
-        </section>
-
-      </div>
-    </section>
 
   </main>
 <footer class="proved-site-footer">
@@ -488,12 +429,10 @@ function showPage(pageName) {
 
   const pages = {
     calculatorPage: document.getElementById('calculatorPage'),
-    weightTrendPage: document.getElementById('weightTrendPage'),
     wetFoodBetaPage: document.getElementById('wetFoodBetaPage')
   };
   const buttons = {
     calculatorPage: document.getElementById('navCalculator'),
-    weightTrendPage: document.getElementById('navWeightTrend'),
     wetFoodBetaPage: document.getElementById('navWetFoodBeta')
   };
 
@@ -508,10 +447,6 @@ function showPage(pageName) {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
-
-  if (pageName === 'weightTrendPage' && typeof refreshWeightTrendPage === 'function' && !state.isApplyingActivePet) {
-    refreshWeightTrendPage();
-  }
 }
 
 
@@ -602,8 +537,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="js/recent-feed.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="js/saved-cats.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="js/auth.js?v=20260728-calculator-pet-load"></script>
-<script src="js/wet-beta-access.js?v=20260814-unified-chrome-v1"></script>
+<script src="js/wet-beta-access.js?v=20260922-weight-nav-v1"></script>
 <script src="js/share-card.js?v=20260725-feeding-flow-2"></script>
-<script src="js/weight-trend.js?v=20260812-legacy-cleanup-v2"></script>
 </body>
 </html>
