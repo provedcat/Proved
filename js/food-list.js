@@ -102,6 +102,8 @@
     button.setAttribute('aria-pressed', selected ? 'true' : 'false');
     button.setAttribute('aria-label', selected ? '즐겨찾기 해제' : '즐겨찾기 추가');
     button.title = selected ? '즐겨찾기 해제' : '즐겨찾기 추가';
+    const label = button.querySelector('[data-favorite-label]');
+    if (label) label.textContent = selected ? '저장됨' : '저장하지 않음';
   }
 
   function refreshRenderedFavoriteButtons() {
@@ -546,6 +548,13 @@
       if (!feed) return;
       event.preventDefault(); openDetail(feed);
     });
+    els.detailContent.addEventListener('click', event => {
+      const favorite = event.target.closest('[data-favorite-feed-id]');
+      if (!favorite) return;
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFavorite(favorite);
+    });
     els.loadMore.addEventListener('click', () => loadFeeds(false));
     els.back.addEventListener('click', event => {
       const finder = history.state?.foodFinder;
@@ -949,6 +958,7 @@
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
     const semanticClass = getFeedSemanticClass(feed);
+    const favorite = state.favoriteKeys.has(favoriteKey(state.species, feed.id));
     const detailCharacteristics = Array.isArray(feed._detailCharacteristics) ? feed._detailCharacteristics : [];
     const wetAdditives = feed.type === 'wet' && feed.겔화제 ? String(feed.겔화제).trim() : '';
     const supplementalTraits = feed.type === 'wet'
@@ -1076,7 +1086,18 @@
           <dl class="food-source-list">
             <div class="food-source-row"><dt>영양정보</dt><dd class="${feed.verified === true ? '' : 'is-review'}">${escapeHtml(verificationLabel)}</dd></div>
             <div class="food-source-row"><dt>열량</dt><dd>${escapeHtml(calorieSourceLabel)}</dd></div>
-
+            <div class="food-source-row">
+              <dt>즐겨찾기</dt>
+              <dd>
+                <button class="food-source-favorite${favorite ? ' is-selected' : ''}" type="button"
+                  data-favorite-feed-id="${escapeHtml(feed.id)}" data-favorite-species="${escapeHtml(state.species)}"
+                  aria-pressed="${favorite ? 'true' : 'false'}" aria-label="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
+                  title="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
+                  ${favoriteHeartIcon()}
+                  <span data-favorite-label>${favorite ? '저장됨' : '저장하지 않음'}</span>
+                </button>
+              </dd>
+            </div>
           </dl>
         </section>
         ${coupangCta}
