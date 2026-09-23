@@ -317,7 +317,7 @@
 
   function scrollFavoriteCarousel(direction) {
     if (!els.favoriteRail) return;
-    const card = els.favoriteRail.querySelector('.my-favorite-card, .my-empty-card');
+    const card = els.favoriteRail.querySelector('.my-favorite-card-wrap, .my-empty-card');
     const styles = window.getComputedStyle(els.favoriteRail);
     const gap = parseFloat(styles.columnGap || styles.gap) || 14;
     const step = card ? card.getBoundingClientRect().width + gap : els.favoriteRail.clientWidth * 0.8;
@@ -358,23 +358,69 @@
       const brand = getFoodBrand(food);
       const meta = speciesLabel(food.species) + ' · ' + foodTypeLabel(food.type);
 
-      return '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '" ' +
+      return '<article class="my-favorite-card-wrap" ' +
         'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';--favorite-glow:' + palette.glow + ';">' +
-        '<div class="my-favorite-card__visual">' +
-          '<span class="my-favorite-card__type">' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
-          '<span class="my-favorite-card__heart">' + favoriteHeartIcon() + '</span>' +
-        '</div>' +
-        '<div class="my-favorite-card__body">' +
-          '<p class="my-favorite-card__meta">' + escapeHtml(meta) + '</p>' +
-          '<p class="my-favorite-card__brand">' + escapeHtml(brand) + '</p>' +
-          '<strong>' + escapeHtml(food.제품명 || '제품명 정보 없음') + '</strong>' +
-          '<div class="my-favorite-card__stats">' +
-            '<span><small>열량</small><b>' + escapeHtml(formatFoodKcal(food.final_me)) + '</b></span>' +
-            '<span><small>Ca:P</small><b>' + escapeHtml(formatFoodRatio(food.ca_p_ratio)) + '</b></span>' +
+        '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '">' +
+          '<div class="my-favorite-card__visual">' +
+            '<span class="my-favorite-card__type">' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
           '</div>' +
-        '</div>' +
-      '</a>';
+          '<div class="my-favorite-card__body">' +
+            '<p class="my-favorite-card__meta">' + escapeHtml(meta) + '</p>' +
+            '<p class="my-favorite-card__brand">' + escapeHtml(brand) + '</p>' +
+            '<strong>' + escapeHtml(food.제품명 || '제품명 정보 없음') + '</strong>' +
+            '<div class="my-favorite-card__stats">' +
+              '<span><small>열량</small><b>' + escapeHtml(formatFoodKcal(food.final_me)) + '</b></span>' +
+              '<span><small>Ca:P</small><b>' + escapeHtml(formatFoodRatio(food.ca_p_ratio)) + '</b></span>' +
+            '</div>' +
+          '</div>' +
+        '</a>' +
+        '<button class="my-favorite-card__heart" type="button" ' +
+          'data-my-remove-favorite="' + escapeHtml(food.id) + '" data-my-favorite-species="' + escapeHtml(food.species) + '" ' +
+          'aria-label="즐겨찾기 해제" title="즐겨찾기 해제">' +
+          favoriteHeartIcon() +
+        '</button>' +
+      '</article>';
     }).join('');
+  }
+
+  async function removeFavoriteFood(button) {
+    const feedId = String(button?.dataset.myRemoveFavorite || '');
+    const species = button?.dataset.myFavoriteSpecies === 'dog' ? 'dog' : 'cat';
+    if (!feedId || button.disabled) return;
+
+    const userResponse = await sb.auth.getUser();
+    const user = userResponse.data && userResponse.data.user;
+    if (!user) return;
+
+    button.disabled = true;
+    button.setAttribute('aria-label', '즐겨찾기 해제 중');
+
+    try {
+      let query = sb
+        .from('favorite_foods')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('species', species);
+
+      query = species === 'dog'
+        ? query.eq('dog_feed_id', feedId)
+        : query.eq('feed_id', feedId);
+
+      const response = await query;
+      if (response.error) throw response.error;
+
+      state.favoriteRows = state.favoriteRows.filter(function (food) {
+        return !(String(food.id) === feedId && food.species === species);
+      });
+
+      renderFavoriteFoods();
+      window.requestAnimationFrame(updateFavoriteCarouselNav);
+    } catch (error) {
+      console.error('Favorite remove failed:', error);
+      button.disabled = false;
+      button.setAttribute('aria-label', '즐겨찾기 해제');
+      button.title = '즐겨찾기 해제';
+    }
   }
 
   async function loadComparisonHistory(userId) {
@@ -539,6 +585,13 @@
     els.logoutButton.addEventListener('click', logout);
     els.favoritePrev?.addEventListener('click', function () { scrollFavoriteCarousel(-1); });
     els.favoriteNext?.addEventListener('click', function () { scrollFavoriteCarousel(1); });
+    els.favoriteRail?.addEventListener('click', function (event) {
+      const button = event.target.closest('[data-my-remove-favorite]');
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      removeFavoriteFood(button);
+    });
     els.favoriteRail?.addEventListener('scroll', updateFavoriteCarouselNav, { passive: true });
     window.addEventListener('resize', updateFavoriteCarouselNav);
     bindFavoriteFilters();
