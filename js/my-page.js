@@ -25,7 +25,8 @@
 
   const state = {
     favoriteRows: [],
-    favoriteFilter: 'all'
+    favoriteFilter: 'all',
+    comparisonRows: []
   };
 
   const els = {};
@@ -106,6 +107,21 @@
 
   function speciesLabel(species) {
     return species === 'dog' ? '강아지' : '고양이';
+  }
+
+  function formatComparisonDate(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('ko-KR', {
+      month: 'numeric',
+      day: 'numeric'
+    }).format(date);
+  }
+
+  function buildComparisonPath(row) {
+    const ids = [row.product_a_id, row.product_b_id].filter(Boolean).map(encodeURIComponent);
+    return '/food/compare/?species=' + encodeURIComponent(row.species || 'cat') + '&ids=' + ids.join(',');
   }
 
   function formatWeight(value) {
@@ -361,6 +377,68 @@
     }).join('');
   }
 
+  async function loadComparisonHistory(userId) {
+    if (!els.compareList) return;
+
+    els.compareList.innerHTML = '<div class="my-compare-loading">최근 비교를 불러오는 중입니다.</div>';
+
+    const response = await sb
+      .from('food_comparison_history')
+      .select('id,species,product_a_id,product_b_id,product_a_brand,product_a_name,product_b_brand,product_b_name,compared_at')
+      .eq('user_id', userId)
+      .order('compared_at', { ascending: false })
+      .limit(20);
+
+    if (response.error) throw response.error;
+
+    state.comparisonRows = response.data || [];
+    renderComparisonHistory();
+  }
+
+  function renderComparisonHistory() {
+    if (!els.compareList) return;
+
+    if (!state.comparisonRows.length) {
+      els.compareList.innerHTML =
+        '<article class="my-empty-compare">' +
+          '<div>' +
+            '<strong>아직 비교 기록이 없습니다.</strong>' +
+            '<p>두 사료를 비교하면 최근 비교한 조합이 시간순으로 이곳에 쌓입니다.</p>' +
+          '</div>' +
+          '<a href="/food/">사료 비교 시작</a>' +
+        '</article>';
+      return;
+    }
+
+    els.compareList.innerHTML = state.comparisonRows.map(function (row) {
+      const species = speciesLabel(row.species);
+      const date = formatComparisonDate(row.compared_at);
+      const aBrand = row.product_a_brand || '브랜드 정보 없음';
+      const bBrand = row.product_b_brand || '브랜드 정보 없음';
+
+      return '<a class="my-compare-record" href="' + escapeHtml(buildComparisonPath(row)) + '">' +
+        '<div class="my-compare-record__meta">' +
+          '<span>' + escapeHtml(species) + '</span>' +
+          '<time datetime="' + escapeHtml(row.compared_at || '') + '">' + escapeHtml(date) + '</time>' +
+        '</div>' +
+        '<div class="my-compare-record__pair">' +
+          '<div class="my-compare-record__product">' +
+            '<small>A</small>' +
+            '<span>' + escapeHtml(aBrand) + '</span>' +
+            '<strong>' + escapeHtml(row.product_a_name || '제품명 정보 없음') + '</strong>' +
+          '</div>' +
+          '<span class="my-compare-record__versus" aria-hidden="true">↔</span>' +
+          '<div class="my-compare-record__product">' +
+            '<small>B</small>' +
+            '<span>' + escapeHtml(bBrand) + '</span>' +
+            '<strong>' + escapeHtml(row.product_b_name || '제품명 정보 없음') + '</strong>' +
+          '</div>' +
+        '</div>' +
+        '<svg class="my-compare-record__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>' +
+      '</a>';
+    }).join('');
+  }
+
   async function renderForCurrentUser() {
     const userResponse = await sb.auth.getUser();
     const user = userResponse.data && userResponse.data.user;
@@ -375,7 +453,8 @@
     try {
       await Promise.all([
         loadPets(user.id),
-        loadFavoriteFoods(user.id)
+        loadFavoriteFoods(user.id),
+        loadComparisonHistory(user.id)
       ]);
     } catch (error) {
       console.error('My Page load failed:', error);
@@ -447,6 +526,7 @@
     els.favoriteRail = $('myFavoriteRail');
     els.favoritePrev = $('myFavoritePrev');
     els.favoriteNext = $('myFavoriteNext');
+    els.compareList = $('myCompareList');
     els.logoutButton = $('myLogoutButton');
     els.accountStatus = $('myAccountStatus');
 
@@ -469,7 +549,8 @@
         showLoggedIn();
         Promise.all([
           loadPets(session.user.id),
-          loadFavoriteFoods(session.user.id)
+          loadFavoriteFoods(session.user.id),
+          loadComparisonHistory(session.user.id)
         ]).catch(function (error) {
           console.error('My Page reload failed:', error);
         });

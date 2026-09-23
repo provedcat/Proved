@@ -51,6 +51,40 @@
     const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
     return relation?.name || feed?.제조사 || '브랜드 정보 없음';
   }
+
+  function comparisonKey(a, b) {
+    return [String(a?.id || ''), String(b?.id || '')].sort().join(':');
+  }
+
+  async function saveComparisonHistory() {
+    if (state.feeds.length !== 2) return;
+
+    const { data: userData, error: userError } = await compareSb.auth.getUser();
+    const user = userData?.user || null;
+    if (userError || !user) return;
+
+    const [a, b] = state.feeds;
+    const payload = {
+      user_id: user.id,
+      species: state.species,
+      product_a_id: a.id,
+      product_b_id: b.id,
+      product_a_brand: getBrand(a),
+      product_a_name: a.제품명 || '제품명 정보 없음',
+      product_b_brand: getBrand(b),
+      product_b_name: b.제품명 || '제품명 정보 없음',
+      comparison_key: comparisonKey(a, b),
+      compared_at: new Date().toISOString()
+    };
+
+    const { error } = await compareSb
+      .from('food_comparison_history')
+      .upsert(payload, { onConflict: 'user_id,species,comparison_key' });
+
+    if (error) {
+      console.warn('Comparison history save failed:', error);
+    }
+  }
   function getDisplayBrand(feed) {
     const raw = String(getBrand(feed) || '').trim();
     const normalized = raw.toLowerCase();
@@ -272,6 +306,7 @@
     }
     els.status.textContent = '';
     renderComparison();
+    await saveComparisonHistory();
   }
 
   function renderWaitingProduct() {
