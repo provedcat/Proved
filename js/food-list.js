@@ -45,7 +45,9 @@
     activeTagCategory: '',
     tagSearchQueries: {},
     matchingFeedIds: { cat: null, dog: null },
-    tagsLoading: false
+    tagsLoading: false,
+    favoriteKeys: new Set(),
+    favoriteUserId: null
   };
 
   const listColumns = [
@@ -80,6 +82,131 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function favoriteKey(species, feedId) {
+    return `${species === 'dog' ? 'dog' : 'cat'}:${String(feedId || '')}`;
+  }
+
+  function isFavorite(feed) {
+    return state.favoriteKeys.has(favoriteKey(feed?.species, feed?.id));
+  }
+
+  function favoriteHeartIcon() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4.7 16.1 2.5 11.7C.7 8.1 2.7 4.5 6.2 4.5c2.1 0 3.8 1.1 4.8 2.8.4.7 1.6.7 2 0 1-1.7 2.7-2.8 4.8-2.8 3.5 0 5.5 3.6 3.7 7.2C19.3 16.1 12 20.5 12 20.5Z"/></svg>';
+  }
+
+  function syncFavoriteButton(button, selected) {
+    if (!button) return;
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    button.setAttribute('aria-label', selected ? '즐겨찾기 해제' : '즐겨찾기 추가');
+    button.title = selected ? '즐겨찾기 해제' : '즐겨찾기 추가';
+  }
+
+  function refreshRenderedFavoriteButtons() {
+    document.querySelectorAll('[data-favorite-feed-id]').forEach(button => {
+      syncFavoriteButton(
+        button,
+        state.favoriteKeys.has(favoriteKey(button.dataset.favoriteSpecies, button.dataset.favoriteFeedId))
+      );
+    });
+  }
+
+  function showFavoriteToast(message) {
+    let toast = document.getElementById('foodFavoriteToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'foodFavoriteToast';
+      toast.className = 'food-favorite-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+    window.clearTimeout(showFavoriteToast._timer);
+    showFavoriteToast._timer = window.setTimeout(() => toast.classList.remove('is-visible'), 1800);
+  }
+
+  async function loadFavoriteState() {
+    const { data: userData } = await foodSb.auth.getUser();
+    const user = userData?.user || null;
+    state.favoriteUserId = user?.id || null;
+    state.favoriteKeys = new Set();
+
+    if (!user) {
+      refreshRenderedFavoriteButtons();
+      return;
+    }
+
+    const { data, error } = await foodSb
+      .from('favorite_foods')
+      .select('species,feed_id,dog_feed_id')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.warn('Favorite foods load failed:', error);
+      refreshRenderedFavoriteButtons();
+      return;
+    }
+
+    (data || []).forEach(row => {
+      const feedId = row.species === 'dog' ? row.dog_feed_id : row.feed_id;
+      if (feedId) state.favoriteKeys.add(favoriteKey(row.species, feedId));
+    });
+    refreshRenderedFavoriteButtons();
+  }
+
+  async function toggleFavorite(button) {
+    const feedId = String(button?.dataset.favoriteFeedId || '');
+    const species = button?.dataset.favoriteSpecies === 'dog' ? 'dog' : 'cat';
+    if (!feedId || button.disabled) return;
+
+    const { data: userData } = await foodSb.auth.getUser();
+    const user = userData?.user || null;
+    if (!user) {
+      showFavoriteToast('로그인 후 즐겨찾기를 사용할 수 있습니다.');
+      return;
+    }
+
+    state.favoriteUserId = user.id;
+    const key = favoriteKey(species, feedId);
+    const selected = state.favoriteKeys.has(key);
+    button.disabled = true;
+
+    try {
+      if (selected) {
+        let query = foodSb
+          .from('favorite_foods')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('species', species);
+        query = species === 'dog' ? query.eq('dog_feed_id', feedId) : query.eq('feed_id', feedId);
+        const { error } = await query;
+        if (error) throw error;
+        state.favoriteKeys.delete(key);
+        syncFavoriteButton(button, false);
+        showFavoriteToast('관심 사료에서 해제했습니다.');
+      } else {
+        const payload = {
+          user_id: user.id,
+          species,
+          feed_id: species === 'cat' ? feedId : null,
+          dog_feed_id: species === 'dog' ? feedId : null
+        };
+        const { error } = await foodSb.from('favorite_foods').insert(payload);
+        if (error && error.code !== '23505') throw error;
+        state.favoriteKeys.add(key);
+        syncFavoriteButton(button, true);
+        showFavoriteToast('관심 사료에 저장했습니다.');
+      }
+    } catch (error) {
+      console.error('Favorite toggle failed:', error);
+      showFavoriteToast('즐겨찾기를 저장하지 못했습니다.');
+    } finally {
+      button.disabled = false;
+    }
   }
 
   function isAnimalIngredient(text) {
@@ -404,6 +531,13 @@
     });
     els.conditionReset?.addEventListener('click', clearAllTags);
     els.results.addEventListener('click', event => {
+      const favorite = event.target.closest('[data-favorite-feed-id]');
+      if (favorite) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleFavorite(favorite);
+        return;
+      }
       const action = event.target.closest('[data-recovery]');
       if (action) { applyRecovery(action.dataset.recovery); return; }
       const link = event.target.closest('a[data-feed-id]');
@@ -624,20 +758,29 @@
     const product = splitProductName(feed.제품명);
     const meta = [getSpeciesLabel(feed.species), getTypeLabel(feed.type), getRoleLabel(feed.완전식여부), feed.메인단백질 || '주 단백질 확인중'];
     const semanticClass = getFeedSemanticClass(feed);
+    const favorite = isFavorite(feed);
     return `
-      <a class="food-result" href="${escapeHtml(buildProductPath(feed))}" data-feed-id="${escapeHtml(feed.id)}" data-species="${escapeHtml(feed.species)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
-        <span class="food-result__brand">${escapeHtml(brand.name)}</span>
-        <span class="food-result__title-wrap">
-          <span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</span>
-          ${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ''}
-          <span class="food-result__meta">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span>
-        </span>
-        <span class="food-result__stats">
-          <span class="food-result-stat food-result-stat--energy ${semanticClass}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span>
-          <span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span>
-          <svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
-        </span>
-      </a>`;
+      <div class="food-result-wrap">
+        <a class="food-result" href="${escapeHtml(buildProductPath(feed))}" data-feed-id="${escapeHtml(feed.id)}" data-species="${escapeHtml(feed.species)}" aria-label="${escapeHtml(brand.name)} ${escapeHtml(product.primary)} 상세 보기">
+          <span class="food-result__brand">${escapeHtml(brand.name)}</span>
+          <span class="food-result__title-wrap">
+            <span class="food-result__title">${escapeHtml(product.primary)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</span>
+            ${product.secondary ? `<span class="food-result__secondary-title">${escapeHtml(product.secondary)}</span>` : ''}
+            <span class="food-result__meta">${meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</span>
+          </span>
+          <span class="food-result__stats">
+            <span class="food-result-stat food-result-stat--energy ${semanticClass}"><span class="food-result-stat__label">열량</span><span class="food-result-stat__value">${escapeHtml(formatKcal(feed.final_me))}</span></span>
+            <span class="food-result-stat"><span class="food-result-stat__label">Ca:P</span><span class="food-result-stat__value">${escapeHtml(formatRatio(feed.ca_p_ratio))}</span></span>
+            <svg class="food-result__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+          </span>
+        </a>
+        <button class="food-result__favorite${favorite ? ' is-selected' : ''}" type="button"
+          data-favorite-feed-id="${escapeHtml(feed.id)}" data-favorite-species="${escapeHtml(feed.species)}"
+          aria-pressed="${favorite ? 'true' : 'false'}" aria-label="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
+          title="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
+          ${favoriteHeartIcon()}
+        </button>
+      </div>`;
   }
 
   async function openDetail(feed) {
@@ -989,6 +1132,7 @@
 
     const detailRoute = readDetailRoute();
     const conditionTagsPromise = els.conditionFolders ? loadConditionTags() : Promise.resolve();
+    await loadFavoriteState();
     if (detailRoute?.id) {
       history.replaceState({
         view: 'detail',
@@ -1003,6 +1147,10 @@
     const finder = history.state?.foodFinder;
     if (finder) requestAnimationFrame(() => window.scrollTo({ top: Number(finder.scrollY) || 0, behavior: 'auto' }));
   }
+
+  foodSb.auth.onAuthStateChange(() => {
+    loadFavoriteState().catch(error => console.warn('Favorite auth refresh failed:', error));
+  });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
