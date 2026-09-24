@@ -323,6 +323,9 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
       link.href = `/feed-registration/?${params.toString()}`;
     });
   });
+  // A return from registration is another explicit product handoff. It wins
+  // over the ordinary saved-diet default until the user saves a new calculation.
+  if (readPendingRegisteredFeed()) window.provedRegistrationReturnPending = true;
   await restorePendingRegisteredFeed();
   window.addEventListener('pagehide', saveCalculatorDraft);
 });
