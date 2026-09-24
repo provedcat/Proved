@@ -26,7 +26,9 @@
   const state = {
     favoriteRows: [],
     favoriteFilter: 'all',
-    comparisonRows: []
+    comparisonRows: [],
+    favoriteUndo: null,
+    favoriteUndoTimer: null
   };
 
   const els = {};
@@ -87,6 +89,16 @@
 
   function foodTypeLabel(type) {
     return type === 'wet' ? '습식사료' : type === 'dry' ? '건사료' : '형태 확인중';
+  }
+
+  function foodTypeIcon(type) {
+    if (type === 'wet') {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5s-5 5.7-5 10a5 5 0 0 0 10 0c0-4.3-5-10-5-10Z"></path></svg>';
+    }
+    if (type === 'dry') {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14c0 4.2-3.1 7-7 7s-7-2.8-7-7Z"></path><circle cx="8" cy="8" r="1.5"></circle><circle cx="13" cy="7" r="1.5"></circle><circle cx="17" cy="9" r="1.5"></circle></svg>';
+    }
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle></svg>';
   }
 
   function formatFoodKcal(value) {
@@ -356,12 +368,15 @@
         'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';">' +
         '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '">' +
           '<div class="my-favorite-card__visual">' +
-            '<span class="my-favorite-card__type">' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
+            '<span class="my-favorite-card__type">' +
+              foodTypeIcon(food.type) +
+              '<span>' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
+            '</span>' +
+            '<strong class="my-favorite-card__visual-title">' + escapeHtml(food.제품명 || '제품명 정보 없음') + '</strong>' +
           '</div>' +
           '<div class="my-favorite-card__body">' +
             '<p class="my-favorite-card__meta">' + escapeHtml(meta) + '</p>' +
             '<p class="my-favorite-card__brand">' + escapeHtml(brand) + '</p>' +
-            '<strong>' + escapeHtml(food.제품명 || '제품명 정보 없음') + '</strong>' +
             '<div class="my-favorite-card__stats">' +
               '<span><small>열량</small><b>' + escapeHtml(formatFoodKcal(food.final_me)) + '</b></span>' +
               '<span><small>Ca:P</small><b>' + escapeHtml(formatFoodRatio(food.ca_p_ratio)) + '</b></span>' +
@@ -375,6 +390,86 @@
         '</button>' +
       '</article>';
     }).join('');
+  }
+
+  function ensureFavoriteUndoToast() {
+    let toast = document.getElementById('myFavoriteUndoToast');
+    if (toast) return toast;
+
+    toast = document.createElement('div');
+    toast.id = 'myFavoriteUndoToast';
+    toast.className = 'my-favorite-undo';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.innerHTML =
+      '<span>관심 사료에서 삭제했습니다.</span>' +
+      '<button type="button" data-favorite-undo>되돌리기</button>';
+    document.body.appendChild(toast);
+
+    toast.querySelector('[data-favorite-undo]').addEventListener('click', undoFavoriteRemoval);
+    return toast;
+  }
+
+  function dismissFavoriteUndo() {
+    if (state.favoriteUndoTimer) {
+      window.clearTimeout(state.favoriteUndoTimer);
+      state.favoriteUndoTimer = null;
+    }
+    state.favoriteUndo = null;
+    const toast = document.getElementById('myFavoriteUndoToast');
+    if (toast) toast.classList.remove('is-visible');
+  }
+
+  function showFavoriteUndo(food, index, userId) {
+    dismissFavoriteUndo();
+    state.favoriteUndo = { food, index, userId };
+    const toast = ensureFavoriteUndoToast();
+    toast.querySelector('span').textContent = '관심 사료에서 삭제했습니다.';
+    const button = toast.querySelector('[data-favorite-undo]');
+    button.disabled = false;
+    button.textContent = '되돌리기';
+    toast.classList.add('is-visible');
+    state.favoriteUndoTimer = window.setTimeout(dismissFavoriteUndo, 5000);
+  }
+
+  async function undoFavoriteRemoval() {
+    const pending = state.favoriteUndo;
+    const toast = document.getElementById('myFavoriteUndoToast');
+    const button = toast?.querySelector('[data-favorite-undo]');
+    if (!pending || !button || button.disabled) return;
+
+    button.disabled = true;
+    button.textContent = '복원 중';
+
+    const food = pending.food;
+    const payload = {
+      user_id: pending.userId,
+      species: food.species,
+      feed_id: food.species === 'cat' ? food.id : null,
+      dog_feed_id: food.species === 'dog' ? food.id : null,
+      created_at: food.favorite_created_at || new Date().toISOString()
+    };
+
+    const response = await sb.from('favorite_foods').insert(payload);
+    if (response.error && response.error.code !== '23505') {
+      console.error('Favorite undo failed:', response.error);
+      toast.querySelector('span').textContent = '되돌리지 못했습니다.';
+      button.textContent = '다시 시도';
+      button.disabled = false;
+      return;
+    }
+
+    const alreadyPresent = state.favoriteRows.some(function (item) {
+      return String(item.id) === String(food.id) && item.species === food.species;
+    });
+    if (!alreadyPresent) {
+      const index = Math.max(0, Math.min(pending.index, state.favoriteRows.length));
+      state.favoriteRows.splice(index, 0, food);
+    }
+
+    renderFavoriteFoods();
+    window.requestAnimationFrame(updateFavoriteCarouselNav);
+    dismissFavoriteUndo();
   }
 
   async function removeFavoriteFood(button) {
@@ -403,12 +498,18 @@
       const response = await query;
       if (response.error) throw response.error;
 
+      const removedIndex = state.favoriteRows.findIndex(function (food) {
+        return String(food.id) === feedId && food.species === species;
+      });
+      const removedFood = removedIndex >= 0 ? state.favoriteRows[removedIndex] : null;
+
       state.favoriteRows = state.favoriteRows.filter(function (food) {
         return !(String(food.id) === feedId && food.species === species);
       });
 
       renderFavoriteFoods();
       window.requestAnimationFrame(updateFavoriteCarouselNav);
+      if (removedFood) showFavoriteUndo(removedFood, removedIndex, user.id);
     } catch (error) {
       console.error('Favorite remove failed:', error);
       button.disabled = false;
