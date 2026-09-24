@@ -1,0 +1,38 @@
+.pc-diet-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  padding: 15px 20px;
+  border: 1px solid rgba(53,104,255,.17);
+  background: rgba(243,242,255,.76);
+  color: #43517B;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+.pc-diet-notice[hidden],
+.pc-diet-notice button[hidden] { display: none !important; }
+.pc-diet-notice p { min-width: 0; flex: 1 1 260px; margin: 0; }
+.pc-diet-notice button {
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 0 13px;
+  color: #3568ff;
+  border: 1px solid rgba(53,104,255,.38);
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.pc-diet-notice button:focus-visible {
+  outline: 2px solid #3568ff;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .pc-diet-notice { padding: 14px 15px; }
+  .pc-diet-notice button { width: 100%; }
+}
