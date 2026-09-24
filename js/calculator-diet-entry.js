@@ -242,7 +242,7 @@
     // Initial routing briefly activates a guest species while the signed-in
     // account's pet list loads. Do not consume the linked candidate until
     // an existing pet has been selected by the login destination resolver.
-    if (userId && !petId && pendingExternal) {
+    if (userId && !petId && (pendingExternal || window.provedRegistrationReturnPending)) {
       const existing = await sb.from('pets').select('id')
         .eq('user_id', userId).eq('species', species).limit(1);
       if (existing.error) {
@@ -253,6 +253,13 @@
     }
     const key = userId + ':' + petId + ':' + species;
 
+    if (window.provedRegistrationReturnPending && !pendingExternal) {
+      // The registration return already owns the working draft. Keep it
+      // until the next fresh visit rather than replacing it with saved A.
+      window.provedRegistrationReturnPending = false;
+      lastAppliedPet = key;
+      return;
+    }
     if (lastAppliedPet === key && !pendingExternal) return;
     const serial = ++sequence;
     lastAppliedPet = key;
