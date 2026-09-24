@@ -269,6 +269,11 @@
           const applied = await applySavedDiet(response.data, species, serial);
           if (serial !== sequence) return;
           if (applied && !pendingExternal) message('최근 저장한 식단을 불러왔습니다.', false);
+          // A stale browser draft must not stand in for a saved diet we could not identify.
+          if (!applied) clearSelectedFeeds();
+        } else {
+          // The selected pet has no committed diet. Never inherit another pet's draft feeds.
+          clearSelectedFeeds();
         }
       }
       if (pendingExternal) await applyExternal(species, serial);
