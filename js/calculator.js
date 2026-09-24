@@ -608,7 +608,7 @@ function calculate() {
     const subPct = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1;
     const kcal = foodKcal * dryRatio * subPct;
     const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.건사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
+    if (grams > 0 || kcal > 0) resultData.건사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
   wetEntries.forEach(({ sid, feed }, index) => {
     let subPct;
@@ -617,7 +617,7 @@ function calculate() {
     else subPct = Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100;
     const kcal = foodKcal * wetRatio * subPct;
     const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.습식사료_결과.push({ 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
+    if (grams > 0 || kcal > 0) resultData.습식사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
   });
   [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${item.이름}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
   const dryTotalGrams = resultData.건사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
