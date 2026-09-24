@@ -417,6 +417,10 @@ async function saveFeedingRecord(catId, currentResult) {
   if (error) {
     throw new Error(`계산 결과 저장 실패: ${error.message || error}`);
   }
+  // Only a successful DB INSERT changes the committed diet.
+  if (typeof window !== 'undefined' && typeof window.provedOnFeedingPlanSaved === 'function') {
+    window.provedOnFeedingPlanSaved({ userId, petId: catId, result: currentResult });
+  }
 }
 
 async function handleSaveFeedingRecord() {
