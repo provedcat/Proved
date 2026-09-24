@@ -239,6 +239,18 @@
     if (requestedSpecies && species !== requestedSpecies) return;
     const userId = state.currentUser?.id || '';
     const petId = userId && pet?.id ? String(pet.id) : '';
+    // Initial routing briefly activates a guest species while the signed-in
+    // account's pet list loads. Do not consume the linked candidate until
+    // an existing pet has been selected by the login destination resolver.
+    if (userId && !petId && pendingExternal) {
+      const existing = await sb.from('pets').select('id')
+        .eq('user_id', userId).eq('species', species).limit(1);
+      if (existing.error) {
+        console.warn('Pet selection check failed:', existing.error);
+        return;
+      }
+      if (existing.data?.length) return;
+    }
     const key = userId + ':' + petId + ':' + species;
 
     if (lastAppliedPet === key && !pendingExternal) return;
@@ -277,6 +289,13 @@
 
   window.provedRestoreSavedDietAndHandoff = applyOnPetSelection;
   window.provedOnFeedingPlanSaved = afterSave;
+
+  sb.auth.onAuthStateChange(event => {
+    if (event === 'SIGNED_OUT') {
+      lastAppliedPet = '';
+      latestSaved = null;
+    }
+  });
 
   if (pendingExternal) {
     // The signed-in destination resolver activates its pet asynchronously.
