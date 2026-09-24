@@ -346,6 +346,54 @@
   border-bottom: 1px solid rgba(112,102,156,.12);
 }
 
+.my-pet-danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--my-line);
+}
+
+.my-pet-danger-row button {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--my-copy);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.my-pet-danger-row button:disabled {
+  opacity: .45;
+  cursor: wait;
+}
+
+.my-pet-danger-row p {
+  min-height: 20px;
+  margin: 0;
+  color: var(--my-copy);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.my-pet-danger-row button:focus-visible {
+  outline: 2px solid rgba(53,104,255,.28);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .my-pet-danger-row button:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
 @media (max-width: 720px) {
   .my-pet-page {
     width: min(100% - 28px, 620px);
