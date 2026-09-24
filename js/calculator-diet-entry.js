@@ -14,7 +14,6 @@
   let lastAppliedPet = '';
   let latestSaved = null;
   let sequence = 0;
-  let inFlight = false;
 
   function normalizeSavedEntries(result) {
     if (!result || typeof result !== 'object') return [];
@@ -235,7 +234,7 @@
   }
 
   async function applyOnPetSelection(pet) {
-    if (typeof state === 'undefined' || !state.authInitialized || inFlight) return;
+    if (typeof state === 'undefined' || !state.authInitialized) return;
     const species = pet?.species === 'dog' ? 'dog' : 'cat';
     if (requestedSpecies && species !== requestedSpecies) return;
     const userId = state.currentUser?.id || '';
@@ -243,7 +242,6 @@
     const key = userId + ':' + petId + ':' + species;
 
     if (lastAppliedPet === key && !pendingExternal) return;
-    inFlight = true;
     const serial = ++sequence;
     lastAppliedPet = key;
     latestSaved = null;
@@ -265,8 +263,6 @@
     } catch (error) {
       console.warn('Saved feeding plan could not be loaded:', error);
       message('저장된 식단을 불러오지 못했습니다. 기존 기록은 유지됩니다.', false);
-    } finally {
-      inFlight = false;
     }
   }
 
