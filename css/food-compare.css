@@ -88,6 +88,30 @@ button { cursor: pointer; }
   font-size: 12px;
   font-weight: 750;
 }
+.food-compare-product__calculate {
+  display: flex;
+  width: fit-content;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0 14px;
+  border: 1px solid var(--compare-blue);
+  color: var(--compare-blue);
+  background: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 780;
+}
+.food-compare-product__calculate svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.food-compare-product__calculate:hover { background: rgba(53,104,255,.06); }
+.food-compare-product__calculate:focus-visible { outline: 2px solid rgba(53,104,255,.38); outline-offset: 3px; }
 .food-compare-product__select {
   min-height: 42px;
   margin-top: 20px;
