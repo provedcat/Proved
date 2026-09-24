@@ -13,10 +13,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/my-page.css?v=20260922-my-foundation-v2">
-  <link rel="stylesheet" href="/css/my-pet.css?v=20260924-avatar-entry-v1">
+  <link rel="stylesheet" href="/css/my-page.css?v=20260924-my-page-polish-v3">
+  <link rel="stylesheet" href="/css/my-pet.css?v=20260924-pet-delete-v2">
   <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
-  <script defer src="/js/my-pet.js?v=20260924-avatar-entry-v1"></script>
+  <script defer src="/js/my-pet.js?v=20260924-pet-delete-v2"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -82,6 +82,11 @@
           </div>
           <div id="myPetCalculations" class="my-pet-calculations"></div>
         </section>
+
+        <div class="my-pet-danger-row">
+          <button type="button" id="myPetDeleteButton">반려동물 정보 삭제</button>
+          <p id="myPetDeleteStatus" role="status"></p>
+        </div>
       </div>
     </main>
 

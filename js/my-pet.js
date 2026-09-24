@@ -354,6 +354,45 @@
     }).join('');
   }
 
+  function setupPetDeletion(user, pet) {
+    const button = $('myPetDeleteButton');
+    const status = $('myPetDeleteStatus');
+    if (!button || !status) return;
+
+    button.addEventListener('click', async function () {
+      if (button.disabled) return;
+
+      const petName = pet.name || '이 반려동물';
+      const confirmed = window.confirm(
+        petName + '의 반려동물 정보와 체중·급여 기록을 삭제할까요?\n삭제한 정보는 복구할 수 없습니다.'
+      );
+      if (!confirmed) return;
+
+      button.disabled = true;
+      status.textContent = '삭제하는 중입니다.';
+
+      try {
+        const response = await sb
+          .from('pets')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('id', pet.id)
+          .select('id');
+
+        if (response.error) throw response.error;
+        if (!response.data || !response.data.length) {
+          throw new Error('삭제할 반려동물 정보를 찾지 못했습니다.');
+        }
+
+        window.location.assign('/my/');
+      } catch (error) {
+        console.error('Pet delete failed:', error);
+        status.textContent = '반려동물 정보를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+        button.disabled = false;
+      }
+    });
+  }
+
   async function init() {
     const petId = new URLSearchParams(window.location.search).get('id');
     if (!petId) {
@@ -392,6 +431,7 @@
       renderWeightChart(results[0], pet);
       renderCurrentDiet(results[1]);
       renderRecentCalculations(results[1]);
+      setupPetDeletion(user, pet);
     } catch (error) {
       console.error('Pet detail load failed:', error);
       showGate('반려동물 기록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');

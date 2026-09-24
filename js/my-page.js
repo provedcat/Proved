@@ -193,7 +193,6 @@
   async function loadPets(userId) {
     els.petStatus.textContent = '반려동물을 불러오는 중입니다.';
     els.petRail.innerHTML = '';
-    els.petCount.textContent = '';
 
     const petsResponse = await sb
       .from('pets')
@@ -230,7 +229,6 @@
       }
     });
 
-    els.petCount.textContent = pets.length + '마리';
     els.petStatus.textContent = '';
     els.petRail.innerHTML = pets.map(function (pet) {
       const palette = paletteForPet(pet);
@@ -383,10 +381,10 @@
             '</div>' +
           '</div>' +
         '</a>' +
-        '<button class="my-favorite-card__remove" type="button" ' +
+        '<button class="my-favorite-card__heart" type="button" ' +
           'data-my-remove-favorite="' + escapeHtml(food.id) + '" data-my-favorite-species="' + escapeHtml(food.species) + '" ' +
-          'aria-label="즐겨찾기 해제" title="즐겨찾기 해제">' +
-          '삭제' +
+          'aria-label="관심 사료에서 제거" title="관심 사료에서 제거">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6 10.55 19.3C5.4 14.64 2 11.56 2 7.78 2 4.7 4.42 2.3 7.5 2.3c1.74 0 3.41.81 4.5 2.08A6.04 6.04 0 0 1 16.5 2.3C19.58 2.3 22 4.7 22 7.78c0 3.78-3.4 6.86-8.55 11.53L12 20.6Z"></path></svg>' +
         '</button>' +
       '</article>';
     }).join('');
@@ -402,7 +400,7 @@
     toast.setAttribute('role', 'status');
     toast.setAttribute('aria-live', 'polite');
     toast.innerHTML =
-      '<span>관심 사료에서 삭제했습니다.</span>' +
+      '<span>관심 사료에서 제거했습니다.</span>' +
       '<button type="button" data-favorite-undo>되돌리기</button>';
     document.body.appendChild(toast);
 
@@ -424,7 +422,7 @@
     dismissFavoriteUndo();
     state.favoriteUndo = { food, index, userId };
     const toast = ensureFavoriteUndoToast();
-    toast.querySelector('span').textContent = '관심 사료에서 삭제했습니다.';
+    toast.querySelector('span').textContent = '관심 사료에서 제거했습니다.';
     const button = toast.querySelector('[data-favorite-undo]');
     button.disabled = false;
     button.textContent = '되돌리기';
@@ -482,7 +480,7 @@
     if (!user) return;
 
     button.disabled = true;
-    button.setAttribute('aria-label', '즐겨찾기 해제 중');
+    button.setAttribute('aria-label', '관심 사료에서 제거 중');
 
     try {
       let query = sb
@@ -497,6 +495,14 @@
 
       const response = await query;
       if (response.error) throw response.error;
+
+      const card = button.closest('.my-favorite-card-wrap');
+      if (card) {
+        card.classList.add('is-removing');
+        await new Promise(function (resolve) {
+          window.setTimeout(resolve, 180);
+        });
+      }
 
       const removedIndex = state.favoriteRows.findIndex(function (food) {
         return String(food.id) === feedId && food.species === species;
@@ -513,8 +519,8 @@
     } catch (error) {
       console.error('Favorite remove failed:', error);
       button.disabled = false;
-      button.setAttribute('aria-label', '즐겨찾기 해제');
-      button.title = '즐겨찾기 해제';
+      button.setAttribute('aria-label', '관심 사료에서 제거');
+      button.title = '관심 사료에서 제거';
     }
   }
 
@@ -663,7 +669,6 @@
     els.authStatus = $('myAuthStatus');
     els.petStatus = $('myPetStatus');
     els.petRail = $('myPetRail');
-    els.petCount = $('myPetCount');
     els.favoriteRail = $('myFavoriteRail');
     els.favoritePrev = $('myFavoritePrev');
     els.favoriteNext = $('myFavoriteNext');
