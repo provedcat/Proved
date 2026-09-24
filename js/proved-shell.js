@@ -441,6 +441,9 @@ async function setActivePet(pet, options = {}) {
     if (normalizedPet.id && syncTrend && state.currentUser && typeof selectTrendCat === 'function') {
       await selectTrendCat(normalizedPet);
     }
+    if (typeof window.provedRestoreSavedDietAndHandoff === 'function') {
+      await window.provedRestoreSavedDietAndHandoff(normalizedPet);
+    }
   } finally {
     state.isApplyingActivePet = previousApplying;
   }
