@@ -229,6 +229,9 @@ function restoreCalculatorDraft() {
   }
   resetWetSlotsToDefault();
   if (!draft || draft.version !== 1 || typeof state === 'undefined') return;
+  // Session draft belongs to a species; do not rehydrate dog feeds in cat mode or conversely.
+  const routeSpecies = typeof provedGetRequestedSpecies === 'function' ? provedGetRequestedSpecies() : null;
+  if (routeSpecies && draft.species !== routeSpecies) return;
 
   Object.entries(draft.fields || {}).forEach(([key, value]) => restoreFieldValue(key, value));
   if (Array.isArray(draft.dryFeeds)) {
@@ -320,6 +323,9 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
       link.href = `/feed-registration/?${params.toString()}`;
     });
   });
+  // A return from registration is another explicit product handoff. It wins
+  // over the ordinary saved-diet default until the user saves a new calculation.
+  if (readPendingRegisteredFeed()) window.provedRegistrationReturnPending = true;
   await restorePendingRegisteredFeed();
   window.addEventListener('pagehide', saveCalculatorDraft);
 });

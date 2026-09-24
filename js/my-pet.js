@@ -139,10 +139,10 @@
   async function loadFeedingRecords(userId, petId) {
     const response = await sb
       .from('feeding_records')
-      .select('recorded_date,result_data')
+      .select('recorded_date,result_data,created_at')
       .eq('user_id', userId)
       .eq('pet_id', petId)
-      .order('recorded_date', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(12);
 
     if (response.error) throw response.error;

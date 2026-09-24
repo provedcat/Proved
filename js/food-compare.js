@@ -321,12 +321,16 @@
   }
 
   function renderProduct(feed, index) {
+    const calculatorLink = ['dry', 'wet'].includes(feed.type) && Number(feed.final_me) > 0
+      ? '/'+(state.species === 'dog' ? 'dog' : 'cat')+'-food-calculator/?feed='+encodeURIComponent(feed.id)+'&type='+encodeURIComponent(feed.type)
+      : '';
     return `<article class="food-compare-product">
       <p class="food-compare-product__marker">${getProductMarker(index)}</p>
       <p class="food-compare-product__brand">${escapeHtml(getBrand(feed))}</p>
       <h2><a class="food-compare-product__title-link" href="${escapeHtml(buildProductPathForCompare(feed))}">${escapeHtml(feed.제품명 || '제품명 정보 없음')}</a></h2>
       <p class="food-compare-product__meta">${escapeHtml(getSpeciesLabel())} · ${escapeHtml(getTypeLabel(feed.type))} · ${escapeHtml(feed.완전식여부 || '분류 확인중')}</p>
       <button class="food-compare-product__change" type="button" data-change-product="${index}">${getProductMarker(index)} 변경</button>
+      ${calculatorLink ? `<a class="food-compare-product__calculate" href="${escapeHtml(calculatorLink)}">이 사료로 계산하기 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></a>` : ''}
     </article>`;
   }
 
