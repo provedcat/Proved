@@ -229,6 +229,9 @@ function restoreCalculatorDraft() {
   }
   resetWetSlotsToDefault();
   if (!draft || draft.version !== 1 || typeof state === 'undefined') return;
+  // Session draft belongs to a species; do not rehydrate dog feeds in cat mode or conversely.
+  const routeSpecies = typeof provedGetRequestedSpecies === 'function' ? provedGetRequestedSpecies() : null;
+  if (routeSpecies && draft.species !== routeSpecies) return;
 
   Object.entries(draft.fields || {}).forEach(([key, value]) => restoreFieldValue(key, value));
   if (Array.isArray(draft.dryFeeds)) {
