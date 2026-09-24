@@ -43,6 +43,8 @@ assert.equal(savedDietPolicy(false, false), 'draft');
 const calculator = read('js/calculator.js');
 const savedCats = read('js/saved-cats.js');
 const shell = read('js/proved-shell.js');
+const session = read('js/calculator-session.js');
+const petDetail = read('js/my-pet.js');
 const detail = read('js/food-list.js');
 const compare = read('js/food-compare.js');
 
@@ -54,6 +56,9 @@ assert.match(entry, /\.from\('feeding_records'\)/);
 assert.match(entry, /\.order\('created_at', \{ ascending: false \}\)/);
 assert.match(entry, /if \(pendingExternal\) await applyExternal\(species, serial\)/);
 assert.match(entry, /if \(!applied\) clearSelectedFeeds\(\)/);
+assert.match(entry, /provedRegistrationReturnPending/);
+assert.match(session, /if \(readPendingRegisteredFeed\(\)\) window\.provedRegistrationReturnPending = true/);
+assert.match(petDetail, /\.order\('created_at', \{ ascending: false \}\)/);
 assert.match(detail, /-food-calculator\/\?feed=/);
 assert.match(compare, /-food-calculator\/\?feed=/);
 
