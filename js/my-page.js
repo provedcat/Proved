@@ -15,12 +15,12 @@
   ];
 
   const FOOD_PALETTE = [
-    { accent: '#8F92FF', soft: '#EEF0FF', glow: '#C3C7F4' },
-    { accent: '#C8A8E9', soft: '#F3EAFA', glow: '#E3AADD' },
-    { accent: '#E3AADD', soft: '#F8EAF6', glow: '#F6BCBA' },
-    { accent: '#F6BCBA', soft: '#FCEAE8', glow: '#F2DDDC' },
-    { accent: '#C7B8FF', soft: '#F2EEFF', glow: '#C8A8E9' },
-    { accent: '#D9B7C9', soft: '#FAEEF3', glow: '#F2DDDC' }
+    { accent: '#8F92FF', soft: '#EEF0FF' },
+    { accent: '#C8A8E9', soft: '#F3EAFA' },
+    { accent: '#E3AADD', soft: '#F8EAF6' },
+    { accent: '#F6BCBA', soft: '#FCEAE8' },
+    { accent: '#C7B8FF', soft: '#F2EEFF' },
+    { accent: '#D9B7C9', soft: '#FAEEF3' }
   ];
 
   const state = {
@@ -99,10 +99,6 @@
     const number = Number(value);
     if (!Number.isFinite(number) || number <= 0) return '—';
     return number.toLocaleString('ko-KR', { maximumFractionDigits: 2 }) + ' : 1';
-  }
-
-  function favoriteHeartIcon() {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4.7 16.1 2.5 11.7C.7 8.1 2.7 4.5 6.2 4.5c2.1 0 3.8 1.1 4.8 2.8.4.7 1.6.7 2 0 1-1.7 2.7-2.8 4.8-2.8 3.5 0 5.5 3.6 3.7 7.2C19.3 16.1 12 20.5 12 20.5Z"/></svg>';
   }
 
   function speciesLabel(species) {
@@ -332,9 +328,8 @@
     if (!state.favoriteRows.length) {
       els.favoriteRail.innerHTML =
         '<article class="my-empty-card my-empty-card--favorite">' +
-        '<div class="my-empty-symbol" aria-hidden="true">♡</div>' +
         '<strong>아직 저장한 관심 사료가 없습니다.</strong>' +
-        '<p>사료 찾기에서 하트를 누른 제품이 최근 저장한 순서대로 이곳에 표시됩니다.</p>' +
+        '<p>사료 찾기에서 관심 제품을 저장하면 최근 저장한 순서대로 이곳에 표시됩니다.</p>' +
         '<a href="/food/">사료 찾기</a>' +
         '</article>';
       resetFavoriteCarousel();
@@ -344,7 +339,6 @@
     if (!filtered.length) {
       els.favoriteRail.innerHTML =
         '<article class="my-empty-card my-empty-card--favorite">' +
-        '<div class="my-empty-symbol" aria-hidden="true">♡</div>' +
         '<strong>' + escapeHtml(state.favoriteFilter === 'dog' ? '저장한 강아지 사료가 없습니다.' : '저장한 고양이 사료가 없습니다.') + '</strong>' +
         '<p>다른 필터를 선택하거나 사료 찾기에서 관심 제품을 저장해 보세요.</p>' +
         '<a href="/food/">사료 찾기</a>' +
@@ -359,7 +353,7 @@
       const meta = speciesLabel(food.species) + ' · ' + foodTypeLabel(food.type);
 
       return '<article class="my-favorite-card-wrap" ' +
-        'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';--favorite-glow:' + palette.glow + ';">' +
+        'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';">' +
         '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '">' +
           '<div class="my-favorite-card__visual">' +
             '<span class="my-favorite-card__type">' + escapeHtml(food.type === 'wet' ? 'WET' : food.type === 'dry' ? 'DRY' : 'FOOD') + '</span>' +
@@ -374,10 +368,10 @@
             '</div>' +
           '</div>' +
         '</a>' +
-        '<button class="my-favorite-card__heart" type="button" ' +
+        '<button class="my-favorite-card__remove" type="button" ' +
           'data-my-remove-favorite="' + escapeHtml(food.id) + '" data-my-favorite-species="' + escapeHtml(food.species) + '" ' +
           'aria-label="즐겨찾기 해제" title="즐겨찾기 해제">' +
-          favoriteHeartIcon() +
+          '삭제' +
         '</button>' +
       '</article>';
     }).join('');

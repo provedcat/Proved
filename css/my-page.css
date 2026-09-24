@@ -30,10 +30,7 @@ body.my-body {
   min-height: 100vh;
   font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--my-ink);
-  background:
-    radial-gradient(circle at 76% 5%, rgba(199, 184, 255, .24), transparent 28rem),
-    radial-gradient(circle at 18% 28%, rgba(246, 217, 214, .22), transparent 26rem),
-    linear-gradient(180deg, #FBFAFF 0%, #F7F6FC 52%, #FAF9FC 100%);
+  background: linear-gradient(180deg, #FBFAFF 0%, #F7F6FC 52%, #FAF9FC 100%);
 }
 
 .my-site-shell { min-height: 100vh; }
@@ -81,21 +78,6 @@ body.my-body {
   color: var(--my-copy);
   font-size: 15px;
   line-height: 1.7;
-}
-
-.my-hero-orb {
-  position: absolute;
-  top: -28px;
-  right: 2px;
-  width: 136px;
-  height: 136px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255,255,255,.94) 0 8%, transparent 30%),
-    linear-gradient(145deg, rgba(143,146,255,.72), rgba(227,170,221,.46) 56%, rgba(246,217,214,.50));
-  box-shadow: inset 0 0 26px rgba(255,255,255,.72), 0 22px 54px rgba(122,112,178,.14);
-  filter: saturate(.92);
-  opacity: .82;
 }
 
 .my-section {
@@ -339,7 +321,6 @@ body.my-body {
 .my-favorite-card-wrap {
   --favorite-accent: #8F92FF;
   --favorite-soft: #EEF0FF;
-  --favorite-glow: #C3C7F4;
   position: relative;
   min-height: 326px;
   scroll-snap-align: start;
@@ -365,35 +346,7 @@ body.my-body {
   position: relative;
   min-height: 130px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 76% 24%, rgba(255,255,255,.86) 0 7%, transparent 29%),
-    radial-gradient(circle at 24% 72%, var(--favorite-glow) 0 15%, transparent 42%),
-    linear-gradient(145deg, var(--favorite-soft), rgba(255,255,255,.74));
-}
-
-.my-favorite-card__visual::before,
-.my-favorite-card__visual::after {
-  content: "";
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(.2px);
-  opacity: .48;
-}
-
-.my-favorite-card__visual::before {
-  width: 92px;
-  height: 92px;
-  top: -20px;
-  right: 28px;
-  background: var(--favorite-accent);
-}
-
-.my-favorite-card__visual::after {
-  width: 74px;
-  height: 74px;
-  bottom: -32px;
-  left: 34px;
-  background: var(--favorite-glow);
+  background: var(--favorite-soft);
 }
 
 .my-favorite-card__type {
@@ -407,42 +360,33 @@ body.my-body {
   letter-spacing: .13em;
 }
 
-.my-favorite-card__heart {
+.my-favorite-card__remove {
   appearance: none;
   position: absolute;
   z-index: 4;
   right: 15px;
   top: 13px;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 3px;
   border: 0;
-  border-radius: 50%;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0;
+  color: var(--my-copy);
   background: transparent;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 720;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.my-favorite-card__heart svg {
-  width: 27px;
-  height: 27px;
-}
-
-.my-favorite-card__heart path {
-  fill: var(--favorite-accent);
-  stroke: var(--favorite-accent);
-  stroke-width: .75;
-  stroke-linejoin: round;
-}
-
-.my-favorite-card__heart:focus-visible {
+.my-favorite-card__remove:focus-visible {
   outline: 2px solid rgba(53,104,255,.28);
   outline-offset: 2px;
 }
 
-.my-favorite-card__heart:disabled {
+.my-favorite-card__remove:disabled {
   opacity: .45;
   cursor: wait;
 }
@@ -558,20 +502,10 @@ body.my-body {
   flex-direction: column;
   justify-content: flex-end;
   border: 1px solid rgba(255,255,255,.82);
-  background:
-    radial-gradient(circle at 72% 14%, rgba(199,184,255,.52), transparent 32%),
-    radial-gradient(circle at 18% 28%, rgba(246,217,214,.44), transparent 34%),
-    rgba(255,255,255,.70);
+  background: rgba(255,255,255,.70);
   box-shadow: 0 16px 42px rgba(83,72,132,.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-}
-
-.my-empty-symbol {
-  margin-bottom: auto;
-  color: var(--my-orchid);
-  font-size: 44px;
-  font-weight: 500;
 }
 
 .my-empty-card strong,
@@ -798,12 +732,6 @@ body.my-body {
   }
 
   .my-hero { padding-bottom: 30px; }
-  .my-hero-orb {
-    width: 112px;
-    height: 112px;
-    right: -18px;
-  }
-
   .my-section-heading h2 { font-size: 22px; }
 
   .my-pet-rail {
