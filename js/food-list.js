@@ -1026,10 +1026,17 @@
           </div>
           <h1 id="foodDetailTitle">${escapeHtml(product.primary)}</h1>
           ${product.secondary ? `<p class="food-detail-hero__secondary">${escapeHtml(product.secondary)}</p>` : ''}
-          <a class="food-compare-link" href="/food/compare/?species=${escapeHtml(state.species)}&ids=${encodeURIComponent(feed.id)}">
-            다른 제품과 비교하기
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
-          </a>
+          <div class="food-detail-hero__actions">
+            <a class="food-compare-link" href="/food/compare/?species=${escapeHtml(state.species)}&ids=${encodeURIComponent(feed.id)}">
+              다른 제품과 비교하기
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+            </a>
+            ${['dry', 'wet'].includes(feed.type) && Number(feed.final_me) > 0 ? `
+              <a class="food-calculator-link" href="/${state.species === 'dog' ? 'dog' : 'cat'}-food-calculator/?feed=${encodeURIComponent(feed.id)}&type=${encodeURIComponent(feed.type)}">
+                이 사료로 급여량 계산하기
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+              </a>` : ''}
+          </div>
         </header>
 
         <section class="food-detail-section" aria-labelledby="foodBasicHeading">
