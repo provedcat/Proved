@@ -157,6 +157,8 @@
     hero.style.setProperty('--pet-soft', palette.soft);
 
     $('myPetHeroIcon').innerHTML = petIcon(pet.species);
+    $('myPetHeroIcon').href = '/my/pet/avatar/?id=' + encodeURIComponent(pet.id);
+    $('myPetHeroIcon').setAttribute('aria-label', (pet.name || '반려동물') + ' 아바타 만들기');
     $('myPetName').textContent = pet.name || '이름 없음';
     $('myPetHeroMeta').textContent = [
       speciesLabel(pet.species),
