@@ -256,7 +256,7 @@ body.my-body {
 .my-favorite-rail {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(258px, 72%);
+  grid-auto-columns: 214px;
   gap: 14px;
   overflow-x: auto;
   padding: 2px 2px 12px;
@@ -322,14 +322,14 @@ body.my-body {
   --favorite-accent: #8F92FF;
   --favorite-soft: #EEF0FF;
   position: relative;
-  min-height: 326px;
+  min-height: 254px;
   scroll-snap-align: start;
 }
 
 .my-favorite-card {
   position: relative;
   width: 100%;
-  min-height: 326px;
+  min-height: 254px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -344,28 +344,51 @@ body.my-body {
 
 .my-favorite-card__visual {
   position: relative;
-  min-height: 130px;
+  min-height: 104px;
   overflow: hidden;
+  padding: 14px 52px 14px 14px;
   background: var(--favorite-soft);
 }
 
 .my-favorite-card__type {
-  position: absolute;
-  z-index: 2;
-  left: 18px;
-  top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--my-ink);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 850;
-  letter-spacing: .13em;
+  letter-spacing: .12em;
+}
+
+.my-favorite-card__type svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.my-favorite-card__visual-title {
+  display: -webkit-box;
+  margin-top: 12px;
+  overflow: hidden;
+  color: var(--my-ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -.02em;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .my-favorite-card__remove {
   appearance: none;
   position: absolute;
   z-index: 4;
-  right: 15px;
-  top: 13px;
+  right: 12px;
+  top: 10px;
   min-width: 44px;
   min-height: 44px;
   padding: 0 3px;
@@ -395,7 +418,7 @@ body.my-body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 19px 18px 18px;
+  padding: 14px 14px 15px;
 }
 
 .my-favorite-card__meta,
@@ -410,23 +433,11 @@ body.my-body {
 }
 
 .my-favorite-card__brand {
-  margin-top: 13px;
+  margin-top: 8px;
   color: var(--favorite-accent);
   font-size: 12px;
   font-weight: 820;
   letter-spacing: .01em;
-}
-
-.my-favorite-card__body > strong {
-  display: -webkit-box;
-  margin-top: 5px;
-  overflow: hidden;
-  color: var(--my-ink);
-  font-size: 17px;
-  line-height: 1.38;
-  letter-spacing: -.025em;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 .my-favorite-card__stats {
@@ -434,7 +445,7 @@ body.my-body {
   grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr);
   gap: 12px;
   margin-top: auto;
-  padding-top: 18px;
+  padding-top: 13px;
   border-top: 1px solid rgba(112,102,156,.11);
 }
 
@@ -469,6 +480,60 @@ body.my-body {
   place-items: center;
   color: var(--my-soft);
   font-size: 13px;
+}
+
+.my-favorite-undo {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 18px));
+  min-width: min(360px, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid rgba(143,146,255,.22);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 14px 36px rgba(78,69,126,.16);
+  color: var(--my-ink);
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.my-favorite-undo.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.my-favorite-undo button {
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--my-blue);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 820;
+  cursor: pointer;
+}
+
+.my-favorite-undo button:disabled {
+  opacity: .48;
+  cursor: wait;
+}
+
+.my-favorite-undo button:focus-visible {
+  outline: 2px solid rgba(53,104,255,.28);
+  outline-offset: 3px;
 }
 
 .my-favorite-card:focus-visible {
@@ -739,7 +804,7 @@ body.my-body {
   }
 
   .my-favorite-rail {
-    grid-auto-columns: minmax(250px, 78%);
+    grid-auto-columns: minmax(210px, 64%);
   }
 
   .my-favorite-carousel__nav {
