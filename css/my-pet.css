@@ -61,6 +61,8 @@
 
 .my-pet-hero__icon {
   display: grid;
+  text-decoration: none;
+  cursor: pointer;
   place-items: center;
   width: 106px;
   height: 106px;
@@ -71,6 +73,22 @@
     var(--pet-soft);
   border: 1px solid rgba(255,255,255,.84);
   box-shadow: 0 18px 44px rgba(82,70,127,.08);
+}
+
+.my-pet-hero__icon:focus-visible {
+  outline: 2px solid rgba(53,104,255,.36);
+  outline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .my-pet-hero__icon {
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+
+  .my-pet-hero__icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 48px rgba(82,70,127,.12);
+  }
 }
 
 .my-pet-hero__icon svg {
