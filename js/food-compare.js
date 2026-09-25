@@ -347,7 +347,6 @@
         ${renderDmGroup(a, b)}
         ${renderAsFed100gGroup(a, b)}
         ${renderEnergyGroup(a, b)}
-        ${renderMoistureGroup(a, b)}
         ${renderIngredientGroup(a, b)}
       </section>
       <section class="food-compare-section" aria-labelledby="compareSimulationHeading">
@@ -384,8 +383,7 @@
     const calciumRow = hasLabeledMineralPair(a, b, '칼슘') && hasPair(a, b, 'dm_칼슘') ? makeDisplayRow('칼슘', a.dm_칼슘, b.dm_칼슘, '%', 3) : '';
     const phosphorusRow = hasLabeledMineralPair(a, b, '인') && hasPair(a, b, 'dm_인') ? makeDisplayRow('인', a.dm_인, b.dm_인, '%', 3) : '';
     return `<div class="food-compare-group"><h3>DM 영양성분</h3>
-      <p class="food-simulation-note">수분 차이를 제거해 사료 자체의 영양 농도를 비교합니다.</p>
-      ${dmInsight(a, b)}
+      <p class="food-simulation-note">수분 차이를 제거하고 영양 구성 자체를 비교합니다.</p>
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeRow('단백질', a.dm_단백, b.dm_단백, '%')}
         ${makeRow('지방', a.dm_지방, b.dm_지방, '%')}
@@ -402,37 +400,8 @@
     const ratioRow = hasLabeledMineralPair(a, b, '칼슘') && hasLabeledMineralPair(a, b, '인') && hasPair(a, b, 'ca_p_ratio')
       ? makeDisplayRow('칼슘:인', a.ca_p_ratio, b.ca_p_ratio, ' : 1', 2)
       : '';
-
-    let insight = insightMissing();
-    if (hasPair(a, b, '조단백') && hasPair(a, b, '조지방')) {
-      const proteinDiff = Number(a.조단백) - Number(b.조단백);
-      const fatDiff = Number(a.조지방) - Number(b.조지방);
-      const nameA = getShortName(a);
-      const nameB = getShortName(b);
-      const parts = [];
-      const proteinThreshold = Math.max(Math.abs(Number(a.조단백)), Math.abs(Number(b.조단백)), 1) * 0.02;
-      const fatThreshold = Math.max(Math.abs(Number(a.조지방)), Math.abs(Number(b.조지방)), 1) * 0.02;
-
-      if (Math.abs(proteinDiff) <= proteinThreshold) {
-        parts.push('<strong>단백질</strong>은 큰 차이가 없고');
-      } else {
-        const higher = proteinDiff > 0 ? nameA : nameB;
-        const lower = proteinDiff > 0 ? nameB : nameA;
-        parts.push(`${escapeHtml(lower)}보다 ${escapeHtml(higher)}가 <strong>단백질</strong>은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 급여 가능하고`);
-      }
-
-      if (Math.abs(fatDiff) <= fatThreshold) {
-        parts.push('<strong>지방</strong>도 큰 차이가 없습니다.');
-      } else {
-        const higher = fatDiff > 0 ? nameA : nameB;
-        const lower = fatDiff > 0 ? nameB : nameA;
-        parts.push(`${escapeHtml(lower)}보다 ${escapeHtml(higher)}가 <strong>지방</strong>은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 급여 가능합니다.`);
-      }
-      insight = `<p class="food-compare-insight">같은 100g을 급여하면 ${parts.join(' ')}</p>`;
-    }
-
     return `<div class="food-compare-group"><h3>같은 100g 기준</h3>
-      ${insight}
+      <p class="food-simulation-note">같은 무게의 제품 안에 무엇이 얼마나 들어 있는지 비교합니다.</p>
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
         ${makeDisplayRow('칼로리', isPresent(a.final_me) ? Number(a.final_me) / 10 : null, isPresent(b.final_me) ? Number(b.final_me) / 10 : null, 'kcal', 1)}
         ${makeDisplayRow('단백질', a.조단백, b.조단백, 'g')}
@@ -444,36 +413,26 @@
       </tbody></table></div>`;
   }
 
+  function gramsPer100Kcal(feed) {
+    if (!isPresent(feed?.final_me) || Number(feed.final_me) <= 0) return null;
+    return 100000 / Number(feed.final_me);
+  }
+
   function renderEnergyGroup(a, b) {
     const proteinA = per100Kcal(a, 'eb_단백');
     const proteinB = per100Kcal(b, 'eb_단백');
     const fatA = per100Kcal(a, 'eb_지방');
     const fatB = per100Kcal(b, 'eb_지방');
-    let insight = insightMissing();
-    if ([proteinA, proteinB, fatA, fatB].every(isPresent)) {
-      const proteinDiff = Number(proteinA) - Number(proteinB);
-      const fatDiff = Number(fatA) - Number(fatB);
-      const parts = [];
-      if (Math.abs(proteinDiff) > Math.max(Math.abs(proteinA), Math.abs(proteinB), 1) * 0.02) {
-        const higher = proteinDiff > 0 ? getShortName(a) : getShortName(b);
-        parts.push(`${escapeHtml(higher)}이(가) <strong>단백질</strong>은 약 ${escapeHtml(formatNumber(Math.abs(proteinDiff), 1))}g 더 많고`);
-      } else {
-        parts.push('<strong>단백질</strong>은 큰 차이가 없고');
-      }
-      if (Math.abs(fatDiff) > Math.max(Math.abs(fatA), Math.abs(fatB), 1) * 0.02) {
-        const higher = fatDiff > 0 ? getShortName(a) : getShortName(b);
-        parts.push(`${escapeHtml(higher)}이(가) <strong>지방</strong>은 약 ${escapeHtml(formatNumber(Math.abs(fatDiff), 1))}g 더 많습니다.`);
-      } else {
-        parts.push('<strong>지방</strong>도 큰 차이가 없습니다.');
-      }
-      insight = `<p class="food-compare-insight">같은 100kcal를 먹이면 ${parts.join(' ')}</p>`;
-    }
+    const waterA = waterPer100Kcal(a);
+    const waterB = waterPer100Kcal(b);
     return `<div class="food-compare-group"><h3>같은 100kcal 기준</h3>
-      ${insight}
+      <p class="food-simulation-note">같은 열량을 먹을 때 실제로 먹는 양과 함께 섭취되는 영양소를 비교합니다.</p>
       <table class="food-compare-table">${comparisonTableHead()}<tbody>
+        ${makeRow('먹게 되는 양', gramsPer100Kcal(a), gramsPer100Kcal(b), 'g', 1)}
         ${makeRow('단백질', proteinA, proteinB, 'g')}
         ${makeRow('지방', fatA, fatB, 'g')}
         ${makeRow('탄수화물 추정치', per100Kcal(a, 'eb_탄수화물'), per100Kcal(b, 'eb_탄수화물'), 'g')}
+        ${makeRow('사료를 통한 수분', waterA, waterB, 'ml', 1)}
       </tbody></table></div>`;
   }
 
@@ -495,17 +454,6 @@
         ${calciumRow}
         ${phosphorusRow}
         ${ratioRow}
-      </tbody></table></div>`;
-  }
-
-  function renderMoistureGroup(a, b) {
-    const waterA = waterPer100Kcal(a);
-    const waterB = waterPer100Kcal(b);
-    return `<div class="food-compare-group"><h3>수분</h3>
-      ${pairValueInsight(waterA, waterB, '수분을', 'ml', '같은 100kcal를 급여하면')}
-      <table class="food-compare-table">${comparisonTableHead()}<tbody>
-        ${makeRow('수분 함량', a.수분, b.수분, '%')}
-        ${makeRow('100kcal당 수분', waterA, waterB, 'ml', 1)}
       </tbody></table></div>`;
   }
 
