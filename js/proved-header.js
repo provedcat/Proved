@@ -43,7 +43,7 @@
     { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
-    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
+    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/', '/food-ranking/'] },
     { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/editorial/', '/archive/'] },
     { label: '로그인', auth: true, matches: ['/my/'] }
   ];
@@ -58,7 +58,8 @@
     ],
     food: [
       { label: '사료 찾기', href: '/food/', match: '/food/' },
-      { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' }
+      { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
+      { label: '사료랭킹', href: '/food-ranking/', match: '/food-ranking/' }
     ],
     archive: [
       { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
@@ -74,7 +75,7 @@
   function getSectionKey(path = normalizedPath()) {
     if (path.startsWith('/cat-food-calculator/')) return 'cat';
     if (path.startsWith('/dog-food-calculator/')) return 'dog';
-    if (path.startsWith('/food/') || path.startsWith('/feed-registration/')) return 'food';
+    if (path.startsWith('/food/') || path.startsWith('/feed-registration/') || path.startsWith('/food-ranking/')) return 'food';
     if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/') || path.startsWith('/guide/feed-reading/') || path.startsWith('/editorial/')) return 'archive';
     return null;
   }
