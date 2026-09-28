@@ -24,47 +24,45 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260924-diet-handoff-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
+  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20260928-mobile-first-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
   <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
 </head>
-<body>
+<body class="food-ranking-body">
   <div class="food-shell">
     <header data-proved-header="food"></header>
 
-    <main class="food-main">
-      <section id="myFitAccessLoading" class="food-results-section" aria-live="polite">
-        <div class="food-results-heading">
-          <p class="food-results-count">MY FIT 접근 권한을 확인하고 있습니다.</p>
-        </div>
+    <main class="food-ranking-main">
+      <section id="myFitAccessLoading" class="food-ranking-state" aria-live="polite">
+        <p>MY FIT 접근 권한을 확인하고 있습니다.</p>
       </section>
 
-      <section id="myFitAccessDenied" class="food-results-section" aria-labelledby="myFitDeniedTitle" hidden>
-        <div class="food-results-heading">
-          <p id="myFitDeniedTitle" class="food-results-count">현재 MY FIT 베타에 접근할 수 없는 계정입니다.</p>
-          <p class="food-results-note">허용된 계정으로 로그인한 뒤 다시 시도해 주세요.</p>
-        </div>
-        <a class="food-back-button" href="/food/">사료 찾기로 돌아가기</a>
+      <section id="myFitAccessDenied" class="food-ranking-state" aria-labelledby="myFitDeniedTitle" hidden>
+        <p class="food-ranking-eyebrow">FOOD RANKING</p>
+        <h1 id="myFitDeniedTitle">MY FIT</h1>
+        <p>현재 MY FIT 베타에 접근할 수 없는 계정입니다.<br>허용된 계정으로 로그인한 뒤 다시 시도해 주세요.</p>
+        <a class="food-ranking-link" href="/food/">사료 찾기로 돌아가기</a>
       </section>
 
-      <section id="myFitRestrictedRoot" class="food-list-view" aria-labelledby="myFitTitle" hidden>
-        <div class="food-list-hero">
-          <p class="food-eyebrow">FOOD RANKING</p>
+      <section id="myFitRestrictedRoot" class="food-ranking-page" aria-labelledby="myFitTitle" hidden>
+        <header class="food-ranking-hero">
+          <p class="food-ranking-eyebrow">FOOD RANKING</p>
           <h1 id="myFitTitle">MY FIT</h1>
-          <p class="food-list-hero__lead">
+          <p class="food-ranking-lead">
             좋은 사료의 기준은 하나가 아닙니다.<br>
             나의 반려동물을 위해, 나만의 기준을 세우세요.
           </p>
-        </div>
+        </header>
 
-        <section class="food-results-section" aria-label="MY FIT 안내">
-          <div class="food-results-heading">
-            <p class="food-results-count">내 기준으로 만드는 사료 순위</p>
-            <p class="food-results-note">점수 없이, 선택한 사료 안에서의 상대적인 순위만 보여드립니다.</p>
+        <section class="food-ranking-intro" aria-labelledby="myFitIntroTitle">
+          <p class="food-ranking-step">01</p>
+          <h2 id="myFitIntroTitle">내 기준으로 만드는 사료 순위</h2>
+          <p>점수 없이, 내가 고른 사료 안에서 내 기준에 따른 상대적인 순위를 보여드립니다.</p>
+          <div class="food-ranking-rule">
+            <span>사료</span><strong>최대 5개</strong>
+            <span>기준</span><strong>최대 5개</strong>
           </div>
-          <p class="food-list-hero__lead" style="margin-top:0">
-            비교할 사료는 최대 5개, 기준도 최대 5개까지 선택할 수 있습니다.
-          </p>
         </section>
       </section>
     </main>

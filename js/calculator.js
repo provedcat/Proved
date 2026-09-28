@@ -261,7 +261,7 @@ function updateResultActionState() {
     shareOpenButton.classList.toggle('opacity-50', !isFresh);
     shareOpenButton.classList.toggle('cursor-not-allowed', !isFresh);
   }
-  document.querySelectorAll('.share-btn-save, .share-btn-kakao').forEach(button => {
+  document.querySelectorAll('.share-btn-save').forEach(button => {
     button.disabled = !isFresh;
     button.setAttribute('aria-disabled', String(!isFresh));
   });
@@ -769,7 +769,7 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
   const resultLabel = document.querySelector('#resultArea > .pc-section-title');
   if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
   const shareButton = document.getElementById('openShareModalBtn');
-  if (shareButton) shareButton.textContent = '이 문서 저장·공유';
+  if (shareButton) shareButton.textContent = '저장용 이미지 만들기';
   updateMobileFeedingSummary();
 
   const treatInput = document.getElementById('treatKcalInput');

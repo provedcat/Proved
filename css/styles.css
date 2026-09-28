@@ -5,209 +5,265 @@
     input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:var(--brand); border-radius:50%; cursor:pointer; border:4px solid white; box-shadow:0 2px 4px rgba(0,0,0,.15); }
     .autocomplete-item:hover { background:#f0f7ff; }
 
-    /* -----------------------------------------------
-       공유 카드 모달 스타일
-       역할: 결과 이미지 카드를 보여주는 전체화면 레이어
-    ----------------------------------------------- */
+    /* 저장용 이미지 모달 */
     #shareModal {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: rgba(0,0,0,0.8);
+      background: rgba(15,23,42,.78);
       overflow-y: auto;
       padding: 24px 16px 48px;
       -webkit-overflow-scrolling: touch;
     }
     #shareModal.open { display: block; }
 
-    /* 모달 내부 컨텐츠 박스 */
     .share-modal-inner {
-      max-width: 360px;
+      width: min(100%, 360px);
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    /* 닫기 버튼 */
     .share-close-btn {
       align-self: flex-end;
-      background: rgba(255,255,255,0.15);
-      border: none;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
       color: #fff;
-      font-size: 20px;
-      width: 38px; height: 38px;
-      border-radius: 50%;
+      font-size: 16px;
+      font-weight: 900;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
     }
 
-    /* -----------------------------------------------
-       공유 카드 본체 (콘텐츠 높이에 따라 자연 확장)
-       역할: 이 div 전체가 png 이미지로 캡처됩니다
-    ----------------------------------------------- */
     #shareCard {
-      width: 360px;
-      max-width: 100%;
-      height: auto;
-      min-height: 640px;
-      box-sizing: border-box;
-      transform: none;
-      zoom: 1;
-      background: #101B33;
-      border-radius: 22px;
+      width: 100%;
+      aspect-ratio: 9 / 16;
       overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      font-family: -apple-system, sans-serif;
+      background: #F8F6EF;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(15,23,42,.28);
+    }
+    #shareCard img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .share-preview-loading {
+      height: 100%;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: #667085;
+      font-size: 14px;
+      font-weight: 800;
+      text-align: center;
     }
 
-    /* 배경 장식 그라데이션 원 */
-    #shareCard::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
-      width: 280px; height: 280px;
-      background: transparent;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    #shareCard::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: -60px;
-      width: 200px; height: 200px;
-      background: transparent;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    /* 카드 헤더: 브랜드명 + 고양이 이름 */
-    .sc-header {
-      padding: 26px 24px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      position: relative;
-    }
-    .sc-brand { font-size:14px; font-weight:900; color:#5ba3e8; font-style:italic; letter-spacing:-0.02em; }
-    .sc-cat-name { font-size:22px; font-weight:900; color:#fff; line-height:1.1; text-align:right; letter-spacing:-0.03em; }
-    .sc-cat-sub { font-size:10px; color:rgba(255,255,255,0.38); text-align:right; margin-top:3px; font-weight:700; }
-
-    /* 칼로리 블록 */
-    .sc-kcal-block {
-      padding: 18px 24px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      position: relative;
-    }
-    .sc-kcal-label { font-size:9px; font-weight:900; color:#5ba3e8; letter-spacing:0.18em; margin-bottom:4px; }
-    .sc-kcal-row { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; }
-    .sc-kcal-value { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
-    .sc-kcal-num { display:block; font-size:54px; font-weight:900; color:#fff; line-height:0.95; letter-spacing:-0.04em; }
-    .sc-kcal-unit { display:block; font-size:12px; line-height:1.25; color:rgba(255,255,255,0.35); font-weight:700; margin-top:4px; }
-    .sc-ratio-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; padding-bottom:4px; }
-    .sc-ratio-bar { width:84px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; display:flex; }
-    .sc-dry-seg { background:#FF9F43; }
-    .sc-wet-seg { background:#3D8BFF; flex:1; }
-    .sc-ratio-txt { font-size:9px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.07em; }
-
-    /* 사료 급여량 목록 */
-    .sc-feeds {
-      padding: 14px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      position: relative;
-    }
-    .sc-feeds-title { font-size:9px; font-weight:900; color:rgba(255,255,255,0.25); letter-spacing:0.15em; margin-bottom:2px; }
-    .sc-feed-row {
-      display:flex; align-items:center; gap:9px;
-      padding:10px 12px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:13px;
-    }
-    .sc-feed-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-    .sc-feed-info { flex:1; min-width:0; }
-    .sc-feed-type { font-size:8px; font-weight:900; letter-spacing:0.12em; opacity:0.45; color:#fff; }
-    .sc-feed-name { font-size:11px; font-weight:700; color:rgba(255,255,255,0.85); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
-    .sc-feed-right { text-align:right; flex-shrink:0; }
-    .sc-feed-g { font-size:20px; font-weight:900; color:#fff; line-height:1; letter-spacing:-0.03em; }
-    .sc-feed-kcal { font-size:9px; color:rgba(255,255,255,0.3); font-weight:700; }
-
-    /* 영양 분석 섹션 */
-    .sc-analysis {
-      padding: 12px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-      position: relative;
-      flex: 1;
-    }
-    .sc-analysis-title { font-size:9px; font-weight:900; color:rgba(255,255,255,0.25); letter-spacing:0.15em; }
-    .sc-an-card {
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:14px;
-      padding:12px 14px;
-      box-sizing:border-box;
-    }
-    .sc-an-label { font-size:9px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.1em; margin-bottom:7px; line-height:1.25; }
-    .sc-an-main-row { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
-    .sc-an-val { font-size:24px; font-weight:900; line-height:1.1; letter-spacing:-0.03em; }
-    .sc-an-sub { font-size:10px; font-weight:700; margin-top:4px; line-height:1.35; }
-
-    /* Ca:P 칼슘/인 용량 상세 */
-    .sc-cap-detail { display:flex; gap:10px; margin-top:8px; }
-    .sc-cap-item { flex:1; background:rgba(255,255,255,0.05); border-radius:9px; padding:7px 9px; text-align:center; }
-    .sc-cap-item-label { font-size:8px; font-weight:900; color:rgba(255,255,255,0.3); letter-spacing:0.1em; }
-    .sc-cap-item-val { font-size:15px; font-weight:900; color:#fff; margin-top:2px; line-height:1; }
-    .sc-cap-item-unit { font-size:8px; color:rgba(255,255,255,0.3); font-weight:700; }
-
-    /* 수분 게이지 */
-    .sc-water-card { display:flex; flex-direction:column; gap:7px; }
-    .sc-water-main-row { align-items:flex-start; }
-    .sc-water-ml { display:block; flex:1; min-width:0; overflow-wrap:anywhere; }
-    .sc-water-pct { flex-shrink:0; margin-top:3px; text-align:right; }
-    .sc-water-gauge-track { width:100%; height:7px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; margin-top:2px; flex-shrink:0; }
-    .sc-water-gauge-fill { height:7px; border-radius:4px; }
-    .sc-water-nums { display:flex; justify-content:space-between; gap:10px; margin-top:0; font-size:8px; line-height:1.25; font-weight:700; color:rgba(255,255,255,0.25); }
-    .sc-water-nums span:last-child { text-align:right; }
-
-    /* 상태 색상 */
-    .color-ok   { color: #4ade80; }
-    .color-warn { color: #fbbf24; }
-
-    /* 카드 푸터 */
-    .sc-footer {
-      padding: 10px 24px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      position: relative;
-    }
-    .sc-footer-url { font-size:9px; font-weight:900; color:rgba(255,255,255,0.2); letter-spacing:0.04em; }
-    .sc-footer-date { font-size:9px; font-weight:700; color:rgba(255,255,255,0.2); }
-
-    /* 저장/공유 버튼 */
-    .share-btn-row { display:flex; gap:10px; }
+    .share-btn-row { display: block; }
     .share-btn-save {
-      flex:1; padding:15px;
-      background:#2F6FED; color:#fff;
-      font-size:14px; font-weight:900;
-      border:none; border-radius:16px; cursor:pointer;
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 16px;
+      background: #3568FF;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
     }
-    .share-btn-kakao {
-      flex:1; padding:15px;
-      background:#FEE500; color:#3C1E1E;
-      font-size:14px; font-weight:900;
-      border:none; border-radius:16px; cursor:pointer;
+    .share-btn-save:disabled { opacity: .55; cursor: wait; }
+
+    /* 540×960 CSS px → html2canvas scale 2 = 1080×1920 PNG */
+    .feeding-save-card {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      z-index: -1;
+      box-sizing: border-box;
+      width: 540px;
+      height: 960px;
+      overflow: hidden;
+      padding: 50px 48px 34px;
+      background: #F8F6EF;
+      color: #24304D;
+      font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .share-btn-save:active, .share-btn-kakao:active { opacity:0.8; }
+
+    .feeding-save-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 28px;
+    }
+    .feeding-save-card__header span {
+      display: block;
+      margin-bottom: 8px;
+      color: #3568FF;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+    .feeding-save-card__header h1 {
+      margin: 0;
+      color: #3568FF;
+      font-size: 36px;
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: -.05em;
+    }
+    .feeding-save-card__header time {
+      flex: 0 0 auto;
+      padding-top: 4px;
+      color: #667085;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .feeding-save-card__pet {
+      margin-top: 24px;
+      padding-bottom: 22px;
+    }
+    .feeding-save-card__pet h2 {
+      margin: 0;
+      color: #24304D;
+      font-size: 50px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.055em;
+    }
+    .feeding-save-card__pet p {
+      margin: 10px 0 0;
+      color: #7B8495;
+      font-size: 20px;
+      font-weight: 750;
+    }
+
+    .feeding-save-card__feeds {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feeding-save-card__feed {
+      height: 76px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: 8px 17px;
+      border: 1px solid rgba(53,104,255,.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,.82);
+    }
+    .feeding-save-card__feed > div { min-width: 0; }
+    .feeding-save-card__feed span {
+      display: block;
+      color: #8A93A3;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .feeding-save-card__feed strong {
+      display: block;
+      margin-top: 3px;
+      overflow: hidden;
+      color: #24304D;
+      font-size: 20px;
+      line-height: 1.24;
+      font-weight: 850;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .feeding-save-card__feed small {
+      display: block;
+      margin-top: 3px;
+      color: #9AA1AD;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feeding-save-card__feed b {
+      color: #3568FF;
+      font-size: 40px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      white-space: nowrap;
+    }
+    .feeding-save-card__feed b i {
+      margin-left: 4px;
+      font-size: 18px;
+      font-style: normal;
+      letter-spacing: 0;
+    }
+    .feeding-save-card__empty {
+      margin: 0;
+      padding: 22px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.72);
+      color: #8A93A3;
+      font-size: 16px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .feeding-save-card__metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .feeding-save-card__metrics > div {
+      min-height: 98px;
+      padding: 16px 17px 14px;
+      border-radius: 20px;
+      background: #EEF2FF;
+    }
+    .feeding-save-card__metrics span {
+      display: block;
+      color: #6D78A5;
+      font-size: 14px;
+      font-weight: 850;
+    }
+    .feeding-save-card__metrics strong {
+      display: block;
+      margin-top: 7px;
+      color: #3568FF;
+      font-size: 31px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.045em;
+    }
+    .feeding-save-card__metrics strong i {
+      margin-left: 4px;
+      font-size: 16px;
+      font-style: normal;
+      letter-spacing: 0;
+    }
+    .feeding-save-card__metrics small {
+      display: block;
+      margin-top: 8px;
+      color: #7D8491;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .feeding-save-card footer {
+      position: absolute;
+      left: 48px;
+      right: 48px;
+      bottom: 30px;
+      display: flex;
+      justify-content: flex-start;
+      color: #3568FF;
+      font-size: 15px;
+      font-weight: 900;
+    }
 
 /* 모바일 PWA 설치 안내 */
 .pwa-install-prompt {
@@ -449,7 +505,6 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 #shareCard { background:var(--modal-background); border-radius:16px; }
 .sc-feed-row, .sc-an-card, .sc-energy-details > div { background:var(--modal-surface); border-color:var(--modal-divider); }
 .share-btn-save { background:var(--brand-blue); border-radius:10px; }
-.share-btn-kakao { border-radius:10px; }
 
 :where(button, input, select, [tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(47,111,237,.45) !important; outline-offset:2px; }
 .pc-result-panel:focus,
@@ -758,7 +813,6 @@ input::placeholder { color:var(--text-placeholder); }
 .share-btn-row{margin-top:16px!important;gap:8px!important}
 .share-btn-row button{min-height:50px!important;border-radius:0!important}
 .share-btn-save{border:0!important;background:var(--brand-primary)!important;color:#fff!important}
-.share-btn-kakao{border:1px solid var(--brand-primary)!important;background:#fff!important;color:var(--brand-primary)!important}
 
 @media(max-width:720px){
   .share-modal-inner{padding-inline:10px}

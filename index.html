@@ -56,7 +56,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/styles.css?v=20260816-surface-consistency-v1">
+  <link rel="stylesheet" href="css/styles.css?v=20260928-save-card-v1">
   <link rel="stylesheet" href="css/proved-shell.css?v=20260816-surface-consistency-v1">
   <link rel="stylesheet" href="/css/calculator-diet-entry.css?v=20260924-v1">
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
@@ -140,7 +140,7 @@
     </section>
 
     <!-- 3단계: 결과 -->
-    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 저장하거나 공유하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">결과 이미지 저장·공유</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p></section>
+    <section id="resultArea" class="pc-result-panel pc-section-card hidden" tabindex="-1" aria-labelledby="resultTitle" aria-live="polite"><p class="pc-section-title"><span>03</span> 계산 결과</p><h2 id="resultTitle"><span id="resCatName">고양이</span>의 하루 급여 계획</h2><p id="resultLead" class="pc-result-lead hidden"></p><div class="pc-result-summary"><div><span>하루 시작 열량</span><strong><span id="resDER">0</span> kcal</strong></div><div><span>식사 배정 칼로리</span><strong><span id="resFoodKcal">0</span> kcal</strong></div><div id="resTreatRow" class="hidden"><span>간식 허용 칼로리</span><strong><span id="resTreatKcal">0</span> kcal</strong></div></div><div id="resItems" class="pc-result-items"></div><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 이미지를 저장하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 분석하기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취량 분석하기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">저장용 이미지 만들기</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p></section>
 
 
     <!-- 제품 목록 바텀시트 -->
@@ -263,117 +263,19 @@
   </div>
 </div>
 
-<!-- -----------------------------------------------
-  공유 카드 모달
-  역할: 결과를 9:16 이미지로 보여주고 저장/공유 제공
-  이 div는 body 끝에 위치 — 다른 요소 위에 fixed로 떠 있음
------------------------------------------------ -->
+<!-- 저장용 이미지 모달 -->
 <div id="shareModal">
   <div class="share-modal-inner">
+    <button type="button" class="share-close-btn" onclick="closeShareModal()" aria-label="결과 이미지 닫기">×</button>
 
-    <!-- 닫기 버튼 -->
-    <button class="share-close-btn" onclick="closeShareModal()">닫기</button>
-
-    <!-- 캡처 대상 카드 -->
-    <div id="shareCard">
-
-      <!-- 헤더 -->
-      <div class="sc-header">
-        <div class="sc-brand">프루브</div>
-        <div>
-          <div class="sc-cat-name" id="sc_catName">—</div>
-          <div class="sc-cat-sub"  id="sc_catSub">—</div>
-        </div>
-      </div>
-
-      <!-- 하루 칼로리 + DRY/WET 비율 -->
-      <div class="sc-kcal-block">
-        <div class="sc-kcal-label">DAILY CALORIES</div>
-        <div class="sc-kcal-row">
-          <div class="sc-kcal-value">
-            <span class="sc-kcal-num" id="sc_der">—</span>
-            <div class="sc-kcal-unit">kcal / day</div>
-          </div>
-          <div class="sc-ratio-wrap">
-            <div class="sc-ratio-bar">
-              <div class="sc-dry-seg" id="sc_drySeg" style="width:30%"></div>
-              <div class="sc-wet-seg"></div>
-            </div>
-            <div class="sc-ratio-txt" id="sc_ratioTxt">DRY 30% · WET 70%</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sc-energy-details">
-        <div><span>하루 급여량</span><strong id="sc_foodKcal">—</strong><small> kcal</small></div>
-        <div id="sc_treatBlock"><span>간식 열량</span><strong id="sc_treatKcal">—</strong><small id="sc_treatPct"></small></div>
-      </div>
-
-      <!-- 사료별 급여량 -->
-      <div class="sc-feeds">
-        <div class="sc-feeds-title">FEEDING PLAN</div>
-        <div id="sc_feedList"></div>
-      </div>
-
-      <!-- 영양 분석 -->
-      <div class="sc-analysis">
-        <div class="sc-analysis-title">NUTRITION ANALYSIS</div>
-
-        <!-- Ca:P 비율 카드 -->
-        <div class="sc-an-card">
-          <div class="sc-an-label">Ca : P 비율</div>
-          <div class="sc-an-main-row">
-            <div class="sc-an-val" id="sc_capRatio">—</div>
-            <div class="sc-an-sub" id="sc_capStatus"></div>
-          </div>
-          <!-- 칼슘/인 용량 상세 -->
-          <div class="sc-cap-detail">
-            <div class="sc-cap-item">
-              <div class="sc-cap-item-label">칼슘 섭취</div>
-              <div class="sc-cap-item-val" id="sc_ca">—</div>
-              <div class="sc-cap-item-unit">mg / day</div>
-            </div>
-            <div class="sc-cap-item">
-              <div class="sc-cap-item-label">인 섭취</div>
-              <div class="sc-cap-item-val" id="sc_p">—</div>
-              <div class="sc-cap-item-unit">mg / day</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 수분 섭취 카드 -->
-        <div class="sc-an-card sc-water-card">
-          <div class="sc-an-label">수분 섭취</div>
-          <div class="sc-an-main-row sc-water-main-row">
-            <!-- 섭취량(ml) -->
-            <div class="sc-an-val sc-water-ml" id="sc_waterMl">—</div>
-            <!-- 충족률(%) -->
-            <div class="sc-an-sub sc-water-pct" id="sc_waterPct">—</div>
-          </div>
-          <!-- 게이지 바: 섭취량 / 최소 권장량 비율 시각화 -->
-          <div class="sc-water-gauge-track">
-            <div class="sc-water-gauge-fill" id="sc_waterGauge" style="width:0%"></div>
-          </div>
-          <div class="sc-water-nums">
-            <span>0 ml</span>
-            <span id="sc_waterRange">권장 —</span>
-          </div>
-          <div class="sc-an-sub" id="sc_waterStatus" style="margin-top:5px">—</div>
-        </div>
-      </div>
-
-      <!-- 카드 푸터 -->
-      <div class="sc-footer">
-        <div class="sc-footer-url">provedcat.github.io/catfoodcalculator</div>
-        <div class="sc-footer-date" id="sc_date"></div>
-      </div>
+    <div id="shareCard" aria-live="polite">
+      <p class="share-preview-loading">저장용 이미지 미리보기</p>
     </div>
 
-    <!-- 저장 / 카카오 공유 버튼 -->
     <div class="share-btn-row">
-      <button class="share-btn-save"  onclick="shareCard_save()">📥 이미지 저장</button>
-      <button class="share-btn-kakao" onclick="shareCard_kakao()">📤 이미지 공유하기</button>
+      <button type="button" class="share-btn-save" onclick="shareCard_save()">이미지 저장</button>
     </div>
+
     <div class="mt-3 space-y-2">
       <button id="saveFeedingRecordBtn" onclick="handleSaveFeedingRecord()"
         class="hidden w-full py-4 bg-[#2F6FED] text-white font-black text-base rounded-2xl">
@@ -381,7 +283,6 @@
       </button>
       <p id="saveFeedingRecordMsg" class="hidden text-xs font-bold text-blue-400 text-center"></p>
     </div>
-
   </div>
 </div>
 
@@ -539,7 +440,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="js/saved-cats.js?v=20260924-diet-handoff-v1"></script>
 <script src="js/auth.js?v=20260728-calculator-pet-load"></script>
 <script src="js/wet-beta-access.js?v=20260922-weight-nav-v1"></script>
-<script src="js/share-card.js?v=20260725-feeding-flow-2"></script>
+<script src="js/share-card.js?v=20260928-save-card-v1"></script>
 <script src="/js/calculator-diet-entry.js?v=20260924-v1"></script>
 </body>
 </html>
