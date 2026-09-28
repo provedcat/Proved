@@ -505,7 +505,6 @@ fieldset.pc-field > legend ~ .pc-chip-row { margin-top: 4px; }
 #shareCard { background:var(--modal-background); border-radius:16px; }
 .sc-feed-row, .sc-an-card, .sc-energy-details > div { background:var(--modal-surface); border-color:var(--modal-divider); }
 .share-btn-save { background:var(--brand-blue); border-radius:10px; }
-.share-btn-kakao { border-radius:10px; }
 
 :where(button, input, select, [tabindex]:not([tabindex="-1"])):focus-visible { outline:3px solid rgba(47,111,237,.45) !important; outline-offset:2px; }
 .pc-result-panel:focus,
@@ -814,7 +813,6 @@ input::placeholder { color:var(--text-placeholder); }
 .share-btn-row{margin-top:16px!important;gap:8px!important}
 .share-btn-row button{min-height:50px!important;border-radius:0!important}
 .share-btn-save{border:0!important;background:var(--brand-primary)!important;color:#fff!important}
-.share-btn-kakao{border:1px solid var(--brand-primary)!important;background:#fff!important;color:var(--brand-primary)!important}
 
 @media(max-width:720px){
   .share-modal-inner{padding-inline:10px}
