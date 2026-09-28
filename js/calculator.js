@@ -261,7 +261,7 @@ function updateResultActionState() {
     shareOpenButton.classList.toggle('opacity-50', !isFresh);
     shareOpenButton.classList.toggle('cursor-not-allowed', !isFresh);
   }
-  document.querySelectorAll('.share-btn-save, .share-btn-kakao').forEach(button => {
+  document.querySelectorAll('.share-btn-save').forEach(button => {
     button.disabled = !isFresh;
     button.setAttribute('aria-disabled', String(!isFresh));
   });
