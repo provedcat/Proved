@@ -57,7 +57,10 @@ function getSaveCardModel() {
     waterIntake: waterKnown ? `${waterIntake} ml` : '확인 불가',
     waterRange: waterMin != null ? `${waterMin}–${waterMax} ml` : '확인 불가',
     additionalWater: additionalWater == null ? '확인 불가' : `${additionalWater} ml`,
-    waterNote: missingWater ? '확인된 수분 정보만 반영' : '사료 수분 기준'
+    waterNote: missingWater ? '확인된 수분 정보만 반영' : '사료 수분 기준',
+    additionalWaterNote: additionalWater == null
+      ? '수분 정보 확인 필요'
+      : additionalWater === 0 ? '최소 참고량 충족' : '최소 참고량까지'
   };
 }
 
@@ -102,7 +105,7 @@ function buildFeedingSaveCard() {
       <div><span>하루 에너지</span><strong>${data.dailyKcal}<i>kcal</i></strong><small>${kcalSub}</small></div>
       <div><span>Ca : P</span><strong>${saveCardEscape(data.capRatio)}</strong><small>${saveCardEscape(data.capStatus || '비율 확인')}</small></div>
       <div><span>사료로 섭취한 물</span><strong>${saveCardEscape(data.waterIntake)}</strong><small>참고 범위 ${saveCardEscape(data.waterRange)}</small></div>
-      <div><span>추가로 마실 물</span><strong>${saveCardEscape(data.additionalWater)}</strong><small>${saveCardEscape(data.waterNote)} · 최소 기준까지</small></div>
+      <div><span>추가로 마실 물</span><strong>${saveCardEscape(data.additionalWater)}</strong><small>${saveCardEscape(data.additionalWaterNote)}</small></div>
     </section>
 
     <footer><strong>proved.kr</strong></footer>`;
