@@ -26,16 +26,31 @@
   ensureLayoutSystem();
 
   const AUTH_STORAGE_KEY = 'sb-qpklvtgnhrdmzxzlstpp-auth-token';
+  const MY_FIT_ALLOWED_USER_ID = '70720f7f-51c9-415a-948f-c676ede9a35d';
 
-  function hasPersistedAuthSession() {
+  function getPersistedAuthSession() {
     try {
       const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return false;
+      if (!raw) return null;
       const stored = JSON.parse(raw);
-      return Boolean(stored && (stored.access_token || stored.refresh_token) && stored.user);
+      return stored && (stored.access_token || stored.refresh_token) && stored.user ? stored : null;
     } catch (error) {
-      return false;
+      return null;
     }
+  }
+
+  function hasPersistedAuthSession() {
+    return Boolean(getPersistedAuthSession());
+  }
+
+  function isMyFitAllowedUser() {
+    return getPersistedAuthSession()?.user?.id === MY_FIT_ALLOWED_USER_ID;
+  }
+
+  function isItemVisible(item) {
+    if (item.hidden) return false;
+    if (item.myFitRestricted && !isMyFitAllowedUser()) return false;
+    return true;
   }
 
   const globalItems = [
@@ -43,7 +58,7 @@
     { label: '강아지 계산기', href: '/dog-food-calculator/', match: '/dog-food-calculator/' },
     // matches는 상위 메뉴의 하위·레거시 URL에서도 활성 상태를 유지하기 위한 경로 묶음입니다.
     // 하위 URL을 추가하거나 기본 진입 경로를 바꿀 때 이 목록도 함께 갱신합니다.
-    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/'] },
+    { label: '사료', href: '/food/', matches: ['/food/', '/feed-registration/', '/food-ranking/'] },
     { label: '아카이브', href: '/guide/calculation-method/', matches: ['/guide/calculation-method/', '/guide/feed-reading/', '/editorial/', '/archive/'] },
     { label: '로그인', auth: true, matches: ['/my/'] }
   ];
@@ -58,7 +73,8 @@
     ],
     food: [
       { label: '사료 찾기', href: '/food/', match: '/food/' },
-      { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' }
+      { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
+      { label: '사료랭킹', href: '/food-ranking/', match: '/food-ranking/', myFitRestricted: true }
     ],
     archive: [
       { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
@@ -74,7 +90,7 @@
   function getSectionKey(path = normalizedPath()) {
     if (path.startsWith('/cat-food-calculator/')) return 'cat';
     if (path.startsWith('/dog-food-calculator/')) return 'dog';
-    if (path.startsWith('/food/') || path.startsWith('/feed-registration/')) return 'food';
+    if (path.startsWith('/food/') || path.startsWith('/feed-registration/') || path.startsWith('/food-ranking/')) return 'food';
     if (path.startsWith('/archive/') || path.startsWith('/guide/calculation-method/') || path.startsWith('/guide/feed-reading/') || path.startsWith('/editorial/')) return 'archive';
     return null;
   }
@@ -108,7 +124,7 @@
       element.dataset.provedAuth = 'true';
       element.addEventListener('click', runAuthAction);
     }
-    if (item.hidden) element.classList.add('hidden');
+    if (!isItemVisible(item)) element.classList.add('hidden');
     if (item.disabled) {
       element.disabled = true;
       element.setAttribute('aria-disabled', 'true');
@@ -149,7 +165,7 @@
     const subnav = document.createElement('nav');
     subnav.className = `proved-section-subnav proved-section-subnav--${sectionKey}`;
     subnav.dataset.section = sectionKey;
-    subnav.dataset.visibleItems = String(items.filter(item => !item.hidden).length);
+    subnav.dataset.visibleItems = String(items.filter(isItemVisible).length);
     subnav.setAttribute('aria-label', `${sectionKey === 'cat' ? '고양이' : sectionKey === 'dog' ? '강아지' : sectionKey === 'food' ? '사료' : '아카이브'} 하위 메뉴`);
     if (sectionKey === 'cat' || sectionKey === 'dog') subnav.id = 'mainNav';
 
