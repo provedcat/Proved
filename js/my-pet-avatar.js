@@ -37,7 +37,6 @@
       const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
       heading.textContent = title; grid.className = 'my-avatar-options'; group.append(heading, grid);
       for (const value of options(key)) {
-        if (key === 'shape' && avatar.catalog.shape[value].species !== pet.species) continue;
         const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
         button.setAttribute('aria-pressed', String(settings[key] === value));
         const name = value ? avatar.catalog[key][value].name : '없음';
@@ -56,7 +55,11 @@
     try {
       const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
       await avatar.render(canvas, settings, pet.species);
-      if (current === revision) $('avatarPreview').getContext('2d').drawImage(canvas, 0, 0);
+      if (current === revision) {
+        const preview = $('avatarPreview'), context = preview.getContext('2d');
+        context.clearRect(0, 0, preview.width, preview.height);
+        context.drawImage(canvas, 0, 0);
+      }
       $('avatarStatus').textContent = '';
     } catch (error) { console.error(error); $('avatarStatus').textContent = '이미지를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
   }
