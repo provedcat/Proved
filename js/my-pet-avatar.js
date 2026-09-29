@@ -19,7 +19,7 @@
   }
   function thumb(key, value) {
     if (!value) return '';
-    if (['eyeColor','eyePattern','blush','nose'].includes(key)) return '/images/pet-avatar/thumbs/' + avatar.catalog[key][value].file + '.webp';
+    if (['eyeColor','eyePattern','blush','nose'].includes(key)) return '/images/pet-avatar/thumbs/' + avatar.catalog[key][value].file + '.webp?v=20260929-final';
     if (key === 'shape') return avatar.catalog.shape[value].mask;
     return avatar.catalog[key][value].src;
   }
