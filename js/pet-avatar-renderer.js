@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const base = '/images/pet-avatar/assets/';
-  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-final';
+  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-colors-v2';
   const make = (entries) => Object.fromEntries(entries);
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
@@ -12,8 +12,8 @@
       light: asset('02_shape', id + '_light-softlight')
     }];
   }));
-  const colors = make(['black', 'blue', 'cool_white', 'lemon', 'orange', 'pink', 'purple', 'warm_white'].map(key =>
-    [key, { name: { black: '블랙', blue: '블루', cool_white: '쿨 화이트', lemon: '레몬', orange: '오렌지', pink: '핑크', purple: '퍼플', warm_white: '웜 화이트' }[key], src: asset('01_color', '01_color_' + key) }]));
+  const colors = make(['black', 'blue', 'cool_white', 'warm_white', 'silver_gray', 'soft_gray', 'beige', 'apricot', 'skyblue', 'calico', 'lemon', 'orange', 'pink', 'purple'].map(key =>
+    [key, { name: { black: '블랙', blue: '블루', cool_white: '쿨 화이트', warm_white: '웜 화이트', silver_gray: '실버 그레이', soft_gray: '소프트 그레이', beige: '베이지', apricot: '살구색', skyblue: '하늘색', calico: '삼색', lemon: '레몬', orange: '오렌지', pink: '핑크', purple: '퍼플' }[key], src: asset('01_color', '01_color_' + key) }]));
   const patternFiles = {
     muzzle: '0000_muzzle', black_tan: '0001_black-tan', lynx: '0002_lynx',
     long_ear: '0003_long_ear', short_ear: '0004_short__ear',
@@ -81,7 +81,7 @@
     }
     images.forEach((img, i) => draw(img,
       [ 'source-over','color-burn','soft-light','color-burn','color-burn','color-burn','color-burn','source-over','source-over','source-over','source-over' ][i],
-      i >= 3 && i <= 5 ? opacity[s.color] : 1, i === 0 || (i >= 3 && i <= 5)));
+      i >= 3 && i <= 5 ? (opacity[s.color] ?? 1) : 1, i === 0 || (i >= 3 && i <= 5)));
   }
   window.ProvedAvatar = { catalog, groups, defaults, normalize, render };
 })();
