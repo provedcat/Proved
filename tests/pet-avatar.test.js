@@ -28,6 +28,7 @@ same(avatar.normalize({
   patternEar: 'long_ear', patternOuter: 'raccoon', eyeColor: 'emerald',
   eyePattern: 'cat_eye', blush: 'pink', nose: 'brown'
 });
-assert.equal(avatar.normalize({ shape: '02_08', patternCentral: 'raccoon' }, 'cat').shape, '02_01');
+assert.equal(avatar.normalize({ shape: '02_08', patternCentral: 'raccoon' }, 'cat').shape, '02_08');
+assert.equal(avatar.normalize({ shape: '02_01' }, 'dog').shape, '02_01');
 assert.equal(avatar.normalize({ patternCentral: 'raccoon' }, 'cat').patternCentral, null);
 console.log('Pet avatar asset and settings checks passed.');

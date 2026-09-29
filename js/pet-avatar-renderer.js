@@ -6,7 +6,6 @@
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
     return [id, {
-      species: i < 4 ? 'cat' : 'dog',
       name: ['단모', '장모', '장모 · 이어터프트', '작은 귀', '뾰족한 귀', '처진 둥근 귀', '작고 둥근 귀', '길게 처진 귀'][i],
       mask: asset('02_shape', id + '_shape'),
       shadow: asset('02_shape', id + '_shadow-colorburn'),
@@ -48,7 +47,6 @@
       if (candidate === null && (key in groups || key === 'blush' || key === 'eyePattern')) result[key] = null;
       else if (catalog[key][candidate] && (!groups[key] || groups[key].includes(candidate))) result[key] = candidate;
     }
-    if (shapes[result.shape].species !== species) result.shape = defaults(species).shape;
     return result;
   }
   const cache = new Map();
