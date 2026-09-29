@@ -63,15 +63,12 @@
 }
 
 .my-avatar-preview {
-  --avatar-soft: #F2EEFF;
   width: 210px;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255,255,255,.88);
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255,255,255,.86), transparent 28%),
-    var(--avatar-soft);
+  background: #fff;
 }
 
 .my-avatar-preview canvas {
@@ -154,7 +151,7 @@
 .my-avatar-option[aria-pressed="true"] { outline: 2px solid var(--my-blue); outline-offset: 1px; }
 .my-avatar-option img, .my-avatar-none {
   display: grid; place-items: center; width: 100%; aspect-ratio: 1;
-  object-fit: contain; background: #f7f5ff;
+  object-fit: contain; background: #fff;
 }
 .my-avatar-option > span:last-child { display: block; padding: 7px 0 3px; font-size: 12px; font-weight: 700; }
 .my-avatar-save {

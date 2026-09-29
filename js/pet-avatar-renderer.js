@@ -67,6 +67,8 @@
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
     const clipped = document.createElement('canvas'); clipped.width = w; clipped.height = h;
     const c = clipped.getContext('2d');
     function draw(img, mode, alpha, clip) {
