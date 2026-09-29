@@ -8,9 +8,11 @@ const context = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(root, 'js/pet-avatar-renderer.js'), 'utf8'), context);
 const avatar = context.window.ProvedAvatar;
 const same = (actual, expected) => assert.deepEqual(JSON.parse(JSON.stringify(actual)), expected);
-assert.equal(Object.keys(avatar.catalog.color).length, 14);
+assert.equal(Object.keys(avatar.catalog.color).length, 15);
 assert.equal(avatar.catalog.color.skyblue.name, '하늘색');
+assert.equal(avatar.catalog.color.pure_white.name, '퓨어 화이트');
 assert.equal(avatar.normalize({ color: 'calico' }, 'cat').color, 'calico');
+assert.equal(avatar.normalize({ color: 'pure_white' }, 'cat').color, 'pure_white');
 
 for (const [group, options] of Object.entries(avatar.catalog)) {
   for (const [key, item] of Object.entries(options)) {
@@ -48,8 +50,19 @@ const mainContext = {
 };
 avatar.render({ width: 256, height: 256, getContext: () => mainContext }, {
   color: 'black', patternCentral: 'sold', patternEar: 'long_ear'
-}, 'cat').then(() => {
+}, 'cat').then(async () => {
   assert.deepEqual(draws[3], { mode: 'overlay', alpha: 1 });
   assert.deepEqual(draws[4], { mode: 'color-burn', alpha: .6 });
+  draws.length = 0;
+  await avatar.render({ width: 256, height: 256, getContext: () => mainContext }, {
+    color: 'soft_gray', patternCentral: 'sold', patternEar: 'long_ear'
+  }, 'cat');
+  assert.deepEqual(draws[3], { mode: 'overlay', alpha: .6 });
+  assert.deepEqual(draws[4], { mode: 'color-burn', alpha: .6 });
+  draws.length = 0;
+  await avatar.render({ width: 256, height: 256, getContext: () => mainContext }, {
+    color: 'pure_white', patternCentral: 'muzzle'
+  }, 'cat');
+  assert.deepEqual(draws[3], { mode: 'color-burn', alpha: 1 });
   console.log('Pet avatar asset, settings, and blend checks passed.');
 }).catch(error => { console.error(error); process.exitCode = 1; });
