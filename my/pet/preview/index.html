@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>MY PET 미리 만들기 | 프루브</title>
+  <meta name="description" content="로그인 없이 프루브 MY PET 아바타를 미리 만들어보세요.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <meta name="theme-color" content="#3568FF">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
+  <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
+  <link rel="stylesheet" href="/css/my-page.css?v=20260929-pet-avatar">
+  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260929-thumb-crop-v1">
+  <link rel="stylesheet" href="/css/my-pet-promo.css?v=20260930-v1">
+  <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
+  <script defer src="/js/pet-avatar-renderer.js?v=20260929-color-refresh-v1"></script>
+  <script defer src="/js/my-pet-promo.js?v=20260930-v1"></script>
+</head>
+<body class="my-body">
+  <div class="my-site-shell">
+    <header data-proved-header="my"></header>
+
+    <main class="my-pet-promo-page">
+      <section class="my-pet-promo-hero">
+        <p class="my-eyebrow">MY PET PREVIEW</p>
+        <h1>우리 아이를<br>먼저 만들어보세요.</h1>
+        <p>로그인 없이 바로 시작할 수 있습니다. 여기서 만든 내용은 계정에 저장되지 않습니다.</p>
+      </section>
+
+      <section class="my-pet-promo-intro" aria-labelledby="promoStartTitle">
+        <div>
+          <p class="my-avatar-section-number">01</p>
+          <h2 id="promoStartTitle">누구를 만들까요?</h2>
+        </div>
+        <div class="my-pet-promo-fields">
+          <label class="my-pet-promo-field">
+            <span>이름</span>
+            <input id="promoPetName" type="text" maxlength="20" autocomplete="off" placeholder="예: 은동이">
+          </label>
+          <fieldset class="my-pet-promo-species">
+            <legend>반려동물</legend>
+            <div>
+              <button type="button" data-promo-species="cat" aria-pressed="true">고양이</button>
+              <button type="button" data-promo-species="dog" aria-pressed="false">강아지</button>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="my-avatar-preview-section my-pet-promo-preview" aria-labelledby="promoPreviewTitle">
+        <div class="my-avatar-preview"><canvas id="promoAvatarPreview" width="256" height="256" role="img" aria-label="현재 MY PET 아바타"></canvas></div>
+        <div>
+          <p class="my-avatar-section-number">02</p>
+          <h2 id="promoPreviewTitle">MY PET 미리보기</h2>
+          <strong id="promoPetNamePreview">반려동물</strong>
+          <p id="promoPetMeta">고양이 · 로그인 없이 체험 중</p>
+        </div>
+      </section>
+
+      <section class="my-avatar-builder-shell" aria-labelledby="promoBuilderTitle">
+        <div class="my-avatar-section-heading">
+          <p class="my-avatar-section-number">03</p>
+          <h2 id="promoBuilderTitle">우리 아이처럼 꾸미기</h2>
+        </div>
+        <div class="my-avatar-tabs" id="promoAvatarTabs" role="tablist" aria-label="아바타 편집 항목"></div>
+        <div id="promoAvatarOptions" class="my-avatar-panel" role="tabpanel"></div>
+      </section>
+
+      <section class="my-pet-promo-finish" aria-labelledby="promoFinishTitle">
+        <div>
+          <p class="my-avatar-section-number">04</p>
+          <h2 id="promoFinishTitle">완성</h2>
+          <p>정식 MY에서는 아바타와 반려동물 정보를 저장하고, 체중·식단·급여 계산 기록까지 이어볼 수 있습니다.</p>
+        </div>
+        <div class="my-pet-promo-actions">
+          <button type="button" id="promoDownload">이미지 저장</button>
+          <a href="/my/?login=1">MY에서 이어가기</a>
+        </div>
+        <p id="promoStatus" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <footer data-proved-footer></footer>
+  </div>
+</body>
+</html>
