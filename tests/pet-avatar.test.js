@@ -12,7 +12,7 @@ const same = (actual, expected) => assert.deepEqual(JSON.parse(JSON.stringify(ac
 for (const [group, options] of Object.entries(avatar.catalog)) {
   for (const [key, item] of Object.entries(options)) {
     for (const src of [item.src, item.mask, item.shadow, item.light].filter(Boolean)) {
-      assert.ok(fs.existsSync(path.join(root, src)), group + '/' + key + ': ' + src);
+      assert.ok(fs.existsSync(path.join(root, src.split('?')[0])), group + '/' + key + ': ' + src);
     }
     if (['eyeColor','eyePattern','blush','nose'].includes(group)) {
       assert.ok(fs.existsSync(path.join(root, 'images/pet-avatar/thumbs', item.file + '.webp')));

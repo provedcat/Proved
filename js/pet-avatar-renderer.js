@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const base = '/images/pet-avatar/assets/';
-  const asset = (folder, file) => base + folder + '/' + file + '.png';
+  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-final';
   const make = (entries) => Object.fromEntries(entries);
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
