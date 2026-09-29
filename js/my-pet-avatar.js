@@ -37,13 +37,19 @@
       const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
       heading.textContent = title; grid.className = 'my-avatar-options';
       if (avatar.groups[key]) grid.classList.add('my-avatar-pattern-options');
+      if (['color','blush','nose'].includes(key)) grid.classList.add('my-avatar-' + key + '-options');
       group.append(heading, grid);
       for (const value of options(key)) {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
         button.setAttribute('aria-pressed', String(settings[key] === value));
         const name = value ? avatar.catalog[key][value].name : '없음';
         const image = thumb(key, value);
-        if (image) { const img = document.createElement('img'); img.src = image; img.alt = ''; img.loading = 'lazy'; button.appendChild(img); }
+        if (image) {
+          const img = document.createElement('img'); img.src = image; img.alt = ''; img.loading = 'lazy';
+          if (key === 'blush') {
+            const crop = document.createElement('span'); crop.className = 'my-avatar-blush-crop'; crop.appendChild(img); button.appendChild(crop);
+          } else button.appendChild(img);
+        }
         else { const mark = document.createElement('span'); mark.className = 'my-avatar-none'; mark.textContent = '—'; button.appendChild(mark); }
         const label = document.createElement('span'); label.textContent = name; button.appendChild(label);
         button.addEventListener('click', () => { settings[key] = avatar.groups[key] && settings[key] === value ? null : value; renderControls(); draw(); });

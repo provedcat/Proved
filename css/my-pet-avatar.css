@@ -154,6 +154,21 @@
   object-fit: contain; background: #fff;
 }
 .my-avatar-option > span:last-child { display: block; padding: 7px 0 3px; font-size: 12px; font-weight: 700; }
+.my-avatar-color-options .my-avatar-option img { border-radius: 50%; }
+.my-avatar-blush-crop {
+  display: block; width: min(100%, 96px); aspect-ratio: 1;
+  border-radius: 50%; overflow: hidden;
+}
+.my-avatar-blush-crop img { transform: scale(2); transform-origin: 15% 50%; }
+@media (min-width: 721px) {
+  .my-avatar-color-options .my-avatar-option,
+  .my-avatar-blush-options .my-avatar-option,
+  .my-avatar-nose-options .my-avatar-option { display: grid; justify-items: center; align-content: center; }
+  .my-avatar-color-options .my-avatar-option img { width: min(100%, 112px); }
+  .my-avatar-nose-options .my-avatar-option img,
+  .my-avatar-blush-options .my-avatar-none { width: min(100%, 88px); }
+  .my-avatar-blush-crop { width: min(100%, 88px); }
+}
 .my-avatar-pattern-options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
 .my-avatar-pattern-options .my-avatar-option { display: grid; justify-items: center; align-content: center; padding: 8px 3px; }
 .my-avatar-pattern-options .my-avatar-option img { width: min(100%, 56px); }
