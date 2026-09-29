@@ -34,4 +34,22 @@ same(avatar.normalize({
 assert.equal(avatar.normalize({ shape: '02_08', patternCentral: 'raccoon' }, 'cat').shape, '02_08');
 assert.equal(avatar.normalize({ shape: '02_01' }, 'dog').shape, '02_01');
 assert.equal(avatar.normalize({ patternCentral: 'raccoon' }, 'cat').patternCentral, null);
-console.log('Pet avatar asset and settings checks passed.');
+assert.equal(avatar.normalize({ patternCentral: 'sold' }, 'cat').patternCentral, 'sold');
+
+context.Image = class {
+  set src(value) { this.value = value; queueMicrotask(() => this.onload()); }
+};
+const clippedContext = { clearRect() {}, drawImage() {}, globalCompositeOperation: 'source-over', globalAlpha: 1 };
+context.document = { createElement: () => ({ getContext: () => clippedContext }) };
+const draws = [];
+const mainContext = {
+  clearRect() {}, fillRect() {}, globalCompositeOperation: 'source-over', globalAlpha: 1,
+  drawImage() { draws.push({ mode: this.globalCompositeOperation, alpha: this.globalAlpha }); }
+};
+avatar.render({ width: 256, height: 256, getContext: () => mainContext }, {
+  color: 'black', patternCentral: 'sold', patternEar: 'long_ear'
+}, 'cat').then(() => {
+  assert.deepEqual(draws[3], { mode: 'overlay', alpha: 1 });
+  assert.deepEqual(draws[4], { mode: 'color-burn', alpha: .6 });
+  console.log('Pet avatar asset, settings, and blend checks passed.');
+}).catch(error => { console.error(error); process.exitCode = 1; });

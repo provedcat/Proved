@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const base = '/images/pet-avatar/assets/';
-  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-colors-v2';
+  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-central-pattern-v1';
   const make = (entries) => Object.fromEntries(entries);
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
@@ -17,10 +17,10 @@
   const patternFiles = {
     muzzle: '0000_muzzle', black_tan: '0001_black-tan', lynx: '0002_lynx',
     long_ear: '0003_long_ear', short_ear: '0004_short__ear',
-    half_face: '0005_half-face', bicolor: '0006_bycolor', raccoon: '0007_raccoon'
+    half_face: '0005_half-face', bicolor: '0006_bycolor', raccoon: '0007_raccoon', sold: '0008_sold'
   };
   const patterns = make(Object.entries(patternFiles).map(([key, file]) => [key, { name: {
-    muzzle: '입 주변', black_tan: '블랙탄', lynx: '링스', long_ear: '긴 귀', short_ear: '짧은 귀',
+    muzzle: '입 주변', black_tan: '블랙탄', lynx: '링스', sold: '중앙 포인트', long_ear: '긴 귀', short_ear: '짧은 귀',
     half_face: '반쪽 얼굴', bicolor: '바이컬러', raccoon: '라쿤'
   }[key], src: asset('03_face_pattern', '03_face_pattern__' + file) }]));
   const parts = (folder, prefix, names) => make(names.map((key, i) => [key, {
@@ -37,7 +37,7 @@
   };
   // The source PSD exports use round-eye, cat-eye, and brown_line spellings.
   catalog.nose.brown_line.src = asset('07_nose', '07_nose_0003_brown_line');
-  const groups = { patternCentral: ['muzzle','black_tan','lynx'], patternEar: ['long_ear','short_ear'], patternOuter: ['half_face','bicolor','raccoon'] };
+  const groups = { patternCentral: ['muzzle','black_tan','lynx','sold'], patternEar: ['long_ear','short_ear'], patternOuter: ['half_face','bicolor','raccoon'] };
   const opacity = { black: .6, blue: .6, cool_white: 1, lemon: 1, orange: .8, pink: 1, purple: .8, warm_white: 1 };
   const defaults = species => ({ shape: species === 'dog' ? '02_05' : '02_01', color: 'warm_white', patternCentral: null, patternEar: null, patternOuter: null, eyeColor: 'marigold', eyePattern: 'cat_eye', blush: null, nose: 'black' });
   function normalize(value, species) {
@@ -79,9 +79,13 @@
       ctx.globalCompositeOperation = mode; ctx.globalAlpha = alpha;
       ctx.drawImage(clipped, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     }
-    images.forEach((img, i) => draw(img,
-      [ 'source-over','color-burn','soft-light','color-burn','color-burn','color-burn','color-burn','source-over','source-over','source-over','source-over' ][i],
-      i >= 3 && i <= 5 ? (opacity[s.color] ?? 1) : 1, i === 0 || (i >= 3 && i <= 5)));
+    images.forEach((img, i) => {
+      const overlayPattern = i === 3 && s.patternCentral === 'sold';
+      draw(img,
+        overlayPattern ? 'overlay' : [ 'source-over','color-burn','soft-light','color-burn','color-burn','color-burn','color-burn','source-over','source-over','source-over','source-over' ][i],
+        overlayPattern ? 1 : i >= 3 && i <= 5 ? (opacity[s.color] ?? 1) : 1,
+        i === 0 || (i >= 3 && i <= 5));
+    });
   }
   window.ProvedAvatar = { catalog, groups, defaults, normalize, render };
 })();
