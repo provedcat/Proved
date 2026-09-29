@@ -196,7 +196,7 @@
 
     const petsResponse = await sb
       .from('pets')
-      .select('id,name,birth_date,neutered,species,created_at')
+      .select('id,name,birth_date,neutered,species,created_at,avatar_image_url')
       .eq('user_id', userId)
       .order('created_at', { ascending: true });
 
@@ -234,15 +234,25 @@
       const palette = paletteForPet(pet);
       const latest = latestWeightByPet.get(String(pet.id));
       const meta = speciesLabel(pet.species) + ' · ' + calculateAgeLabel(pet.birth_date);
+      const avatarPath = pet.avatar_image_url;
+      const avatar = avatarPath && /^[0-9a-f-]+\/[0-9a-f-]+\/[0-9a-f-]+\.webp$/i.test(avatarPath)
+        ? '<img data-pet-avatar data-species="' + (pet.species === 'dog' ? 'dog' : 'cat') + '" src="' +
+          escapeHtml(sb.storage.from('pet-avatars').getPublicUrl(avatarPath).data.publicUrl) + '" alt="">'
+        : petIcon(pet.species);
 
       return '<a class="my-pet-card" href="/my/pet/?id=' + encodeURIComponent(pet.id) + '" style="--pet-accent:' + palette.accent + ';--pet-soft:' + palette.soft + ';">' +
-        '<div class="my-pet-icon">' + petIcon(pet.species) + '</div>' +
+        '<div class="my-pet-icon">' + avatar + '</div>' +
         '<strong>' + escapeHtml(pet.name || '이름 없음') + '</strong>' +
         '<p>' + escapeHtml(meta) + '</p>' +
         '<p>' + escapeHtml(formatWeight(latest && latest.weight_kg)) + '</p>' +
         '<span class="my-pet-accent" aria-hidden="true"></span>' +
         '</a>';
     }).join('');
+    els.petRail.querySelectorAll('img[data-pet-avatar]').forEach(function (image) {
+      image.addEventListener('error', function () {
+        image.parentElement.innerHTML = petIcon(image.dataset.species);
+      });
+    });
     resetFavoriteCarousel();
   }
 
