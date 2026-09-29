@@ -37,6 +37,8 @@ assert.equal(avatar.normalize({ shape: '02_08', patternCentral: 'raccoon' }, 'ca
 assert.equal(avatar.normalize({ shape: '02_01' }, 'dog').shape, '02_01');
 assert.equal(avatar.normalize({ patternCentral: 'raccoon' }, 'cat').patternCentral, null);
 assert.equal(avatar.normalize({ patternCentral: 'sold' }, 'cat').patternCentral, 'sold');
+assert.equal(avatar.catalog.patternCentral.sold.name, '눈');
+assert.equal(avatar.catalog.patternCentral.muzzle.name, '입');
 
 context.Image = class {
   set src(value) { this.value = value; queueMicrotask(() => this.onload()); }

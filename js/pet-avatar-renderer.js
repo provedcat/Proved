@@ -20,7 +20,7 @@
     half_face: '0005_half-face', bicolor: '0006_bycolor', raccoon: '0007_raccoon', sold: '0008_sold'
   };
   const patterns = make(Object.entries(patternFiles).map(([key, file]) => [key, { name: {
-    muzzle: '입 주변', black_tan: '블랙탄', lynx: '링스', sold: '중앙 포인트', long_ear: '긴 귀', short_ear: '짧은 귀',
+    muzzle: '입', black_tan: '블랙탄', lynx: '링스', sold: '눈', long_ear: '긴 귀', short_ear: '짧은 귀',
     half_face: '반쪽 얼굴', bicolor: '바이컬러', raccoon: '라쿤'
   }[key], src: asset('03_face_pattern', '03_face_pattern__' + file) }]));
   const parts = (folder, prefix, names) => make(names.map((key, i) => [key, {

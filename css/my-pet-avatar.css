@@ -154,6 +154,10 @@
   object-fit: contain; background: #fff;
 }
 .my-avatar-option > span:last-child { display: block; padding: 7px 0 3px; font-size: 12px; font-weight: 700; }
+.my-avatar-pattern-options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.my-avatar-pattern-options .my-avatar-option { display: grid; justify-items: center; align-content: center; padding: 8px 3px; }
+.my-avatar-pattern-options .my-avatar-option img { width: min(100%, 56px); }
+.my-avatar-pattern-options .my-avatar-option > span:last-child { padding: 5px 0 0; line-height: 1.25; word-break: keep-all; }
 .my-avatar-save {
   width: 100%; min-height: 48px; margin-top: 28px; border: 0;
   background: var(--my-blue); color: #fff; font: inherit; font-weight: 760; cursor: pointer;
@@ -185,4 +189,5 @@
   }
 
   .my-avatar-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .my-avatar-pattern-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
