@@ -8,6 +8,9 @@ const context = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(root, 'js/pet-avatar-renderer.js'), 'utf8'), context);
 const avatar = context.window.ProvedAvatar;
 const same = (actual, expected) => assert.deepEqual(JSON.parse(JSON.stringify(actual)), expected);
+assert.equal(Object.keys(avatar.catalog.color).length, 14);
+assert.equal(avatar.catalog.color.skyblue.name, '하늘색');
+assert.equal(avatar.normalize({ color: 'calico' }, 'cat').color, 'calico');
 
 for (const [group, options] of Object.entries(avatar.catalog)) {
   for (const [key, item] of Object.entries(options)) {
