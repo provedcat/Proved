@@ -114,21 +114,44 @@ function buildFeedingSaveCard() {
   return card;
 }
 
+function withTimeout(promise, timeoutMs, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
+
+async function waitForShareCardFonts() {
+  if (!document.fonts?.ready) return;
+  // iOS Safari can leave FontFaceSet.ready pending for a long time when a webfont
+  // request stalls. Do not let optional font loading block the whole image flow.
+  try {
+    await withTimeout(document.fonts.ready, 1800, '폰트 로딩 시간이 초과되었습니다.');
+  } catch (_) {
+    // Continue with the available system fallback font.
+  }
+}
+
 async function captureShareCardCanvas() {
   const captureTarget = buildFeedingSaveCard();
   try {
-    if (document.fonts?.ready) await document.fonts.ready;
+    await waitForShareCardFonts();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    return await html2canvas(captureTarget, {
-      backgroundColor: '#F8F6EF',
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      width: FEEDING_SAVE_CARD_WIDTH,
-      height: FEEDING_SAVE_CARD_HEIGHT,
-      windowWidth: FEEDING_SAVE_CARD_WIDTH,
-      windowHeight: FEEDING_SAVE_CARD_HEIGHT
-    });
+    return await withTimeout(
+      html2canvas(captureTarget, {
+        backgroundColor: '#F8F6EF',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: FEEDING_SAVE_CARD_WIDTH,
+        height: FEEDING_SAVE_CARD_HEIGHT,
+        windowWidth: FEEDING_SAVE_CARD_WIDTH,
+        windowHeight: FEEDING_SAVE_CARD_HEIGHT
+      }),
+      12000,
+      '이미지 생성 시간이 초과되었습니다.'
+    );
   } finally {
     captureTarget.remove();
   }
@@ -153,7 +176,8 @@ async function openShareModal() {
     image.src = canvas.toDataURL('image/png');
     preview.replaceChildren(image);
   } catch (error) {
-    preview.innerHTML = '<p class="share-preview-loading">미리보기를 만들지 못했습니다. 다시 시도해 주세요.</p>';
+    console.error('[저장용 이미지 생성 실패]', error);
+    preview.innerHTML = '<p class="share-preview-loading">이미지를 만들지 못했습니다.<br>다시 시도해 주세요.</p>';
   }
 }
 

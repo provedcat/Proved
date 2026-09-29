@@ -220,14 +220,11 @@ function updateSaveFeedingButtonVisibility() {
   const isAlreadySaved = !!(hasResult && currentSaveKey && currentSaveKey === state.lastSavedResultKey);
   const canClick = hasResult && !state.isCalculationDirty && !isSaving && !isAlreadySaved;
 
-  button.classList.toggle('hidden', !hasResult || !state.currentUser);
+  // Keep result saving available as its own primary action. Logged-out users can
+  // press it and continue through the existing login flow.
+  button.classList.toggle('hidden', !hasResult);
   button.disabled = !canClick;
-  button.classList.toggle('bg-[#2F6FED]', canClick);
-  button.classList.toggle('text-white', canClick);
-  button.classList.toggle('bg-gray-200', !canClick);
-  button.classList.toggle('text-gray-400', !canClick);
-  button.classList.toggle('cursor-not-allowed', !canClick);
-  button.classList.toggle('opacity-70', !canClick);
+  button.classList.toggle('is-disabled', !canClick);
 
   if (isSaving) {
     button.textContent = '저장 중입니다...';
@@ -241,7 +238,7 @@ function updateSaveFeedingButtonVisibility() {
     return;
   }
 
-  button.textContent = '이 계산 결과 저장하기';
+  button.textContent = '결과 저장하기';
 
   if (!hasResult) {
     setSaveFeedingRecordMessage('먼저 급여량을 계산해 주세요.', 'gray');

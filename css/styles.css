@@ -979,3 +979,43 @@ details[open] > :not(summary) { animation: provedReveal var(--proved-motion-fast
   .pc-mobile-feeding-summary.is-complete{display:none}
   .pc-feeding-document{width:100%;padding:26px 20px 20px}.pc-feeding-document .pc-result-card{grid-template-columns:20px minmax(0,1fr) auto;gap:8px}.pc-feeding-document .pc-result-card>strong{min-width:68px;font-size:32px!important}.pc-document-analysis{grid-template-columns:1fr}.pc-document-analysis>div+div{padding-left:0;border-top:1px solid #d5d2c9;border-left:0}
 }
+
+
+/* Result actions: keep data save independent from image generation. */
+.pc-result-save-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+}
+.pc-result-save-primary,
+.pc-result-save-secondary {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 16px;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+}
+.pc-result-save-primary {
+  border: 1px solid var(--brand-primary);
+  background: var(--brand-primary);
+  color: #fff;
+}
+.pc-result-save-primary:active {
+  background: var(--brand-primary-pressed);
+}
+.pc-result-save-primary.is-disabled,
+.pc-result-save-primary:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.pc-result-save-secondary {
+  border: 1px solid var(--brand-primary);
+  background: #fff;
+  color: var(--brand-primary);
+}
+.pc-result-save-secondary:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
