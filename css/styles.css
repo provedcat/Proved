@@ -1013,7 +1013,7 @@ details[open] > :not(summary) { animation: provedReveal var(--proved-motion-fast
   cursor: not-allowed;
 }
 .pc-result-save-secondary {
-  border: 1px solid var(--brand-primary);
+  border: 0;
   background: #fff;
   color: var(--brand-primary);
 }
