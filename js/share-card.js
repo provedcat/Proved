@@ -1,6 +1,15 @@
 // 저장해서 다시 보는 9:16 급여 계획 이미지만 생성합니다.
 const FEEDING_SAVE_CARD_WIDTH = 540;
-const FEEDING_SAVE_CARD_HEIGHT = 960;
+const FEEDING_SAVE_CARD_MIN_HEIGHT = 650;
+const FEEDING_SAVE_CARD_MAX_HEIGHT = 960;
+
+function getFeedingSaveCardHeight(feedCount) {
+  // Header/pet/metrics/footer need ~560px. Each feed row adds 94px.
+  return Math.min(
+    FEEDING_SAVE_CARD_MAX_HEIGHT,
+    Math.max(FEEDING_SAVE_CARD_MIN_HEIGHT, 560 + Math.max(1, feedCount) * 94)
+  );
+}
 
 function saveCardEscape(value) {
   return String(value ?? '')
@@ -71,6 +80,7 @@ function buildFeedingSaveCard() {
   card.id = 'feedingPlanSaveCard';
   card.className = 'feeding-save-card';
   card.setAttribute('aria-hidden', 'true');
+  card.style.height = `${getFeedingSaveCardHeight(data.feeds.length)}px`;
 
   const feedRows = data.feeds.map(feed => `
     <div class="feeding-save-card__feed">
@@ -138,6 +148,7 @@ async function captureShareCardCanvas() {
   try {
     await waitForShareCardFonts();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const captureHeight = Math.ceil(captureTarget.getBoundingClientRect().height);
     return await withTimeout(
       html2canvas(captureTarget, {
         backgroundColor: '#F8F6EF',
@@ -145,9 +156,9 @@ async function captureShareCardCanvas() {
         useCORS: true,
         logging: false,
         width: FEEDING_SAVE_CARD_WIDTH,
-        height: FEEDING_SAVE_CARD_HEIGHT,
+        height: captureHeight,
         windowWidth: FEEDING_SAVE_CARD_WIDTH,
-        windowHeight: FEEDING_SAVE_CARD_HEIGHT
+        windowHeight: captureHeight
       }),
       12000,
       '이미지 생성 시간이 초과되었습니다.'
