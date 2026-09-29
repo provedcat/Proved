@@ -266,7 +266,11 @@ function updateResultActionState() {
     button.setAttribute('aria-disabled', String(!isFresh));
   });
   updateSaveFeedingButtonVisibility();
-  document.getElementById('resultDirtyNotice')?.classList.toggle('hidden', !state.isCalculationDirty);
+  const dirtyNotice = document.getElementById('resultDirtyNotice');
+  if (dirtyNotice) {
+    dirtyNotice.classList.toggle('hidden', !state.isCalculationDirty);
+    dirtyNotice.textContent = '입력값이 변경되었습니다. 결과를 저장하거나 이미지를 만들려면 다시 계산해 주세요.';
+  }
 }
 
 function initializeCalculatorChoices() {
