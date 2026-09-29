@@ -7,13 +7,13 @@
   const tabs = { shape: '형태', color: '색상', pattern: '패턴', eye: '눈', blush: '볼', nose: '코' };
   const sections = {
     shape: [['shape', '얼굴 형태']], color: [['color', '털 색상']],
-    pattern: [['patternCentral','중앙형'], ['patternEar','귀 연동형'], ['patternOuter','외곽형']],
+    pattern: [['patternCentral','포인트'], ['patternEar','귀 얼룩'], ['patternOuter','얼굴 패턴']],
     eye: [['eyeColor','눈 색상'], ['eyePattern','눈 패턴']],
     blush: [['blush','볼터치']], nose: [['nose','코']]
   };
   let pet, user, settings, active = 'shape', revision = 0, saving = false;
   function options(key) {
-    if (avatar.groups[key]) return [null, ...avatar.groups[key]];
+    if (avatar.groups[key]) return avatar.groups[key];
     const keys = Object.keys(avatar.catalog[key]);
     return (key === 'blush' || key === 'eyePattern') ? [null, ...keys] : keys;
   }
@@ -35,7 +35,9 @@
     const panel = $('avatarOptions'); panel.replaceChildren();
     for (const [key, title] of sections[active]) {
       const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
-      heading.textContent = title; grid.className = 'my-avatar-options'; group.append(heading, grid);
+      heading.textContent = title; grid.className = 'my-avatar-options';
+      if (avatar.groups[key]) grid.classList.add('my-avatar-pattern-options');
+      group.append(heading, grid);
       for (const value of options(key)) {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
         button.setAttribute('aria-pressed', String(settings[key] === value));
@@ -44,7 +46,7 @@
         if (image) { const img = document.createElement('img'); img.src = image; img.alt = ''; img.loading = 'lazy'; button.appendChild(img); }
         else { const mark = document.createElement('span'); mark.className = 'my-avatar-none'; mark.textContent = '—'; button.appendChild(mark); }
         const label = document.createElement('span'); label.textContent = name; button.appendChild(label);
-        button.addEventListener('click', () => { settings[key] = value; renderControls(); draw(); });
+        button.addEventListener('click', () => { settings[key] = avatar.groups[key] && settings[key] === value ? null : value; renderControls(); draw(); });
         grid.appendChild(button);
       }
       panel.appendChild(group);
