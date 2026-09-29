@@ -106,7 +106,7 @@
   async function loadPet(userId, petId) {
     const response = await sb
       .from('pets')
-      .select('id,name,birth_date,neutered,species')
+      .select('id,name,birth_date,neutered,species,avatar_image_url')
       .eq('user_id', userId)
       .eq('id', petId)
       .limit(1);
@@ -156,7 +156,16 @@
     hero.style.setProperty('--pet-accent', palette.accent);
     hero.style.setProperty('--pet-soft', palette.soft);
 
-    $('myPetHeroIcon').innerHTML = petIcon(pet.species);
+    $('myPetHeroIcon').innerHTML = '';
+    if (pet.avatar_image_url && /^[0-9a-f-]+\/[0-9a-f-]+\/[0-9a-f-]+\.webp$/i.test(pet.avatar_image_url)) {
+      const image = document.createElement('img');
+      image.src = sb.storage.from('pet-avatars').getPublicUrl(pet.avatar_image_url).data.publicUrl;
+      image.alt = '';
+      image.onerror = function () { $('myPetHeroIcon').innerHTML = petIcon(pet.species); };
+      $('myPetHeroIcon').appendChild(image);
+    } else {
+      $('myPetHeroIcon').innerHTML = petIcon(pet.species);
+    }
     $('myPetHeroIcon').href = '/my/pet/avatar/?id=' + encodeURIComponent(pet.id);
     $('myPetHeroIcon').setAttribute('aria-label', (pet.name || '반려동물') + ' 아바타 만들기');
     $('myPetName').textContent = pet.name || '이름 없음';
