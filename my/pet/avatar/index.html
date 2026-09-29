@@ -13,9 +13,10 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <link rel="stylesheet" href="/css/my-page.css?v=20260924-favorite-card-v2">
-  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260924-shell-v1">
+  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260929-builder-v1">
   <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
-  <script defer src="/js/my-pet-avatar.js?v=20260924-shell-v1"></script>
+  <script defer src="/js/pet-avatar-renderer.js?v=20260929-v1"></script>
+  <script defer src="/js/my-pet-avatar.js?v=20260929-builder-v1"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -38,12 +39,12 @@
         </header>
 
         <section class="my-avatar-preview-section" aria-labelledby="avatarPreviewTitle">
-          <div class="my-avatar-preview" id="avatarPreview"></div>
+          <div class="my-avatar-preview"><canvas id="avatarPreview" width="256" height="256" role="img" aria-label="현재 아바타 조합"></canvas></div>
           <div>
             <p class="my-avatar-section-number">01</p>
             <h2 id="avatarPreviewTitle">아바타 프리뷰</h2>
             <strong id="avatarPetName">반려동물</strong>
-            <p>현재 기본 아바타입니다. 기존 테스트 에셋을 이 페이지에 연결해 편집기로 확장합니다.</p>
+            <p>아래에서 모습을 선택하고 완성 버튼을 눌러 저장하세요.</p>
           </div>
         </section>
 
@@ -52,15 +53,10 @@
             <p class="my-avatar-section-number">02</p>
             <h2 id="avatarBuilderTitle">편집 항목</h2>
           </div>
-          <div class="my-avatar-tabs" aria-label="아바타 편집 항목">
-            <span>얼굴</span>
-            <span>털색</span>
-            <span>무늬</span>
-            <span>눈</span>
-            <span>코</span>
-            <span>볼</span>
-          </div>
-          <p class="my-avatar-next-note">얼굴형·털색·패턴·눈·코·볼 레이어 편집기는 다음 단계에서 기존 MY PET 테스트 에셋 구조로 연결합니다.</p>
+          <div class="my-avatar-tabs" id="avatarTabs" role="tablist" aria-label="아바타 편집 항목"></div>
+          <div id="avatarOptions" class="my-avatar-panel" role="tabpanel"></div>
+          <button type="button" id="avatarSave" class="my-avatar-save">완료하고 저장</button>
+          <p id="avatarStatus" role="status" aria-live="polite"></p>
         </section>
       </div>
     </main>

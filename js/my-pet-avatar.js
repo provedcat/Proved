@@ -1,67 +1,115 @@
 (function () {
   'use strict';
-
-  const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-  function $(id) { return document.getElementById(id); }
-
-  function speciesLabel(species) {
-    return species === 'dog' ? '강아지' : '고양이';
+  const URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
+  const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
+  const sb = window.supabase.createClient(URL, KEY), avatar = window.ProvedAvatar;
+  const $ = id => document.getElementById(id);
+  const tabs = { shape: '형태', color: '색상', pattern: '패턴', eye: '눈', blush: '볼', nose: '코' };
+  const sections = {
+    shape: [['shape', '얼굴 형태']], color: [['color', '털 색상']],
+    pattern: [['patternCentral','중앙형'], ['patternEar','귀 연동형'], ['patternOuter','외곽형']],
+    eye: [['eyeColor','눈 색상'], ['eyePattern','눈 패턴']],
+    blush: [['blush','볼터치']], nose: [['nose','코']]
+  };
+  let pet, user, settings, active = 'shape', revision = 0, saving = false;
+  function options(key) {
+    if (avatar.groups[key]) return [null, ...avatar.groups[key]];
+    const keys = Object.keys(avatar.catalog[key]);
+    return (key === 'blush' || key === 'eyePattern') ? [null, ...keys] : keys;
   }
-
-  function petIcon(species) {
-    if (species === 'dog') {
-      return '<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
-        '<path d="M20 19c-5-8-12-6-12 2 0 6 4 11 9 13"/><path d="M44 19c5-8 12-6 12 2 0 6-4 11-9 13"/>' +
-        '<path d="M18 28c0-10 6-17 14-17s14 7 14 17v9c0 10-6 17-14 17S18 47 18 37z"/>' +
-        '<circle cx="26" cy="31" r="1.5" fill="currentColor" stroke="none"/><circle cx="38" cy="31" r="1.5" fill="currentColor" stroke="none"/>' +
-        '<path d="M29 39c2-2 4-2 6 0-1 3-5 3-6 0z"/><path d="M32 42v3"/></svg>';
+  function thumb(key, value) {
+    if (!value) return '';
+    if (['eyeColor','eyePattern','blush','nose'].includes(key)) return '/images/pet-avatar/thumbs/' + avatar.catalog[key][value].file + '.webp';
+    if (key === 'shape') return avatar.catalog.shape[value].mask;
+    return avatar.catalog[key][value].src;
+  }
+  function renderControls() {
+    $('avatarTabs').replaceChildren();
+    Object.entries(tabs).forEach(([key, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = label; button.setAttribute('role', 'tab');
+      button.setAttribute('aria-selected', String(active === key));
+      button.addEventListener('click', () => { active = key; renderControls(); });
+      $('avatarTabs').appendChild(button);
+    });
+    const panel = $('avatarOptions'); panel.replaceChildren();
+    for (const [key, title] of sections[active]) {
+      const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
+      heading.textContent = title; grid.className = 'my-avatar-options'; group.append(heading, grid);
+      for (const value of options(key)) {
+        if (key === 'shape' && avatar.catalog.shape[value].species !== pet.species) continue;
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
+        button.setAttribute('aria-pressed', String(settings[key] === value));
+        const name = value ? avatar.catalog[key][value].name : '없음';
+        const image = thumb(key, value);
+        if (image) { const img = document.createElement('img'); img.src = image; img.alt = ''; img.loading = 'lazy'; button.appendChild(img); }
+        else { const mark = document.createElement('span'); mark.className = 'my-avatar-none'; mark.textContent = '—'; button.appendChild(mark); }
+        const label = document.createElement('span'); label.textContent = name; button.appendChild(label);
+        button.addEventListener('click', () => { settings[key] = value; renderControls(); draw(); });
+        grid.appendChild(button);
+      }
+      panel.appendChild(group);
     }
-    return '<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M18 24 15 9l13 9M46 24 49 9 36 18"/><path d="M17 28c0-10 6-17 15-17s15 7 15 17v10c0 10-6 17-15 17S17 48 17 38z"/>' +
-      '<circle cx="26" cy="31" r="1.5" fill="currentColor" stroke="none"/><circle cx="38" cy="31" r="1.5" fill="currentColor" stroke="none"/>' +
-      '<path d="M29 39c2-2 4-2 6 0-1 3-5 3-6 0z"/><path d="M32 42v3M22 41l-10 1M22 45l-9 4M42 41l10 1M42 45l9 4"/></svg>';
   }
-
+  async function draw() {
+    const current = ++revision;
+    try {
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
+      await avatar.render(canvas, settings, pet.species);
+      if (current === revision) $('avatarPreview').getContext('2d').drawImage(canvas, 0, 0);
+      $('avatarStatus').textContent = '';
+    } catch (error) { console.error(error); $('avatarStatus').textContent = '이미지를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
+  }
+  function webp(canvas) {
+    return new Promise((resolve, reject) => canvas.toBlob(blob => blob && blob.type === 'image/webp'
+      ? resolve(blob) : reject(new Error('WebP 이미지를 만들 수 없습니다.')), 'image/webp', .88));
+  }
+  async function save() {
+    if (saving) return;
+    saving = true; $('avatarSave').disabled = true; $('avatarStatus').textContent = '저장하고 있습니다…';
+    let path;
+    try {
+      // Render the saved settings afresh so a pending preview render cannot be uploaded.
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
+      const selected = avatar.normalize(settings, pet.species);
+      await avatar.render(canvas, selected, pet.species);
+      const blob = await webp(canvas);
+      path = user.id + '/' + pet.id + '/' + crypto.randomUUID() + '.webp';
+      const upload = await sb.storage.from('pet-avatars').upload(path, blob, { contentType: 'image/webp', upsert: false });
+      if (upload.error) throw upload.error;
+      const updated = await sb.from('pets').update({ avatar_settings: selected, avatar_image_url: path })
+        .eq('id', pet.id).eq('user_id', user.id).select('id').single();
+      if (updated.error || !updated.data) throw updated.error || new Error('펫 정보가 변경되지 않았습니다.');
+      const old = pet.avatar_image_url; pet.avatar_image_url = path; settings = selected;
+      if (old && old !== path) {
+        const removed = await sb.storage.from('pet-avatars').remove([old]);
+        if (removed.error) console.warn('Old avatar cleanup failed', removed.error);
+      }
+      $('avatarStatus').textContent = '저장했습니다.';
+      window.location.assign('/my/pet/?id=' + encodeURIComponent(pet.id));
+    } catch (error) {
+      console.error('Avatar save failed:', error);
+      if (path) await sb.storage.from('pet-avatars').remove([path]);
+      $('avatarStatus').textContent = '저장하지 못했습니다. 다시 시도해 주세요.';
+      saving = false; $('avatarSave').disabled = false;
+    }
+  }
   async function init() {
-    const petId = new URLSearchParams(window.location.search).get('id');
-    if (!petId) {
-      $('avatarGate').hidden = false;
-      return;
-    }
-
-    const userResult = await sb.auth.getUser();
-    const user = userResult.data && userResult.data.user;
-    if (!user) {
-      $('avatarGate').hidden = false;
-      return;
-    }
-
-    if (typeof window.provedSetHeaderAuthState === 'function') {
-      window.provedSetHeaderAuthState(true);
-    }
-
-    const response = await sb.from('pets')
-      .select('id,name,species')
-      .eq('user_id', user.id)
-      .eq('id', petId)
-      .limit(1);
-
-    if (response.error || !response.data || !response.data[0]) {
-      $('avatarGate').hidden = false;
-      return;
-    }
-
-    const pet = response.data[0];
+    const id = new URLSearchParams(location.search).get('id');
+    if (!id) { $('avatarGate').hidden = false; return; }
+    const auth = await sb.auth.getUser(); user = auth.data && auth.data.user;
+    if (!user) { $('avatarGate').hidden = false; return; }
+    if (typeof window.provedSetHeaderAuthState === 'function') window.provedSetHeaderAuthState(true);
+    const result = await sb.from('pets').select('id,user_id,name,species,avatar_settings,avatar_image_url')
+      .eq('id', id).eq('user_id', user.id).maybeSingle();
+    if (result.error || !result.data) { $('avatarGate').hidden = false; return; }
+    pet = result.data; settings = avatar.normalize(pet.avatar_settings, pet.species);
     $('avatarContent').hidden = false;
     $('avatarPetName').textContent = pet.name || '반려동물';
-    $('avatarPetMeta').textContent = (pet.name || '반려동물') + ' · ' + speciesLabel(pet.species);
-    $('avatarPreview').innerHTML = petIcon(pet.species);
+    $('avatarPetMeta').textContent = (pet.name || '반려동물') + ' · ' + (pet.species === 'dog' ? '강아지' : '고양이');
     $('avatarBackLink').href = '/my/pet/?id=' + encodeURIComponent(pet.id);
-    document.title = (pet.name || '반려동물') + ' 아바타 만들기 | 프루브';
+    $('avatarSave').addEventListener('click', save);
+    renderControls(); draw();
   }
-
   window.addEventListener('DOMContentLoaded', init);
 })();
