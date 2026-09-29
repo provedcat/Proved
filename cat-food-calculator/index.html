@@ -55,7 +55,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- ✅ 카카오톡 공유 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/styles.css?v=20260928-save-card-v1">
+  <link rel="stylesheet" href="/css/styles.css?v=20260929-result-save-v1">
   <link rel="stylesheet" href="/css/proved-shell.css?v=20260816-surface-consistency-v1">
   <link rel="stylesheet" href="/css/calculator-diet-entry.css?v=20260924-v1">
   <link rel="stylesheet" href="/css/proved-header.css?v=20260816-surface-consistency-v1">
@@ -203,7 +203,11 @@
         <div class="pc-document-analysis"><div><span>Ca : P</span><strong id="planCapRatio">—</strong><small id="planCapStatus"></small></div><div><span>WATER</span><strong id="planWaterIntake">—</strong><small id="planWaterNeed">—</small><em id="planWaterRate">—</em></div></div>
         <footer><span>proved.kr</span><span>급여량은 체중·체형 변화에 맞춰 조정하세요.</span></footer>
       </article>
-      <p id="resultLead" class="pc-result-lead hidden"></p><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 이미지를 저장하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 비율 보기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취 보기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-secondary-button pc-share-result-button">저장용 이미지 만들기</button><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p><aside class="pc-diet-warning-box hidden" aria-labelledby="dietWarningsTitle"><h3 id="dietWarningsTitle">식단 확인이 필요한 항목</h3><ul id="dietWarnings"></ul></aside>
+      <p id="resultLead" class="pc-result-lead hidden"></p><details id="dogCalculationBasis" class="pc-calculation-basis hidden"><summary>계산 기준 보기</summary><div id="dogCalculationBasisContent"></div></details><div id="dogConditionalWarnings" class="pc-warning-list hidden"></div><p id="resultDirtyNotice" class="hidden pc-inline-error" role="status" aria-live="polite">입력값이 변경되었습니다. 이미지를 저장하려면 다시 계산해 주세요.</p><div class="pc-analysis-block pc-analysis-block--cap"><button id="capBtn" type="button" onclick="analyzeCaP()" class="pc-secondary-button" aria-controls="capResult" aria-expanded="false">칼슘·인 비율 보기</button><div id="capResult" class="hidden" aria-live="polite"></div></div><div class="pc-analysis-block pc-analysis-block--water"><button id="waterBtn" type="button" onclick="analyzeWater()" class="pc-secondary-button" aria-controls="waterResult" aria-expanded="false">수분 섭취 보기</button><div id="waterResult" class="hidden" aria-live="polite"></div></div><div class="pc-result-save-actions">
+        <button id="saveFeedingRecordBtn" type="button" onclick="handleSaveFeedingRecord()" class="pc-result-save-primary">결과 저장하기</button>
+        <button id="openShareModalBtn" type="button" onclick="openShareModal()" class="pc-result-save-secondary">저장용 이미지 만들기</button>
+        <p id="saveFeedingRecordMsg" class="hidden text-xs font-bold text-blue-400 text-center"></p>
+      </div><p class="pc-result-disclaimer">※ 계산값은 관찰을 시작하기 위한 기준입니다. 2~4주간 체중과 체형 변화를 확인해 급여량을 조정하고, 성장기·임신·수유·질환·의학적 감량은 수의사와 상의하세요.</p><aside class="pc-diet-warning-box hidden" aria-labelledby="dietWarningsTitle"><h3 id="dietWarningsTitle">식단 확인이 필요한 항목</h3><ul id="dietWarnings"></ul></aside>
     </section>
 
 
@@ -399,13 +403,6 @@
       <button type="button" class="share-btn-save" onclick="shareCard_save()">이미지 저장</button>
     </div>
 
-    <div class="mt-3 space-y-2">
-      <button id="saveFeedingRecordBtn" onclick="handleSaveFeedingRecord()"
-        class="hidden w-full py-4 bg-[#2F6FED] text-white font-black text-base rounded-2xl">
-        이 계산 결과 저장하기
-      </button>
-      <p id="saveFeedingRecordMsg" class="hidden text-xs font-bold text-blue-400 text-center"></p>
-    </div>
   </div>
 </div>
 
@@ -569,7 +566,7 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="/js/saved-cats.js?v=20260924-diet-handoff-v1"></script>
 <script src="/js/auth.js?v=20260728-calculator-pet-load"></script>
 <script src="/js/wet-beta-access.js?v=20260814-unified-chrome-v1"></script>
-<script src="/js/share-card.js?v=20260928-save-card-v1"></script>
+<script src="/js/share-card.js?v=20260929-ios-fix-v1"></script>
 <script src="/js/weight-trend.js?v=20260812-legacy-cleanup-v2"></script>
 <script src="/js/calculator-diet-entry.js?v=20260924-v1"></script>
 </body>
