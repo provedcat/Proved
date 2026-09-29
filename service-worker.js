@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1-unified-finder-v1';
+const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1-unified-finder-v1-pet-avatar-v3';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -93,13 +93,13 @@ async function matchCached(request) {
   return caches.match(request, { ignoreSearch: true });
 }
 
-async function networkFirst(request) {
+async function networkFirst(request, exactCacheOnly = false) {
   try {
     const networkResponse = await fetch(request, { cache: 'no-store' });
     await cacheResponse(request, networkResponse);
     return networkResponse;
   } catch (error) {
-    const cachedResponse = await matchCached(request);
+    const cachedResponse = exactCacheOnly ? await caches.match(request) : await matchCached(request);
     if (cachedResponse) return cachedResponse;
     throw error;
   }
@@ -127,7 +127,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (IMAGE_DESTINATIONS.has(event.request.destination)) {
-    event.respondWith(cacheFirst(event.request));
+    event.respondWith(requestUrl.pathname.startsWith('/images/pet-avatar/')
+      ? networkFirst(event.request, true)
+      : cacheFirst(event.request));
     return;
   }
 
