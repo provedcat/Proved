@@ -37,7 +37,6 @@
       const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
       heading.textContent = title; grid.className = 'my-avatar-options'; group.append(heading, grid);
       for (const value of options(key)) {
-        if (key === 'shape' && avatar.catalog.shape[value].species !== pet.species) continue;
         const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
         button.setAttribute('aria-pressed', String(settings[key] === value));
         const name = value ? avatar.catalog[key][value].name : '없음';
