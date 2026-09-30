@@ -90,8 +90,33 @@ async function shareCard_save() {
   try {
     const canvas = await captureShareCardCanvas();
     const petName = document.getElementById('catName')?.value?.trim() || (state.selectedPetSpecies === 'dog' ? 'dog' : 'cat');
+    const filename = `proved_${petName}_feeding-plan.png`;
+
+    const isAppleMobile = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isAppleMobile && navigator.share) {
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(value => value ? resolve(value) : reject(new Error('PNG 변환에 실패했습니다.')), 'image/png');
+      });
+      const file = new File([blob], filename, { type: 'image/png' });
+      const shareData = { files: [file] };
+
+      if (!navigator.canShare || navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (shareError) {
+          // Closing the native share sheet is not a save failure.
+          if (shareError?.name === 'AbortError') return;
+          console.warn('[iOS 이미지 공유 실패 - 다운로드로 대체]', shareError);
+        }
+      }
+    }
+
+    // Android/desktop, and unsupported iOS browsers, keep the normal PNG download.
     const link = document.createElement('a');
-    link.download = `proved_${petName}_feeding-plan.png`;
+    link.download = filename;
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch (error) {
