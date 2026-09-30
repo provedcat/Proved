@@ -2,14 +2,15 @@
   'use strict';
   const avatar = window.ProvedAvatar;
   const $ = id => document.getElementById(id);
-  const tabs = { shape: '형태', color: '색상', pattern: '패턴', eye: '눈', blush: '볼', nose: '코' };
+  const tabs = { shape: '형태', color: '색상', pattern: '패턴', eye: '눈', blush: '볼', nose: '코', background: '배경' };
   const sections = {
     shape: [['shape', '얼굴 형태']],
     color: [['color', '털 색상']],
     pattern: [['patternCentral', '포인트'], ['patternEar', '귀 얼룩'], ['patternOuter', '얼굴 패턴']],
     eye: [['eyeColor', '눈 색상'], ['eyePattern', '눈 패턴']],
     blush: [['blush', '볼터치']],
-    nose: [['nose', '코']]
+    nose: [['nose', '코']],
+    background: [['background', '배경지']]
   };
   let species = 'cat';
   let settings = avatar.defaults(species);
@@ -24,6 +25,7 @@
 
   function thumb(key, value) {
     if (!value) return '';
+    if (key === 'background') return avatar.catalog.background[value].src;
     if (['eyeColor', 'eyePattern', 'blush', 'nose'].includes(key)) {
       return '/images/pet-avatar/thumbs/' + avatar.catalog[key][value].file + '.webp?v=20260929-final';
     }
@@ -61,7 +63,7 @@
       heading.textContent = title;
       grid.className = 'my-avatar-options';
       if (avatar.groups[key]) grid.classList.add('my-avatar-pattern-options');
-      if (['color', 'blush', 'nose'].includes(key)) grid.classList.add('my-avatar-' + key + '-options');
+      if (['color', 'blush', 'nose', 'background'].includes(key)) grid.classList.add('my-avatar-' + key + '-options');
       group.append(heading, grid);
 
       for (const value of options(key)) {
@@ -117,6 +119,8 @@
       const context = preview.getContext('2d');
       context.clearRect(0, 0, preview.width, preview.height);
       context.drawImage(canvas, 0, 0);
+      const image = $('promoAvatarImage');
+      if (image) image.src = canvas.toDataURL('image/png');
       $('promoStatus').textContent = '';
     } catch (error) {
       console.error(error);
@@ -147,7 +151,7 @@
       link.download = 'proved-' + safe + '-my-pet.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-      $('promoStatus').textContent = '이미지를 저장했습니다.';
+      $('promoStatus').textContent = '이미지를 저장했습니다. 모바일에서는 위 이미지를 길게 눌러 사진으로 저장할 수도 있습니다.';
     } catch (error) {
       console.error(error);
       $('promoStatus').textContent = '이미지를 저장하지 못했습니다.';
