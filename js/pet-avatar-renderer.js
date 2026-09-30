@@ -6,14 +6,14 @@
   const backgrounds = make(Array.from({ length: 5 }, (_, i) => {
     const id = 'back0' + i;
     return [id, {
-      name: ['화이트', '파스텔 웨이브', '밤하늘', '파스텔 플라워', '파스텔 스타'][i],
+      name: ['WHITE', 'FIRE WORK', 'NIGHT', 'FLOWER', 'STAR'][i],
       src: '/images/pet-avatar/backgrounds/08_' + id + '.webp?v=20260930-v1'
     }];
   }));
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
     return [id, {
-      name: ['단모', '장모', '장모 · 이어터프트', '작은 귀', '뾰족한 귀', '처진 둥근 귀', '작고 둥근 귀', '길게 처진 귀'][i],
+      name: ['단모', '장모', '장모 · 이어터프트', '작은 귀', '뾰족한 귀', '처진 귀', '둥근 귀', '길게 처진 귀'][i],
       mask: asset('02_shape', id + '_shape'),
       shadow: asset('02_shape', id + '_shadow-colorburn'),
       light: asset('02_shape', id + '_light-softlight')
@@ -28,7 +28,7 @@
   };
   const patterns = make(Object.entries(patternFiles).map(([key, file]) => [key, { name: {
     muzzle: '입', black_tan: '블랙탄', lynx: '링스', sold: '눈', long_ear: '긴 귀', short_ear: '짧은 귀',
-    half_face: '반쪽 얼굴', bicolor: '바이컬러', raccoon: '라쿤'
+    half_face: '반쪽 얼굴', bicolor: '바이컬러', raccoon: '마스크'
   }[key], src: asset('03_face_pattern', '03_face_pattern__' + file) }]));
   const parts = (folder, prefix, names) => make(names.map((key, i) => [key, {
     name: { marigold: '메리골드', rainbow: '레인보우', green: '그린', emerald: '에메랄드', blue: '블루', bronze: '브론즈', odd: '오드아이', split: '스플릿', half: '하프', star: '스타', flare: '플레어', round_eye: '둥근 눈', cat_eye: '고양이 눈', white: '화이트', yellow: '옐로', coral: '코랄', pink: '핑크', black: '블랙', brown: '브라운', brown_line: '브라운 라인', gold: '골드' }[key],
