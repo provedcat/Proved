@@ -30,23 +30,32 @@ async function captureShareCardCanvas() {
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
   const rect = captureTarget.getBoundingClientRect();
-  const captureWidth = Math.ceil(captureTarget.scrollWidth || rect.width);
-  const captureHeight = Math.ceil(captureTarget.scrollHeight || rect.height);
+  const captureWidth = Math.ceil(rect.width);
+  const captureHeight = Math.ceil(rect.height);
 
+  // Capture only the rendered card. Supplying a synthetic viewport larger than
+  // mobile Safari's real viewport can make html2canvas fail during document cloning.
   return await withTimeout(
     html2canvas(captureTarget, {
       backgroundColor: '#F8F6EF',
-      scale: 2,
+      scale: Math.min(2, window.devicePixelRatio || 1),
       useCORS: true,
+      allowTaint: false,
       logging: false,
       width: captureWidth,
       height: captureHeight,
-      windowWidth: Math.max(document.documentElement.clientWidth, captureWidth),
-      windowHeight: Math.max(document.documentElement.clientHeight, captureHeight),
-      scrollX: 0,
-      scrollY: -window.scrollY
+      scrollX: -window.scrollX,
+      scrollY: -window.scrollY,
+      onclone: clonedDocument => {
+        const clonedTarget = clonedDocument.getElementById('feedingPlanDocument');
+        if (clonedTarget) {
+          clonedTarget.style.transform = 'none';
+          clonedTarget.style.width = captureWidth + 'px';
+          clonedTarget.style.maxWidth = 'none';
+        }
+      }
     }),
-    12000,
+    18000,
     '이미지 생성 시간이 초과되었습니다.'
   );
 }
@@ -71,7 +80,8 @@ async function openShareModal() {
     preview.replaceChildren(image);
   } catch (error) {
     console.error('[저장용 이미지 생성 실패]', error);
-    preview.innerHTML = '<p class="share-preview-loading">이미지를 만들지 못했습니다.<br>다시 시도해 주세요.</p>';
+    const reason = error?.message ? `<small>${String(error.message).replace(/[<>]/g, '')}</small>` : '';
+    preview.innerHTML = `<p class="share-preview-loading">이미지를 만들지 못했습니다.<br>다시 시도해 주세요.<br>${reason}</p>`;
   }
 }
 
