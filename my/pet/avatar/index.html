@@ -13,10 +13,10 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <link rel="stylesheet" href="/css/my-page.css?v=20260924-favorite-card-v2">
-  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260929-thumb-crop-v1">
+  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260930-background-v1">
   <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
-  <script defer src="/js/pet-avatar-renderer.js?v=20260929-color-refresh-v1"></script>
-  <script defer src="/js/my-pet-avatar.js?v=20260929-thumb-crop-v1"></script>
+  <script defer src="/js/pet-avatar-renderer.js?v=20260930-background-v1"></script>
+  <script defer src="/js/my-pet-avatar.js?v=20260930-background-v1"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -39,12 +39,12 @@
         </header>
 
         <section class="my-avatar-preview-section" aria-labelledby="avatarPreviewTitle">
-          <div class="my-avatar-preview"><canvas id="avatarPreview" width="256" height="256" role="img" aria-label="현재 아바타 조합"></canvas></div>
+          <div class="my-avatar-preview"><canvas id="avatarPreview" width="256" height="256" aria-hidden="true"></canvas><img id="avatarPreviewImage" alt="현재 아바타 조합" draggable="false"></div>
           <div>
             <p class="my-avatar-section-number">01</p>
             <h2 id="avatarPreviewTitle">아바타 프리뷰</h2>
             <strong id="avatarPetName">반려동물</strong>
-            <p>아래에서 모습을 선택하고 완성 버튼을 눌러 저장하세요.</p>
+            <p>아래에서 모습을 선택하세요. 모바일에서는 완성 이미지를 길게 눌러 사진으로 저장할 수 있습니다.</p>
           </div>
         </section>
 
