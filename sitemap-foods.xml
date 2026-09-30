@@ -81,6 +81,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EB%89%B4%ED%84%B0%EB%93%9C-%EC%84%B8%ED%83%80%EC%9D%B4%EC%96%B4%ED%8B%B0-%EB%B0%B8%EB%9F%B0%EC%8A%A4--3dd7f7bf/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EB%8B%A4%EC%9D%B4%EC%95%84%EB%B2%A0%ED%8B%B1--9cc1443c/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -162,6 +167,11 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-%EC%BC%80%EC%96%B4-2kg--aabc74bb/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-%EC%BA%A3-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-s-o-%EB%B8%94%EB%9E%98%EB%8D%94-%EC%BB%B4%ED%8F%AC%ED%8A%B8-%EC%84%B8%ED%83%80%EC%9D%B4%EC%96%B4%ED%8B%B0--035f68db/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -262,11 +272,6 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EC%BA%A3-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-s-o-%EB%AA%A8%EB%8D%94%EB%A0%88%EC%9D%B4%ED%8A%B8-%EC%B9%BC%EB%A1%9C%EB%A6%AC--c2a46233/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin-%EC%BA%A3-%EC%9C%A0%EB%A6%AC%EB%84%88%EB%A6%AC-s-o-%EB%B8%94%EB%9E%98%EB%8D%94-%EC%BB%B4%ED%8F%AC%ED%8A%B8-%EC%84%B8%ED%83%80%EC%9D%B4%EC%96%B4%ED%8B%B0--035f68db/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1011,27 +1016,17 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EB%A9%94%ED%83%80%EB%B3%BC%EB%A6%AD-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%EA%B1%B4%EC%82%AC%EB%A3%8C-%EC%B9%98%ED%82%A8--8947628a/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EB%A9%94%ED%83%80%EB%B3%BC%EB%A6%AD-%EC%B9%98%ED%82%A8-%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B2%84--8947628a/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EB%A9%94%ED%83%80%EB%B3%BC%EB%A6%AD-%EC%B9%98%ED%82%A8-%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B2%84--01736506/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-%EC%8A%A4%ED%8A%B8%EB%A0%88%EC%8A%A4-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8--d95010c7/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%EA%B1%B4%EC%82%AC%EB%A3%8C-%EC%B9%98%ED%82%A8--9af50e6f/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-%EC%8A%A4%ED%8A%B8%EB%A0%88%EC%8A%A4-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%EA%B1%B4%EC%82%AC%EB%A3%8C-%EC%B9%98%ED%82%A8--d95010c7/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-and-%EC%B9%98%ED%82%A8--e455c29b/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8--9af50e6f/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1041,12 +1036,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-gi-%EB%B0%94%EC%9D%B4%EC%98%B4-%EC%8A%A4%ED%8A%B8%EB%A0%88%EC%8A%A4-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8-%EC%95%A0%EC%99%84%EA%B3%A0%EC%96%91%EC%9D%B4%EC%82%AC%EB%A3%8C-326-%EC%9D%B5%EC%8A%A4%ED%8A%B8%EB%A3%A8%EC%A0%BC--c106e7e2/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-i-d-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8--c3056e32/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-i-d-%EC%B9%98%ED%82%A8--c3056e32/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-k-d--83db9c68/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1056,17 +1051,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-k-d-feline--83db9c68/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-z-d-%ED%95%98%EC%9D%B4%EB%93%9C%EB%A1%A4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%B9%98%ED%82%A8-%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B2%84--5be1f858/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-inc-%ED%9E%90%EC%8A%A4%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-c-d-%EB%A9%80%ED%8B%B0%EC%BC%80%EC%96%B4-%EC%8A%A4%ED%8A%B8%EB%A0%88%EC%8A%A4-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8--b103c0d4/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1887,11 +1872,6 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/rawz-%EC%98%A4%EC%A5%AC-%EB%B0%94%EC%9D%B4-%EB%A1%9C%EC%9A%B0%EC%A6%88-%EC%B9%98%ED%82%A8%EA%B0%80%EC%8A%B4%EC%82%B4-and-%ED%98%B8%EB%B0%95--6fbe435b/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/royal-canin-sas-france-%EC%BA%A3-%EB%89%B4%ED%84%B0%EB%93%9C-%EC%84%B8%ED%83%80%EC%9D%B4%EC%96%B4%ED%8B%B0-%EB%B0%B8%EB%9F%B0%EC%8A%A4--3dd7f7bf/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
