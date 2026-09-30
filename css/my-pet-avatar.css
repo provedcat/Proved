@@ -71,8 +71,9 @@
   background: #fff;
 }
 
+.my-avatar-preview { position: relative; overflow: hidden; }
 .my-avatar-preview canvas {
-  display: block;
+  display: none;
   width: 100%;
   height: 100%;
   color: var(--my-ink);
@@ -205,4 +206,19 @@
 
   .my-avatar-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .my-avatar-pattern-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.my-avatar-preview > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-touch-callout: default;
+  user-select: auto;
+}
+.my-avatar-background-options { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.my-avatar-background-options .my-avatar-option { padding: 5px; }
+.my-avatar-background-options .my-avatar-option img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+@media (max-width: 720px) {
+  .my-avatar-background-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
