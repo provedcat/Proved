@@ -62,7 +62,7 @@
   async function draw() {
     const current = ++revision;
     try {
-      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1024;
       await avatar.render(canvas, settings, pet.species);
       if (current === revision) {
         const preview = $('avatarPreview'), context = preview.getContext('2d');
@@ -84,7 +84,7 @@
     let path;
     try {
       // Render the saved settings afresh so a pending preview render cannot be uploaded.
-      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1024;
       const selected = avatar.normalize(settings, pet.species);
       await avatar.render(canvas, selected, pet.species);
       const blob = await webp(canvas);
