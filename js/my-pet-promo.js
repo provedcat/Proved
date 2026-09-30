@@ -112,7 +112,7 @@
     const current = ++revision;
     try {
       const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = 256;
+      canvas.width = canvas.height = 1024;
       await avatar.render(canvas, settings, species);
       if (current !== revision) return;
       const preview = $('promoAvatarPreview');
