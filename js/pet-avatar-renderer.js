@@ -3,6 +3,13 @@
   const base = '/images/pet-avatar/assets/';
   const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-color-refresh-v1';
   const make = (entries) => Object.fromEntries(entries);
+  const backgrounds = make(Array.from({ length: 5 }, (_, i) => {
+    const id = 'back0' + i;
+    return [id, {
+      name: ['화이트', '파스텔 웨이브', '밤하늘', '파스텔 플라워', '파스텔 스타'][i],
+      src: '/images/pet-avatar/backgrounds/08_' + id + '.webp?v=20260930-v1'
+    }];
+  }));
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
     const id = '02_' + String(i + 1).padStart(2, '0');
     return [id, {
@@ -33,13 +40,13 @@
     eyeColor: parts('04_eye_color', '04_eye_color_', ['marigold','rainbow','green','emerald','blue','bronze','odd','split']),
     eyePattern: parts('05_eye_pattern', '05_eye_pattern_', ['half','star','flare','round_eye','cat_eye']),
     blush: parts('06_blush', '06_blush_', ['white','yellow','coral','pink']),
-    nose: parts('07_nose', '07_nose_', ['black','blue','brown','brown_line','gold','pink'])
+    nose: parts('07_nose', '07_nose_', ['black','blue','brown','brown_line','gold','pink']), background: backgrounds
   };
   // The source PSD exports use round-eye, cat-eye, and brown_line spellings.
   catalog.nose.brown_line.src = asset('07_nose', '07_nose_0003_brown_line');
   const groups = { patternCentral: ['muzzle','black_tan','lynx','sold'], patternEar: ['long_ear','short_ear'], patternOuter: ['half_face','bicolor','raccoon'] };
   const opacity = { black: .6, blue: .6, cool_white: 1, lemon: 1, orange: .8, pink: 1, purple: .8, soft_gray: .6, warm_white: 1 };
-  const defaults = species => ({ shape: species === 'dog' ? '02_05' : '02_01', color: 'warm_white', patternCentral: null, patternEar: null, patternOuter: null, eyeColor: 'marigold', eyePattern: 'cat_eye', blush: null, nose: 'black' });
+  const defaults = species => ({ background: 'back00', shape: species === 'dog' ? '02_05' : '02_01', color: 'warm_white', patternCentral: null, patternEar: null, patternOuter: null, eyeColor: 'marigold', eyePattern: 'cat_eye', blush: null, nose: 'black' });
   function normalize(value, species) {
     const result = { ...defaults(species) };
     for (const key of Object.keys(result)) {
@@ -63,12 +70,13 @@
       asset('04_eye_blend_base','04_eye_color_base_layer_colorburn'),
       catalog.eyeColor[s.eyeColor].src, s.eyePattern && catalog.eyePattern[s.eyePattern].src,
       s.blush && catalog.blush[s.blush].src, catalog.nose[s.nose].src];
-    const [mask, ...images] = await Promise.all([load(shape.mask), ...layers.map(src => src ? load(src) : Promise.resolve(null))]);
+    const [background, mask, ...images] = await Promise.all([load(backgrounds[s.background].src), load(shape.mask), ...layers.map(src => src ? load(src) : Promise.resolve(null))]);
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(background, 0, 0, w, h);
     const clipped = document.createElement('canvas'); clipped.width = w; clipped.height = h;
     const c = clipped.getContext('2d');
     function draw(img, mode, alpha, clip) {
