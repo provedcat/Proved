@@ -1,13 +1,13 @@
 (function () {
   'use strict';
   const base = '/images/pet-avatar/assets/';
-  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260929-color-refresh-v1';
+  const asset = (folder, file) => base + folder + '/' + file + '.png?v=20260930-original-v4';
   const make = (entries) => Object.fromEntries(entries);
   const backgrounds = make(Array.from({ length: 5 }, (_, i) => {
     const id = 'back0' + i;
     return [id, {
-      name: ['WHITE', 'FIRE WORK', 'NIGHT', 'FLOWER', 'STAR'][i],
-      src: '/images/pet-avatar/backgrounds/08_' + id + '.webp?v=20260930-v1'
+      name: ['WHITE', 'FIRE WORK', 'NIGHT', 'STAR', 'FLOWER'][i],
+      src: asset('08_back', '08_' + id)
     }];
   }));
   const shapes = make(Array.from({ length: 8 }, (_, i) => {
