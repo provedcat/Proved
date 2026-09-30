@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <link rel="stylesheet" href="/css/my-page.css?v=20260929-pet-avatar">
-  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260929-thumb-crop-v1">
+  <link rel="stylesheet" href="/css/my-pet-avatar.css?v=20260930-background-v1">
   <link rel="stylesheet" href="/css/my-pet-promo.css?v=20260930-v1">
   <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
-  <script defer src="/js/pet-avatar-renderer.js?v=20260929-color-refresh-v1"></script>
-  <script defer src="/js/my-pet-promo.js?v=20260930-v1"></script>
+  <script defer src="/js/pet-avatar-renderer.js?v=20260930-background-v1"></script>
+  <script defer src="/js/my-pet-promo.js?v=20260930-background-v1"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -27,7 +27,7 @@
       <section class="my-pet-promo-hero">
         <p class="my-eyebrow">MY PET PREVIEW</p>
         <h1>우리 아이를<br>먼저 만들어보세요.</h1>
-        <p>로그인 없이 바로 시작할 수 있습니다. 여기서 만든 내용은 계정에 저장되지 않습니다.</p>
+        <p>로그인 없이 바로 시작할 수 있습니다. 배경까지 고른 뒤 이미지를 저장해 간직할 수 있습니다.</p>
       </section>
 
       <section class="my-pet-promo-intro" aria-labelledby="promoStartTitle">
@@ -51,7 +51,7 @@
       </section>
 
       <section class="my-avatar-preview-section my-pet-promo-preview" aria-labelledby="promoPreviewTitle">
-        <div class="my-avatar-preview"><canvas id="promoAvatarPreview" width="256" height="256" role="img" aria-label="현재 MY PET 아바타"></canvas></div>
+        <div class="my-avatar-preview"><canvas id="promoAvatarPreview" width="256" height="256" aria-hidden="true"></canvas><img id="promoAvatarImage" alt="현재 MY PET 아바타" draggable="false"></div>
         <div>
           <p class="my-avatar-section-number">02</p>
           <h2 id="promoPreviewTitle">MY PET 미리보기</h2>
