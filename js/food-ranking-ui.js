@@ -20,6 +20,16 @@
       ]
     },
     {
+      id: 'basic',
+      title: '기본 영양 정보',
+      meta: '표시 기준',
+      note: '수분과 열량은 제품에 표시된 기준값 그대로 비교해요.',
+      directions: [
+        ['moisture', '수분', '%'],
+        ['calorie', '칼로리', 'kcal / kg']
+      ]
+    },
+    {
       id: 'intake',
       title: '섭취 기준',
       meta: '1,000 kcal 기준',
@@ -424,6 +434,8 @@
 
   function cleanupDrag() {
     document.removeEventListener('pointermove', moveDrag);
+    document.removeEventListener('pointerup', endDrag);
+    document.removeEventListener('pointercancel', cancelDrag);
     document.querySelectorAll('.myfit-rank-slot.is-drop-target')
       .forEach(slot => slot.classList.remove('is-drop-target'));
     state.drag?.source?.classList.remove('is-dragging');
