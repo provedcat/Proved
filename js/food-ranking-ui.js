@@ -156,7 +156,9 @@
     selected: new Map(),
     order: [],
     drag: null,
-    ignoreClickUntil: 0
+    ignoreClickUntil: 0,
+    resultLoading: false,
+    resultModel: null
   };
 
   const els = {};
@@ -170,6 +172,7 @@
     els.foodScreen = $('myFitFoodScreen');
     els.criteriaScreen = $('myFitCriteriaScreen');
     els.priorityScreen = $('myFitPriorityScreen');
+    els.resultScreen = $('myFitResultScreen');
     els.foodCount = $('myFitFoodCount');
     els.foodSearch = $('myFitFoodSearchInput');
     els.foodSearchHint = $('myFitFoodSearchHint');
@@ -187,6 +190,16 @@
     els.pool = $('myFitChipPool');
     els.priorityStatus = $('myFitPriorityStatus');
     els.result = $('myFitShowResult');
+    els.backToPriority = $('myFitBackToPriority');
+    els.resultFoodCount = $('myFitResultFoodCount');
+    els.resultCriteriaCount = $('myFitResultCriteriaCount');
+    els.resultSpecies = $('myFitResultSpecies');
+    els.resultNotice = $('myFitResultNotice');
+    els.resultList = $('myFitResultList');
+    els.resultCriteriaMeta = $('myFitResultCriteriaMeta');
+    els.resultCriteriaChips = $('myFitResultCriteriaChips');
+    els.chooseCriteriaAgain = $('myFitChooseCriteriaAgain');
+    els.compareFoodsAgain = $('myFitCompareFoodsAgain');
     els.toast = $('myFitToast');
     els.progress = Array.from(document.querySelectorAll('.myfit-progress span'));
   }
