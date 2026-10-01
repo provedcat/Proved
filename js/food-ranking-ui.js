@@ -98,7 +98,7 @@
             ['avoid_corn', '옥수수', '옥수수 제외'],
             ['avoid_soy', '콩', '콩 제외'],
             ['avoid_wheat_gluten', '밀·밀글루텐', '밀·밀글루텐 제외'],
-            ['avoid_grain', '곡물', '그레인 프리']
+            ['avoid_grain', '곡물', '곡물 제외']
           ]
         },
         {
