@@ -822,8 +822,18 @@
     return (food?._tags || []).map(tag => tag.label_ko || '').join(' ');
   }
 
+  function stripFishOils(text) {
+    return String(text || '').replace(
+      /(어유|생선\s*오일|연어\s*오일|참치\s*오일|청어\s*오일|정어리\s*오일|fish\s*oil|salmon\s*oil|tuna\s*oil|herring\s*oil|sardine\s*oil)/gi,
+      ' '
+    );
+  }
+
   function proteinText(food) {
-    return [food?.메인단백질, food?.전성분, tagText(food)].filter(Boolean).join(' ');
+    const main = String(food?.메인단백질 || '').trim();
+    if (main) return main;
+    const ingredients = stripFishOils(food?.전성분);
+    return [ingredients, tagText(food)].filter(Boolean).join(' ');
   }
 
   function evaluateAvoidIngredient(food, terms, explicitFreePatterns = []) {
@@ -901,7 +911,12 @@
     }
 
     if (id === 'avoid_chicken') return evaluateAvoidIngredient(food, animalPatterns.chicken, ['치킨 프리', '닭고기 프리', 'chicken free']);
-    if (id === 'avoid_fish') return evaluateAvoidIngredient(food, animalPatterns.fish, ['생선 프리', '어류 프리', 'fish free']);
+    if (id === 'avoid_fish') {
+      const tagsText = tagText(food);
+      if (includesAny(tagsText, ['생선 프리', '어류 프리', 'fish free'])) return true;
+      if (!ingredients) return null;
+      return !includesAny(stripFishOils(ingredients), animalPatterns.fish);
+    }
     if (id === 'avoid_fish_oil') return evaluateAvoidIngredient(food, ['어유', '생선오일', '생선 오일', 'fish oil', 'salmon oil', '연어오일'], ['생선오일 프리', '어유 프리', 'fish oil free']);
     if (id === 'avoid_meal') {
       if (includesAny(tags, ['meal-free', 'meal free', '육분 없음', '육분 프리', '밀프리'])) return true;
@@ -910,7 +925,11 @@
     }
     if (id === 'avoid_corn') return evaluateAvoidIngredient(food, ['옥수수', 'corn', 'maize'], ['옥수수 프리', 'corn free']);
     if (id === 'avoid_soy') return evaluateAvoidIngredient(food, ['대두', '콩', 'soy', 'soybean'], ['콩 프리', '대두 프리', 'soy free']);
-    if (id === 'avoid_wheat_gluten') return evaluateAvoidIngredient(food, ['밀 ', '밀,', '밀가루', '밀글루텐', 'wheat', 'wheat gluten'], ['밀 프리', 'wheat free', '글루텐 프리', 'gluten free']);
+    if (id === 'avoid_wheat_gluten') {
+      if (includesAny(tags, ['밀 프리', 'wheat free', '글루텐 프리', 'gluten free'])) return true;
+      if (!ingredients) return null;
+      return !/(^|[,;()\s])(?:밀|통밀|밀가루|밀배아|밀글루텐|소맥|wheat|wheat gluten)(?=$|[,;()\s])/i.test(ingredients);
+    }
     if (id === 'avoid_grain') {
       if (includesAny(tags, ['그레인 프리', 'grain free', 'grain-free'])) return true;
       if (!ingredients) return null;
@@ -1060,6 +1079,12 @@
     const orderedCriteria = state.order.filter(id => state.selected.has(id));
     const criteriaModels = orderedCriteria.map((id, index) => evaluateCriterion(id, foods, index, orderedCriteria.length));
     const activeModels = criteriaModels.filter(model => model.eligible);
+    activeModels.forEach((model, activeIndex) => {
+      model.weight = activeModels.length - activeIndex;
+    });
+    criteriaModels.filter(model => !model.eligible).forEach(model => {
+      model.weight = 0;
+    });
     const totalWeight = activeModels.reduce((sum, model) => sum + model.weight, 0);
 
     const entries = foods.map((food, foodIndex) => {
