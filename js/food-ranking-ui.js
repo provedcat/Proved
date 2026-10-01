@@ -822,6 +822,10 @@
     return (food?._tags || []).map(tag => tag.label_ko || '').join(' ');
   }
 
+  function hasTag(food, slug) {
+    return (food?._tags || []).some(tag => String(tag.slug || '') === slug);
+  }
+
   function stripFishOils(text) {
     return String(text || '').replace(
       /(어유|생선\s*오일|연어\s*오일|참치\s*오일|청어\s*오일|정어리\s*오일|fish\s*oil|salmon\s*oil|tuna\s*oil|herring\s*oil|sardine\s*oil)/gi,
@@ -904,14 +908,19 @@
     }
 
     if (id === 'prefer_single_protein') {
+      if (hasTag(food, 'single_animal_protein')) return true;
       if (!tags) return null;
       if (includesAny(tags, ['단일 단백질', '단일단백질', '단일 동물성 단백질', 'single protein', 'single animal protein'])) return true;
       if (includesAny(tags, ['다중 단백질', 'multiple protein', 'multi protein'])) return false;
       return null;
     }
 
-    if (id === 'avoid_chicken') return evaluateAvoidIngredient(food, animalPatterns.chicken, ['치킨 프리', '치킨프리', '닭고기 프리', 'chicken free']);
+    if (id === 'avoid_chicken') {
+      if (hasTag(food, 'chicken_free')) return true;
+      return evaluateAvoidIngredient(food, animalPatterns.chicken, ['치킨 프리', '치킨프리', '닭고기 프리', 'chicken free']);
+    }
     if (id === 'avoid_fish') {
+      if (hasTag(food, 'fish_free')) return true;
       const tagsText = tagText(food);
       if (includesAny(tagsText, ['생선 프리', '어류 프리', '어류 유래 원료 없음', 'fish free'])) return true;
       if (!ingredients) return null;
@@ -919,6 +928,7 @@
     }
     if (id === 'avoid_fish_oil') return evaluateAvoidIngredient(food, ['어유', '생선오일', '생선 오일', 'fish oil', 'salmon oil', '연어오일'], ['생선오일 프리', '어유 프리', 'fish oil free']);
     if (id === 'avoid_meal') {
+      if (hasTag(food, 'meal_free')) return true;
       if (includesAny(tags, ['meal-free', 'meal free', '無육분', '육분 없음', '육분 프리', '밀프리'])) return true;
       if (!ingredients) return null;
       return !/(육분|가금류분|닭고기분|오리분|칠면조분|어분|생선분|연어분|청어분|meat meal|chicken meal|poultry meal|turkey meal|duck meal|fish meal|salmon meal|herring meal)/i.test(ingredients);
@@ -931,6 +941,7 @@
       return !/(^|[,;()\s])(?:밀|통밀|밀가루|밀배아|밀글루텐|소맥|wheat|wheat gluten)(?=$|[,;()\s])/i.test(ingredients);
     }
     if (id === 'avoid_grain') {
+      if (hasTag(food, 'grain_free')) return true;
       if (includesAny(tags, ['그레인 프리', '그레인프리', 'grain free', 'grain-free'])) return true;
       if (!ingredients) return null;
       return !includesAny(ingredients, ['밀', 'wheat', '옥수수', 'corn', '쌀', 'rice', '보리', 'barley', '귀리', 'oat', '호밀', 'rye', '수수', 'sorghum', '기장', 'millet']);
@@ -938,12 +949,19 @@
 
     const thickeners = thickenerCount(food);
     if (id === 'no_thickener') {
+      if (hasTag(food, 'thickener_free')) return true;
       if (includesAny(tags, ['검·겔화제 무첨가', '점증제 없음', '무점증제', 'thickener-free', 'thickener free'])) return true;
       return thickeners === null ? null : thickeners === 0;
     }
-    if (id === 'carrageenan_free') return evaluateAvoidIngredient(food, ['카라기난', 'carrageenan'], ['카라기난 프리', 'carrageenan free']);
+    if (id === 'carrageenan_free') {
+      if (hasTag(food, 'carrageenan_free')) return true;
+      return evaluateAvoidIngredient(food, ['카라기난', 'carrageenan'], ['카라기난 프리', 'carrageenan free']);
+    }
     if (id === 'gum_free') return evaluateAvoidIngredient(food, ['구아검', '잔탄검', '크산탄검', '로커스트빈검', '카시아검', '셀룰로오스검', '아라비아검', '젤란검', '타라검', 'guar gum', 'xanthan gum', 'locust bean gum', 'cassia gum', 'cellulose gum', 'gum arabic', 'gellan gum', 'tara gum']);
-    if (id === 'gum_agar_free') return evaluateAvoidIngredient(food, ['구아검', '잔탄검', '크산탄검', '로커스트빈검', '카시아검', '셀룰로오스검', '아라비아검', '젤란검', '타라검', '한천', 'agar', 'guar gum', 'xanthan gum', 'locust bean gum', 'cassia gum', 'cellulose gum', 'gum arabic', 'gellan gum', 'tara gum'], ['검류·한천 프리', 'gum & agar-free', 'gum and agar free']);
+    if (id === 'gum_agar_free') {
+      if (hasTag(food, 'gum_agar_free')) return true;
+      return evaluateAvoidIngredient(food, ['구아검', '잔탄검', '크산탄검', '로커스트빈검', '카시아검', '셀룰로오스검', '아라비아검', '젤란검', '타라검', '한천', 'agar', 'guar gum', 'xanthan gum', 'locust bean gum', 'cassia gum', 'cellulose gum', 'gum arabic', 'gellan gum', 'tara gum'], ['검류·한천 프리', 'gum & agar-free', 'gum and agar free']);
+    }
 
     if (id === 'official_calorie') {
       const calories = numberOrNull(food?.final_me);
@@ -1034,7 +1052,7 @@
     if (tagIds.length) {
       const { data: tagRows, error: tagError } = await sb
         .from('food_tags')
-        .select('id,label_ko,category')
+        .select('id,slug,label_ko,category')
         .in('id', tagIds);
       if (tagError) throw tagError;
       tags = tagRows || [];
