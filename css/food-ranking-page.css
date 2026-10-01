@@ -113,7 +113,8 @@ body.food-ranking-body {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: 4px;
   gap: 8px;
   padding: 18px 22px 0;
 }
@@ -211,6 +212,47 @@ body.food-ranking-body {
 .myfit-food-search {
   margin-bottom: 18px;
 }
+
+.myfit-favorites {
+  margin-top: 14px;
+  padding: 15px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.68);
+  box-shadow: 0 8px 24px rgba(72,82,145,.06);
+}
+
+.myfit-favorites__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.myfit-favorites__head h3 {
+  margin: 0;
+  color: var(--myfit-ink);
+  font-size: 13px;
+  font-weight: 840;
+}
+
+.myfit-favorites__head span {
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 680;
+  text-align: right;
+}
+
+.myfit-favorites__list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.myfit-favorite-food {
+  box-shadow: none;
+}
+
 
 .myfit-search-box,
 .myfit-inline-search {

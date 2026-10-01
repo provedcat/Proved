@@ -4,6 +4,7 @@
   const MAX_FOODS = 5;
   const MIN_FOODS = 2;
   const MAX_CRITERIA = 5;
+  const MYFIT_SESSION_KEY = 'proved.myfit.session.v1';
   const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
 
@@ -153,12 +154,15 @@
     foodIndexPromise: null,
     foodSearchMatches: [],
     foodSearchVisible: 20,
+    favoriteFoods: [],
+    favoritesLoading: false,
     selected: new Map(),
     order: [],
     drag: null,
     ignoreClickUntil: 0,
     resultLoading: false,
-    resultModel: null
+    resultModel: null,
+    currentScreen: 'foods'
   };
 
   const els = {};
@@ -176,6 +180,8 @@
     els.foodCount = $('myFitFoodCount');
     els.foodSearch = $('myFitFoodSearchInput');
     els.foodSearchHint = $('myFitFoodSearchHint');
+    els.favorites = $('myFitFavorites');
+    els.favoritesList = $('myFitFavoritesList');
     els.foodResults = $('myFitFoodSearchResults');
     els.selectedFoods = $('myFitSelectedFoodsList');
     els.selectedFoodsEmpty = $('myFitSelectedFoodsEmpty');
@@ -211,6 +217,56 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function persistSessionState() {
+    try {
+      const payload = {
+        foods: state.foods,
+        species: state.species,
+        selected: [...state.selected.entries()],
+        order: state.order,
+        currentScreen: state.currentScreen
+      };
+      window.sessionStorage.setItem(MYFIT_SESSION_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn('MY FIT state save failed:', error);
+    }
+  }
+
+  function restoreSessionState() {
+    try {
+      const raw = window.sessionStorage.getItem(MYFIT_SESSION_KEY);
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== 'object') return false;
+
+      const foods = Array.isArray(saved.foods) ? saved.foods.slice(0, MAX_FOODS) : [];
+      const species = saved.species === 'cat' || saved.species === 'dog' ? saved.species : null;
+      const selectedEntries = Array.isArray(saved.selected)
+        ? saved.selected.filter(entry => Array.isArray(entry) && criteria.has(entry[0])).slice(0, MAX_CRITERIA)
+        : [];
+      const selected = new Map(selectedEntries);
+      const order = Array.isArray(saved.order)
+        ? saved.order.filter(id => selected.has(id)).slice(0, MAX_CRITERIA)
+        : [];
+      const validScreens = new Set(['foods', 'criteria', 'priority', 'result']);
+      let currentScreen = validScreens.has(saved.currentScreen) ? saved.currentScreen : 'foods';
+
+      if (foods.length < MIN_FOODS && currentScreen !== 'foods') currentScreen = 'foods';
+      if (!selected.size && (currentScreen === 'priority' || currentScreen === 'result')) currentScreen = 'criteria';
+      if (order.length !== selected.size && currentScreen === 'result') currentScreen = 'priority';
+
+      state.foods = foods;
+      state.species = foods.length ? species || foods[0]?.species || null : null;
+      state.selected = selected;
+      state.order = order;
+      state.currentScreen = currentScreen;
+      return true;
+    } catch (error) {
+      console.warn('MY FIT state restore failed:', error);
+      return false;
+    }
   }
 
   function normalizeSearchText(value) {
@@ -311,6 +367,97 @@
     return relation?.name || food?.제조사 || '브랜드 정보 없음';
   }
 
+  function favoriteFoodButton(food) {
+    const key = foodKey(food);
+    const selected = state.foods.some(item => foodKey(item) === key);
+    const disabled = !selected && state.foods.length >= MAX_FOODS;
+    return `
+      <button type="button" class="myfit-food-result myfit-favorite-food${selected ? ' is-selected' : ''}"
+        data-favorite-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
+        <span>
+          <small>★ 즐겨찾기 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
+          <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
+          <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
+        </span>
+        <i>${selected ? '✓' : '+'}</i>
+      </button>`;
+  }
+
+  function renderFavorites() {
+    if (!els.favorites || !els.favoritesList || !els.foodSearch) return;
+    const hasQuery = Boolean(els.foodSearch.value.trim());
+    const foods = state.favoriteFoods.filter(food => !state.species || food.species === state.species);
+    const visible = !hasQuery && foods.length > 0;
+
+    els.favorites.hidden = !visible;
+    if (!visible) {
+      els.favoritesList.innerHTML = '';
+      return;
+    }
+
+    els.favoritesList.innerHTML = foods.map(favoriteFoodButton).join('');
+    els.favoritesList.querySelectorAll('[data-favorite-food-key]').forEach(button => {
+      button._food = foods.find(food => foodKey(food) === button.dataset.favoriteFoodKey);
+    });
+  }
+
+  async function loadFavoriteFoods() {
+    if (!sb || state.favoritesLoading) return;
+    state.favoritesLoading = true;
+    try {
+      const { data: authData } = await sb.auth.getUser();
+      const user = authData?.user;
+      if (!user) {
+        state.favoriteFoods = [];
+        renderFavorites();
+        return;
+      }
+
+      const { data: favorites, error } = await sb
+        .from('favorite_foods')
+        .select('species,feed_id,dog_feed_id,created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const rows = favorites || [];
+      const catIds = [...new Set(rows.filter(row => row.species === 'cat' && row.feed_id).map(row => row.feed_id))];
+      const dogIds = [...new Set(rows.filter(row => row.species === 'dog' && row.dog_feed_id).map(row => row.dog_feed_id))];
+      const columns = 'id,type,제조사,제품명,완전식여부,메인단백질,brands(name)';
+
+      const [catResult, dogResult] = await Promise.all([
+        catIds.length
+          ? sb.from('feeds').select(columns).in('id', catIds)
+          : Promise.resolve({ data: [], error: null }),
+        dogIds.length
+          ? sb.from('dog_feeds').select(columns).in('id', dogIds)
+          : Promise.resolve({ data: [], error: null })
+      ]);
+
+      if (catResult.error) throw catResult.error;
+      if (dogResult.error) throw dogResult.error;
+
+      const byKey = new Map([
+        ...(catResult.data || []).map(food => [`cat:${food.id}`, { ...food, species: 'cat' }]),
+        ...(dogResult.data || []).map(food => [`dog:${food.id}`, { ...food, species: 'dog' }])
+      ]);
+
+      state.favoriteFoods = rows
+        .map(row => row.species === 'dog'
+          ? byKey.get(`dog:${row.dog_feed_id}`)
+          : byKey.get(`cat:${row.feed_id}`))
+        .filter(Boolean);
+
+      renderFavorites();
+    } catch (error) {
+      console.warn('MY FIT favorite foods load failed:', error);
+      state.favoriteFoods = [];
+      renderFavorites();
+    } finally {
+      state.favoritesLoading = false;
+    }
+  }
+
   function syncFoodUi() {
     const count = state.foods.length;
     if (els.foodCount) els.foodCount.querySelector('strong').textContent = String(count);
@@ -338,6 +485,7 @@
         ? `${getSpeciesLabel(state.species)} 사료만 검색하고 있어요.`
         : '검색어를 입력하면 고양이·강아지 사료를 함께 찾아요.';
     }
+    renderFavorites();
   }
 
   function renderFoodSearchResults() {
@@ -380,6 +528,8 @@
     if (!sb || !els.foodSearch || !els.foodResults) return;
     const query = els.foodSearch.value.trim().slice(0, 100);
     const serial = ++state.foodSearchSerial;
+
+    renderFavorites();
 
     if (query.length < 2) {
       state.foodSearchMatches = [];
@@ -437,6 +587,7 @@
     state.foods.push(food);
     state.species = food.species;
     syncFoodUi();
+    persistSessionState();
     searchFoods();
   }
 
@@ -444,6 +595,7 @@
     state.foods = state.foods.filter(food => foodKey(food) !== key);
     if (!state.foods.length) state.species = null;
     syncFoodUi();
+    persistSessionState();
     searchFoods();
   }
 
@@ -541,6 +693,7 @@
       state.selected.set(id, direction);
     }
     syncCriteriaUi();
+    persistSessionState();
   }
 
   function toggleChip(id) {
@@ -555,6 +708,7 @@
       state.selected.set(id, 'selected');
     }
     syncCriteriaUi();
+    persistSessionState();
   }
 
   function syncCriteriaUi() {
@@ -586,7 +740,7 @@
     if (!els.priorityScreen?.hidden) renderPriority();
   }
 
-  function showScreen(name) {
+  function showScreen(name, options = {}) {
     const screens = {
       foods: els.foodScreen,
       criteria: els.criteriaScreen,
@@ -609,13 +763,17 @@
 
     const activeIndex = name === 'foods' ? 0 : name === 'criteria' ? 1 : name === 'priority' ? 2 : 3;
     els.progress.forEach((item, index) => item.classList.toggle('is-active', index <= activeIndex));
+    state.currentScreen = name;
+    if (options.persist !== false) persistSessionState();
 
     if (name === 'priority') {
       state.order = state.order.filter(id => state.selected.has(id));
       renderPriority();
     }
 
-    requestAnimationFrame(() => els.app?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    if (options.scroll !== false) {
+      requestAnimationFrame(() => els.app?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
   }
 
   function renderPriority() {
@@ -658,11 +816,13 @@
     if (!state.selected.has(id) || state.order.includes(id)) return;
     state.order.push(id);
     renderPriority();
+    persistSessionState();
   }
 
   function removeFromOrder(id) {
     state.order = state.order.filter(item => item !== id);
     renderPriority();
+    persistSessionState();
   }
 
   function moveToSlot(id, targetIndex) {
@@ -672,6 +832,7 @@
     next.splice(insertAt, 0, id);
     state.order = next.slice(0, MAX_CRITERIA);
     renderPriority();
+    persistSessionState();
   }
 
   function bindDragTargets() {
@@ -1281,8 +1442,14 @@
 
   function bindEvents() {
     els.foodSearch?.addEventListener('input', () => {
+      renderFavorites();
       window.clearTimeout(state.foodSearchTimer);
       state.foodSearchTimer = window.setTimeout(searchFoods, 240);
+    });
+
+    els.favoritesList?.addEventListener('click', event => {
+      const button = event.target.closest('[data-favorite-food-key]');
+      if (button?._food) addFood(button._food);
     });
 
     els.foodResults?.addEventListener('click', event => {
@@ -1342,13 +1509,34 @@
     els.compareFoodsAgain?.addEventListener('click', () => showScreen('foods'));
   }
 
-  function init() {
+  async function init() {
     cacheElements();
     if (!els.app || !els.groups) return;
+
+    restoreSessionState();
     renderGroups();
     bindEvents();
     syncFoodUi();
     syncCriteriaUi();
+    await loadFavoriteFoods();
+
+    if (state.currentScreen === 'result') {
+      try {
+        const foods = await loadSelectedFoodDetails();
+        if (foods.length === state.foods.length) {
+          const model = buildResultModel(foods);
+          state.resultModel = model;
+          renderResult(model);
+          showScreen('result', { persist: false, scroll: false });
+          return;
+        }
+      } catch (error) {
+        console.warn('MY FIT result restore failed:', error);
+        state.currentScreen = 'priority';
+      }
+    }
+
+    showScreen(state.currentScreen, { persist: false, scroll: false });
   }
 
   window.addEventListener('DOMContentLoaded', init);
