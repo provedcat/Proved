@@ -389,7 +389,7 @@ body.my-body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--my-ink);
+  color: var(--favorite-accent);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .12em;
@@ -488,7 +488,7 @@ body.my-body {
   gap: 12px;
   margin-top: auto;
   padding-top: 13px;
-  border-top: 1px solid rgba(112,102,156,.11);
+  border-top: 1px solid color-mix(in srgb, var(--favorite-accent) 14%, transparent);
 }
 
 .my-favorite-card__stats span {
