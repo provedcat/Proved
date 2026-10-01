@@ -174,6 +174,8 @@
 .my-avatar-pattern-options .my-avatar-option { display: grid; justify-items: center; align-content: center; padding: 8px 3px; }
 .my-avatar-pattern-options .my-avatar-option img { width: min(100%, 56px); }
 .my-avatar-pattern-options .my-avatar-option > span:last-child { padding: 5px 0 0; line-height: 1.25; word-break: keep-all; }
+.my-avatar-eye-options .my-avatar-option { display: grid; justify-items: center; align-content: center; }
+.my-avatar-eye-options .my-avatar-option img { width: min(100%, 84px); }
 .my-avatar-save {
   width: 100%; min-height: 48px; margin-top: 28px; border: 0;
   background: var(--my-blue); color: #fff; font: inherit; font-weight: 760; cursor: pointer;
@@ -191,28 +193,51 @@
 @media (max-width: 720px) {
   .my-avatar-page {
     width: min(100% - 28px, 720px);
-    padding-top: 18px;
+    padding-top: 8px;
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
 
+  .my-avatar-hero { display: none; }
+
   .my-avatar-preview-section {
+    position: sticky;
+    top: 0;
+    z-index: 12;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 22px;
+    box-sizing: border-box;
+    height: 176px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    border-top: 0;
+    background: #F7F6FC;
   }
 
   .my-avatar-preview {
-    width: min(100%, 430px);
-    margin: 0 auto;
+    width: 158px;
   }
 
   .my-avatar-preview-section > div:last-child {
-    width: 100%;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
+  .my-avatar-builder-shell { padding-top: 0; border-top: 0; }
+  .my-avatar-section-heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .my-avatar-tabs { position: sticky; top: 176px; z-index: 11; background: #fff; }
+  .my-avatar-tabs button { flex: 0 0 70px; min-height: 44px; }
+  .my-avatar-panel { padding-top: 10px; }
+  .my-avatar-panel h3 { display: none; }
   .my-avatar-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .my-avatar-pattern-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .my-avatar-eye-options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+  .my-avatar-eye-options .my-avatar-option { min-height: 94px; padding: 5px 2px; }
+  .my-avatar-eye-options .my-avatar-option img { width: min(100%, 62px); }
+  .my-avatar-eye-options .my-avatar-option > span:last-child { font-size: 11px; line-height: 1.2; padding: 5px 0 0; word-break: keep-all; }
 }
 
 .my-avatar-preview > img {

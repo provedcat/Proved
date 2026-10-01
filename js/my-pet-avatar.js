@@ -4,11 +4,11 @@
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const sb = window.supabase.createClient(URL, KEY), avatar = window.ProvedAvatar;
   const $ = id => document.getElementById(id);
-  const tabs = { shape: '형태', color: '색상', pattern: '패턴', eye: '눈', blush: '볼', nose: '코', background: '배경' };
+  const tabs = { shape: '형태', color: '색상', pattern: '패턴', eyeColor: '눈', eyePattern: '동공', blush: '볼', nose: '코', background: '배경' };
   const sections = {
     shape: [['shape', '얼굴 형태']], color: [['color', '털 색상']],
     pattern: [['patternCentral','포인트'], ['patternEar','귀 얼룩'], ['patternOuter','얼굴 패턴']],
-    eye: [['eyeColor','눈 색상'], ['eyePattern','눈 패턴']],
+    eyeColor: [['eyeColor','눈 색상']], eyePattern: [['eyePattern','동공']],
     blush: [['blush','볼터치']], nose: [['nose','코']], background: [['background','배경지']]
   };
   let pet, user, settings, active = 'shape', revision = 0, saving = false;
@@ -25,20 +25,31 @@
     return avatar.catalog[key][value].src;
   }
   function renderControls() {
-    $('avatarTabs').replaceChildren();
+    const tabList = $('avatarTabs');
+    const tabScroll = tabList.scrollLeft;
+    tabList.replaceChildren();
     Object.entries(tabs).forEach(([key, label]) => {
       const button = document.createElement('button');
       button.type = 'button'; button.textContent = label; button.setAttribute('role', 'tab');
       button.setAttribute('aria-selected', String(active === key));
       button.addEventListener('click', () => { active = key; renderControls(); });
-      $('avatarTabs').appendChild(button);
+      tabList.appendChild(button);
     });
+    tabList.scrollLeft = tabScroll;
+    const selectedTab = tabList.querySelector('[aria-selected="true"]');
+    if (selectedTab) {
+      const left = selectedTab.getBoundingClientRect().left - tabList.getBoundingClientRect().left + tabList.scrollLeft;
+      if (left < tabList.scrollLeft) tabList.scrollLeft = left;
+      else if (left + selectedTab.offsetWidth > tabList.scrollLeft + tabList.clientWidth)
+        tabList.scrollLeft = left + selectedTab.offsetWidth - tabList.clientWidth;
+    }
     const panel = $('avatarOptions'); panel.replaceChildren();
     for (const [key, title] of sections[active]) {
       const group = document.createElement('section'), heading = document.createElement('h3'), grid = document.createElement('div');
       heading.textContent = title; grid.className = 'my-avatar-options';
       if (avatar.groups[key]) grid.classList.add('my-avatar-pattern-options');
       if (['color','blush','nose','background'].includes(key)) grid.classList.add('my-avatar-' + key + '-options');
+      if (key === 'eyeColor' || key === 'eyePattern') grid.classList.add('my-avatar-eye-options');
       group.append(heading, grid);
       for (const value of options(key)) {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'my-avatar-option';
@@ -53,7 +64,11 @@
         }
         else { const mark = document.createElement('span'); mark.className = 'my-avatar-none'; mark.textContent = '—'; button.appendChild(mark); }
         const label = document.createElement('span'); label.textContent = name; button.appendChild(label);
-        button.addEventListener('click', () => { settings[key] = avatar.groups[key] && settings[key] === value ? null : value; renderControls(); draw(); });
+        button.addEventListener('click', () => {
+          settings[key] = avatar.groups[key] && settings[key] === value ? null : value;
+          for (const option of grid.children) option.setAttribute('aria-pressed', String(option === button && settings[key] === value));
+          draw();
+        });
         grid.appendChild(button);
       }
       panel.appendChild(group);
