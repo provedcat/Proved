@@ -162,6 +162,8 @@
     ignoreClickUntil: 0,
     resultLoading: false,
     resultModel: null,
+    savedRecordId: null,
+    savingResult: false,
     currentScreen: 'foods'
   };
 
@@ -204,6 +206,8 @@
     els.resultList = $('myFitResultList');
     els.resultCriteriaMeta = $('myFitResultCriteriaMeta');
     els.resultCriteriaChips = $('myFitResultCriteriaChips');
+    els.saveResult = $('myFitSaveResult');
+    els.saveStatus = $('myFitSaveStatus');
     els.chooseCriteriaAgain = $('myFitChooseCriteriaAgain');
     els.compareFoodsAgain = $('myFitCompareFoodsAgain');
     els.toast = $('myFitToast');
@@ -1418,7 +1422,10 @@
       if (foods.length !== state.foods.length) throw new Error('선택한 사료 정보를 모두 불러오지 못했습니다.');
       const model = buildResultModel(foods);
       state.resultModel = model;
+      state.savedRecordId = null;
+      if (els.saveStatus) els.saveStatus.textContent = '';
       renderResult(model);
+      syncSaveButton();
       showScreen('result');
     } catch (error) {
       console.error('MY FIT result calculation failed:', error);
@@ -1430,6 +1437,228 @@
         els.result.disabled = state.order.length !== state.selected.size || state.selected.size === 0;
       }
     }
+  }
+
+  function compactCriteriaRows(model) {
+    return model.criteriaModels.map(criterionModel => {
+      const item = criteria.get(criterionModel.id);
+      const excludedCode = criterionModel.eligible
+        ? null
+        : criterionModel.reason === 'same' ? 's' : 'm';
+
+      if (item?.type === 'direction') {
+        const direction = state.selected.get(criterionModel.id) === 'low' ? 'l' : 'h';
+        return excludedCode
+          ? [criterionModel.id, direction, excludedCode]
+          : [criterionModel.id, direction];
+      }
+
+      return excludedCode
+        ? [criterionModel.id, excludedCode]
+        : [criterionModel.id];
+    });
+  }
+
+  function compactResultRows(model) {
+    return model.entries.map(entry => [
+      String(entry.food.id),
+      Number(entry.displayRank) || 1,
+      model.criteriaModels.map(criterionModel => {
+        if (!criterionModel.eligible) return null;
+        const result = entry.criteria[criterionModel.id];
+        if (criterionModel.kind === 'boolean') return result?.status ? 1 : 0;
+        return Number(result?.rank) || null;
+      })
+    ]);
+  }
+
+  function syncSaveButton() {
+    if (!els.saveResult) return;
+    els.saveResult.disabled = state.savingResult || !state.resultModel || Boolean(state.savedRecordId);
+    els.saveResult.textContent = state.savingResult
+      ? '저장 중…'
+      : state.savedRecordId ? '저장됨' : 'MY FIT 저장하기';
+  }
+
+  async function saveCurrentResult() {
+    if (!state.resultModel || state.savingResult || state.savedRecordId) return;
+
+    state.savingResult = true;
+    if (els.saveStatus) els.saveStatus.textContent = '';
+    syncSaveButton();
+
+    try {
+      const { data: authData, error: authError } = await sb.auth.getUser();
+      if (authError) throw authError;
+      const user = authData?.user;
+      if (!user) {
+        showToast('MY FIT 저장은 로그인 후 사용할 수 있어요.');
+        return;
+      }
+
+      const payload = {
+        user_id: user.id,
+        species: state.species,
+        food_ids: state.foods.map(food => String(food.id)),
+        criteria: compactCriteriaRows(state.resultModel),
+        result: compactResultRows(state.resultModel),
+        algorithm_version: 1
+      };
+
+      const { data, error } = await sb
+        .from('my_fit_saved')
+        .insert(payload)
+        .select('id')
+        .single();
+      if (error) throw error;
+
+      state.savedRecordId = data?.id || null;
+      if (els.saveStatus) els.saveStatus.textContent = '마이페이지에 저장했어요.';
+      showToast('MY FIT 결과를 저장했어요.');
+    } catch (error) {
+      console.error('MY FIT save failed:', error);
+      if (els.saveStatus) els.saveStatus.textContent = '저장하지 못했어요. 다시 시도해 주세요.';
+    } finally {
+      state.savingResult = false;
+      syncSaveButton();
+    }
+  }
+
+  function savedCriterionModel(row, index) {
+    const id = String(row?.[0] || '');
+    const item = criteria.get(id);
+    if (!item) return null;
+
+    const isDirection = item.type === 'direction';
+    const directionCode = isDirection ? row?.[1] : null;
+    const excludedCode = isDirection ? row?.[2] : row?.[1];
+    const reason = excludedCode === 'm' ? 'missing' : excludedCode === 's' ? 'same' : '';
+    const eligible = !reason;
+    const kind = numericCriterionReaders[id] || id === 'fewer_thickeners' ? 'numeric' : 'boolean';
+
+    return {
+      id,
+      item,
+      label: isDirection
+        ? `${item.rankLabel || item.label} ${directionCode === 'l' ? '↓' : '↑'}`
+        : item.rankLabel || item.label,
+      weight: 0,
+      eligible,
+      reason,
+      kind,
+      direction: directionCode === 'l' ? 'low' : directionCode === 'h' ? 'high' : null,
+      savedIndex: index
+    };
+  }
+
+  async function fetchSavedFoods(species, ids) {
+    if (!ids.length) return [];
+    const table = species === 'dog' ? 'dog_feeds' : 'feeds';
+    const { data, error } = await sb
+      .from(table)
+      .select('id,type,제조사,제품명,완전식여부,메인단백질,image_url,brands(name)')
+      .in('id', ids);
+    if (error) throw error;
+
+    const byId = new Map((data || []).map(food => [String(food.id), { ...food, species }]));
+    return ids.map(id => byId.get(String(id)) || {
+      id: String(id),
+      species,
+      제품명: '현재 제품 정보를 찾을 수 없어요.',
+      제조사: '제품 정보 없음',
+      brands: null
+    });
+  }
+
+  function buildSavedResultModel(record, foods) {
+    const criteriaRows = Array.isArray(record.criteria) ? record.criteria : [];
+    const criteriaModels = criteriaRows.map(savedCriterionModel).filter(Boolean);
+    const activeModels = criteriaModels.filter(model => model.eligible);
+    const excludedModels = criteriaModels.filter(model => !model.eligible);
+    const foodMap = new Map(foods.map(food => [String(food.id), food]));
+    const resultRows = Array.isArray(record.result) ? record.result : [];
+
+    const entries = resultRows.map(row => {
+      const foodId = String(row?.[0] || '');
+      const codes = Array.isArray(row?.[2]) ? row[2] : [];
+      const perCriterion = {};
+
+      criteriaModels.forEach((criterionModel, criterionIndex) => {
+        const code = codes[criterionIndex];
+        perCriterion[criterionModel.id] = {
+          eligible: criterionModel.eligible,
+          reason: criterionModel.reason || '',
+          rank: criterionModel.kind === 'numeric' && Number.isFinite(Number(code)) ? Number(code) : null,
+          status: criterionModel.kind === 'boolean' && code !== null && code !== undefined ? Number(code) === 1 : null,
+          utility: 0,
+          value: null
+        };
+      });
+
+      return {
+        food: foodMap.get(foodId) || {
+          id: foodId,
+          species: record.species,
+          제품명: '현재 제품 정보를 찾을 수 없어요.',
+          제조사: '제품 정보 없음'
+        },
+        criteria: perCriterion,
+        displayRank: Number(row?.[1]) || 1
+      };
+    });
+
+    return {
+      foods,
+      entries,
+      criteriaModels,
+      activeModels,
+      excludedModels
+    };
+  }
+
+  async function loadSavedResult(savedId) {
+    const { data: record, error } = await sb
+      .from('my_fit_saved')
+      .select('id,species,food_ids,criteria,result,algorithm_version,created_at')
+      .eq('id', savedId)
+      .single();
+    if (error) throw error;
+
+    const foodIds = Array.isArray(record.food_ids) ? record.food_ids.map(String).slice(0, MAX_FOODS) : [];
+    const foods = await fetchSavedFoods(record.species, foodIds);
+    const criteriaRows = Array.isArray(record.criteria) ? record.criteria.slice(0, MAX_CRITERIA) : [];
+
+    state.species = record.species === 'dog' ? 'dog' : 'cat';
+    state.foods = foods;
+    state.selected = new Map();
+    state.order = [];
+
+    criteriaRows.forEach(row => {
+      const id = String(row?.[0] || '');
+      const item = criteria.get(id);
+      if (!item) return;
+      const value = item.type === 'direction'
+        ? row?.[1] === 'l' ? 'low' : 'high'
+        : 'selected';
+      state.selected.set(id, value);
+      state.order.push(id);
+    });
+
+    state.savedRecordId = record.id;
+    state.resultModel = buildSavedResultModel(record, foods);
+    state.currentScreen = 'result';
+
+    syncFoodUi();
+    syncCriteriaUi();
+    renderResult(state.resultModel);
+    syncSaveButton();
+    if (els.saveStatus) {
+      const date = record.created_at ? new Date(record.created_at) : null;
+      els.saveStatus.textContent = date && !Number.isNaN(date.getTime())
+        ? `${date.toLocaleDateString('ko-KR')} 저장된 결과`
+        : '저장된 MY FIT 결과';
+    }
+    showScreen('result', { persist: false, scroll: false });
   }
 
   function showToast(message) {
@@ -1504,6 +1733,7 @@
     });
 
     els.result?.addEventListener('click', calculateAndShowResult);
+    els.saveResult?.addEventListener('click', saveCurrentResult);
     els.backToPriority?.addEventListener('click', () => showScreen('priority'));
     els.chooseCriteriaAgain?.addEventListener('click', () => showScreen('criteria'));
     els.compareFoodsAgain?.addEventListener('click', () => showScreen('foods'));
@@ -1513,12 +1743,25 @@
     cacheElements();
     if (!els.app || !els.groups) return;
 
-    restoreSessionState();
+    const savedId = new URLSearchParams(window.location.search).get('saved');
+    if (!savedId) restoreSessionState();
+
     renderGroups();
     bindEvents();
     syncFoodUi();
     syncCriteriaUi();
     await loadFavoriteFoods();
+
+    if (savedId) {
+      try {
+        await loadSavedResult(savedId);
+        return;
+      } catch (error) {
+        console.error('MY FIT saved result load failed:', error);
+        showToast('저장된 MY FIT 결과를 불러오지 못했어요.');
+        state.currentScreen = 'foods';
+      }
+    }
 
     if (state.currentScreen === 'result') {
       try {
