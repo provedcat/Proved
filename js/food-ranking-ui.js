@@ -367,6 +367,97 @@
     return relation?.name || food?.제조사 || '브랜드 정보 없음';
   }
 
+  function favoriteFoodButton(food) {
+    const key = foodKey(food);
+    const selected = state.foods.some(item => foodKey(item) === key);
+    const disabled = !selected && state.foods.length >= MAX_FOODS;
+    return `
+      <button type="button" class="myfit-food-result myfit-favorite-food${selected ? ' is-selected' : ''}"
+        data-favorite-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
+        <span>
+          <small>★ 즐겨찾기 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
+          <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
+          <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
+        </span>
+        <i>${selected ? '✓' : '+'}</i>
+      </button>`;
+  }
+
+  function renderFavorites() {
+    if (!els.favorites || !els.favoritesList || !els.foodSearch) return;
+    const hasQuery = Boolean(els.foodSearch.value.trim());
+    const foods = state.favoriteFoods.filter(food => !state.species || food.species === state.species);
+    const visible = !hasQuery && foods.length > 0;
+
+    els.favorites.hidden = !visible;
+    if (!visible) {
+      els.favoritesList.innerHTML = '';
+      return;
+    }
+
+    els.favoritesList.innerHTML = foods.map(favoriteFoodButton).join('');
+    els.favoritesList.querySelectorAll('[data-favorite-food-key]').forEach(button => {
+      button._food = foods.find(food => foodKey(food) === button.dataset.favoriteFoodKey);
+    });
+  }
+
+  async function loadFavoriteFoods() {
+    if (!sb || state.favoritesLoading) return;
+    state.favoritesLoading = true;
+    try {
+      const { data: authData } = await sb.auth.getUser();
+      const user = authData?.user;
+      if (!user) {
+        state.favoriteFoods = [];
+        renderFavorites();
+        return;
+      }
+
+      const { data: favorites, error } = await sb
+        .from('favorite_foods')
+        .select('species,feed_id,dog_feed_id,created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const rows = favorites || [];
+      const catIds = [...new Set(rows.filter(row => row.species === 'cat' && row.feed_id).map(row => row.feed_id))];
+      const dogIds = [...new Set(rows.filter(row => row.species === 'dog' && row.dog_feed_id).map(row => row.dog_feed_id))];
+      const columns = 'id,type,제조사,제품명,완전식여부,메인단백질,brands(name)';
+
+      const [catResult, dogResult] = await Promise.all([
+        catIds.length
+          ? sb.from('feeds').select(columns).in('id', catIds)
+          : Promise.resolve({ data: [], error: null }),
+        dogIds.length
+          ? sb.from('dog_feeds').select(columns).in('id', dogIds)
+          : Promise.resolve({ data: [], error: null })
+      ]);
+
+      if (catResult.error) throw catResult.error;
+      if (dogResult.error) throw dogResult.error;
+
+      const byKey = new Map([
+        ...(catResult.data || []).map(food => [`cat:${food.id}`, { ...food, species: 'cat' }]),
+        ...(dogResult.data || []).map(food => [`dog:${food.id}`, { ...food, species: 'dog' }])
+      ]);
+
+      state.favoriteFoods = rows
+        .map(row => row.species === 'dog'
+          ? byKey.get(`dog:${row.dog_feed_id}`)
+          : byKey.get(`cat:${row.feed_id}`))
+        .filter(Boolean);
+
+      renderFavorites();
+    } catch (error) {
+      console.warn('MY FIT favorite foods load failed:', error);
+      state.favoriteFoods = [];
+      renderFavorites();
+    } finally {
+      state.favoritesLoading = false;
+    }
+  }
+
   function syncFoodUi() {
     const count = state.foods.length;
     if (els.foodCount) els.foodCount.querySelector('strong').textContent = String(count);
