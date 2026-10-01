@@ -14,14 +14,17 @@
     { accent: '#C7B8FF', soft: '#F2EEFF' }
   ];
 
-  const FOOD_PALETTE = [
-    { accent: '#8F92FF', soft: '#EEF0FF' },
-    { accent: '#C8A8E9', soft: '#F3EAFA' },
-    { accent: '#E3AADD', soft: '#F8EAF6' },
-    { accent: '#F6BCBA', soft: '#FCEAE8' },
-    { accent: '#C7B8FF', soft: '#F2EEFF' },
-    { accent: '#D9B7C9', soft: '#FAEEF3' }
-  ];
+  const FOOD_PALETTE = {
+    cat: {
+      dry: { accent: '#B85A00', soft: '#FBE9D7', surface: '#FFF8F1' },
+      wet: { accent: '#1F5CC4', soft: '#E5EEFC', surface: '#F4F8FE' }
+    },
+    dog: {
+      dry: { accent: '#9A5B34', soft: '#F0E4DC', surface: '#FAF5F1' },
+      wet: { accent: '#388255', soft: '#E1EFE6', surface: '#F2F8F4' }
+    },
+    fallback: { accent: '#8F92FF', soft: '#EEF0FF', surface: '#F8F9FF' }
+  };
 
   const state = {
     favoriteRows: [],
@@ -60,7 +63,9 @@
   }
 
   function paletteForFood(food) {
-    return FOOD_PALETTE[hashText((food.species || '') + ':' + (food.id || '')) % FOOD_PALETTE.length];
+    const species = food?.species === 'dog' ? 'dog' : food?.species === 'cat' ? 'cat' : '';
+    const type = food?.type === 'wet' ? 'wet' : food?.type === 'dry' ? 'dry' : '';
+    return FOOD_PALETTE?.[species]?.[type] || FOOD_PALETTE.fallback;
   }
 
   function slugify(value) {
@@ -373,7 +378,7 @@
       const meta = speciesLabel(food.species) + ' · ' + foodTypeLabel(food.type);
 
       return '<article class="my-favorite-card-wrap" ' +
-        'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';">' +
+        'style="--favorite-accent:' + palette.accent + ';--favorite-soft:' + palette.soft + ';--favorite-surface:' + palette.surface + ';">' +
         '<a class="my-favorite-card" href="' + escapeHtml(buildFoodPath(food)) + '">' +
           '<div class="my-favorite-card__visual">' +
             '<span class="my-favorite-card__type">' +
