@@ -1086,7 +1086,7 @@ body.food-ranking-body {
 .myfit-result-card {
   position: relative;
   display: grid;
-  grid-template-columns: 68px minmax(0,1fr) 34px;
+  grid-template-columns: 74px minmax(0,1fr) 34px;
   align-items: start;
   gap: 13px;
   padding: 17px;
@@ -1136,6 +1136,30 @@ body.food-ranking-body {
   font-size: 9px;
   font-weight: 800;
   opacity: .75;
+}
+
+.myfit-result-side {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.myfit-result-image {
+  width: 68px;
+  height: 68px;
+  display: block;
+  object-fit: contain;
+  border-radius: 15px;
+  background: rgba(255,255,255,.78);
+}
+
+.myfit-result-image--empty {
+  display: grid;
+  place-items: center;
+  color: #B1B6C2;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
 }
 
 .myfit-result-card__body {
@@ -1326,7 +1350,7 @@ body.food-ranking-body {
   }
 
   .myfit-result-card {
-    grid-template-columns: 58px minmax(0,1fr) 30px;
+    grid-template-columns: 62px minmax(0,1fr) 30px;
     gap: 10px;
     padding: 14px;
   }
@@ -1334,6 +1358,12 @@ body.food-ranking-body {
   .myfit-result-rank {
     min-height: 58px;
     border-radius: 16px;
+  }
+
+  .myfit-result-image {
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
   }
 
   .myfit-result-rank strong {
