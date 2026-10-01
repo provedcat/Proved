@@ -24,11 +24,11 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260924-diet-handoff-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-search-v1">
+  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-result-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
   <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
-  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-search-v1"></script>
+  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-result-v1"></script>
 </head>
 <body class="food-ranking-body">
   <div class="food-shell">
@@ -62,7 +62,7 @@
 
         <div class="myfit-app" id="myFitApp">
           <div class="myfit-progress" aria-label="MY FIT 진행 단계">
-            <span class="is-active"></span><span></span><span></span>
+            <span class="is-active"></span><span></span><span></span><span></span>
           </div>
 
           <section class="myfit-screen is-active" id="myFitFoodScreen" data-myfit-screen="foods" aria-labelledby="myFitFoodTitle">
@@ -148,6 +148,51 @@
               <button type="button" class="myfit-primary-button myfit-primary-button--result" id="myFitShowResult" disabled>
                 MY FIT 결과 보기
               </button>
+            </div>
+          </section>
+
+          <section class="myfit-screen myfit-result-screen" id="myFitResultScreen" data-myfit-screen="result" aria-labelledby="myFitResultTitle" hidden>
+            <header class="myfit-screen__header myfit-result-header">
+              <div>
+                <button type="button" class="myfit-back-button" id="myFitBackToPriority" aria-label="우선순위로 돌아가기">←</button>
+                <p class="myfit-kicker">04 · RESULT</p>
+                <h2 id="myFitResultTitle">당신이 선택한 기준에서의 순위</h2>
+                <p>점수 없이, 선택한 기준별 상대적인 우위를 보여드려요.</p>
+              </div>
+            </header>
+
+            <section class="myfit-result-summary" aria-label="비교 요약">
+              <div>
+                <span>비교 사료</span>
+                <strong id="myFitResultFoodCount">0개</strong>
+              </div>
+              <div>
+                <span>반영 기준</span>
+                <strong id="myFitResultCriteriaCount">0개</strong>
+              </div>
+              <div>
+                <span>비교 대상</span>
+                <strong id="myFitResultSpecies">—</strong>
+              </div>
+            </section>
+
+            <div class="myfit-result-notice" id="myFitResultNotice" hidden></div>
+            <div class="myfit-result-list" id="myFitResultList" aria-live="polite"></div>
+
+            <section class="myfit-result-criteria" aria-labelledby="myFitResultCriteriaTitle">
+              <div class="myfit-result-criteria__head">
+                <div>
+                  <h3 id="myFitResultCriteriaTitle">반영된 기준</h3>
+                  <p>위에서 정한 중요도 순서대로 계산에 반영했어요.</p>
+                </div>
+                <span id="myFitResultCriteriaMeta"></span>
+              </div>
+              <div class="myfit-result-criteria__chips" id="myFitResultCriteriaChips"></div>
+            </section>
+
+            <div class="myfit-result-actions">
+              <button type="button" class="myfit-primary-button" id="myFitChooseCriteriaAgain">기준 다시 고르기</button>
+              <button type="button" class="myfit-secondary-button" id="myFitCompareFoodsAgain">다른 사료 비교</button>
             </div>
           </section>
 

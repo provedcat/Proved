@@ -1014,6 +1014,321 @@ body.food-ranking-body {
   transform: translate(-50%, 0);
 }
 
+
+.myfit-result-screen {
+  padding-bottom: 30px;
+}
+
+.myfit-result-header {
+  margin-bottom: 18px;
+}
+
+.myfit-result-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(75,92,170,.08);
+  box-shadow: var(--myfit-shadow-soft);
+}
+
+.myfit-result-summary > div {
+  min-width: 0;
+  padding: 16px 14px;
+  background: rgba(255,255,255,.86);
+}
+
+.myfit-result-summary span {
+  display: block;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.myfit-result-summary strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: var(--myfit-ink);
+  font-size: 18px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myfit-result-notice {
+  margin-bottom: 14px;
+  padding: 13px 15px;
+  border-radius: 17px;
+  background: rgba(255,248,224,.82);
+  color: #77633A;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.myfit-result-notice p {
+  margin: 0;
+}
+
+.myfit-result-notice p + p {
+  margin-top: 5px;
+}
+
+.myfit-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.myfit-result-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 74px minmax(0,1fr) 34px;
+  align-items: start;
+  gap: 13px;
+  padding: 17px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 10px 28px rgba(72,82,145,.07);
+}
+
+.myfit-result-card.is-top {
+  background:
+    linear-gradient(135deg, rgba(239,244,255,.98), rgba(255,255,255,.92));
+  box-shadow: 0 18px 40px rgba(53,104,255,.12);
+}
+
+.myfit-result-rank {
+  min-height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 19px;
+  background: rgba(238,242,255,.92);
+  color: var(--myfit-blue);
+}
+
+.myfit-result-card.is-top .myfit-result-rank {
+  background: linear-gradient(145deg, #4776FF, #6D75E7);
+  color: #fff;
+}
+
+.myfit-result-rank span {
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .04em;
+}
+
+.myfit-result-rank strong {
+  margin-top: 2px;
+  font-size: 27px;
+  line-height: 1;
+  font-weight: 920;
+  letter-spacing: -.04em;
+}
+
+.myfit-result-rank small {
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  opacity: .75;
+}
+
+.myfit-result-side {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.myfit-result-image {
+  width: 68px;
+  height: 68px;
+  display: block;
+  object-fit: contain;
+  border-radius: 15px;
+  background: rgba(255,255,255,.78);
+}
+
+.myfit-result-image--empty {
+  display: grid;
+  place-items: center;
+  color: #B1B6C2;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.myfit-result-card__body {
+  min-width: 0;
+}
+
+.myfit-result-brand {
+  margin: 1px 0 4px;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.myfit-result-card h3 {
+  margin: 0;
+  color: var(--myfit-ink);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 880;
+  letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+}
+
+.myfit-result-meta {
+  margin: 5px 0 0;
+  color: var(--myfit-copy);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.myfit-result-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.myfit-result-chip {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 11px;
+  background: rgba(236,242,255,.94);
+  color: #3156A8;
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.myfit-result-chip.is-positive {
+  background: rgba(225,248,238,.95);
+  color: #247454;
+}
+
+.myfit-result-chip.is-neutral {
+  background: rgba(243,244,248,.95);
+  color: #7D8492;
+}
+
+.myfit-result-chip.is-muted {
+  background: rgba(245,246,249,.85);
+  color: #A4A9B2;
+}
+
+.myfit-result-detail {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: rgba(238,242,255,.95);
+  color: var(--myfit-blue);
+  font-size: 16px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.myfit-result-criteria {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 23px;
+  background: rgba(255,255,255,.70);
+  box-shadow: var(--myfit-shadow-soft);
+}
+
+.myfit-result-criteria__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 13px;
+}
+
+.myfit-result-criteria__head h3 {
+  margin: 0;
+  color: var(--myfit-ink);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.myfit-result-criteria__head p {
+  margin: 4px 0 0;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.myfit-result-criteria__head > span {
+  flex: 0 0 auto;
+  color: var(--myfit-periwinkle);
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.myfit-result-criteria__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.myfit-result-criteria__chips > span {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border-radius: 12px;
+  background: rgba(238,242,255,.90);
+  color: var(--myfit-ink);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.myfit-result-criteria__chips > span.is-excluded {
+  background: rgba(244,245,248,.90);
+  color: #A1A6B0;
+}
+
+.myfit-result-criteria__chips b {
+  color: var(--myfit-blue);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.myfit-result-criteria__chips > span.is-excluded b {
+  color: #B6BAC3;
+}
+
+.myfit-result-actions {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.myfit-secondary-button {
+  min-height: 58px;
+  border: 0;
+  border-radius: 20px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 8px 22px rgba(71,80,138,.06);
+  color: #59627C;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 820;
+  cursor: pointer;
+}
+
 .food-ranking-link {
   display: inline-flex;
   min-height: 44px;
@@ -1023,6 +1338,50 @@ body.food-ranking-body {
   font-size: 14px;
   font-weight: 760;
   text-underline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .myfit-result-summary > div {
+    padding: 14px 10px;
+  }
+
+  .myfit-result-summary strong {
+    font-size: 15px;
+  }
+
+  .myfit-result-card {
+    grid-template-columns: 62px minmax(0,1fr) 30px;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .myfit-result-rank {
+    min-height: 58px;
+    border-radius: 16px;
+  }
+
+  .myfit-result-image {
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
+  }
+
+  .myfit-result-rank strong {
+    font-size: 23px;
+  }
+
+  .myfit-result-card h3 {
+    font-size: 15px;
+  }
+
+  .myfit-result-detail {
+    width: 30px;
+    height: 30px;
+  }
+
+  .myfit-result-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
