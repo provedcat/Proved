@@ -78,30 +78,27 @@ async function searchFeed(type, query, listId, slotId) {
     return;
   }
 
-  let data;
   try {
-    data = await fetchAllSearchableFeeds(type);
+    await ensureFeedPickerFeeds(type);
   } catch (error) {
     list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(error.message)}</div>`;
     list.classList.remove('hidden');
     return;
   }
 
-  data = data
+  if (feedPickerState.error[type]) {
+    list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(feedPickerState.error[type].message || '검색 결과를 불러오지 못했습니다.')}</div>`;
+    list.classList.remove('hidden');
+    return;
+  }
+
+  let data = (feedPickerState.cache[type] || [])
     .filter(feed => matchesFeedSearch(feed, searchQuery, type))
     .sort((a, b) =>
       feedSearchRelevance(b, searchQuery, type) - feedSearchRelevance(a, searchQuery, type)
       || compareFeedText(a.제조사, b.제조사)
       || compareFeedText(a.제품명, b.제품명)
-    )
-    .slice(0, 20);
-  const error = null;
-
-  if (error) {
-    list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(error.message)}</div>`;
-    list.classList.remove('hidden');
-    return;
-  }
+    );
 
   if (!data?.length) {
     list.innerHTML = `
