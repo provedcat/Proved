@@ -644,6 +644,127 @@ body.my-body {
   line-height: 1.65;
 }
 
+.my-fit-saved-list {
+  display: grid;
+  gap: 10px;
+}
+
+.my-fit-saved-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(143,146,255,.12);
+  background:
+    linear-gradient(135deg, rgba(239,243,255,.94), rgba(255,255,255,.86));
+  box-shadow: 0 12px 32px rgba(72,82,145,.07);
+}
+
+.my-fit-saved-card__link {
+  display: block;
+  padding: 18px 48px 18px 18px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.my-fit-saved-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.my-fit-saved-card__meta span {
+  color: var(--my-blue);
+  font-size: 10px;
+  font-weight: 860;
+  letter-spacing: .06em;
+}
+
+.my-fit-saved-card__meta time {
+  color: var(--my-soft);
+  font-size: 10px;
+  font-weight: 680;
+}
+
+.my-fit-saved-card__top {
+  display: block;
+  overflow: hidden;
+  color: var(--my-ink);
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-fit-saved-card__link > p {
+  margin: 5px 0 13px;
+  color: var(--my-copy);
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.my-fit-saved-card__preview {
+  display: grid;
+  gap: 5px;
+}
+
+.my-fit-saved-card__preview span {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 7px;
+  color: var(--my-copy);
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.my-fit-saved-card__preview b {
+  color: var(--my-periwinkle);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.my-fit-saved-card__preview span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-fit-saved-card__delete {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--my-soft);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.my-fit-saved-card__delete:disabled {
+  opacity: .35;
+  cursor: wait;
+}
+
+.my-fit-saved-card__link:focus-visible,
+.my-fit-saved-card__delete:focus-visible {
+  outline: 2px solid rgba(53,104,255,.28);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .my-fit-saved-card:hover {
+    box-shadow: 0 16px 38px rgba(72,82,145,.10);
+  }
+}
+
 .my-compare-list {
   display: grid;
   gap: 0;

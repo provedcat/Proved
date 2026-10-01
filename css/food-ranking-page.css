@@ -1351,9 +1351,26 @@ body.food-ranking-body {
   color: #B6BAC3;
 }
 
+.myfit-result-save {
+  margin-top: 18px;
+}
+
+.myfit-result-save .myfit-primary-button {
+  width: 100%;
+}
+
+.myfit-result-save p {
+  min-height: 18px;
+  margin: 7px 2px 0;
+  color: var(--myfit-copy);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .myfit-result-actions {
   display: grid;
-  grid-template-columns: 1.15fr .85fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 18px;
 }

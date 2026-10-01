@@ -30,6 +30,8 @@
     favoriteRows: [],
     favoriteFilter: 'all',
     comparisonRows: [],
+    myFitRows: [],
+    myFitProductMap: new Map(),
     favoriteUndo: null,
     favoriteUndoTimer: null
   };
@@ -135,6 +137,14 @@
   function buildComparisonPath(row) {
     const ids = [row.product_a_id, row.product_b_id].filter(Boolean).map(encodeURIComponent);
     return '/food/compare/?species=' + encodeURIComponent(row.species || 'cat') + '&ids=' + ids.join(',');
+  }
+
+  function buildMyFitSavedPath(id) {
+    return '/food-ranking/?saved=' + encodeURIComponent(id || '');
+  }
+
+  function myFitFoodKey(species, id) {
+    return (species === 'dog' ? 'dog' : 'cat') + ':' + String(id || '');
   }
 
   function formatWeight(value) {
@@ -539,6 +549,130 @@
     }
   }
 
+  async function loadMyFitSaved(userId) {
+    if (!els.fitSavedList) return;
+
+    els.fitSavedList.innerHTML = '<div class="my-compare-loading">저장한 MY FIT을 불러오는 중입니다.</div>';
+
+    const response = await sb
+      .from('my_fit_saved')
+      .select('id,species,food_ids,criteria,result,algorithm_version,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (response.error) throw response.error;
+
+    const rows = response.data || [];
+    state.myFitRows = rows;
+
+    const catIds = [];
+    const dogIds = [];
+    rows.forEach(function (row) {
+      const target = row.species === 'dog' ? dogIds : catIds;
+      (Array.isArray(row.food_ids) ? row.food_ids : []).forEach(function (id) {
+        if (id && !target.includes(String(id))) target.push(String(id));
+      });
+    });
+
+    const selectColumns = 'id,제조사,제품명,brands(name)';
+    const results = await Promise.all([
+      catIds.length
+        ? sb.from('feeds').select(selectColumns).in('id', catIds)
+        : Promise.resolve({ data: [], error: null }),
+      dogIds.length
+        ? sb.from('dog_feeds').select(selectColumns).in('id', dogIds)
+        : Promise.resolve({ data: [], error: null })
+    ]);
+
+    const failed = results.find(function (result) { return result.error; });
+    if (failed) throw failed.error;
+
+    state.myFitProductMap = new Map();
+    (results[0].data || []).forEach(function (food) {
+      state.myFitProductMap.set(myFitFoodKey('cat', food.id), { ...food, species: 'cat' });
+    });
+    (results[1].data || []).forEach(function (food) {
+      state.myFitProductMap.set(myFitFoodKey('dog', food.id), { ...food, species: 'dog' });
+    });
+
+    renderMyFitSaved();
+  }
+
+  function renderMyFitSaved() {
+    if (!els.fitSavedList) return;
+
+    if (!state.myFitRows.length) {
+      els.fitSavedList.innerHTML =
+        '<article class="my-empty-compare">' +
+          '<div>' +
+            '<strong>아직 저장한 MY FIT이 없습니다.</strong>' +
+            '<p>사료랭킹에서 만든 순위를 저장하면 이곳에서 다시 볼 수 있습니다.</p>' +
+          '</div>' +
+          '<a href="/food-ranking/">MY FIT 시작</a>' +
+        '</article>';
+      return;
+    }
+
+    els.fitSavedList.innerHTML = state.myFitRows.map(function (row) {
+      const resultRows = Array.isArray(row.result) ? row.result : [];
+      const criteriaRows = Array.isArray(row.criteria) ? row.criteria : [];
+      const foodIds = Array.isArray(row.food_ids) ? row.food_ids : [];
+      const ranked = resultRows.slice().sort(function (a, b) {
+        return Number(a?.[1] || 999) - Number(b?.[1] || 999);
+      });
+      const top = ranked[0];
+      const topFood = top ? state.myFitProductMap.get(myFitFoodKey(row.species, top[0])) : null;
+      const topName = topFood?.제품명 || '현재 제품 정보 없음';
+      const date = formatComparisonDate(row.created_at);
+      const preview = ranked.slice(0, 3).map(function (resultRow) {
+        const food = state.myFitProductMap.get(myFitFoodKey(row.species, resultRow?.[0]));
+        return '<span><b>' + escapeHtml(String(resultRow?.[1] || '—')) + '</b>' +
+          escapeHtml(food?.제품명 || '현재 제품 정보 없음') + '</span>';
+      }).join('');
+
+      return '<article class="my-fit-saved-card">' +
+        '<a class="my-fit-saved-card__link" href="' + escapeHtml(buildMyFitSavedPath(row.id)) + '">' +
+          '<div class="my-fit-saved-card__meta">' +
+            '<span>MY FIT · ' + escapeHtml(speciesLabel(row.species)) + '</span>' +
+            '<time datetime="' + escapeHtml(row.created_at || '') + '">' + escapeHtml(date) + '</time>' +
+          '</div>' +
+          '<strong class="my-fit-saved-card__top">1위 · ' + escapeHtml(topName) + '</strong>' +
+          '<p>' + escapeHtml(String(foodIds.length)) + '개 사료 · ' + escapeHtml(String(criteriaRows.length)) + '개 기준</p>' +
+          '<div class="my-fit-saved-card__preview">' + preview + '</div>' +
+        '</a>' +
+        '<button type="button" class="my-fit-saved-card__delete" data-delete-my-fit="' + escapeHtml(row.id) + '" aria-label="저장한 MY FIT 삭제">×</button>' +
+      '</article>';
+    }).join('');
+  }
+
+  async function deleteMyFitSaved(button) {
+    const id = String(button?.dataset.deleteMyFit || '');
+    if (!id || button.disabled) return;
+
+    const userResponse = await sb.auth.getUser();
+    const user = userResponse.data && userResponse.data.user;
+    if (!user) return;
+
+    button.disabled = true;
+    const response = await sb
+      .from('my_fit_saved')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (response.error) {
+      console.error('MY FIT saved delete failed:', response.error);
+      button.disabled = false;
+      return;
+    }
+
+    state.myFitRows = state.myFitRows.filter(function (row) {
+      return String(row.id) !== id;
+    });
+    renderMyFitSaved();
+  }
+
   async function loadComparisonHistory(userId) {
     if (!els.compareList) return;
 
@@ -616,6 +750,7 @@
       await Promise.all([
         loadPets(user.id),
         loadFavoriteFoods(user.id),
+        loadMyFitSaved(user.id),
         loadComparisonHistory(user.id)
       ]);
     } catch (error) {
@@ -687,6 +822,7 @@
     els.favoriteRail = $('myFavoriteRail');
     els.favoritePrev = $('myFavoritePrev');
     els.favoriteNext = $('myFavoriteNext');
+    els.fitSavedList = $('myFitSavedList');
     els.compareList = $('myCompareList');
     els.logoutButton = $('myLogoutButton');
     els.accountStatus = $('myAccountStatus');
@@ -707,6 +843,13 @@
       event.stopPropagation();
       removeFavoriteFood(button);
     });
+    els.fitSavedList?.addEventListener('click', function (event) {
+      const button = event.target.closest('[data-delete-my-fit]');
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      deleteMyFitSaved(button);
+    });
     els.favoriteRail?.addEventListener('scroll', updateFavoriteCarouselNav, { passive: true });
     window.addEventListener('resize', updateFavoriteCarouselNav);
     bindFavoriteFilters();
@@ -718,6 +861,7 @@
         Promise.all([
           loadPets(session.user.id),
           loadFavoriteFoods(session.user.id),
+          loadMyFitSaved(session.user.id),
           loadComparisonHistory(session.user.id)
         ]).catch(function (error) {
           console.error('My Page reload failed:', error);
