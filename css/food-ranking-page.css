@@ -84,10 +84,7 @@ body.food-ranking-body {
 }
 
 .food-ranking-hero__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 86px;
-  align-items: end;
-  gap: 22px;
+  display: block;
 }
 
 .food-ranking-lead {
@@ -98,32 +95,6 @@ body.food-ranking-body {
   font-weight: 560;
   line-height: 1.72;
 }
-
-.myfit-orb {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  margin-bottom: 2px;
-  border: 1px solid rgba(255,255,255,.76);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 34% 30%, rgba(255,255,255,.95), transparent 24%),
-    linear-gradient(145deg, rgba(143,146,255,.34), rgba(155,231,255,.28));
-  box-shadow: 0 18px 50px rgba(83,88,177,.14), inset 0 1px 0 rgba(255,255,255,.82);
-  transform: rotate(5deg);
-}
-
-.myfit-orb i {
-  position: absolute;
-  border: 1px solid rgba(255,255,255,.8);
-  border-radius: 50%;
-  background: rgba(255,255,255,.42);
-  backdrop-filter: blur(8px);
-}
-
-.myfit-orb i:nth-child(1) { width: 32px; height: 32px; left: 12px; top: 15px; }
-.myfit-orb i:nth-child(2) { width: 22px; height: 22px; right: 10px; top: 28px; }
-.myfit-orb i:nth-child(3) { width: 15px; height: 15px; left: 34px; bottom: 9px; }
 
 .myfit-app {
   position: relative;
@@ -138,37 +109,11 @@ body.food-ranking-body {
   -webkit-backdrop-filter: blur(28px);
 }
 
-.myfit-app::before,
-.myfit-app::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(4px);
-}
-
-.myfit-app::before {
-  width: 260px;
-  height: 260px;
-  right: -150px;
-  top: 80px;
-  background: radial-gradient(circle, rgba(143,146,255,.18), transparent 68%);
-}
-
-.myfit-app::after {
-  width: 220px;
-  height: 220px;
-  left: -130px;
-  bottom: 70px;
-  background: radial-gradient(circle, rgba(155,231,255,.14), transparent 70%);
-}
-
 .myfit-progress {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 18px 22px 0;
 }
@@ -260,6 +205,270 @@ body.food-ranking-body {
 .myfit-count span {
   font-size: 12px;
   font-weight: 800;
+}
+
+
+.myfit-food-search {
+  margin-bottom: 18px;
+}
+
+.myfit-search-box,
+.myfit-inline-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(244,246,252,.92);
+  box-shadow: inset 0 1px 2px rgba(60,70,120,.05);
+}
+
+.myfit-search-box svg,
+.myfit-inline-search svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--myfit-periwinkle);
+  stroke-width: 1.8;
+}
+
+.myfit-search-box input,
+.myfit-inline-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--myfit-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.myfit-search-box input::placeholder,
+.myfit-inline-search input::placeholder {
+  color: #AEB4C0;
+}
+
+.myfit-food-search__hint {
+  margin: 8px 2px 0;
+  color: var(--myfit-soft);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.myfit-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.myfit-search-state {
+  margin: 0;
+  padding: 16px 4px;
+  color: var(--myfit-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.myfit-food-result {
+  width: 100%;
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 34px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px 11px 15px;
+  border: 0;
+  border-radius: 17px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 6px 18px rgba(79,84,143,.06);
+  color: var(--myfit-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.myfit-food-result span {
+  min-width: 0;
+}
+
+.myfit-food-result small,
+.myfit-food-result em {
+  display: block;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.myfit-food-result strong {
+  display: block;
+  margin: 3px 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 820;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myfit-food-result i {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #EEF2FF;
+  color: var(--myfit-blue);
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.myfit-food-result.is-selected {
+  background: #EEF3FF;
+}
+
+.myfit-food-result:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.myfit-selected-foods {
+  padding: 17px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.62);
+  box-shadow: var(--myfit-shadow-soft);
+  margin-bottom: 88px;
+}
+
+.myfit-selected-foods__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.myfit-selected-foods__head h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 840;
+}
+
+.myfit-selected-foods__head span {
+  color: var(--myfit-periwinkle);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.myfit-selected-foods__empty {
+  margin: 0;
+  padding: 16px 0 8px;
+  color: var(--myfit-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.myfit-selected-food {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) 30px;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+}
+
+.myfit-selected-food + .myfit-selected-food {
+  margin-top: 6px;
+}
+
+.myfit-selected-food__number {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #EEF2FF;
+  color: var(--myfit-blue);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.myfit-selected-food div {
+  min-width: 0;
+}
+
+.myfit-selected-food small {
+  display: block;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.myfit-selected-food strong {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--myfit-ink);
+  font-size: 13px;
+  font-weight: 810;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myfit-selected-food button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #F1F3F8;
+  color: var(--myfit-soft);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.myfit-chip-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.myfit-chip-section__head h4 {
+  margin: 0;
+}
+
+.myfit-inline-search {
+  width: 180px;
+  min-height: 38px;
+  padding-inline: 11px;
+  border-radius: 14px;
+}
+
+.myfit-inline-search svg {
+  width: 15px;
+  height: 15px;
+}
+
+.myfit-inline-search input {
+  font-size: 12px;
+}
+
+.myfit-chip-search-empty {
+  margin: 10px 0 0;
+  color: var(--myfit-soft);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .myfit-criteria-groups {
@@ -451,7 +660,7 @@ body.food-ranking-body {
 }
 
 .myfit-chip-section h4 {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--myfit-copy);
   font-size: 11px;
   font-weight: 850;
@@ -575,7 +784,7 @@ body.food-ranking-body {
 .myfit-rank-board {
   position: relative;
   padding: 16px;
-  border: 1px solid rgba(143,146,255,.10);
+  border: 0;
   border-radius: 28px;
   background:
     radial-gradient(circle at 88% 10%, rgba(143,146,255,.13), transparent 13rem),
@@ -596,15 +805,14 @@ body.food-ranking-body {
   align-items: center;
   gap: 10px;
   padding: 7px 9px 7px 7px;
-  border: 1px dashed rgba(83,94,157,.18);
+  border: 0;
   border-radius: 19px;
-  background: rgba(255,255,255,.46);
+  background: rgba(255,255,255,.58);
   transition: border-color .18s ease, background .18s ease, transform .18s var(--myfit-ease);
 }
 
 .myfit-rank-slot.is-drop-target {
-  border-color: rgba(53,104,255,.45);
-  background: rgba(235,241,255,.9);
+  background: rgba(235,241,255,.92);
   transform: scale(1.01);
 }
 
@@ -808,17 +1016,6 @@ body.food-ranking-body {
     padding: 8px 4px 24px;
   }
 
-  .food-ranking-hero__row {
-    grid-template-columns: minmax(0, 1fr) 68px;
-    gap: 14px;
-  }
-
-  .myfit-orb {
-    width: 64px;
-    height: 64px;
-    border-radius: 23px;
-  }
-
   .myfit-screen {
     min-height: calc(100vh - 180px);
     padding: 24px 16px 20px;
@@ -844,6 +1041,10 @@ body.food-ranking-body {
   .myfit-chip-section {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  .myfit-inline-search {
+    width: 158px;
   }
 }
 
