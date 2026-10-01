@@ -219,6 +219,56 @@
       .replace(/'/g, '&#39;');
   }
 
+  function persistSessionState() {
+    try {
+      const payload = {
+        foods: state.foods,
+        species: state.species,
+        selected: [...state.selected.entries()],
+        order: state.order,
+        currentScreen: state.currentScreen
+      };
+      window.sessionStorage.setItem(MYFIT_SESSION_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn('MY FIT state save failed:', error);
+    }
+  }
+
+  function restoreSessionState() {
+    try {
+      const raw = window.sessionStorage.getItem(MYFIT_SESSION_KEY);
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== 'object') return false;
+
+      const foods = Array.isArray(saved.foods) ? saved.foods.slice(0, MAX_FOODS) : [];
+      const species = saved.species === 'cat' || saved.species === 'dog' ? saved.species : null;
+      const selectedEntries = Array.isArray(saved.selected)
+        ? saved.selected.filter(entry => Array.isArray(entry) && criteria.has(entry[0])).slice(0, MAX_CRITERIA)
+        : [];
+      const selected = new Map(selectedEntries);
+      const order = Array.isArray(saved.order)
+        ? saved.order.filter(id => selected.has(id)).slice(0, MAX_CRITERIA)
+        : [];
+      const validScreens = new Set(['foods', 'criteria', 'priority', 'result']);
+      let currentScreen = validScreens.has(saved.currentScreen) ? saved.currentScreen : 'foods';
+
+      if (foods.length < MIN_FOODS && currentScreen !== 'foods') currentScreen = 'foods';
+      if (!selected.size && (currentScreen === 'priority' || currentScreen === 'result')) currentScreen = 'criteria';
+      if (order.length !== selected.size && currentScreen === 'result') currentScreen = 'priority';
+
+      state.foods = foods;
+      state.species = foods.length ? species || foods[0]?.species || null : null;
+      state.selected = selected;
+      state.order = order;
+      state.currentScreen = currentScreen;
+      return true;
+    } catch (error) {
+      console.warn('MY FIT state restore failed:', error);
+      return false;
+    }
+  }
+
   function normalizeSearchText(value) {
     return String(value || '')
       .normalize('NFKC')
