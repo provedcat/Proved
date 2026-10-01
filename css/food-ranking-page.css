@@ -127,7 +127,7 @@ body.food-ranking-body {
 
 .myfit-app {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   border: 1px solid rgba(255,255,255,.82);
   border-radius: 34px;
   background:
