@@ -346,6 +346,7 @@ body.my-body {
 .my-favorite-card-wrap {
   --favorite-accent: #8F92FF;
   --favorite-soft: #EEF0FF;
+  --favorite-surface: #F8F9FF;
   position: relative;
   min-height: 254px;
   scroll-snap-align: start;
@@ -368,7 +369,7 @@ body.my-body {
   color: inherit;
   text-decoration: none;
   border: 1px solid rgba(255,255,255,.84);
-  background: rgba(255,255,255,.76);
+  background: var(--favorite-surface);
   box-shadow: 0 16px 42px rgba(83,72,132,.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -379,14 +380,16 @@ body.my-body {
   min-height: 104px;
   overflow: hidden;
   padding: 14px 52px 14px 14px;
-  background: var(--favorite-soft);
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.24), transparent 64%),
+    var(--favorite-soft);
 }
 
 .my-favorite-card__type {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--my-ink);
+  color: var(--favorite-accent);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .12em;
@@ -485,7 +488,7 @@ body.my-body {
   gap: 12px;
   margin-top: auto;
   padding-top: 13px;
-  border-top: 1px solid rgba(112,102,156,.11);
+  border-top: 1px solid color-mix(in srgb, var(--favorite-accent) 14%, transparent);
 }
 
 .my-favorite-card__stats span {
