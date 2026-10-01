@@ -791,7 +791,9 @@
       if (serial !== state.requestSerial) return;
       const failed = responses.find(response => response.error); if (failed) throw failed.error;
       const combined = responses.flatMap((response, index) => (response.data || []).map(row => ({ ...row, species: speciesList[index] })));
-      combined.sort(compareFeedRows);
+      combined.sort(state.query
+        ? (a, b) => foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query) || compareFeedRows(a, b)
+        : compareFeedRows);
       state.rows = combined.slice(0, state.loaded); state.total = responses.reduce((sum, response) => sum + (Number(response.count) || 0), 0);
       state.loading = false; els.loadMore.disabled = false; els.loadMore.textContent = '더 보기'; renderResults(); persistFinderPosition();
     } catch (error) {
