@@ -1442,8 +1442,14 @@
 
   function bindEvents() {
     els.foodSearch?.addEventListener('input', () => {
+      renderFavorites();
       window.clearTimeout(state.foodSearchTimer);
       state.foodSearchTimer = window.setTimeout(searchFoods, 240);
+    });
+
+    els.favoritesList?.addEventListener('click', event => {
+      const button = event.target.closest('[data-favorite-food-key]');
+      if (button?._food) addFood(button._food);
     });
 
     els.foodResults?.addEventListener('click', event => {
@@ -1503,13 +1509,34 @@
     els.compareFoodsAgain?.addEventListener('click', () => showScreen('foods'));
   }
 
-  function init() {
+  async function init() {
     cacheElements();
     if (!els.app || !els.groups) return;
+
+    restoreSessionState();
     renderGroups();
     bindEvents();
     syncFoodUi();
     syncCriteriaUi();
+    await loadFavoriteFoods();
+
+    if (state.currentScreen === 'result') {
+      try {
+        const foods = await loadSelectedFoodDetails();
+        if (foods.length === state.foods.length) {
+          const model = buildResultModel(foods);
+          state.resultModel = model;
+          renderResult(model);
+          showScreen('result', { persist: false, scroll: false });
+          return;
+        }
+      } catch (error) {
+        console.warn('MY FIT result restore failed:', error);
+        state.currentScreen = 'priority';
+      }
+    }
+
+    showScreen(state.currentScreen, { persist: false, scroll: false });
   }
 
   window.addEventListener('DOMContentLoaded', init);
