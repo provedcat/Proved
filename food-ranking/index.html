@@ -24,11 +24,11 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260924-diet-handoff-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-state-v1">
+  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-save-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
   <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
-  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-state-v1"></script>
+  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-save-v1"></script>
 </head>
 <body class="food-ranking-body">
   <div class="food-shell">
@@ -199,8 +199,13 @@
               <div class="myfit-result-criteria__chips" id="myFitResultCriteriaChips"></div>
             </section>
 
+            <div class="myfit-result-save">
+              <button type="button" class="myfit-primary-button" id="myFitSaveResult">MY FIT 저장하기</button>
+              <p id="myFitSaveStatus" role="status"></p>
+            </div>
+
             <div class="myfit-result-actions">
-              <button type="button" class="myfit-primary-button" id="myFitChooseCriteriaAgain">기준 다시 고르기</button>
+              <button type="button" class="myfit-secondary-button" id="myFitChooseCriteriaAgain">기준 다시 고르기</button>
               <button type="button" class="myfit-secondary-button" id="myFitCompareFoodsAgain">다른 사료 비교</button>
             </div>
           </section>
