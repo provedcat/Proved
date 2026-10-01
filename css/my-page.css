@@ -346,6 +346,7 @@ body.my-body {
 .my-favorite-card-wrap {
   --favorite-accent: #8F92FF;
   --favorite-soft: #EEF0FF;
+  --favorite-surface: #F8F9FF;
   position: relative;
   min-height: 254px;
   scroll-snap-align: start;
@@ -368,7 +369,7 @@ body.my-body {
   color: inherit;
   text-decoration: none;
   border: 1px solid rgba(255,255,255,.84);
-  background: rgba(255,255,255,.76);
+  background: var(--favorite-surface);
   box-shadow: 0 16px 42px rgba(83,72,132,.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -379,7 +380,9 @@ body.my-body {
   min-height: 104px;
   overflow: hidden;
   padding: 14px 52px 14px 14px;
-  background: var(--favorite-soft);
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.24), transparent 64%),
+    var(--favorite-soft);
 }
 
 .my-favorite-card__type {
