@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20260910-product-pages-v1-unified-finder-v1-pet-avatar-v3';
+const CACHE_NAME = 'proved-pwa-20261001-shared-token-search-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
