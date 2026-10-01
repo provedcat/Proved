@@ -752,17 +752,19 @@
   }
 
   function calculateDmCarb(food) {
+    const moisture = numberOrNull(food?.수분);
+    if (moisture === null || moisture >= 100) return null;
+    const dryMatter = 100 - moisture;
+    const storedNfe = numberOrNull(food?.nfe);
+    if (storedNfe !== null) return Math.max(0, storedNfe) / dryMatter * 100;
+
     const protein = numberOrNull(food?.조단백);
     const fat = numberOrNull(food?.조지방);
     const ash = numberOrNull(food?.조회분);
     const fiber = numberOrNull(food?.조섬유);
-    const moisture = numberOrNull(food?.수분);
-    if ([protein, fat, ash, fiber, moisture].some(value => value === null)) return null;
-    const dryMatter = 100 - moisture;
-    if (dryMatter <= 0) return null;
+    if ([protein, fat, ash, fiber].some(value => value === null)) return null;
     const nfe = 100 - protein - fat - ash - fiber - moisture;
-    if (!Number.isFinite(nfe)) return null;
-    return Math.max(0, nfe) / dryMatter * 100;
+    return Number.isFinite(nfe) ? Math.max(0, nfe) / dryMatter * 100 : null;
   }
 
   const numericCriterionReaders = {
@@ -924,6 +926,7 @@
     if (id === 'official_calorie') {
       const calories = numberOrNull(food?.final_me);
       if (calories === null) return null;
+      if (numberOrNull(food?.official_me) !== null) return true;
       const source = String(food?.cal_source || '');
       return /(label|official|manufacturer|package|라벨|공식|제조사)/i.test(source);
     }
@@ -988,9 +991,9 @@
     const columns = [
       'id','type','제조사','제품명','완전식여부','메인단백질','전성분',
       '조단백','조지방','조회분','조섬유','수분','칼슘','인',
-      'dm_단백','dm_지방','dm_회분','dm_섬유','dm_칼슘','dm_인','겔화제',
-      'final_me','cal_source','eb_단백','eb_지방','eb_탄수화물','eb_칼슘','eb_인',
-      'brands(name)'
+      'dm_단백','dm_지방','dm_회분','dm_섬유','dm_칼슘','dm_인','겔화제','nfe',
+      'final_me','official_me','cal_source','eb_단백','eb_지방','eb_탄수화물','eb_칼슘','eb_인',
+      'image_url','brands(name)'
     ].join(',');
 
     const { data, error } = await sb.from(table).select(columns).in('id', ids);
@@ -1156,10 +1159,15 @@
 
       return `
         <article class="myfit-result-card${entry.displayRank === 1 ? ' is-top' : ''}">
-          <div class="myfit-result-rank">
-            <span>MY FIT</span>
-            <strong>${String(entry.displayRank).padStart(2, '0')}</strong>
-            ${tied ? '<small>공동</small>' : ''}
+          <div class="myfit-result-side">
+            <div class="myfit-result-rank">
+              <span>MY FIT</span>
+              <strong>${String(entry.displayRank).padStart(2, '0')}</strong>
+              ${tied ? '<small>공동</small>' : ''}
+            </div>
+            ${food.image_url
+              ? `<img class="myfit-result-image" src="${escapeHtml(food.image_url)}" alt="" loading="lazy">`
+              : '<div class="myfit-result-image myfit-result-image--empty" aria-hidden="true">FOOD</div>'}
           </div>
           <div class="myfit-result-card__body">
             <p class="myfit-result-brand">${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</p>
