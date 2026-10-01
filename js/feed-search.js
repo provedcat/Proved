@@ -1,9 +1,54 @@
-function quotePostgrestFilterValue(value) {
-  return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+function normalizeFeedSearchText(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[()\[\]{}\/\\,._·&+\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-function buildFeedSearchPattern(query) {
-  return quotePostgrestFilterValue(`*${query}*`);
+function tokenizeFeedSearchQuery(value) {
+  return [...new Set(normalizeFeedSearchText(value).split(' ').filter(Boolean))];
+}
+
+function buildFeedSearchText(feed, type) {
+  const resolvedType = type || feed?.type;
+  const typeTerms = resolvedType === 'dry'
+    ? '건식 드라이 dry'
+    : resolvedType === 'wet' ? '습식 wet 캔 파우치' : '';
+  return normalizeFeedSearchText([
+    feed?.제조사,
+    feed?.제품명,
+    feed?.메인단백질,
+    feed?.완전식여부,
+    typeTerms
+  ].filter(Boolean).join(' '));
+}
+
+function matchesFeedSearch(feed, rawQuery, type) {
+  const tokens = tokenizeFeedSearchQuery(rawQuery);
+  if (!tokens.length) return true;
+  const text = buildFeedSearchText(feed, type);
+  return tokens.every(token => text.includes(token));
+}
+
+function feedSearchRelevance(feed, rawQuery, type) {
+  const tokens = tokenizeFeedSearchQuery(rawQuery);
+  const phrase = normalizeFeedSearchText(rawQuery);
+  const product = normalizeFeedSearchText(feed?.제품명);
+  const maker = normalizeFeedSearchText(feed?.제조사);
+  const text = buildFeedSearchText(feed, type);
+  let score = 0;
+  if (phrase && product.includes(phrase)) score += 120;
+  if (phrase && maker.includes(phrase)) score += 100;
+  tokens.forEach(token => {
+    if (product.includes(token)) score += 24;
+    if (maker.includes(token)) score += 18;
+    if (product.startsWith(token)) score += 6;
+    if (maker.startsWith(token)) score += 5;
+    if (text.includes(token)) score += 2;
+  });
+  return score;
 }
 
 function getActiveFeedTable() {
@@ -33,14 +78,24 @@ async function searchFeed(type, query, listId, slotId) {
     return;
   }
 
-  const { data, error } = await sb
-    .from(getActiveFeedTable())
-    .select(getFeedSearchColumns())
-    .eq('type', type)
-    .or('verified.eq.true,searchable_before_review.eq.true')
-    .gt('final_me', 0)
-    .or(`제품명.ilike.${buildFeedSearchPattern(searchQuery)},제조사.ilike.${buildFeedSearchPattern(searchQuery)}`)
-    .limit(10);
+  let data;
+  try {
+    data = await fetchAllSearchableFeeds(type);
+  } catch (error) {
+    list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(error.message)}</div>`;
+    list.classList.remove('hidden');
+    return;
+  }
+
+  data = data
+    .filter(feed => matchesFeedSearch(feed, searchQuery, type))
+    .sort((a, b) =>
+      feedSearchRelevance(b, searchQuery, type) - feedSearchRelevance(a, searchQuery, type)
+      || compareFeedText(a.제조사, b.제조사)
+      || compareFeedText(a.제품명, b.제품명)
+    )
+    .slice(0, 20);
+  const error = null;
 
   if (error) {
     list.innerHTML = `<div class="p-3 text-red-400 text-xs">${escapeFeedPickerHtml(error.message)}</div>`;
@@ -224,17 +279,29 @@ function closeFeedPicker() {
   setFeedPickerBodyScrollLock(false);
 }
 
-async function fetchFeedPickerFeeds(type) {
-  const { data, error } = await sb
-    .from(getActiveFeedTable())
-    .select(getFeedSearchColumns())
-    .eq('type', type)
-    .or('verified.eq.true,searchable_before_review.eq.true')
-    .gt('final_me', 0)
-    .range(0, 999);
+async function fetchAllSearchableFeeds(type) {
+  const rows = [];
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await sb
+      .from(getActiveFeedTable())
+      .select(getFeedSearchColumns())
+      .eq('type', type)
+      .or('verified.eq.true,searchable_before_review.eq.true')
+      .gt('final_me', 0)
+      .order('제조사')
+      .order('제품명')
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+    const page = data || [];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return rows;
+}
 
-  if (error) throw error;
-  return data || [];
+async function fetchFeedPickerFeeds(type) {
+  return fetchAllSearchableFeeds(type);
 }
 
 async function ensureFeedPickerFeeds(type) {
@@ -275,12 +342,10 @@ function setFeedPickerSort(sortBy) {
 }
 
 function getSortedFeedPickerFeeds() {
-  const filter = feedPickerState.nameFilter.trim().toLocaleLowerCase('ko');
-  const feeds = (feedPickerState.cache[feedPickerState.type] || []).filter(feed => {
-    if (!filter) return true;
-    return String(feed.제품명 || '').toLocaleLowerCase('ko').includes(filter)
-      || String(feed.제조사 || '').toLocaleLowerCase('ko').includes(filter);
-  });
+  const filter = feedPickerState.nameFilter.trim();
+  const feeds = (feedPickerState.cache[feedPickerState.type] || []).filter(feed =>
+    !filter || matchesFeedSearch(feed, filter, feedPickerState.type)
+  );
   const sorted = feeds.slice();
 
   if (feedPickerState.sortBy === 'product') {
