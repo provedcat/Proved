@@ -590,7 +590,8 @@
     const screens = {
       foods: els.foodScreen,
       criteria: els.criteriaScreen,
-      priority: els.priorityScreen
+      priority: els.priorityScreen,
+      result: els.resultScreen
     };
     Object.entries(screens).forEach(([key, screen]) => {
       if (!screen) return;
@@ -606,7 +607,7 @@
       current.classList.add('is-entering');
     }
 
-    const activeIndex = name === 'foods' ? 0 : name === 'criteria' ? 1 : 2;
+    const activeIndex = name === 'foods' ? 0 : name === 'criteria' ? 1 : name === 'priority' ? 2 : 3;
     els.progress.forEach((item, index) => item.classList.toggle('is-active', index <= activeIndex));
 
     if (name === 'priority') {
@@ -744,6 +745,478 @@
     state.drag = null;
   }
 
+  function numberOrNull(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function calculateDmCarb(food) {
+    const protein = numberOrNull(food?.조단백);
+    const fat = numberOrNull(food?.조지방);
+    const ash = numberOrNull(food?.조회분);
+    const fiber = numberOrNull(food?.조섬유);
+    const moisture = numberOrNull(food?.수분);
+    if ([protein, fat, ash, fiber, moisture].some(value => value === null)) return null;
+    const dryMatter = 100 - moisture;
+    if (dryMatter <= 0) return null;
+    const nfe = 100 - protein - fat - ash - fiber - moisture;
+    if (!Number.isFinite(nfe)) return null;
+    return Math.max(0, nfe) / dryMatter * 100;
+  }
+
+  const numericCriterionReaders = {
+    dm_protein: food => numberOrNull(food?.dm_단백),
+    dm_fat: food => numberOrNull(food?.dm_지방),
+    dm_carb: calculateDmCarb,
+    dm_ash: food => numberOrNull(food?.dm_회분),
+    dm_fiber: food => numberOrNull(food?.dm_섬유),
+    dm_calcium: food => numberOrNull(food?.dm_칼슘),
+    dm_phosphorus: food => numberOrNull(food?.dm_인),
+    moisture: food => numberOrNull(food?.수분),
+    calorie: food => numberOrNull(food?.final_me),
+    eb_protein: food => numberOrNull(food?.eb_단백),
+    eb_fat: food => numberOrNull(food?.eb_지방),
+    eb_carb: food => numberOrNull(food?.eb_탄수화물),
+    eb_calcium: food => numberOrNull(food?.eb_칼슘),
+    eb_phosphorus: food => numberOrNull(food?.eb_인)
+  };
+
+  const animalPatterns = {
+    poultry: ['닭', '치킨', 'chicken', '칠면조', 'turkey', '오리', 'duck', '거위', 'goose', '메추리', 'quail'],
+    ruminant: ['소고기', '쇠고기', '우육', 'beef', '양고기', 'lamb', '염소', '산양', 'goat', '사슴', 'venison'],
+    fish: ['생선', '어류', 'fish', '연어', 'salmon', '참치', 'tuna', '고등어', 'mackerel', '정어리', 'sardine', '청어', 'herring', '대구', 'cod', '명태', 'pollock', '송어', 'trout', '광어', '가자미', '도미', '멸치', 'anchovy'],
+    chicken: ['닭', '치킨', 'chicken'],
+    turkey: ['칠면조', 'turkey'],
+    duck: ['오리', 'duck'],
+    goose: ['거위', 'goose'],
+    quail: ['메추리', 'quail'],
+    beef: ['소고기', '쇠고기', '우육', 'beef'],
+    lamb: ['양고기', 'lamb'],
+    goat: ['염소', '산양', 'goat'],
+    venison: ['사슴', 'venison'],
+    pork: ['돼지', '돈육', 'pork'],
+    rabbit: ['토끼', 'rabbit'],
+    salmon: ['연어', 'salmon'],
+    tuna: ['참치', 'tuna'],
+    mackerel: ['고등어', 'mackerel'],
+    sardine: ['정어리', 'sardine'],
+    herring: ['청어', 'herring'],
+    cod: ['대구', 'cod'],
+    pollock: ['명태', 'pollock'],
+    trout: ['송어', 'trout']
+  };
+
+  function includesAny(text, terms) {
+    const source = normalizeSearchText(text);
+    return terms.some(term => source.includes(normalizeSearchText(term)));
+  }
+
+  function ingredientText(food) {
+    return String(food?.전성분 || '').trim();
+  }
+
+  function tagText(food) {
+    return (food?._tags || []).map(tag => tag.label_ko || '').join(' ');
+  }
+
+  function proteinText(food) {
+    return [food?.메인단백질, food?.전성분, tagText(food)].filter(Boolean).join(' ');
+  }
+
+  function evaluateAvoidIngredient(food, terms, explicitFreePatterns = []) {
+    const ingredients = ingredientText(food);
+    const tags = tagText(food);
+    if (explicitFreePatterns.length && includesAny(tags, explicitFreePatterns)) return true;
+    if (!ingredients) return null;
+    return !includesAny(ingredients, terms);
+  }
+
+  function thickenerCount(food) {
+    const declared = String(food?.겔화제 || '').trim();
+    const ingredients = ingredientText(food);
+    const source = declared || ingredients;
+    if (!source) return null;
+    const terms = [
+      ['카라기난', 'carrageenan'],
+      ['구아검', 'guar gum'],
+      ['잔탄검', '크산탄검', 'xanthan gum'],
+      ['로커스트빈검', 'locust bean gum', 'carob bean gum'],
+      ['카시아검', 'cassia gum'],
+      ['셀룰로오스검', 'cellulose gum'],
+      ['알긴산', 'alginate', 'alginic'],
+      ['아라비아검', 'gum arabic', 'acacia gum'],
+      ['젤란검', 'gellan gum'],
+      ['타라검', 'tara gum'],
+      ['한천', 'agar'],
+      ['가공전분', '변성전분', 'modified starch'],
+      ['증점다당류']
+    ];
+    return terms.reduce((count, synonyms) => count + (includesAny(source, synonyms) ? 1 : 0), 0);
+  }
+
+  function evaluateCondition(food, id) {
+    const ingredients = ingredientText(food);
+    const tags = tagText(food);
+    const proteins = proteinText(food);
+    const hasProteinInfo = Boolean(String(food?.메인단백질 || '').trim() || ingredients || tags);
+
+    const preferredMap = {
+      prefer_poultry: animalPatterns.poultry,
+      prefer_ruminant: animalPatterns.ruminant,
+      prefer_fish_group: animalPatterns.fish,
+      prefer_chicken: animalPatterns.chicken,
+      prefer_turkey: animalPatterns.turkey,
+      prefer_duck: animalPatterns.duck,
+      prefer_goose: animalPatterns.goose,
+      prefer_quail: animalPatterns.quail,
+      prefer_beef: animalPatterns.beef,
+      prefer_lamb: animalPatterns.lamb,
+      prefer_goat: animalPatterns.goat,
+      prefer_venison: animalPatterns.venison,
+      prefer_pork: animalPatterns.pork,
+      prefer_rabbit: animalPatterns.rabbit,
+      prefer_salmon: animalPatterns.salmon,
+      prefer_tuna: animalPatterns.tuna,
+      prefer_mackerel: animalPatterns.mackerel,
+      prefer_sardine: animalPatterns.sardine,
+      prefer_herring: animalPatterns.herring,
+      prefer_cod: animalPatterns.cod,
+      prefer_pollock: animalPatterns.pollock,
+      prefer_trout: animalPatterns.trout
+    };
+
+    if (preferredMap[id]) {
+      if (!hasProteinInfo) return null;
+      return includesAny(proteins, preferredMap[id]);
+    }
+
+    if (id === 'prefer_single_protein') {
+      if (!tags) return null;
+      if (includesAny(tags, ['단일 단백질', '단일단백질', 'single protein', 'single animal protein'])) return true;
+      if (includesAny(tags, ['다중 단백질', 'multiple protein', 'multi protein'])) return false;
+      return null;
+    }
+
+    if (id === 'avoid_chicken') return evaluateAvoidIngredient(food, animalPatterns.chicken, ['치킨 프리', '닭고기 프리', 'chicken free']);
+    if (id === 'avoid_fish') return evaluateAvoidIngredient(food, animalPatterns.fish, ['생선 프리', '어류 프리', 'fish free']);
+    if (id === 'avoid_fish_oil') return evaluateAvoidIngredient(food, ['어유', '생선오일', '생선 오일', 'fish oil', 'salmon oil', '연어오일'], ['생선오일 프리', '어유 프리', 'fish oil free']);
+    if (id === 'avoid_meal') {
+      if (includesAny(tags, ['meal-free', 'meal free', '육분 없음', '육분 프리', '밀프리'])) return true;
+      if (!ingredients) return null;
+      return !/(육분|가금류분|닭고기분|오리분|칠면조분|어분|생선분|연어분|청어분|meat meal|chicken meal|poultry meal|turkey meal|duck meal|fish meal|salmon meal|herring meal)/i.test(ingredients);
+    }
+    if (id === 'avoid_corn') return evaluateAvoidIngredient(food, ['옥수수', 'corn', 'maize'], ['옥수수 프리', 'corn free']);
+    if (id === 'avoid_soy') return evaluateAvoidIngredient(food, ['대두', '콩', 'soy', 'soybean'], ['콩 프리', '대두 프리', 'soy free']);
+    if (id === 'avoid_wheat_gluten') return evaluateAvoidIngredient(food, ['밀 ', '밀,', '밀가루', '밀글루텐', 'wheat', 'wheat gluten'], ['밀 프리', 'wheat free', '글루텐 프리', 'gluten free']);
+    if (id === 'avoid_grain') {
+      if (includesAny(tags, ['그레인 프리', 'grain free', 'grain-free'])) return true;
+      if (!ingredients) return null;
+      return !includesAny(ingredients, ['밀', 'wheat', '옥수수', 'corn', '쌀', 'rice', '보리', 'barley', '귀리', 'oat', '호밀', 'rye', '수수', 'sorghum', '기장', 'millet']);
+    }
+
+    const thickeners = thickenerCount(food);
+    if (id === 'no_thickener') return thickeners === null ? null : thickeners === 0;
+    if (id === 'carrageenan_free') return evaluateAvoidIngredient(food, ['카라기난', 'carrageenan'], ['카라기난 프리', 'carrageenan free']);
+    if (id === 'gum_free') return evaluateAvoidIngredient(food, ['구아검', '잔탄검', '크산탄검', '로커스트빈검', '카시아검', '셀룰로오스검', '아라비아검', '젤란검', '타라검', 'guar gum', 'xanthan gum', 'locust bean gum', 'cassia gum', 'cellulose gum', 'gum arabic', 'gellan gum', 'tara gum']);
+    if (id === 'gum_agar_free') return evaluateAvoidIngredient(food, ['구아검', '잔탄검', '크산탄검', '로커스트빈검', '카시아검', '셀룰로오스검', '아라비아검', '젤란검', '타라검', '한천', 'agar', 'guar gum', 'xanthan gum', 'locust bean gum', 'cassia gum', 'cellulose gum', 'gum arabic', 'gellan gum', 'tara gum']);
+
+    if (id === 'official_calorie') {
+      const calories = numberOrNull(food?.final_me);
+      if (calories === null) return null;
+      const source = String(food?.cal_source || '');
+      return /(label|official|manufacturer|package|라벨|공식|제조사)/i.test(source);
+    }
+
+    if (id === 'nutrition_complete') {
+      return ['조단백', '조지방', '수분', '칼슘', '인', 'final_me']
+        .every(field => numberOrNull(food?.[field]) !== null);
+    }
+
+    return null;
+  }
+
+  function evaluateCriterion(id, foods, priorityIndex, totalCriteria) {
+    const item = criteria.get(id);
+    const label = criterionLabel(id);
+    const weight = Math.max(1, totalCriteria - priorityIndex);
+    const isFewerThickeners = id === 'fewer_thickeners';
+    const numericReader = numericCriterionReaders[id] || (isFewerThickeners ? thickenerCount : null);
+
+    if (numericReader) {
+      const direction = isFewerThickeners ? 'low' : state.selected.get(id);
+      const values = foods.map(food => numericReader(food));
+      if (values.some(value => value === null || !Number.isFinite(value))) {
+        return { id, item, label, weight, eligible: false, reason: 'missing', values };
+      }
+      const unique = [...new Set(values.map(value => Number(value.toFixed(8))))];
+      if (unique.length < 2) {
+        return { id, item, label, weight, eligible: false, reason: 'same', values };
+      }
+
+      const sorted = values
+        .map((value, index) => ({ value, index }))
+        .sort((a, b) => direction === 'low' ? a.value - b.value : b.value - a.value);
+
+      const ranks = Array(values.length).fill(null);
+      sorted.forEach((entry, sortedIndex) => {
+        const betterCount = sorted.filter(other => direction === 'low' ? other.value < entry.value : other.value > entry.value).length;
+        ranks[entry.index] = betterCount + 1;
+      });
+      const utilities = ranks.map(rank => values.length <= 1 ? 1 : (values.length - rank) / (values.length - 1));
+      return { id, item, label, weight, eligible: true, kind: 'numeric', direction, values, ranks, utilities };
+    }
+
+    const statuses = foods.map(food => evaluateCondition(food, id));
+    if (statuses.some(value => value === null)) {
+      return { id, item, label, weight, eligible: false, reason: 'missing', statuses };
+    }
+    if (statuses.every(value => value === statuses[0])) {
+      return { id, item, label, weight, eligible: false, reason: 'same', statuses };
+    }
+
+    const trueCount = statuses.filter(Boolean).length;
+    const ranks = statuses.map(value => value ? 1 : trueCount + 1);
+    const utilities = statuses.map(value => value ? 1 : 0);
+    return { id, item, label, weight, eligible: true, kind: 'boolean', statuses, ranks, utilities };
+  }
+
+  async function loadSelectedFoodDetails() {
+    if (!sb || !state.foods.length || !state.species) return [];
+    const ids = state.foods.map(food => food.id);
+    const table = state.species === 'dog' ? 'dog_feeds' : 'feeds';
+    const columns = [
+      'id','type','제조사','제품명','완전식여부','메인단백질','전성분',
+      '조단백','조지방','조회분','조섬유','수분','칼슘','인',
+      'dm_단백','dm_지방','dm_회분','dm_섬유','dm_칼슘','dm_인','겔화제',
+      'final_me','cal_source','eb_단백','eb_지방','eb_탄수화물','eb_칼슘','eb_인',
+      'brands(name)'
+    ].join(',');
+
+    const { data, error } = await sb.from(table).select(columns).in('id', ids);
+    if (error) throw error;
+
+    const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const { data: mappings, error: mappingError } = await sb
+      .from(mappingTable)
+      .select(`${feedIdColumn},tag_id`)
+      .in(feedIdColumn, ids);
+    if (mappingError) throw mappingError;
+
+    const tagIds = [...new Set((mappings || []).map(row => row.tag_id).filter(Boolean))];
+    let tags = [];
+    if (tagIds.length) {
+      const { data: tagRows, error: tagError } = await sb
+        .from('food_tags')
+        .select('id,label_ko,category')
+        .in('id', tagIds);
+      if (tagError) throw tagError;
+      tags = tagRows || [];
+    }
+
+    const tagsByFeed = new Map();
+    (mappings || []).forEach(mapping => {
+      const feedId = String(mapping[feedIdColumn] || '');
+      const tag = tags.find(item => String(item.id) === String(mapping.tag_id));
+      if (!feedId || !tag) return;
+      if (!tagsByFeed.has(feedId)) tagsByFeed.set(feedId, []);
+      tagsByFeed.get(feedId).push(tag);
+    });
+
+    const detailsById = new Map((data || []).map(food => [String(food.id), {
+      ...food,
+      species: state.species,
+      _tags: tagsByFeed.get(String(food.id)) || []
+    }]));
+
+    return state.foods
+      .map(food => detailsById.get(String(food.id)))
+      .filter(Boolean);
+  }
+
+  function compareResultEntries(a, b, criteriaModels) {
+    const scoreDiff = b.fitScore - a.fitScore;
+    if (Math.abs(scoreDiff) > 1e-9) return scoreDiff;
+    for (const model of criteriaModels) {
+      if (!model.eligible) continue;
+      const diff = b.criteria[model.id].utility - a.criteria[model.id].utility;
+      if (Math.abs(diff) > 1e-9) return diff;
+    }
+    return String(a.food.제품명 || '').localeCompare(String(b.food.제품명 || ''), 'ko');
+  }
+
+  function sameResultStanding(a, b, criteriaModels) {
+    if (Math.abs(a.fitScore - b.fitScore) > 1e-9) return false;
+    return criteriaModels
+      .filter(model => model.eligible)
+      .every(model => Math.abs(a.criteria[model.id].utility - b.criteria[model.id].utility) <= 1e-9);
+  }
+
+  function buildResultModel(foods) {
+    const orderedCriteria = state.order.filter(id => state.selected.has(id));
+    const criteriaModels = orderedCriteria.map((id, index) => evaluateCriterion(id, foods, index, orderedCriteria.length));
+    const activeModels = criteriaModels.filter(model => model.eligible);
+    const totalWeight = activeModels.reduce((sum, model) => sum + model.weight, 0);
+
+    const entries = foods.map((food, foodIndex) => {
+      const perCriterion = {};
+      criteriaModels.forEach(model => {
+        perCriterion[model.id] = {
+          eligible: model.eligible,
+          reason: model.reason || '',
+          rank: model.ranks?.[foodIndex] ?? null,
+          utility: model.utilities?.[foodIndex] ?? 0,
+          status: model.statuses?.[foodIndex] ?? null,
+          value: model.values?.[foodIndex] ?? null
+        };
+      });
+
+      const weighted = activeModels.reduce((sum, model) => {
+        return sum + model.weight * (perCriterion[model.id].utility || 0);
+      }, 0);
+
+      return {
+        food,
+        criteria: perCriterion,
+        fitScore: totalWeight > 0 ? weighted / totalWeight : 0,
+        displayRank: null
+      };
+    });
+
+    entries.sort((a, b) => compareResultEntries(a, b, criteriaModels));
+    entries.forEach((entry, index) => {
+      if (index === 0) entry.displayRank = 1;
+      else entry.displayRank = sameResultStanding(entry, entries[index - 1], criteriaModels)
+        ? entries[index - 1].displayRank
+        : index + 1;
+    });
+
+    return {
+      foods,
+      entries,
+      criteriaModels,
+      activeModels,
+      excludedModels: criteriaModels.filter(model => !model.eligible)
+    };
+  }
+
+  function resultCriterionChip(model, entry) {
+    const result = entry.criteria[model.id];
+    let text = model.label;
+    let className = 'myfit-result-chip';
+
+    if (!model.eligible) {
+      className += ' is-muted';
+      text += model.reason === 'missing' ? ' · 확인불가' : ' · 동일';
+    } else if (model.kind === 'boolean') {
+      if (result.status) {
+        className += ' is-positive';
+        text += ' ✓';
+      } else {
+        className += ' is-neutral';
+        text += ' —';
+      }
+    } else {
+      className += ' is-ranked';
+      text += ` · ${result.rank}위`;
+    }
+
+    return `<span class="${className}">${escapeHtml(text)}</span>`;
+  }
+
+  function renderResult(model) {
+    if (!model || !els.resultList) return;
+
+    if (els.resultFoodCount) els.resultFoodCount.textContent = `${model.foods.length}개`;
+    if (els.resultCriteriaCount) els.resultCriteriaCount.textContent = `${model.activeModels.length}개`;
+    if (els.resultSpecies) els.resultSpecies.textContent = `${getSpeciesLabel(state.species)} 사료`;
+
+    const notices = [];
+    const missing = model.excludedModels.filter(item => item.reason === 'missing');
+    const same = model.excludedModels.filter(item => item.reason === 'same');
+    if (missing.length) notices.push(`${missing.map(item => item.label).join(', ')}은(는) 일부 제품의 정보가 없어 순위 계산에서 제외했어요.`);
+    if (same.length) notices.push(`${same.map(item => item.label).join(', ')}은(는) 선택한 제품이 모두 같아 순위에 영향을 주지 않았어요.`);
+    if (!model.activeModels.length) notices.push('현재 선택한 기준으로 제품 간 상대적인 차이를 계산할 수 없어요.');
+
+    if (els.resultNotice) {
+      els.resultNotice.hidden = notices.length === 0;
+      els.resultNotice.innerHTML = notices.map(message => `<p>${escapeHtml(message)}</p>`).join('');
+    }
+
+    els.resultList.innerHTML = model.entries.map((entry, index) => {
+      const food = entry.food;
+      const meta = [
+        food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '',
+        food.완전식여부 || '',
+        food.메인단백질 || ''
+      ].filter(Boolean).join(' · ');
+      const detailHref = `/food/?species=${encodeURIComponent(food.species || state.species)}&id=${encodeURIComponent(food.id)}`;
+      const tied = index > 0 && entry.displayRank === model.entries[index - 1].displayRank;
+
+      return `
+        <article class="myfit-result-card${entry.displayRank === 1 ? ' is-top' : ''}">
+          <div class="myfit-result-rank">
+            <span>MY FIT</span>
+            <strong>${String(entry.displayRank).padStart(2, '0')}</strong>
+            ${tied ? '<small>공동</small>' : ''}
+          </div>
+          <div class="myfit-result-card__body">
+            <p class="myfit-result-brand">${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</p>
+            <h3>${escapeHtml(food.제품명 || '제품명 정보 없음')}</h3>
+            <p class="myfit-result-meta">${escapeHtml(meta)}</p>
+            <div class="myfit-result-chips">
+              ${model.criteriaModels.map(criteriaModel => resultCriterionChip(criteriaModel, entry)).join('')}
+            </div>
+          </div>
+          <a class="myfit-result-detail" href="${escapeHtml(detailHref)}" aria-label="${escapeHtml(food.제품명)} 상세 보기">→</a>
+        </article>`;
+    }).join('');
+
+    if (els.resultCriteriaMeta) {
+      els.resultCriteriaMeta.textContent = `${model.activeModels.length}개 기준 반영`;
+    }
+    if (els.resultCriteriaChips) {
+      els.resultCriteriaChips.innerHTML = model.criteriaModels.map((criterionModel, index) => `
+        <span class="${criterionModel.eligible ? '' : 'is-excluded'}">
+          <b>${index + 1}</b>
+          ${escapeHtml(criterionModel.label)}
+        </span>`).join('');
+    }
+  }
+
+  async function calculateAndShowResult() {
+    if (state.resultLoading) return;
+    if (state.foods.length < MIN_FOODS || !state.order.length || state.order.length !== state.selected.size) {
+      showToast('사료와 기준, 우선순위를 먼저 완성해 주세요.');
+      return;
+    }
+
+    state.resultLoading = true;
+    if (els.result) {
+      els.result.disabled = true;
+      els.result.textContent = 'MY FIT 계산 중…';
+    }
+
+    try {
+      const foods = await loadSelectedFoodDetails();
+      if (foods.length !== state.foods.length) throw new Error('선택한 사료 정보를 모두 불러오지 못했습니다.');
+      const model = buildResultModel(foods);
+      state.resultModel = model;
+      renderResult(model);
+      showScreen('result');
+    } catch (error) {
+      console.error('MY FIT result calculation failed:', error);
+      showToast('MY FIT 결과를 계산하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      state.resultLoading = false;
+      if (els.result) {
+        els.result.textContent = 'MY FIT 결과 보기';
+        els.result.disabled = state.order.length !== state.selected.size || state.selected.size === 0;
+      }
+    }
+  }
+
   function showToast(message) {
     if (!els.toast) return;
     els.toast.textContent = message;
@@ -809,9 +1282,10 @@
       }
     });
 
-    els.result?.addEventListener('click', () => {
-      showToast('선택한 사료와 기준으로 MY FIT 순위를 계산하는 단계는 다음 구현에서 연결합니다.');
-    });
+    els.result?.addEventListener('click', calculateAndShowResult);
+    els.backToPriority?.addEventListener('click', () => showScreen('priority'));
+    els.chooseCriteriaAgain?.addEventListener('click', () => showScreen('criteria'));
+    els.compareFoodsAgain?.addEventListener('click', () => showScreen('foods'));
   }
 
   function init() {
