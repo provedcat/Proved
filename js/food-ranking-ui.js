@@ -1402,6 +1402,7 @@
           ${escapeHtml(criterionModel.label)}
         </span>`).join('');
     }
+    syncSaveButton();
   }
 
   async function calculateAndShowResult() {
@@ -1661,6 +1662,16 @@
     showScreen('result', { persist: false, scroll: false });
   }
 
+  function leaveSavedSnapshot() {
+    if (!state.savedRecordId && !new URLSearchParams(window.location.search).has('saved')) return;
+    state.savedRecordId = null;
+    if (els.saveStatus) els.saveStatus.textContent = '';
+    const url = new URL(window.location.href);
+    url.searchParams.delete('saved');
+    window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+    syncSaveButton();
+  }
+
   function showToast(message) {
     if (!els.toast) return;
     els.toast.textContent = message;
@@ -1734,9 +1745,18 @@
 
     els.result?.addEventListener('click', calculateAndShowResult);
     els.saveResult?.addEventListener('click', saveCurrentResult);
-    els.backToPriority?.addEventListener('click', () => showScreen('priority'));
-    els.chooseCriteriaAgain?.addEventListener('click', () => showScreen('criteria'));
-    els.compareFoodsAgain?.addEventListener('click', () => showScreen('foods'));
+    els.backToPriority?.addEventListener('click', () => {
+      leaveSavedSnapshot();
+      showScreen('priority');
+    });
+    els.chooseCriteriaAgain?.addEventListener('click', () => {
+      leaveSavedSnapshot();
+      showScreen('criteria');
+    });
+    els.compareFoodsAgain?.addEventListener('click', () => {
+      leaveSavedSnapshot();
+      showScreen('foods');
+    });
   }
 
   async function init() {
