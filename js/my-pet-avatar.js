@@ -15,7 +15,7 @@
   function options(key) {
     if (avatar.groups[key]) return avatar.groups[key];
     const keys = Object.keys(avatar.catalog[key]);
-    return (key === 'blush' || key === 'eyePattern') ? [null, ...keys] : keys;
+    return key === 'blush' ? [null, ...keys] : keys;
   }
   function thumb(key, value) {
     if (!value) return '';
@@ -65,7 +65,7 @@
         else { const mark = document.createElement('span'); mark.className = 'my-avatar-none'; mark.textContent = '—'; button.appendChild(mark); }
         const label = document.createElement('span'); label.textContent = name; button.appendChild(label);
         button.addEventListener('click', () => {
-          settings[key] = avatar.groups[key] && settings[key] === value ? null : value;
+          settings[key] = (avatar.groups[key] || key === 'eyePattern') && settings[key] === value ? null : value;
           for (const option of grid.children) option.setAttribute('aria-pressed', String(option === button && settings[key] === value));
           draw();
         });
