@@ -298,12 +298,58 @@
     return allowed.includes(value) ? value : fallback;
   }
 
-  function quotePostgrestFilterValue(value) {
-    return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  function normalizeFoodSearchText(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[()\[\]{}\/\\,._·&+\-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
-  function buildSearchPattern(query) {
-    return quotePostgrestFilterValue(`*${query}*`);
+  function tokenizeFoodSearchQuery(value) {
+    return [...new Set(normalizeFoodSearchText(value).split(' ').filter(Boolean))];
+  }
+
+  function buildFoodSearchText(feed) {
+    const typeTerms = feed?.type === 'dry'
+      ? '건식 드라이 dry'
+      : feed?.type === 'wet' ? '습식 wet 캔 파우치' : '';
+    return normalizeFoodSearchText([
+      getBrand(feed).name,
+      feed?.제조사,
+      feed?.제품명,
+      feed?.완전식여부,
+      feed?.메인단백질,
+      typeTerms,
+      getSpeciesLabel(feed?.species)
+    ].filter(Boolean).join(' '));
+  }
+
+  function matchesFoodSearch(feed, rawQuery) {
+    const tokens = tokenizeFoodSearchQuery(rawQuery);
+    if (!tokens.length) return true;
+    const text = buildFoodSearchText(feed);
+    return tokens.every(token => text.includes(token));
+  }
+
+  function foodSearchRelevance(feed, rawQuery) {
+    const tokens = tokenizeFoodSearchQuery(rawQuery);
+    const phrase = normalizeFoodSearchText(rawQuery);
+    const product = normalizeFoodSearchText(feed?.제품명);
+    const brand = normalizeFoodSearchText(getBrand(feed).name);
+    const text = buildFoodSearchText(feed);
+    let score = 0;
+    if (phrase && product.includes(phrase)) score += 120;
+    if (phrase && brand.includes(phrase)) score += 100;
+    tokens.forEach(token => {
+      if (product.includes(token)) score += 24;
+      if (brand.includes(token)) score += 18;
+      if (product.startsWith(token)) score += 6;
+      if (brand.startsWith(token)) score += 5;
+      if (text.includes(token)) score += 2;
+    });
+    return score;
   }
 
   function getTable(species = state.species) {
@@ -696,16 +742,38 @@
     return [...matches].filter(([, tags]) => tags.size === required.size).map(([id]) => id);
   }
 
-  function buildListQuery(species, limit) {
-    let query = foodSb.from(getTable(species)).select(listColumns, { count: 'exact' }).or('verified.eq.true,searchable_before_review.eq.true');
+  function buildListQuery(species, from, to, withCount = false) {
+    let query = foodSb.from(getTable(species)).select(listColumns, withCount ? { count: 'exact' } : undefined).or('verified.eq.true,searchable_before_review.eq.true');
     if (state.type !== 'all') query = query.eq('type', state.type);
     if (state.role !== 'all') query = query.eq('완전식여부', state.role);
-    if (state.query) { const pattern = buildSearchPattern(state.query); query = query.or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`); }
     const ids = state.matchingFeedIds[species];
     if (Array.isArray(ids)) query = ids.length ? query.in('id', ids) : query.eq('id', '00000000-0000-0000-0000-000000000000');
     if (state.sort === 'product') query = query.order('제품명').order('제조사').order('id');
     else query = query.order('제조사').order('제품명').order('id');
-    return query.range(0, limit - 1);
+    return query.range(from, to);
+  }
+
+  async function fetchListRows(species, limit) {
+    if (!state.query) return buildListQuery(species, 0, limit - 1, true);
+
+    const rows = [];
+    const pageSize = 1000;
+    for (let from = 0; ; from += pageSize) {
+      const response = await buildListQuery(species, from, from + pageSize - 1, false);
+      if (response.error) return response;
+      const page = response.data || [];
+      rows.push(...page.map(row => ({ ...row, species })));
+      if (page.length < pageSize) break;
+    }
+
+    const matches = rows
+      .filter(row => matchesFoodSearch(row, state.query))
+      .sort((a, b) =>
+        foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query)
+        || compareFeedRows(a, b)
+      );
+
+    return { data: matches.slice(0, limit), count: matches.length, error: null };
   }
 
   async function loadFeeds(reset) {
@@ -719,7 +787,7 @@
         const idSets = await Promise.all(speciesList.map(species => resolveMatchingFeedIds(species)));
         speciesList.forEach((species, index) => { state.matchingFeedIds[species] = idSets[index]; });
       }
-      const responses = await Promise.all(speciesList.map(species => buildListQuery(species, state.loaded)));
+      const responses = await Promise.all(speciesList.map(species => fetchListRows(species, state.loaded)));
       if (serial !== state.requestSerial) return;
       const failed = responses.find(response => response.error); if (failed) throw failed.error;
       const combined = responses.flatMap((response, index) => (response.data || []).map(row => ({ ...row, species: speciesList[index] })));
