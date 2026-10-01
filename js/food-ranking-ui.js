@@ -149,6 +149,10 @@
     species: null,
     foodSearchSerial: 0,
     foodSearchTimer: null,
+    foodIndex: null,
+    foodIndexPromise: null,
+    foodSearchMatches: [],
+    foodSearchVisible: 20,
     selected: new Map(),
     order: [],
     drag: null,
@@ -196,12 +200,89 @@
       .replace(/'/g, '&#39;');
   }
 
-  function quotePostgrestFilterValue(value) {
-    return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  function normalizeSearchText(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[()\[\]{}\/\\,._·&+\-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
-  function buildSearchPattern(query) {
-    return quotePostgrestFilterValue(`*${query}*`);
+  function tokenizeSearchQuery(value) {
+    return [...new Set(normalizeSearchText(value).split(' ').filter(Boolean))];
+  }
+
+  function buildFoodSearchText(food) {
+    const typeTerms = food?.type === 'dry'
+      ? '건식 드라이 dry'
+      : food?.type === 'wet' ? '습식 wet 캔 파우치' : '';
+    return normalizeSearchText([
+      getBrand(food),
+      food?.제조사,
+      food?.제품명,
+      food?.완전식여부,
+      food?.메인단백질,
+      typeTerms,
+      getSpeciesLabel(food?.species)
+    ].filter(Boolean).join(' '));
+  }
+
+  function foodSearchRelevance(food, rawQuery, tokens) {
+    const product = normalizeSearchText(food?.제품명);
+    const brand = normalizeSearchText(getBrand(food));
+    const text = buildFoodSearchText(food);
+    const phrase = normalizeSearchText(rawQuery);
+    let score = 0;
+    if (phrase && product.includes(phrase)) score += 120;
+    if (phrase && brand.includes(phrase)) score += 100;
+    tokens.forEach(token => {
+      if (product.includes(token)) score += 24;
+      if (brand.includes(token)) score += 18;
+      if (product.startsWith(token)) score += 6;
+      if (brand.startsWith(token)) score += 5;
+      if (text.includes(token)) score += 2;
+    });
+    return score;
+  }
+
+  async function fetchFoodIndexForSpecies(species) {
+    const rows = [];
+    const pageSize = 1000;
+    const table = species === 'dog' ? 'dog_feeds' : 'feeds';
+    const columns = 'id,type,제조사,제품명,완전식여부,메인단백질,verified,searchable_before_review,brands(name)';
+
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await sb
+        .from(table)
+        .select(columns)
+        .or('verified.eq.true,searchable_before_review.eq.true')
+        .order('제조사')
+        .order('제품명')
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      const page = data || [];
+      rows.push(...page.map(row => ({ ...row, species })));
+      if (page.length < pageSize) break;
+    }
+
+    return rows;
+  }
+
+  async function ensureFoodIndex() {
+    if (state.foodIndex) return state.foodIndex;
+    if (!state.foodIndexPromise) {
+      state.foodIndexPromise = Promise.all([
+        fetchFoodIndexForSpecies('cat'),
+        fetchFoodIndexForSpecies('dog')
+      ]).then(([cats, dogs]) => {
+        state.foodIndex = [...cats, ...dogs];
+        return state.foodIndex;
+      }).finally(() => {
+        state.foodIndexPromise = null;
+      });
+    }
+    return state.foodIndexPromise;
   }
 
   function getSpeciesLabel(species) {
@@ -246,67 +327,79 @@
     }
   }
 
+  function renderFoodSearchResults() {
+    if (!els.foodResults) return;
+    const foods = state.foodSearchMatches;
+    if (!foods.length) {
+      els.foodResults.innerHTML = '<p class="myfit-search-state">검색 결과가 없어요.</p>';
+      return;
+    }
+
+    const selectedKeys = new Set(state.foods.map(foodKey));
+    const visibleFoods = foods.slice(0, state.foodSearchVisible);
+    const remaining = Math.max(0, foods.length - visibleFoods.length);
+
+    els.foodResults.innerHTML = visibleFoods.map(food => {
+      const key = foodKey(food);
+      const selected = selectedKeys.has(key);
+      const disabled = !selected && state.foods.length >= MAX_FOODS;
+      return `
+        <button type="button" class="myfit-food-result${selected ? ' is-selected' : ''}"
+          data-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
+          <span>
+            <small>${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
+            <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
+            <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
+          </span>
+          <i>${selected ? '✓' : '+'}</i>
+        </button>`;
+    }).join('') + (remaining ? `
+      <button type="button" class="myfit-food-search-more" data-load-more-food-results>
+        더 보기 <span>${remaining}개 남음</span>
+      </button>` : '');
+
+    els.foodResults.querySelectorAll('[data-food-key]').forEach(button => {
+      button._food = foods.find(food => foodKey(food) === button.dataset.foodKey);
+    });
+  }
+
   async function searchFoods() {
     if (!sb || !els.foodSearch || !els.foodResults) return;
     const query = els.foodSearch.value.trim().slice(0, 100);
     const serial = ++state.foodSearchSerial;
 
     if (query.length < 2) {
+      state.foodSearchMatches = [];
+      state.foodSearchVisible = 20;
       els.foodResults.innerHTML = query ? '<p class="myfit-search-state">두 글자 이상 입력해 주세요.</p>' : '';
       return;
     }
 
     els.foodResults.innerHTML = '<p class="myfit-search-state">사료를 찾고 있어요.</p>';
-    const speciesList = state.species ? [state.species] : ['cat', 'dog'];
 
     try {
-      const pattern = buildSearchPattern(query);
-      const responses = await Promise.all(speciesList.map(species =>
-        sb.from(species === 'dog' ? 'dog_feeds' : 'feeds')
-          .select('id,type,제조사,제품명,완전식여부,메인단백질,verified,searchable_before_review,brands(name)')
-          .or('verified.eq.true,searchable_before_review.eq.true')
-          .or(`제품명.ilike.${pattern},제조사.ilike.${pattern}`)
-          .order('제조사')
-          .order('제품명')
-          .limit(8)
-      ));
-
+      const index = await ensureFoodIndex();
       if (serial !== state.foodSearchSerial) return;
-      const failed = responses.find(response => response.error);
-      if (failed) throw failed.error;
 
-      const selectedKeys = new Set(state.foods.map(foodKey));
-      const foods = responses
-        .flatMap((response, index) => (response.data || []).map(row => ({ ...row, species: speciesList[index] })))
-        .sort((a, b) => getBrand(a).localeCompare(getBrand(b), 'ko') || String(a.제품명 || '').localeCompare(String(b.제품명 || ''), 'ko'))
-        .slice(0, 12);
+      const tokens = tokenizeSearchQuery(query);
+      const foods = index
+        .filter(food => !state.species || food.species === state.species)
+        .filter(food => {
+          const text = buildFoodSearchText(food);
+          return tokens.every(token => text.includes(token));
+        })
+        .sort((a, b) =>
+          foodSearchRelevance(b, query, tokens) - foodSearchRelevance(a, query, tokens)
+          || getBrand(a).localeCompare(getBrand(b), 'ko')
+          || String(a.제품명 || '').localeCompare(String(b.제품명 || ''), 'ko')
+        );
 
-      if (!foods.length) {
-        els.foodResults.innerHTML = '<p class="myfit-search-state">검색 결과가 없어요.</p>';
-        return;
-      }
-
-      els.foodResults.innerHTML = foods.map(food => {
-        const key = foodKey(food);
-        const selected = selectedKeys.has(key);
-        const disabled = !selected && state.foods.length >= MAX_FOODS;
-        return `
-          <button type="button" class="myfit-food-result${selected ? ' is-selected' : ''}"
-            data-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
-            <span>
-              <small>${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
-              <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
-              <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
-            </span>
-            <i>${selected ? '✓' : '+'}</i>
-          </button>`;
-      }).join('');
-
-      els.foodResults.querySelectorAll('[data-food-key]').forEach(button => {
-        button._food = foods.find(food => foodKey(food) === button.dataset.foodKey);
-      });
+      state.foodSearchMatches = foods;
+      state.foodSearchVisible = 20;
+      renderFoodSearchResults();
     } catch (error) {
       if (serial !== state.foodSearchSerial) return;
+      state.foodSearchMatches = [];
       els.foodResults.innerHTML = '<p class="myfit-search-state">검색 결과를 불러오지 못했어요.</p>';
       console.warn('MY FIT food search failed:', error);
     }
@@ -653,6 +746,12 @@
     });
 
     els.foodResults?.addEventListener('click', event => {
+      const more = event.target.closest('[data-load-more-food-results]');
+      if (more) {
+        state.foodSearchVisible += 20;
+        renderFoodSearchResults();
+        return;
+      }
       const button = event.target.closest('[data-food-key]');
       if (button?._food) addFood(button._food);
     });

@@ -276,6 +276,26 @@ body.food-ranking-body {
   text-align: center;
 }
 
+.myfit-food-search-more {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 15px;
+  background: rgba(238,243,255,.88);
+  color: var(--myfit-blue);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.myfit-food-search-more span {
+  margin-left: 5px;
+  color: var(--myfit-soft);
+  font-size: 10px;
+  font-weight: 750;
+}
+
 .myfit-food-result {
   width: 100%;
   min-height: 66px;
