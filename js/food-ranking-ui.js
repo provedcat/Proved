@@ -485,6 +485,7 @@
         ? `${getSpeciesLabel(state.species)} 사료만 검색하고 있어요.`
         : '검색어를 입력하면 고양이·강아지 사료를 함께 찾아요.';
     }
+    renderFavorites();
   }
 
   function renderFoodSearchResults() {
@@ -527,6 +528,8 @@
     if (!sb || !els.foodSearch || !els.foodResults) return;
     const query = els.foodSearch.value.trim().slice(0, 100);
     const serial = ++state.foodSearchSerial;
+
+    renderFavorites();
 
     if (query.length < 2) {
       state.foodSearchMatches = [];
@@ -584,6 +587,7 @@
     state.foods.push(food);
     state.species = food.species;
     syncFoodUi();
+    persistSessionState();
     searchFoods();
   }
 
@@ -591,6 +595,7 @@
     state.foods = state.foods.filter(food => foodKey(food) !== key);
     if (!state.foods.length) state.species = null;
     syncFoodUi();
+    persistSessionState();
     searchFoods();
   }
 
@@ -688,6 +693,7 @@
       state.selected.set(id, direction);
     }
     syncCriteriaUi();
+    persistSessionState();
   }
 
   function toggleChip(id) {
@@ -702,6 +708,7 @@
       state.selected.set(id, 'selected');
     }
     syncCriteriaUi();
+    persistSessionState();
   }
 
   function syncCriteriaUi() {
@@ -733,7 +740,7 @@
     if (!els.priorityScreen?.hidden) renderPriority();
   }
 
-  function showScreen(name) {
+  function showScreen(name, options = {}) {
     const screens = {
       foods: els.foodScreen,
       criteria: els.criteriaScreen,
@@ -756,13 +763,17 @@
 
     const activeIndex = name === 'foods' ? 0 : name === 'criteria' ? 1 : name === 'priority' ? 2 : 3;
     els.progress.forEach((item, index) => item.classList.toggle('is-active', index <= activeIndex));
+    state.currentScreen = name;
+    if (options.persist !== false) persistSessionState();
 
     if (name === 'priority') {
       state.order = state.order.filter(id => state.selected.has(id));
       renderPriority();
     }
 
-    requestAnimationFrame(() => els.app?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    if (options.scroll !== false) {
+      requestAnimationFrame(() => els.app?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
   }
 
   function renderPriority() {
@@ -805,11 +816,13 @@
     if (!state.selected.has(id) || state.order.includes(id)) return;
     state.order.push(id);
     renderPriority();
+    persistSessionState();
   }
 
   function removeFromOrder(id) {
     state.order = state.order.filter(item => item !== id);
     renderPriority();
+    persistSessionState();
   }
 
   function moveToSlot(id, targetIndex) {
@@ -819,6 +832,7 @@
     next.splice(insertAt, 0, id);
     state.order = next.slice(0, MAX_CRITERIA);
     renderPriority();
+    persistSessionState();
   }
 
   function bindDragTargets() {
