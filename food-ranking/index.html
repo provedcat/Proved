@@ -24,10 +24,11 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260924-diet-handoff-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20260928-mobile-first-v1">
+  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-ui-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
   <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
+  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-ui-v1"></script>
 </head>
 <body class="food-ranking-body">
   <div class="food-shell">
@@ -48,22 +49,74 @@
       <section id="myFitRestrictedRoot" class="food-ranking-page" aria-labelledby="myFitTitle" hidden>
         <header class="food-ranking-hero">
           <p class="food-ranking-eyebrow">FOOD RANKING</p>
-          <h1 id="myFitTitle">MY FIT</h1>
-          <p class="food-ranking-lead">
-            좋은 사료의 기준은 하나가 아닙니다.<br>
-            나의 반려동물을 위해, 나만의 기준을 세우세요.
-          </p>
+          <div class="food-ranking-hero__row">
+            <div>
+              <h1 id="myFitTitle">MY FIT</h1>
+              <p class="food-ranking-lead">
+                좋은 사료의 기준은 하나가 아닙니다.<br>
+                나의 반려동물을 위해, 나만의 기준을 세우세요.
+              </p>
+            </div>
+            <div class="myfit-orb" aria-hidden="true"><i></i><i></i><i></i></div>
+          </div>
         </header>
 
-        <section class="food-ranking-intro" aria-labelledby="myFitIntroTitle">
-          <p class="food-ranking-step">01</p>
-          <h2 id="myFitIntroTitle">내 기준으로 만드는 사료 순위</h2>
-          <p>점수 없이, 내가 고른 사료 안에서 내 기준에 따른 상대적인 순위를 보여드립니다.</p>
-          <div class="food-ranking-rule">
-            <span>사료</span><strong>최대 5개</strong>
-            <span>기준</span><strong>최대 5개</strong>
+        <div class="myfit-app" id="myFitApp">
+          <div class="myfit-progress" aria-label="MY FIT 진행 단계">
+            <span class="is-active"></span><span></span>
           </div>
-        </section>
+
+          <section class="myfit-screen is-active" id="myFitCriteriaScreen" data-myfit-screen="criteria" aria-labelledby="myFitCriteriaTitle">
+            <header class="myfit-screen__header">
+              <div>
+                <p class="myfit-kicker">01 · CRITERIA</p>
+                <h2 id="myFitCriteriaTitle">어떤 기준으로 볼까요?</h2>
+                <p>낮게 또는 높게 보고 싶은 방향을 선택하세요. 최대 5개까지 고를 수 있어요.</p>
+              </div>
+              <div class="myfit-count" id="myFitCriteriaCount" aria-live="polite"><strong>0</strong><span>/ 5</span></div>
+            </header>
+
+            <div id="myFitCriteriaGroups" class="myfit-criteria-groups"></div>
+
+            <div class="myfit-sticky-action">
+              <button type="button" class="myfit-primary-button" id="myFitToPriority" disabled>
+                우선순위 정하기
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="myfit-screen" id="myFitPriorityScreen" data-myfit-screen="priority" aria-labelledby="myFitPriorityTitle" hidden>
+            <header class="myfit-screen__header">
+              <div>
+                <button type="button" class="myfit-back-button" id="myFitBackToCriteria" aria-label="기준 선택으로 돌아가기">←</button>
+                <p class="myfit-kicker">02 · PRIORITY</p>
+                <h2 id="myFitPriorityTitle">무엇이 더 중요한가요?</h2>
+                <p>위에 놓인 기준일수록 더 중요하게 반영돼요. 칩을 탭하거나 손가락으로 끌어 놓으세요.</p>
+              </div>
+            </header>
+
+            <div class="myfit-rank-board" aria-label="기준 우선순위">
+              <div id="myFitRankSlots" class="myfit-rank-slots"></div>
+            </div>
+
+            <section class="myfit-chip-dock" aria-labelledby="myFitChipDockTitle">
+              <div class="myfit-chip-dock__heading">
+                <h3 id="myFitChipDockTitle">선택한 기준</h3>
+                <span id="myFitPriorityStatus">아래 칩을 위에 놓아주세요.</span>
+              </div>
+              <div id="myFitChipPool" class="myfit-chip-pool"></div>
+            </section>
+
+            <div class="myfit-sticky-action">
+              <button type="button" class="myfit-primary-button myfit-primary-button--result" id="myFitShowResult" disabled>
+                MY FIT 결과 보기
+              </button>
+            </div>
+          </section>
+
+          <div class="myfit-toast" id="myFitToast" role="status" aria-live="polite"></div>
+        </div>
       </section>
     </main>
 
