@@ -1,0 +1,1323 @@
+{
+  "summary": {
+    "auto_approved": 55,
+    "hold": 22
+  },
+  "results": [
+    {
+      "name": "9Care",
+      "slug": "9care",
+      "official_url": "https://9care.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://9care.kr/",
+      "page_status": 200,
+      "asset_url": "https://ecimg.cafe24img.com/pg1206b20362353032/makopet/web/upload/category/logo/v2_f6c7a8019ba4f58687ff48b92d903672_EalWfcOMQ_bottom.jpg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/9care.png",
+      "mime": "image/png",
+      "dimensions": [
+        804,
+        265
+      ],
+      "score": 16
+    },
+    {
+      "name": "AATU",
+      "slug": "aatu",
+      "official_url": "https://aatu.co.uk/",
+      "status": "hold",
+      "final_page_url": "https://aatu.co.uk/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 18,
+          "url": "https://aatu.co.uk/cdn/shop/files/aatu-gold-logo-new.svg?v=1743764787",
+          "kind": "img"
+        },
+        {
+          "score": 18,
+          "url": "https://aatu.co.uk/cdn/shop/files/Waitrose_Logo.svg?height=32&v=1734360001",
+          "kind": "img"
+        },
+        {
+          "score": 18,
+          "url": "https://aatu.co.uk/cdn/shop/files/Waitrose_Logo.svg?height=32&v=1734360001",
+          "kind": "img"
+        },
+        {
+          "score": 18,
+          "url": "https://aatu.co.uk/cdn/shop/files/Waitrose_Logo.svg?height=32&v=1734360001",
+          "kind": "img"
+        },
+        {
+          "score": 18,
+          "url": "https://aatu.co.uk/cdn/shop/files/Waitrose_Logo.svg?height=32&v=1734360001",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "Acana",
+      "slug": "acana",
+      "official_url": "https://www.acana.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.acana.com/en-US/homepage",
+      "page_status": 200,
+      "asset_url": "https://www.acana.com/en-US/homepage#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/acana.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "AIXIA 아이시아",
+      "slug": "aixia-아이시아",
+      "official_url": "https://www.aixia.jp/en/products/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.aixia.jp/en/products/",
+      "page_status": 200,
+      "asset_url": "https://www.aixia.jp/images/common/logo-en-v01.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/aixia-아이시아.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 26
+    },
+    {
+      "name": "almo nature 알모네이쳐",
+      "slug": "almo-nature-알모네이쳐",
+      "official_url": "https://www.almonature.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.almonature.com/it/",
+      "page_status": 200,
+      "asset_url": "https://www.almonature.com/hubfs/almonature-logo-4.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/almo-nature-알모네이쳐.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 27
+    },
+    {
+      "name": "animonda",
+      "slug": "animonda",
+      "official_url": "https://animonda.de/en/",
+      "status": "hold",
+      "final_page_url": "https://animonda.de/en/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 34,
+          "url": "https://animonda.de/media/68/g0/b1/1757579733/Animonda_Logo_mit%20Claim.svg?ts=1757579751",
+          "kind": "img"
+        },
+        {
+          "score": 34,
+          "url": "https://animonda.de/media/9a/6a/65/1651595357/paypal-icon.svg?ts=1651595357",
+          "kind": "img"
+        },
+        {
+          "score": 34,
+          "url": "https://animonda.de/media/b7/a5/12/1713943687/klarna-icon.svg?ts=1713943687",
+          "kind": "img"
+        },
+        {
+          "score": 34,
+          "url": "https://animonda.de/media/4c/51/88/1651595356/applepay-icon.svg?ts=1651595356",
+          "kind": "img"
+        },
+        {
+          "score": 34,
+          "url": "https://animonda.de/media/b3/ed/3d/1651595356/creditcard-icon.svg?ts=1651595356",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "AvoDerm",
+      "slug": "avoderm",
+      "official_url": "https://avodermnatural.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://avodermnatural.com/",
+      "page_status": 200,
+      "asset_url": "https://avodermnatural.com/wp-content/uploads/2025/03/Avoderm_Logo.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/avoderm.png",
+      "mime": "image/png",
+      "dimensions": [
+        250,
+        84
+      ],
+      "score": 25
+    },
+    {
+      "name": "BIXBI",
+      "slug": "bixbi",
+      "official_url": "https://bixbipet.com/",
+      "status": "hold",
+      "final_page_url": "https://bixbipet.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 17,
+          "url": "https://bixbipet.com/wp-content/webp-express/webp-images/uploads/2022/11/BIXBI-logo-black-on-white-300x300.png.webp",
+          "kind": "img"
+        },
+        {
+          "score": 17,
+          "url": "https://bixbipet.com/wp-content/webp-express/webp-images/uploads/2026/08/CLP-Certified-Logo-06.png.webp",
+          "kind": "img"
+        },
+        {
+          "score": 17,
+          "url": "https://bixbipet.com/wp-content/webp-express/webp-images/uploads/2022/11/BIXBI-logo-white-on-black-300x300.png.webp",
+          "kind": "img"
+        },
+        {
+          "score": 17,
+          "url": "https://bixbipet.com/wp-content/webp-express/webp-images/uploads/2022/11/BIXBI-Logo_white-ring.png.webp",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "BLACKWOOD",
+      "slug": "blackwood",
+      "official_url": "https://blackwoodpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://blackwoodpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://blackwoodpetfood.com/wp-content/uploads/2024/07/Blackwood_White_Logo_No_Spoons.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/blackwood.png",
+      "mime": "image/png",
+      "dimensions": [
+        504,
+        170
+      ],
+      "score": 21
+    },
+    {
+      "name": "Blue Buffalo",
+      "slug": "blue-buffalo",
+      "official_url": "https://bluebuffalo.com/",
+      "status": "hold",
+      "final_page_url": "https://www.bluebuffalo.com/",
+      "page_status": 403,
+      "reason": "page_http_403"
+    },
+    {
+      "name": "BOREAL",
+      "slug": "boreal",
+      "official_url": "https://borealpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://borealpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://borealpetfood.com/Content/images/Boreal-Logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/boreal.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 26
+    },
+    {
+      "name": "Brit",
+      "slug": "brit",
+      "official_url": "https://brit-petfood.com/en/company-profile",
+      "status": "auto_approved",
+      "final_page_url": "https://brit-petfood.com/en/company-profile",
+      "page_status": 200,
+      "asset_url": "https://brit-petfood.com/assets/front/img/logo-brit.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/brit.png",
+      "mime": "image/png",
+      "dimensions": [
+        273,
+        75
+      ],
+      "score": 21
+    },
+    {
+      "name": "Brizan",
+      "slug": "brizan",
+      "official_url": "https://kcll.co.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://kcll.co.kr/",
+      "page_status": 200,
+      "asset_url": "https://kcll.co.kr/web/upload/logo_v2/logo_og.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/brizan.png",
+      "mime": "image/png",
+      "dimensions": [
+        291,
+        81
+      ],
+      "score": 16
+    },
+    {
+      "name": "Canada Fresh",
+      "slug": "canada-fresh",
+      "official_url": "https://petkind.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://petkind.com/",
+      "page_status": 200,
+      "asset_url": "https://petkind.com/cdn/shop/files/charcoalCMYK_petkind_logo.png?v=1710442417&width=864",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/canada-fresh.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        864,
+        432
+      ],
+      "score": 16
+    },
+    {
+      "name": "Carna4",
+      "slug": "carna4",
+      "official_url": "https://carna4.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://carna4.com/",
+      "page_status": 200,
+      "asset_url": "https://carna4.com/wpress/wp-content/uploads/2025/12/Carna4-Logo-web2.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/carna4.png",
+      "mime": "image/png",
+      "dimensions": [
+        620,
+        200
+      ],
+      "score": 25
+    },
+    {
+      "name": "CARU",
+      "slug": "caru",
+      "official_url": "https://carupetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://carupetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://b3507698.assetcdn.net/3507698/wp-content/uploads/2024/01/Caru_Logo_FNL-RGB-e1704384098961.png?lossy=2&strip=1&webp=1",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/caru.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        668,
+        183
+      ],
+      "score": 17
+    },
+    {
+      "name": "Chérie",
+      "slug": "ch-rie",
+      "official_url": "https://www.cheriepetfood.eu/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.cheriepetfood.eu/",
+      "page_status": 200,
+      "asset_url": "https://www.cheriepetfood.eu/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdesc2.3b2191a3.png&w=1200&q=75",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/ch-rie.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        570,
+        282
+      ],
+      "score": 21
+    },
+    {
+      "name": "Farmina",
+      "slug": "farmina",
+      "official_url": "https://www.farmina.com/",
+      "status": "hold",
+      "final_page_url": "https://www.farmina.com/us/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 25,
+          "url": "https://www.farmina.com/images/linee/brand-head/50_47_nd-pumpkin-logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 25,
+          "url": "https://www.farmina.com/images/linee/brand-head/11_35_nd-ancestral-grain-logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 25,
+          "url": "https://www.farmina.com/images/linee/brand-head/88_10_icona-logo-white@web.png",
+          "kind": "img"
+        },
+        {
+          "score": 25,
+          "url": "https://www.farmina.com/images/linee/brand-head/89_08_icona-logo-brown@web.png",
+          "kind": "img"
+        },
+        {
+          "score": 25,
+          "url": "https://www.farmina.com/images/linee/brand-head/90_12_icona-logo-tropical-selection@web.png",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "Fussie Cat",
+      "slug": "fussie-cat",
+      "official_url": "https://fussiecat.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://fussiecat.com/",
+      "page_status": 200,
+      "asset_url": "https://fussiecat.com/wp-content/uploads/2025/10/Fussie-Cat-Logo-768x355.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/fussie-cat.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        768,
+        355
+      ],
+      "score": 26
+    },
+    {
+      "name": "Harlow Blend",
+      "slug": "harlow-blend",
+      "official_url": "https://harlowblend.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://harlowblend.com/",
+      "page_status": 200,
+      "asset_url": "https://harlowblend.com/wp-content/uploads/2025/09/cfia-acia-logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/harlow-blend.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 39
+    },
+    {
+      "name": "Hill's",
+      "slug": "hill-s",
+      "official_url": "https://www.hillspet.co.kr/",
+      "status": "hold",
+      "final_page_url": "https://www.hillspet.co.kr/",
+      "page_status": 403,
+      "reason": "page_http_403"
+    },
+    {
+      "name": "Husse",
+      "slug": "husse",
+      "official_url": "https://www.husse.com/",
+      "status": "hold",
+      "final_page_url": "https://www.husse.com/",
+      "page_status": 200,
+      "reason": "no_high_confidence_logo_candidate"
+    },
+    {
+      "name": "INABA 이나바",
+      "slug": "inaba-이나바",
+      "official_url": "https://inabapetfood.co.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://inabapetfood.co.kr/",
+      "page_status": 200,
+      "asset_url": "https://inabapetfood.co.kr/images/logo_hd.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/inaba-이나바.png",
+      "mime": "image/png",
+      "dimensions": [
+        118,
+        39
+      ],
+      "score": 26
+    },
+    {
+      "name": "Instinct",
+      "slug": "instinct",
+      "official_url": "https://instinctpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.instinctpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://www.instinctpetfood.com/cdn/shop/files/logo_correct_hex.svg?height=36&v=1781818528",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/instinct.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 26
+    },
+    {
+      "name": "INU",
+      "slug": "inu",
+      "official_url": "https://estien.com/product_info?idx=27",
+      "status": "auto_approved",
+      "final_page_url": "https://estien.com/product_info?idx=27",
+      "page_status": 200,
+      "asset_url": "https://estien.com/img/h_logo.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/inu.png",
+      "mime": "image/png",
+      "dimensions": [
+        86,
+        48
+      ],
+      "score": 12
+    },
+    {
+      "name": "Iskhan",
+      "slug": "iskhan",
+      "official_url": "https://iskhan.co.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://iskhan.co.kr/",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20250716/644a3beb9f645.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/iskhan.png",
+      "mime": "image/png",
+      "dimensions": [
+        382,
+        87
+      ],
+      "score": 16
+    },
+    {
+      "name": "Josera",
+      "slug": "josera",
+      "official_url": "https://www.josera.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://josera.com/en",
+      "page_status": 200,
+      "asset_url": "https://josera.com/_next/static/media/logo.d0767350.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/josera.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 18
+    },
+    {
+      "name": "K9 Natural Food",
+      "slug": "k9-natural-food",
+      "official_url": "https://www.k9natural.com/",
+      "status": "hold",
+      "final_page_url": "https://www.k9natural.com/",
+      "page_status": 403,
+      "reason": "page_http_403"
+    },
+    {
+      "name": "Leonardo",
+      "slug": "leonardo",
+      "official_url": "https://www.leonardo-catfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.leonardo-catfood.com/",
+      "page_status": 200,
+      "asset_url": "https://www.leonardo-catfood.com/theme/1dbf5d1cbd264da6b395e804d509dcc6/assets/logo/bl-logo-cmyk-mit-zunge.svg?1789977701",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/leonardo.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 34
+    },
+    {
+      "name": "Lifet",
+      "slug": "lifet",
+      "official_url": "https://lifet.co.kr/",
+      "status": "hold",
+      "final_page_url": "https://lifet.co.kr/",
+      "page_status": 200,
+      "reason": "no_high_confidence_logo_candidate"
+    },
+    {
+      "name": "Lotus Pet Foods",
+      "slug": "lotus-pet-foods",
+      "official_url": "https://www.lotuspetfoods.com/",
+      "status": "hold",
+      "final_page_url": "https://www.lotuspetfoods.com/",
+      "page_status": 200,
+      "reason": "no_high_confidence_logo_candidate"
+    },
+    {
+      "name": "Miamor",
+      "slug": "miamor",
+      "official_url": "https://www.miamor.de/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.miamor.de/",
+      "page_status": 200,
+      "asset_url": "https://www.miamor.de/typo3conf/ext/auw_project/Resources/PubStatic/miamor/img/logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/miamor.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 26
+    },
+    {
+      "name": "Monge",
+      "slug": "monge",
+      "official_url": "https://www.monge.it/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.monge.it/",
+      "page_status": 200,
+      "asset_url": "https://www.monge.it/wp-content/uploads/2023/02/Monge-logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/monge.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 22
+    },
+    {
+      "name": "Natural Balance",
+      "slug": "natural-balance",
+      "official_url": "https://www.naturalbalanceinc.com/",
+      "status": "hold",
+      "final_page_url": "https://www.naturalbalanceinc.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 16,
+          "url": "https://www.naturalbalanceinc.com/wp-content/uploads/2025/10/nb-fwfw-lockup-new-stacked-white.png",
+          "kind": "img"
+        },
+        {
+          "score": 16,
+          "url": "https://www.naturalbalanceinc.com/wp-content/uploads/2025/10/nb-fwfw-lockup-new-stacked.png",
+          "kind": "img"
+        },
+        {
+          "score": 16,
+          "url": "https://www.naturalbalanceinc.com/wp-content/uploads/2025/10/nb-fwfw-lockup-new56.png",
+          "kind": "img"
+        },
+        {
+          "score": 16,
+          "url": "https://www.naturalbalanceinc.com/wp-content/uploads/2025/09/NB-FWFW-Navy.png",
+          "kind": "img"
+        },
+        {
+          "score": 12,
+          "url": "https://www.naturalbalanceinc.com/wp-content/uploads/2022/06/wtb-icon.png",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "Naturo",
+      "slug": "naturo",
+      "official_url": "https://www.naturopetfoods.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.naturopetfoods.com/",
+      "page_status": 200,
+      "asset_url": "https://cdn.shopify.com/s/files/1/0883/3433/6323/files/logo-naturo-pet-tab.png?v=1774358316&width=220",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/naturo.avif",
+      "mime": "image/avif",
+      "dimensions": [
+        220,
+        220
+      ],
+      "score": 21
+    },
+    {
+      "name": "Northwest Naturals",
+      "slug": "northwest-naturals",
+      "official_url": "https://www.nw-naturals.net/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.nw-naturals.net/",
+      "page_status": 200,
+      "asset_url": "https://www.nw-naturals.net/wp-content/uploads/logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/northwest-naturals.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 31
+    },
+    {
+      "name": "Nutrena",
+      "slug": "nutrena",
+      "official_url": "https://www.nutrenaworld.co.kr/",
+      "status": "hold",
+      "final_page_url": "https://www.nutrenaworld.co.kr/",
+      "page_status": 200,
+      "reason": "no_high_confidence_logo_candidate"
+    },
+    {
+      "name": "Nutrience",
+      "slug": "nutrience",
+      "official_url": "https://nutrience.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://nutrience.com/",
+      "page_status": 200,
+      "asset_url": "https://nutrience.com/#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/nutrience.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "Nutro",
+      "slug": "nutro",
+      "official_url": "https://www.nutro.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.nutro.com/",
+      "page_status": 200,
+      "asset_url": "https://www.nutro.com/sites/g/files/fnmzdf2471/files/NUTRO-LOGO-GREEN-RGB-372x213.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/nutro.png",
+      "mime": "image/png",
+      "dimensions": [
+        372,
+        213
+      ],
+      "score": 25
+    },
+    {
+      "name": "Oasy",
+      "slug": "oasy",
+      "official_url": "https://www.oasy.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.oasy.com/en/",
+      "page_status": 200,
+      "asset_url": "https://www.oasy.com/img/logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/oasy.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 22
+    },
+    {
+      "name": "OC Raw Dog",
+      "slug": "oc-raw-dog",
+      "official_url": "https://www.ocraw.com/",
+      "status": "hold",
+      "final_page_url": "https://www.ocraw.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 21,
+          "url": "https://www.ocraw.com/wp-content/uploads/2026/01/ocraw-logo-scaled.png",
+          "kind": "img"
+        },
+        {
+          "score": 21,
+          "url": "https://www.ocraw.com/wp-content/uploads/2026/02/rufflyfe-logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 21,
+          "url": "https://www.ocraw.com/wp-content/uploads/2026/02/lyfe-logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 17,
+          "url": "https://www.ocraw.com/wp-content/uploads/2026/02/signup-logo.png",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "Orijen",
+      "slug": "orijen",
+      "official_url": "https://www.orijenpetfoods.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.orijenpetfoods.com/en-US/homepage",
+      "page_status": 200,
+      "asset_url": "https://www.orijenpetfoods.com/en-US/homepage#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/orijen.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "Petcurean 펫큐리안",
+      "slug": "petcurean-펫큐리안",
+      "official_url": "https://petcurean.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://petcurean.com/en-us",
+      "page_status": 200,
+      "asset_url": "https://petcurean.com/en-us#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/petcurean-펫큐리안.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "Platinum",
+      "slug": "platinum",
+      "official_url": "https://www.platinum.com/en/",
+      "status": "hold",
+      "final_page_url": "https://www.platinum.com/en/",
+      "page_status": 403,
+      "reason": "page_http_403"
+    },
+    {
+      "name": "Princess",
+      "slug": "princess",
+      "official_url": "https://petprinces.com/brand/princess/",
+      "status": "auto_approved",
+      "final_page_url": "https://petprinces.com/brand/princess/",
+      "page_status": 200,
+      "asset_url": "https://petprinces.com/wp-content/uploads/2024/04/Petnutrition-Logo_White-1.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/princess.png",
+      "mime": "image/png",
+      "dimensions": [
+        147,
+        68
+      ],
+      "score": 20
+    },
+    {
+      "name": "Purina",
+      "slug": "purina",
+      "official_url": "https://www.purinapetcare.co.kr/",
+      "status": "hold",
+      "final_page_url": "https://www.purinapetcare.co.kr/",
+      "page_status": 403,
+      "reason": "page_http_403"
+    },
+    {
+      "name": "RAWZ",
+      "slug": "rawz",
+      "official_url": "https://rawznaturalpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://rawznaturalpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://b4111172.assetcdn.net/2.0/4111172/wp-content/uploads/2025/03/RawzLogo_Web-scaled.webp?lossy=0&strip=1&webp=1",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/rawz.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        2560,
+        1311
+      ],
+      "score": 17
+    },
+    {
+      "name": "schesir",
+      "slug": "schesir",
+      "official_url": "https://www.schesir.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.schesir.com/",
+      "page_status": 200,
+      "asset_url": "https://www.schesir.com/cdn/shop/files/Schesir-Logo-GREY.svg?v=1774880435",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/schesir.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 26
+    },
+    {
+      "name": "Sheba",
+      "slug": "sheba",
+      "official_url": "https://www.sheba.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.sheba.com/",
+      "page_status": 200,
+      "asset_url": "https://www.sheba.com/sites/g/files/fnmzdf1826/files/shebalogo.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/sheba.png",
+      "mime": "image/png",
+      "dimensions": [
+        264,
+        282
+      ],
+      "score": 25
+    },
+    {
+      "name": "Stella & Chewy's",
+      "slug": "stella-and-chewy-s",
+      "official_url": "https://www.stellaandchewys.com/",
+      "status": "hold",
+      "final_page_url": "https://www.stellaandchewys.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 30,
+          "url": "https://www.stellaandchewys.com/cdn/shop/files/sc-logo-red.png?v=1737997052&width=600",
+          "kind": "img"
+        },
+        {
+          "score": 30,
+          "url": "https://cdn.shopify.com/s/files/1/0709/9315/0209/files/StackedLogo-Red-2.png?v=1781732145",
+          "kind": "img"
+        },
+        {
+          "score": 14,
+          "url": "data:image/svg+xml;utf8,<svg viewBox='0 0 1800 820' width='1800' height='820' xmlns='http://www.w3.org/2000/svg'/>",
+          "kind": "img"
+        },
+        {
+          "score": 14,
+          "url": "data:image/svg+xml;utf8,<svg viewBox='0 0 1800 820' width='1800' height='820' xmlns='http://www.w3.org/2000/svg'/>",
+          "kind": "img"
+        },
+        {
+          "score": 12,
+          "url": "https://www.stellaandchewys.com/cdn/shop/files/FD_Patty_PDP-Beef_PackStack-5oz_copy.png?v=1753393752",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "Steve's Real Food",
+      "slug": "steve-s-real-food",
+      "official_url": "https://stevesrealfood.com/",
+      "status": "hold",
+      "final_page_url": "https://stevesrealfood.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 27,
+          "url": "https://stevesrealfood.com/wp-content/uploads/2024/12/Steves-real-food-globe-logo-white-outline.png",
+          "kind": "img"
+        },
+        {
+          "score": 27,
+          "url": "https://stevesrealfood.com/wp-content/uploads/2024/11/steves-real-food-cottonwood-heights-utah-logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 27,
+          "url": "https://stevesrealfood.com/wp-content/uploads/elementor/thumbs/steves-real-food-cottonwood-heights-utah-logo-r2t2yt3t7rxhlwmsn1vj55oz96kfvn101g6pa5lahy.png",
+          "kind": "img"
+        },
+        {
+          "score": 27,
+          "url": "https://stevesrealfood.com/wp-content/uploads/2023/08/Steves-Text-Logo-White-Transparent-Crop.png",
+          "kind": "img"
+        },
+        {
+          "score": 25,
+          "url": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20200%2087'%3E%3C/svg%3E",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "The Honest Kitchen",
+      "slug": "the-honest-kitchen",
+      "official_url": "https://www.thehonestkitchen.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.thehonestkitchen.com/",
+      "page_status": 200,
+      "asset_url": "https://www.thehonestkitchen.com/cdn/shop/files/logo.png?height=160&v=1644434333",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/the-honest-kitchen.avif",
+      "mime": "image/avif",
+      "dimensions": [
+        122,
+        120
+      ],
+      "score": 31
+    },
+    {
+      "name": "Thrive",
+      "slug": "thrive",
+      "official_url": "https://thrivepetfoods.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://thrivepetfoods.com/",
+      "page_status": 200,
+      "asset_url": "https://thrivepetfoods.com/cdn/shop/files/Thrive_Logo_500x.svg?v=1778162834",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/thrive.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 30
+    },
+    {
+      "name": "Tuffy's Pet Food, INC",
+      "slug": "tuffy-s-pet-food-inc",
+      "official_url": "https://tuffyspetfoods.com/",
+      "status": "hold",
+      "final_page_url": "https://discovernutrisource.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 38,
+          "url": "https://discovernutrisource.com/cdn/shop/files/NS_Logo_410w.png?v=1613694359&width=110",
+          "kind": "img"
+        },
+        {
+          "score": 38,
+          "url": "https://discovernutrisource.com/cdn/shop/files/NS_Logo_410w.png?v=1613694359&width=135",
+          "kind": "img"
+        },
+        {
+          "score": 17,
+          "url": "https://discovernutrisource.com/cdn/shop/files/PureVita-Product-Hero-Image.png?v=1777917483&width=1100",
+          "kind": "img"
+        },
+        {
+          "score": 12,
+          "url": "https://discovernutrisource.com/cdn/shop/files/nutrisource-superstars-hawk.png?v=1777917517&width=1500",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "V.O.M",
+      "slug": "v-o-m",
+      "official_url": "https://www.wooriwa.com/eng/product/product.php?catcode=15000000",
+      "status": "hold",
+      "final_page_url": "https://wooriwa.com/eng/product/product.php?catcode=15000000",
+      "page_status": 404,
+      "reason": "page_http_404"
+    },
+    {
+      "name": "VITAL ESSENTIALS",
+      "slug": "vital-essentials",
+      "official_url": "https://www.vitalessentials.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.vitalessentials.com/",
+      "page_status": 200,
+      "asset_url": "https://a-us.storyblok.com/f/1002562/x/de63905f2d/vital-essentials-logo.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/vital-essentials.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 27
+    },
+    {
+      "name": "Wealtz",
+      "slug": "wealtz",
+      "official_url": "https://wealtz.co.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://wealtz.co.kr/",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20191219/610eab83acac5.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/wealtz.png",
+      "mime": "image/png",
+      "dimensions": [
+        406,
+        123
+      ],
+      "score": 16
+    },
+    {
+      "name": "Wellness Pet",
+      "slug": "wellness-pet",
+      "official_url": "https://www.wellnesspetfood.com/",
+      "status": "hold",
+      "final_page_url": "https://www.wellnesspetfood.com/",
+      "page_status": 200,
+      "reason": "ambiguous_top_candidates",
+      "candidates": [
+        {
+          "score": 26,
+          "url": "https://www.wellnesspetfood.com/wp-content/uploads/2024/01/Wellness-Pet-Company.png",
+          "kind": "img"
+        },
+        {
+          "score": 26,
+          "url": "https://www.wellnesspetfood.com/wp-content/uploads/2024/01/LOGO_WHZ-WellnessLed-Logo.png",
+          "kind": "img"
+        },
+        {
+          "score": 26,
+          "url": "https://www.wellnesspetfood.com/wp-content/uploads/2024/01/Old-Mother-Hubbard.png",
+          "kind": "img"
+        },
+        {
+          "score": 26,
+          "url": "https://www.wellnesspetfood.com/wp-content/uploads/2024/01/Wellness-Pet-Company.png",
+          "kind": "img"
+        },
+        {
+          "score": 26,
+          "url": "https://www.wellnesspetfood.com/wp-content/uploads/2024/01/LOGO_WHZ-WellnessLed-Logo.png",
+          "kind": "img"
+        }
+      ]
+    },
+    {
+      "name": "WERUVA",
+      "slug": "weruva",
+      "official_url": "https://www.weruva.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.weruva.com/",
+      "page_status": 200,
+      "asset_url": "https://www.weruva.com/cdn/shop/files/Weruva-Logo-Update_horizontal_full_color.png?v=1668131334&width=440",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/weruva.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        360,
+        100
+      ],
+      "score": 25
+    },
+    {
+      "name": "WHISKAS",
+      "slug": "whiskas",
+      "official_url": "https://www.whiskas.me/en-me",
+      "status": "auto_approved",
+      "final_page_url": "https://www.whiskas.me/en-me",
+      "page_status": 200,
+      "asset_url": "https://www.whiskas.me/sites/g/files/fnmzdf5016/files/logo_2_1.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/whiskas.png",
+      "mime": "image/png",
+      "dimensions": [
+        244,
+        195
+      ],
+      "score": 25
+    },
+    {
+      "name": "ZEAL",
+      "slug": "zeal",
+      "official_url": "https://zealpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.zealpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://www.zealpetfood.com/cdn/shop/files/logo_100x.png?v=1755842978",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/zeal.webp",
+      "mime": "image/webp",
+      "dimensions": [
+        100,
+        36
+      ],
+      "score": 17
+    },
+    {
+      "name": "Zealandia",
+      "slug": "zealandia",
+      "official_url": "https://www.zealandiapets.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://www.zealandiapets.com/",
+      "page_status": 200,
+      "asset_url": "https://www.zealandiapets.com/cdn/shop/files/ZEALANDIA-Logo-PetOCoWhite-01_5d35daf3-71a8-40ad-b415-871161320ae0.png?v=1738838697&width=480",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/zealandia.avif",
+      "mime": "image/avif",
+      "dimensions": [
+        480,
+        160
+      ],
+      "score": 25
+    },
+    {
+      "name": "ZIWI Peak",
+      "slug": "ziwi-peak",
+      "official_url": "https://ziwipets.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://ziwipets.com/",
+      "page_status": 200,
+      "asset_url": "https://ziwipets.com/#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/ziwi-peak.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "뉴트리플랜",
+      "slug": "뉴트리플랜",
+      "official_url": "https://www.dongwonfnb.com/services/Brand/Brand_View?brandno=44",
+      "status": "auto_approved",
+      "final_page_url": "https://www.dongwonfnb.com/services/Brand/Brand_View?brandno=44",
+      "page_status": 200,
+      "asset_url": "https://www.dongwonfnb.com/Images/Common/logo_header.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/뉴트리플랜.png",
+      "mime": "image/png",
+      "dimensions": [
+        171,
+        48
+      ],
+      "score": 24
+    },
+    {
+      "name": "닥터베토레",
+      "slug": "닥터베토레",
+      "official_url": "https://drvetore.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://drvetore.com/",
+      "page_status": 200,
+      "asset_url": "https://ecimg.cafe24img.com/pg2503b95794932044/drvetore/web/upload/category/logo/v2_e07e323cbff1e38f78e7e4af29d98d19_PCQSmBeeXP_top.jpg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/닥터베토레.png",
+      "mime": "image/png",
+      "dimensions": [
+        150,
+        70
+      ],
+      "score": 23
+    },
+    {
+      "name": "닥터힐메딕스",
+      "slug": "닥터힐메딕스",
+      "official_url": "https://healmedix.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://healmedix.com/",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20260416/37dc6dad18fdf.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/닥터힐메딕스.png",
+      "mime": "image/png",
+      "dimensions": [
+        768,
+        173
+      ],
+      "score": 21
+    },
+    {
+      "name": "로얄캐닌 Royal Canin",
+      "slug": "로얄캐닌-royal-canin",
+      "official_url": "https://www.royalcanin.com/kr",
+      "status": "auto_approved",
+      "final_page_url": "https://www.royalcanin.com/kr",
+      "page_status": 200,
+      "asset_url": "https://www.royalcanin.com/kr#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/로얄캐닌-royal-canin.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "베러펫",
+      "slug": "베러펫",
+      "official_url": "https://bttpet.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://bttpet.com/",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20230828/c3164c8df3b70.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/베러펫.png",
+      "mime": "image/png",
+      "dimensions": [
+        660,
+        78
+      ],
+      "score": 21
+    },
+    {
+      "name": "세라피드",
+      "slug": "세라피드",
+      "official_url": "https://www.daejoopetfoods.com/CATFOOD_Food",
+      "status": "auto_approved",
+      "final_page_url": "https://www.daejoopetfoods.com/CATFOOD_Food",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20260928/a691c4f058f64.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/세라피드.png",
+      "mime": "image/png",
+      "dimensions": [
+        817,
+        120
+      ],
+      "score": 16
+    },
+    {
+      "name": "시니멀",
+      "slug": "시니멀",
+      "official_url": "https://senimal.com/",
+      "status": "hold",
+      "final_page_url": "https://senimal.com/",
+      "page_status": 200,
+      "reason": "no_high_confidence_logo_candidate"
+    },
+    {
+      "name": "와즈펫",
+      "slug": "와즈펫",
+      "official_url": "https://wispet.store/",
+      "status": "auto_approved",
+      "final_page_url": "https://wispet.store/",
+      "page_status": 200,
+      "asset_url": "https://ecimg.cafe24img.com/pg288b33457320050/wispet9191/web/img/common/logo.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/와즈펫.png",
+      "mime": "image/png",
+      "dimensions": [
+        248,
+        144
+      ],
+      "score": 21
+    },
+    {
+      "name": "정글키친",
+      "slug": "정글키친",
+      "official_url": "https://junglekitchen.co.kr/",
+      "status": "auto_approved",
+      "final_page_url": "https://junglekitchen.co.kr/",
+      "page_status": 200,
+      "asset_url": "https://junglekitchen.co.kr/web/upload/category/logo/v2_2d749319f204b5868056004f3639c475_9WOGZzZhRt_top.jpg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/정글키친.jpg",
+      "mime": "image/jpeg",
+      "dimensions": [
+        8001,
+        418
+      ],
+      "score": 14
+    },
+    {
+      "name": "조앤강",
+      "slug": "조앤강",
+      "official_url": "https://choandkang.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://choandkang.com/",
+      "page_status": 200,
+      "asset_url": "https://choandkang.com/img/logo_footer.svg",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/조앤강.svg",
+      "mime": "image/svg+xml",
+      "dimensions": null,
+      "score": 19
+    },
+    {
+      "name": "캐츠랑",
+      "slug": "캐츠랑",
+      "official_url": "https://www.daejoopetfoods.com/Catsrang",
+      "status": "auto_approved",
+      "final_page_url": "https://www.daejoopetfoods.com/Catsrang",
+      "page_status": 200,
+      "asset_url": "https://cdn.imweb.me/thumbnail/20260928/a691c4f058f64.png",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/캐츠랑.png",
+      "mime": "image/png",
+      "dimensions": [
+        817,
+        120
+      ],
+      "score": 16
+    },
+    {
+      "name": "페스룸",
+      "slug": "페스룸",
+      "official_url": "https://pethroom.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://pethroom.com/",
+      "page_status": 200,
+      "asset_url": "https://pethroom.com/#inline-svg",
+      "asset_kind": "inline_svg",
+      "file": "assets/brand-logos/페스룸.svg",
+      "mime": "image/svg+xml",
+      "score": 12
+    },
+    {
+      "name": "풀무원",
+      "slug": "풀무원",
+      "official_url": "https://brand.naver.com/amio",
+      "status": "hold",
+      "final_page_url": "https://brand.naver.com/amio",
+      "page_status": 429,
+      "reason": "page_http_429"
+    },
+    {
+      "name": "하림",
+      "slug": "하림",
+      "official_url": "https://harimpetfood.com/",
+      "status": "auto_approved",
+      "final_page_url": "https://harimpetfood.com/",
+      "page_status": 200,
+      "asset_url": "https://harimpetfood.com/SkinImg/top_logo.gif",
+      "asset_kind": "img",
+      "file": "assets/brand-logos/하림.gif",
+      "mime": "image/gif",
+      "dimensions": [
+        182,
+        51
+      ],
+      "score": 14
+    }
+  ]
+}
