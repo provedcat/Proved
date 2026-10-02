@@ -1,0 +1,46 @@
+name: Collect official brand logos
+
+on:
+  push:
+    branches:
+      - automation/brand-logo-collector
+    paths:
+      - "scripts/brand-logo-manifest.json"
+      - "scripts/collect-brand-logos.py"
+      - ".github/workflows/collect-brand-logos.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: automation/brand-logo-collector
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 pillow
+
+      - name: Collect logos from official URLs
+        run: python scripts/collect-brand-logos.py
+
+      - name: Commit collected logos and report
+        run: |
+          git config user.name "proved-bot"
+          git config user.email "proved-bot@users.noreply.github.com"
+          git add assets/brand-logos data/brand-logo-report.json
+          if git diff --cached --quiet; then
+            echo "No logo changes to commit."
+          else
+            git commit -m "chore: collect official brand logos [skip ci]"
+            git push origin HEAD:automation/brand-logo-collector
+          fi
