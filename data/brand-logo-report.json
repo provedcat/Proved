@@ -718,8 +718,8 @@
       "official_url": "https://www.husse.com/",
       "status": "hold",
       "final_page_url": "https://www.husse.com/",
-      "page_status": 403,
-      "reason": "page_http_403"
+      "page_status": 200,
+      "reason": "no_strict_logo_candidate"
     },
     {
       "name": "INABA 이나바",
@@ -1577,8 +1577,8 @@
       "page_status": 200,
       "asset_url": "https://stevesrealfood.com/wp-content/uploads/2024/11/steves-real-food-cottonwood-heights-utah-logo.png",
       "asset_kind": "img",
-      "file": "assets/brand-logos/steve-s-real-food.png",
-      "mime": "image/png",
+      "file": "assets/brand-logos/steve-s-real-food.webp",
+      "mime": "image/webp",
       "dimensions": [
         400,
         174
