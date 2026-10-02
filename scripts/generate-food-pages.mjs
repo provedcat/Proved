@@ -14,7 +14,7 @@ const SELECT_COLUMNS = [
   '조단백', '조지방', '조회분', '조섬유', '수분', '칼슘', '인', 'ca_p_ratio',
   'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
   'final_me', 'cal_source', 'calorie_note', 'verified', 'searchable_before_review',
-  'brand_id', 'brands(name,official_url)'
+  'brand_id', 'brands(id,name,name_ko,official_url,slug,logo_url,search_aliases)'
 ].join(',');
 
 export function escapeHtml(value) {
@@ -53,8 +53,15 @@ export function slugify(value) {
 
 function getBrand(feed) {
   const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
+  const name = relation?.name || feed?.제조사 || '브랜드 정보 없음';
   return {
-    name: relation?.name || feed?.제조사 || '브랜드 정보 없음',
+    id: relation?.id || feed?.brand_id || '',
+    name,
+    nameKo: relation?.name_ko || '',
+    displayName: relation?.name_ko || name,
+    slug: relation?.slug || slugify(name),
+    logoUrl: /^https?:\/\//i.test(String(relation?.logo_url || '')) ? relation.logo_url : '',
+    aliases: Array.isArray(relation?.search_aliases) ? relation.search_aliases : [],
     officialUrl: /^https?:\/\//i.test(String(relation?.official_url || '')) ? relation.official_url : ''
   };
 }
@@ -145,7 +152,7 @@ function calorieSourceLabel(source) {
   return labels[source] || '출처 확인중';
 }
 
-function renderPrerenderedDetail(feed, species) {
+function renderPrerenderedDetail(feed, species, allFeeds = []) {
   const brand = getBrand(feed);
   const product = splitProductName(feed.제품명);
   const basic = [
@@ -226,6 +233,7 @@ function renderPrerenderedDetail(feed, species) {
             ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 메모</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ''}
           </dl>
         </section>
+        ${renderRelatedBrandLinks(feed, allFeeds, species)}
       </article>`;
 }
 
@@ -253,21 +261,21 @@ function buildStructuredData(feed, species, canonicalUrl, description) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: `${brand.name} ${product.primary}`,
+    name: `${brand.displayName} ${product.primary}`,
     description,
     url: canonicalUrl,
     category: `${speciesLabel(species)} ${typeLabel(feed.type)}`,
-    brand: { '@type': 'Brand', name: brand.name },
+    brand: { '@type': 'Brand', name: brand.displayName },
     additionalProperty
   };
 }
 
-export function renderProductPage(template, feed, species) {
+export function renderProductPage(template, feed, species, allFeeds = []) {
   const brand = getBrand(feed);
   const product = splitProductName(feed.제품명);
   const productPath = buildProductPath(feed, species);
   const canonicalUrl = new URL(productPath, SITE_ORIGIN).href;
-  const title = `${brand.name} ${product.primary} 성분·칼로리 | 프루브`;
+  const title = `${brand.displayName} ${product.primary} 성분·칼로리·급여량 | 프루브`;
   const description = buildDescription(feed, species);
   const structuredData = buildStructuredData(feed, species, canonicalUrl, description);
   const pageConfig = { species, id: String(feed.id), slug: buildProductSlug(feed), path: productPath };
@@ -302,10 +310,38 @@ export function renderProductPage(template, feed, species) {
   html = replaceHeadValue(
     html,
     /<div id="foodDetailContent"><\/div>/,
-    `<div id="foodDetailContent" data-prerendered-feed-id="${escapeHtml(feed.id)}">${renderPrerenderedDetail(feed, species)}</div>`,
+    `<div id="foodDetailContent" data-prerendered-feed-id="${escapeHtml(feed.id)}">${renderPrerenderedDetail(feed, species, allFeeds)}</div>`,
     '상세 콘텐츠 영역'
   );
   return html;
+}
+
+
+function buildBrandPath(brand, species) {
+  return `/food/${species === 'dog' ? 'dog' : 'cat'}/brand/${brand.slug || slugify(brand.name)}/`;
+}
+
+function renderBrandHub(brand, feeds, species) {
+  const brandPath = buildBrandPath(brand, species);
+  const canonicalUrl = new URL(brandPath, SITE_ORIGIN).href;
+  const label = brand.nameKo || brand.name;
+  const title = `${label} ${speciesLabel(species)} 사료 ${feeds.length}종 성분·칼로리 비교 | 프루브`;
+  const description = `프루브에 등록된 ${label} ${speciesLabel(species)} 사료 ${feeds.length}종의 칼로리, 성분, DM 영양정보를 확인하고 급여량을 계산하세요.`;
+  const cards = feeds.sort((a,b) => String(a.제품명).localeCompare(String(b.제품명), 'ko')).map(feed => {
+    const product = splitProductName(feed.제품명);
+    return `<li><a class="brand-food-card" href="${escapeHtml(buildProductPath(feed, species))}"><strong>${escapeHtml(product.primary)}</strong><span>${escapeHtml(typeLabel(feed.type))} · ${escapeHtml(formatNumber(feed.final_me, 1))} kcal/kg</span></a></li>`;
+  }).join('');
+  const logo = brand.logoUrl ? `<img class="brand-hub-logo" src="${escapeHtml(brand.logoUrl)}" alt="${escapeHtml(label)} 로고">` : '';
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><link rel="stylesheet" href="/css/proved-header.css"><link rel="stylesheet" href="/css/food-list.css"><link rel="stylesheet" href="/css/brand-hub.css"><script defer src="/js/proved-header.js"></script></head><body><div class="food-shell"><header data-proved-header="food"></header><main class="brand-hub"><nav class="brand-breadcrumb"><a href="/food/">사료 찾기</a><span>›</span><span>${escapeHtml(label)}</span></nav><header class="brand-hub-hero">${logo}<div><p class="food-eyebrow">BRAND</p><h1>${escapeHtml(label)}</h1>${brand.nameKo && brand.nameKo !== brand.name ? `<p class="brand-hub-en">${escapeHtml(brand.name)}</p>` : ''}<p>${escapeHtml(description)}</p></div></header><section><h2>등록 제품 ${feeds.length}개</h2><ul class="brand-food-grid">${cards}</ul></section></main><footer data-proved-footer></footer></div></body></html>`;
+}
+
+function renderRelatedBrandLinks(feed, allFeeds, species) {
+  const brand = getBrand(feed);
+  if (!brand.id) return '';
+  const related = allFeeds.filter(item => item.id !== feed.id && getBrand(item).id === brand.id).slice(0, 6);
+  if (!related.length) return '';
+  const label = brand.nameKo || brand.name;
+  return `<section class="food-detail-section food-brand-related" aria-labelledby="foodBrandRelatedHeading"><div class="food-section-heading"><span>+</span><h2 id="foodBrandRelatedHeading">${escapeHtml(label)}의 다른 사료</h2></div><div class="food-brand-related__links">${related.map(item => `<a href="${escapeHtml(buildProductPath(item, species))}">${escapeHtml(splitProductName(item.제품명).primary)}</a>`).join('')}</div><a class="food-brand-related__all" href="${escapeHtml(buildBrandPath(brand, species))}">${escapeHtml(label)} 전체 제품 보기</a></section>`;
 }
 
 export function buildFoodSitemap(entries) {
@@ -355,13 +391,8 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
   const template = await readFile(templatePath, 'utf8');
   const generatedRoots = [path.join(repoRoot, 'food', 'cat'), path.join(repoRoot, 'food', 'dog')];
   generatedRoots.forEach(target => assertGeneratedRoot(repoRoot, target));
-  for (const target of generatedRoots) {
-    await rm(target, { recursive: true, force: true });
-    await mkdir(target, { recursive: true });
-  }
-
-  const entries = [];
-  const seenPaths = new Set();
+  for (const target of generatedRoots) { await rm(target, { recursive: true, force: true }); await mkdir(target, { recursive: true }); }
+  const entries = []; const seenPaths = new Set();
   for (const [species, feeds] of [['cat', catFeeds], ['dog', dogFeeds]]) {
     for (const feed of feeds) {
       if (!feed?.id || !String(feed?.제품명 || '').trim()) continue;
@@ -370,11 +401,24 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
       seenPaths.add(productPath);
       const outputPath = path.join(repoRoot, productPath.replace(/^\//, ''), 'index.html');
       await mkdir(path.dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, renderProductPage(template, feed, species), 'utf8');
-      entries.push({ path: productPath, species, id: String(feed.id) });
+      await writeFile(outputPath, renderProductPage(template, feed, species, feeds), 'utf8');
+      entries.push({ path: productPath, species, id: String(feed.id), kind: 'product' });
+    }
+    const groups = new Map();
+    for (const feed of feeds) {
+      const brand = getBrand(feed);
+      if (!brand.id || !brand.slug) continue;
+      if (!groups.has(brand.id)) groups.set(brand.id, { brand, feeds: [] });
+      groups.get(brand.id).feeds.push(feed);
+    }
+    for (const { brand, feeds: brandFeeds } of groups.values()) {
+      const brandPath = buildBrandPath(brand, species);
+      const outputPath = path.join(repoRoot, brandPath.replace(/^\//, ''), 'index.html');
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, renderBrandHub(brand, brandFeeds, species), 'utf8');
+      entries.push({ path: brandPath, species, id: brand.id, kind: 'brand' });
     }
   }
-
   await writeFile(path.join(repoRoot, 'sitemap-foods.xml'), buildFoodSitemap(entries), 'utf8');
   return entries;
 }
