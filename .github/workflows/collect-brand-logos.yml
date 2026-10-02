@@ -33,6 +33,16 @@ jobs:
       - name: Collect logos from official URLs
         run: python scripts/collect-brand-logos.py
 
+      - name: Upload logo bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: brand-logos
+          path: |
+            assets/brand-logos/**
+            data/brand-logo-report.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Commit collected logos and report
         run: |
           git config user.name "proved-bot"
