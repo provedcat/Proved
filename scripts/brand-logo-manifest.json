@@ -1,389 +1,627 @@
 {
-  "generated_from": "public.brands.official_url",
+  "generated_from": "public.brands official_url/name/name_ko/search_aliases",
   "count": 77,
   "brands": [
     {
       "name": "9Care",
+      "name_ko": "나인케어",
+      "aliases": [],
       "slug": "9care",
       "official_url": "https://9care.kr/"
     },
     {
       "name": "AATU",
+      "name_ko": "아투",
+      "aliases": [],
       "slug": "aatu",
       "official_url": "https://aatu.co.uk/"
     },
     {
       "name": "Acana",
+      "name_ko": "아카나",
+      "aliases": [
+        "Acana",
+        "ACANA",
+        "아카나"
+      ],
       "slug": "acana",
       "official_url": "https://www.acana.com/"
     },
     {
       "name": "AIXIA 아이시아",
+      "name_ko": "아이시아",
+      "aliases": [
+        "아이시아",
+        "AIXIA"
+      ],
       "slug": "aixia-아이시아",
       "official_url": "https://www.aixia.jp/en/products/"
     },
     {
       "name": "almo nature 알모네이쳐",
+      "name_ko": "알모네이쳐",
+      "aliases": [
+        "almo nature",
+        "알모 네이쳐",
+        "알모네이쳐"
+      ],
       "slug": "almo-nature-알모네이쳐",
       "official_url": "https://www.almonature.com/"
     },
     {
       "name": "animonda",
+      "name_ko": "애니몬다",
+      "aliases": [],
       "slug": "animonda",
       "official_url": "https://animonda.de/en/"
     },
     {
       "name": "AvoDerm",
+      "name_ko": "아보덤",
+      "aliases": [],
       "slug": "avoderm",
       "official_url": "https://avodermnatural.com/"
     },
     {
       "name": "BIXBI",
+      "name_ko": "빅스비",
+      "aliases": [],
       "slug": "bixbi",
       "official_url": "https://bixbipet.com/"
     },
     {
       "name": "BLACKWOOD",
+      "name_ko": "블랙우드",
+      "aliases": [],
       "slug": "blackwood",
       "official_url": "https://blackwoodpetfood.com/"
     },
     {
       "name": "Blue Buffalo",
+      "name_ko": "블루 버팔로",
+      "aliases": [],
       "slug": "blue-buffalo",
       "official_url": "https://bluebuffalo.com/"
     },
     {
       "name": "BOREAL",
+      "name_ko": "보레알",
+      "aliases": [],
       "slug": "boreal",
       "official_url": "https://borealpetfood.com/"
     },
     {
       "name": "Brit",
+      "name_ko": "브릿",
+      "aliases": [],
       "slug": "brit",
       "official_url": "https://brit-petfood.com/en/company-profile"
     },
     {
       "name": "Brizan",
+      "name_ko": "브리젠",
+      "aliases": [],
       "slug": "brizan",
       "official_url": "https://kcll.co.kr/"
     },
     {
       "name": "Canada Fresh",
+      "name_ko": "캐나다 프레시",
+      "aliases": [],
       "slug": "canada-fresh",
       "official_url": "https://petkind.com/"
     },
     {
       "name": "Carna4",
+      "name_ko": "카르나4",
+      "aliases": [],
       "slug": "carna4",
       "official_url": "https://carna4.com/"
     },
     {
       "name": "CARU",
+      "name_ko": "카루",
+      "aliases": [],
       "slug": "caru",
       "official_url": "https://carupetfood.com/"
     },
     {
       "name": "Chérie",
+      "name_ko": "쉐리에",
+      "aliases": [],
       "slug": "ch-rie",
       "official_url": "https://www.cheriepetfood.eu/"
     },
     {
       "name": "Farmina",
+      "name_ko": "파미나",
+      "aliases": [
+        "파미나",
+        "Farmina",
+        "N&D",
+        "ND"
+      ],
       "slug": "farmina",
       "official_url": "https://www.farmina.com/"
     },
     {
       "name": "Fussie Cat",
+      "name_ko": "퍼시 캣",
+      "aliases": [],
       "slug": "fussie-cat",
       "official_url": "https://fussiecat.com/"
     },
     {
       "name": "Harlow Blend",
+      "name_ko": "할로우 블랜드",
+      "aliases": [],
       "slug": "harlow-blend",
       "official_url": "https://harlowblend.com/"
     },
     {
       "name": "Hill's",
+      "name_ko": "힐스",
+      "aliases": [
+        "힐스",
+        "Hill's",
+        "Hills",
+        "힐스펫"
+      ],
       "slug": "hill-s",
       "official_url": "https://www.hillspet.co.kr/"
     },
     {
       "name": "Husse",
+      "name_ko": "후세",
+      "aliases": [],
       "slug": "husse",
       "official_url": "https://www.husse.com/"
     },
     {
       "name": "INABA 이나바",
+      "name_ko": "이나바",
+      "aliases": [
+        "이나바",
+        "INABA"
+      ],
       "slug": "inaba-이나바",
       "official_url": "https://inabapetfood.co.kr/"
     },
     {
       "name": "Instinct",
+      "name_ko": "생식본능",
+      "aliases": [],
       "slug": "instinct",
       "official_url": "https://instinctpetfood.com/"
     },
     {
       "name": "INU",
+      "name_ko": "아이누",
+      "aliases": [],
       "slug": "inu",
       "official_url": "https://estien.com/product_info?idx=27"
     },
     {
       "name": "Iskhan",
+      "name_ko": "이즈칸",
+      "aliases": [],
       "slug": "iskhan",
       "official_url": "https://iskhan.co.kr/"
     },
     {
       "name": "Josera",
+      "name_ko": "요세라",
+      "aliases": [],
       "slug": "josera",
       "official_url": "https://www.josera.com/"
     },
     {
       "name": "K9 Natural Food",
+      "name_ko": "케이나인",
+      "aliases": [],
       "slug": "k9-natural-food",
       "official_url": "https://www.k9natural.com/"
     },
     {
       "name": "Leonardo",
+      "name_ko": "레오나르도",
+      "aliases": [],
       "slug": "leonardo",
       "official_url": "https://www.leonardo-catfood.com/"
     },
     {
       "name": "Lifet",
+      "name_ko": "라이펫",
+      "aliases": [],
       "slug": "lifet",
       "official_url": "https://lifet.co.kr/"
     },
     {
       "name": "Lotus Pet Foods",
+      "name_ko": "로투스",
+      "aliases": [],
       "slug": "lotus-pet-foods",
       "official_url": "https://www.lotuspetfoods.com/"
     },
     {
       "name": "Miamor",
+      "name_ko": "미아모아",
+      "aliases": [],
       "slug": "miamor",
       "official_url": "https://www.miamor.de/"
     },
     {
       "name": "Monge",
+      "name_ko": "몬지",
+      "aliases": [],
       "slug": "monge",
       "official_url": "https://www.monge.it/"
     },
     {
       "name": "Natural Balance",
+      "name_ko": "내추럴 발란스",
+      "aliases": [
+        "Natural Balance Pet Foods, Inc."
+      ],
       "slug": "natural-balance",
       "official_url": "https://www.naturalbalanceinc.com/"
     },
     {
       "name": "Naturo",
+      "name_ko": "네추로",
+      "aliases": [],
       "slug": "naturo",
       "official_url": "https://www.naturopetfoods.com/"
     },
     {
       "name": "Northwest Naturals",
+      "name_ko": "노스웨스트 네추럴",
+      "aliases": [],
       "slug": "northwest-naturals",
       "official_url": "https://www.nw-naturals.net/"
     },
     {
       "name": "Nutrena",
+      "name_ko": "뉴트리나",
+      "aliases": [],
       "slug": "nutrena",
       "official_url": "https://www.nutrenaworld.co.kr/"
     },
     {
       "name": "Nutrience",
+      "name_ko": "뉴트리언스",
+      "aliases": [],
       "slug": "nutrience",
       "official_url": "https://nutrience.com/"
     },
     {
       "name": "Nutro",
+      "name_ko": "뉴트로",
+      "aliases": [],
       "slug": "nutro",
       "official_url": "https://www.nutro.com/"
     },
     {
       "name": "Oasy",
+      "name_ko": "오아지",
+      "aliases": [],
       "slug": "oasy",
       "official_url": "https://www.oasy.com/"
     },
     {
       "name": "OC Raw Dog",
+      "name_ko": "오씨 로우 독",
+      "aliases": [],
       "slug": "oc-raw-dog",
       "official_url": "https://www.ocraw.com/"
     },
     {
       "name": "Orijen",
+      "name_ko": "오리젠",
+      "aliases": [
+        "오리젠",
+        "Orijen"
+      ],
       "slug": "orijen",
       "official_url": "https://www.orijenpetfoods.com/"
     },
     {
       "name": "Petcurean 펫큐리안",
+      "name_ko": "펫큐리안",
+      "aliases": [
+        "Petcurean",
+        "펫큐리안"
+      ],
       "slug": "petcurean-펫큐리안",
       "official_url": "https://petcurean.com/"
     },
     {
       "name": "Platinum",
+      "name_ko": "플래티넘",
+      "aliases": [],
       "slug": "platinum",
       "official_url": "https://www.platinum.com/en/"
     },
     {
       "name": "Princess",
+      "name_ko": "프린세스",
+      "aliases": [],
       "slug": "princess",
       "official_url": "https://petprinces.com/brand/princess/"
     },
     {
       "name": "Purina",
+      "name_ko": "퓨리나",
+      "aliases": [
+        "퓨리나",
+        "Purina"
+      ],
       "slug": "purina",
       "official_url": "https://www.purinapetcare.co.kr/"
     },
     {
       "name": "RAWZ",
+      "name_ko": "로우즈",
+      "aliases": [
+        "로우즈",
+        "RAWZ",
+        "Rawz"
+      ],
       "slug": "rawz",
       "official_url": "https://rawznaturalpetfood.com/"
     },
     {
       "name": "schesir",
+      "name_ko": "쉐지에",
+      "aliases": [],
       "slug": "schesir",
       "official_url": "https://www.schesir.com/"
     },
     {
       "name": "Sheba",
+      "name_ko": "쉬바",
+      "aliases": [],
       "slug": "sheba",
       "official_url": "https://www.sheba.com/"
     },
     {
       "name": "Stella & Chewy's",
+      "name_ko": "스텔라앤츄이스",
+      "aliases": [
+        "스텔라앤츄이스",
+        "스텔라 앤 츄이스",
+        "Stella & Chewy's",
+        "Stella and Chewys"
+      ],
       "slug": "stella-and-chewy-s",
       "official_url": "https://www.stellaandchewys.com/"
     },
     {
       "name": "Steve's Real Food",
+      "name_ko": "스티브스 리얼 푸드",
+      "aliases": [],
       "slug": "steve-s-real-food",
       "official_url": "https://stevesrealfood.com/"
     },
     {
       "name": "The Honest Kitchen",
+      "name_ko": "디 어니스트 키친",
+      "aliases": [],
       "slug": "the-honest-kitchen",
       "official_url": "https://www.thehonestkitchen.com/"
     },
     {
       "name": "Thrive",
+      "name_ko": "쓰라이브",
+      "aliases": [],
       "slug": "thrive",
       "official_url": "https://thrivepetfoods.com/"
     },
     {
       "name": "Tuffy's Pet Food, INC",
+      "name_ko": "터피",
+      "aliases": [],
       "slug": "tuffy-s-pet-food-inc",
       "official_url": "https://tuffyspetfoods.com/"
     },
     {
       "name": "V.O.M",
+      "name_ko": "브이오엠",
+      "aliases": [],
       "slug": "v-o-m",
       "official_url": "https://www.wooriwa.com/eng/product/product.php?catcode=15000000"
     },
     {
       "name": "VITAL ESSENTIALS",
+      "name_ko": "바이탈에센셜",
+      "aliases": [],
       "slug": "vital-essentials",
       "official_url": "https://www.vitalessentials.com/"
     },
     {
       "name": "Wealtz",
+      "name_ko": "웰츠",
+      "aliases": [],
       "slug": "wealtz",
       "official_url": "https://wealtz.co.kr/"
     },
     {
       "name": "Wellness Pet",
+      "name_ko": "웰니스",
+      "aliases": [
+        "웰니스",
+        "Wellness",
+        "Wellness Pet"
+      ],
       "slug": "wellness-pet",
       "official_url": "https://www.wellnesspetfood.com/"
     },
     {
       "name": "WERUVA",
+      "name_ko": "웨루바",
+      "aliases": [],
       "slug": "weruva",
       "official_url": "https://www.weruva.com/"
     },
     {
       "name": "WHISKAS",
+      "name_ko": "위스카스",
+      "aliases": [],
       "slug": "whiskas",
       "official_url": "https://www.whiskas.me/en-me"
     },
     {
       "name": "ZEAL",
+      "name_ko": "질",
+      "aliases": [],
       "slug": "zeal",
       "official_url": "https://zealpetfood.com/"
     },
     {
       "name": "Zealandia",
+      "name_ko": "질란디아",
+      "aliases": [],
       "slug": "zealandia",
       "official_url": "https://www.zealandiapets.com/"
     },
     {
       "name": "ZIWI Peak",
+      "name_ko": "지위픽",
+      "aliases": [
+        "지위픽",
+        "지위 피크",
+        "ZIWI Peak",
+        "Ziwi"
+      ],
       "slug": "ziwi-peak",
       "official_url": "https://ziwipets.com/"
     },
     {
       "name": "뉴트리플랜",
+      "name_ko": "뉴트리플랜",
+      "aliases": [
+        "뉴트리플랜"
+      ],
       "slug": "뉴트리플랜",
       "official_url": "https://www.dongwonfnb.com/services/Brand/Brand_View?brandno=44"
     },
     {
       "name": "닥터베토레",
+      "name_ko": "닥터베토레",
+      "aliases": [
+        "닥터베토레"
+      ],
       "slug": "닥터베토레",
       "official_url": "https://drvetore.com/"
     },
     {
       "name": "닥터힐메딕스",
+      "name_ko": "닥터힐메딕스",
+      "aliases": [
+        "닥터힐메딕스"
+      ],
       "slug": "닥터힐메딕스",
       "official_url": "https://healmedix.com/"
     },
     {
       "name": "로얄캐닌 Royal Canin",
+      "name_ko": "로얄캐닌",
+      "aliases": [
+        "로얄캐닌",
+        "로얄 캐닌",
+        "Royal Canin",
+        "royalcanin"
+      ],
       "slug": "로얄캐닌-royal-canin",
       "official_url": "https://www.royalcanin.com/kr"
     },
     {
       "name": "베러펫",
+      "name_ko": "베러펫",
+      "aliases": [
+        "베러펫"
+      ],
       "slug": "베러펫",
       "official_url": "https://bttpet.com/"
     },
     {
       "name": "세라피드",
+      "name_ko": "세라피드",
+      "aliases": [
+        "세라피드"
+      ],
       "slug": "세라피드",
       "official_url": "https://www.daejoopetfoods.com/CATFOOD_Food"
     },
     {
       "name": "시니멀",
+      "name_ko": "시니멀",
+      "aliases": [
+        "시니멀"
+      ],
       "slug": "시니멀",
       "official_url": "https://senimal.com/"
     },
     {
       "name": "와즈펫",
+      "name_ko": "와즈펫",
+      "aliases": [
+        "와즈펫"
+      ],
       "slug": "와즈펫",
       "official_url": "https://wispet.store/"
     },
     {
       "name": "정글키친",
+      "name_ko": "정글키친",
+      "aliases": [
+        "정글키친"
+      ],
       "slug": "정글키친",
       "official_url": "https://junglekitchen.co.kr/"
     },
     {
       "name": "조앤강",
+      "name_ko": "조앤강",
+      "aliases": [
+        "조앤강"
+      ],
       "slug": "조앤강",
       "official_url": "https://choandkang.com/"
     },
     {
       "name": "캐츠랑",
+      "name_ko": "캐츠랑",
+      "aliases": [
+        "캐츠랑"
+      ],
       "slug": "캐츠랑",
       "official_url": "https://www.daejoopetfoods.com/Catsrang"
     },
     {
       "name": "페스룸",
+      "name_ko": "페스룸",
+      "aliases": [
+        "페스룸"
+      ],
       "slug": "페스룸",
       "official_url": "https://pethroom.com/"
     },
     {
       "name": "풀무원",
+      "name_ko": "풀무원",
+      "aliases": [
+        "풀무원"
+      ],
       "slug": "풀무원",
       "official_url": "https://brand.naver.com/amio"
     },
     {
       "name": "하림",
+      "name_ko": "하림",
+      "aliases": [
+        "하림"
+      ],
       "slug": "하림",
       "official_url": "https://harimpetfood.com/"
     }
