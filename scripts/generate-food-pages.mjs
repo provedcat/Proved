@@ -383,9 +383,7 @@ function renderBrandInitialGroups(initials, groups, range) {
     if (!entries.length) return '';
     return `<div class="food-brand-finder__brand-list" data-brand-group="${escapeHtml(initial)}" data-brand-group-range="${range}" hidden>${entries.map(({ brand, items }) => {
       const label = brand.displayName || brand.name;
-      const species = new Set(items.map(item => item.species));
-      const meta = species.size > 1 ? '고양이 · 강아지' : species.has('dog') ? '강아지' : '고양이';
-      return `<a class="food-brand-chip" href="${escapeHtml(buildBrandPath(brand))}" title="${escapeHtml(brand.name)}"><span>${escapeHtml(label)}</span><small>${escapeHtml(meta)}</small></a>`;
+      return `<a class="food-brand-chip" href="${escapeHtml(buildBrandPath(brand))}" title="${escapeHtml(brand.name)}"><span>${escapeHtml(label)}</span></a>`;
     }).join('')}</div>`;
   }).join('');
 }
