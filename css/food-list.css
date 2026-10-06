@@ -177,6 +177,137 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 
+.food-brand-finder {
+  scroll-margin-top: 24px;
+  padding: 34px 56px 38px;
+  border-bottom: 1px solid var(--food-line);
+  background: var(--food-paper);
+}
+.food-brand-finder__heading h2 {
+  margin: 0;
+  color: var(--food-blue);
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+.food-brand-finder__heading p {
+  margin: 8px 0 0;
+  color: var(--food-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.food-brand-finder__ranges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.food-brand-range {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid #e3e7ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #4f596b;
+  box-shadow: 0 3px 10px rgba(43, 56, 91, .035);
+  font-size: 12px;
+  font-weight: 750;
+  transition: border-color .16s ease, color .16s ease, background-color .16s ease;
+}
+.food-brand-range svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  transition: transform .16s ease;
+}
+.food-brand-range:hover,
+.food-brand-range:focus-visible,
+.food-brand-range.is-open {
+  border-color: rgba(53, 104, 255, .42);
+  color: var(--food-blue);
+  background: #f8faff;
+}
+.food-brand-range.is-open svg { transform: rotate(180deg); }
+.food-brand-finder__panel { margin-top: 15px; }
+.food-brand-finder__initials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.food-brand-initial {
+  min-width: 36px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #e5e8ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #687184;
+  font-size: 12px;
+  font-weight: 750;
+}
+.food-brand-initial:hover:not(:disabled),
+.food-brand-initial:focus-visible:not(:disabled),
+.food-brand-initial[aria-pressed="true"] {
+  border-color: var(--food-blue);
+  background: #f4f7ff;
+  color: var(--food-blue);
+}
+.food-brand-initial:disabled {
+  opacity: .32;
+  cursor: default;
+}
+.food-brand-finder__groups { margin-top: 14px; }
+.food-brand-finder__brand-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.food-brand-chip {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid #e2e6ee;
+  border-radius: 999px;
+  background: #fff;
+  color: #4d5668;
+  box-shadow: 0 4px 12px rgba(43, 56, 91, .035);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 760;
+  transition: transform .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.food-brand-chip small {
+  color: #9aa2af;
+  font-size: 9px;
+  font-weight: 650;
+}
+.food-brand-chip:hover,
+.food-brand-chip:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(53, 104, 255, .44);
+  color: var(--food-blue);
+  box-shadow: 0 6px 16px rgba(53, 104, 255, .08);
+}
+.food-brand-finder__placeholder {
+  margin: 22px 0 0;
+  color: var(--food-muted);
+  font-size: 12px;
+}
+.food-brand-range:focus-visible,
+.food-brand-initial:focus-visible,
+.food-brand-chip:focus-visible {
+  outline: 2px solid rgba(53, 104, 255, .32);
+  outline-offset: 3px;
+}
+
 .food-condition-finder {
   scroll-margin-top: 24px;
   padding: 38px 0 42px;
@@ -890,6 +1021,18 @@ button { cursor: pointer; }
   .food-search-field input { font-size: 19px; }
   .food-filter-grid { grid-template-columns: 1fr; gap: 24px; padding: 28px 0 32px; }
   .food-filter-options { gap: 6px 16px; }
+  .food-brand-finder { padding: 30px 20px 34px; }
+  .food-brand-finder__ranges { margin-top: 20px; }
+  .food-brand-finder__panel { margin-top: 13px; }
+  .food-brand-finder__initials {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .food-brand-initial { min-width: 0; padding: 0 4px; }
+  .food-brand-finder__brand-list { gap: 7px; }
+  .food-brand-chip { min-height: 36px; padding: 0 12px; }
+  .food-brand-chip small { display: none; }
   .food-condition-finder { padding: 34px 0 38px; }
   .food-condition-folders { grid-template-columns: 1fr 1fr; gap: 7px; }
   .food-condition-folder { min-height: 64px; padding: 24px 12px 11px; }
