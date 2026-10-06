@@ -335,7 +335,7 @@ function replaceBrandFinderContent(html, content) {
 }
 
 export function buildBrandPath(brand) {
-  return \`/food/brand/\${brand.slug || slugify(brand.name)}/\`;
+  return `/food/brand/${brand.slug || slugify(brand.name)}/`;
 }
 
 function getHangulInitial(value) {
@@ -373,7 +373,7 @@ function getBrandLatinInitial(brand) {
 function renderInitialButtons(initials, groups, range) {
   return initials.map(initial => {
     const count = groups.get(initial)?.length || 0;
-    return \`<button class="food-brand-initial" type="button" data-brand-initial="\${escapeHtml(initial)}" data-brand-initial-range="\${range}" aria-pressed="false"\${count ? '' : ' disabled'}>\${escapeHtml(initial)}</button>\`;
+    return `<button class="food-brand-initial" type="button" data-brand-initial="${escapeHtml(initial)}" data-brand-initial-range="${range}" aria-pressed="false"${count ? '' : ' disabled'}>${escapeHtml(initial)}</button>`;
   }).join('');
 }
 
@@ -381,12 +381,12 @@ function renderBrandInitialGroups(initials, groups, range) {
   return initials.map(initial => {
     const entries = groups.get(initial) || [];
     if (!entries.length) return '';
-    return \`<div class="food-brand-finder__brand-list" data-brand-group="\${escapeHtml(initial)}" data-brand-group-range="\${range}" hidden>\${entries.map(({ brand, items }) => {
+    return `<div class="food-brand-finder__brand-list" data-brand-group="${escapeHtml(initial)}" data-brand-group-range="${range}" hidden>${entries.map(({ brand, items }) => {
       const label = brand.displayName || brand.name;
       const species = new Set(items.map(item => item.species));
       const meta = species.size > 1 ? '고양이 · 강아지' : species.has('dog') ? '강아지' : '고양이';
-      return \`<a class="food-brand-chip" href="\${escapeHtml(buildBrandPath(brand))}" title="\${escapeHtml(brand.name)}"><span>\${escapeHtml(label)}</span><small>\${escapeHtml(meta)}</small></a>\`;
-    }).join('')}</div>\`;
+      return `<a class="food-brand-chip" href="${escapeHtml(buildBrandPath(brand))}" title="${escapeHtml(brand.name)}"><span>${escapeHtml(label)}</span><small>${escapeHtml(meta)}</small></a>`;
+    }).join('')}</div>`;
   }).join('');
 }
 
@@ -406,7 +406,7 @@ export function renderBrandFinder(brandGroups) {
     if (enGroups.has(en)) enGroups.get(en).push(entry);
   }
 
-  return \`<div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
+  return `<div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
       <button class="food-brand-range" type="button" data-brand-range-toggle="ko" aria-expanded="false" aria-controls="foodBrandRangeKo">
         <span>ㄱ ~ ㅎ</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
       </button>
@@ -415,13 +415,13 @@ export function renderBrandFinder(brandGroups) {
       </button>
     </div>
     <div id="foodBrandRangeKo" class="food-brand-finder__panel" data-brand-range-panel="ko" hidden>
-      <div class="food-brand-finder__initials" aria-label="한글 초성">\${renderInitialButtons(HANGUL_INITIALS, koGroups, 'ko')}</div>
-      <div class="food-brand-finder__groups">\${renderBrandInitialGroups(HANGUL_INITIALS, koGroups, 'ko')}</div>
+      <div class="food-brand-finder__initials" aria-label="한글 초성">${renderInitialButtons(HANGUL_INITIALS, koGroups, 'ko')}</div>
+      <div class="food-brand-finder__groups">${renderBrandInitialGroups(HANGUL_INITIALS, koGroups, 'ko')}</div>
     </div>
     <div id="foodBrandRangeEn" class="food-brand-finder__panel" data-brand-range-panel="en" hidden>
-      <div class="food-brand-finder__initials" aria-label="영문 알파벳">\${renderInitialButtons(LATIN_INITIALS, enGroups, 'en')}</div>
-      <div class="food-brand-finder__groups">\${renderBrandInitialGroups(LATIN_INITIALS, enGroups, 'en')}</div>
-    </div>\`;
+      <div class="food-brand-finder__initials" aria-label="영문 알파벳">${renderInitialButtons(LATIN_INITIALS, enGroups, 'en')}</div>
+      <div class="food-brand-finder__groups">${renderBrandInitialGroups(LATIN_INITIALS, enGroups, 'en')}</div>
+    </div>`;
 }
 
 function collectBrandGroups(catFeeds, dogFeeds) {
@@ -446,13 +446,13 @@ function renderBrandHub(brand, items) {
     if (a.species !== b.species) return a.species.localeCompare(b.species);
     return String(a.feed.제품명 || '').localeCompare(String(b.feed.제품명 || ''), 'ko');
   });
-  const title = \`\${label} 사료 성분·칼로리·급여량 | 프루브\`;
-  const description = \`프루브에 등록된 \${label} 고양이·강아지 사료 \${items.length}종의 칼로리, 성분, DM 영양정보와 급여량 계산 정보를 확인하세요.\`;
+  const title = `${label} 사료 성분·칼로리·급여량 | 프루브`;
+  const description = `프루브에 등록된 ${label} 고양이·강아지 사료 ${items.length}종의 칼로리, 성분, DM 영양정보와 급여량 계산 정보를 확인하세요.`;
   const cards = sortedItems.map(({ feed, species }) => {
     const product = splitProductName(feed.제품명);
-    return \`<li><a class="brand-food-card" href="\${escapeHtml(buildProductPath(feed, species))}"><strong>\${escapeHtml(product.primary)}</strong><span>\${escapeHtml(speciesLabel(species))} · \${escapeHtml(typeLabel(feed.type))} · \${escapeHtml(formatNumber(feed.final_me, 1))} kcal/kg</span></a></li>\`;
+    return `<li><a class="brand-food-card" href="${escapeHtml(buildProductPath(feed, species))}"><strong>${escapeHtml(product.primary)}</strong><span>${escapeHtml(speciesLabel(species))} · ${escapeHtml(typeLabel(feed.type))} · ${escapeHtml(formatNumber(feed.final_me, 1))} kcal/kg</span></a></li>`;
   }).join('');
-  const logo = brand.logoUrl ? \`<img class="brand-hub-logo" src="\${escapeHtml(brand.logoUrl)}" alt="\${escapeHtml(label)} 로고">\` : '';
+  const logo = brand.logoUrl ? `<img class="brand-hub-logo" src="${escapeHtml(brand.logoUrl)}" alt="${escapeHtml(label)} 로고">` : '';
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -465,12 +465,12 @@ function renderBrandHub(brand, items) {
       itemListElement: sortedItems.map(({ feed, species }, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        name: \`\${label} \${splitProductName(feed.제품명).primary}\`,
+        name: `${label} ${splitProductName(feed.제품명).primary}`,
         url: new URL(buildProductPath(feed, species), SITE_ORIGIN).href
       }))
     }
   };
-  return \`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>\${escapeHtml(title)}</title><meta name="description" content="\${escapeHtml(description)}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="\${escapeHtml(canonicalUrl)}"><link rel="stylesheet" href="/css/proved-header.css"><link rel="stylesheet" href="/css/food-list.css"><link rel="stylesheet" href="/css/brand-hub.css"><script id="brandStructuredData" type="application/ld+json">\${jsonForHtml(structuredData)}</script><script defer src="/js/proved-header.js"></script></head><body><div class="food-shell"><header data-proved-header="food"></header><main class="brand-hub"><nav class="brand-breadcrumb"><a href="/food/#foodBrandFinder">사료 찾기</a><span>›</span><span>\${escapeHtml(label)}</span></nav><header class="brand-hub-hero">\${logo}<div><p class="food-eyebrow">BRAND</p><h1>\${escapeHtml(label)}</h1>\${brand.nameKo && brand.nameKo !== brand.name ? \`<p class="brand-hub-en">\${escapeHtml(brand.name)}</p>\` : ''}<p>\${escapeHtml(description)}</p></div></header><section><h2>등록 제품 \${items.length}개</h2><ul class="brand-food-grid">\${cards}</ul></section></main><footer data-proved-footer></footer></div></body></html>\`;
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><link rel="stylesheet" href="/css/proved-header.css"><link rel="stylesheet" href="/css/food-list.css"><link rel="stylesheet" href="/css/brand-hub.css"><script id="brandStructuredData" type="application/ld+json">${jsonForHtml(structuredData)}</script><script defer src="/js/proved-header.js"></script></head><body><div class="food-shell"><header data-proved-header="food"></header><main class="brand-hub"><nav class="brand-breadcrumb"><a href="/food/#foodBrandFinder">사료 찾기</a><span>›</span><span>${escapeHtml(label)}</span></nav><header class="brand-hub-hero">${logo}<div><p class="food-eyebrow">BRAND</p><h1>${escapeHtml(label)}</h1>${brand.nameKo && brand.nameKo !== brand.name ? `<p class="brand-hub-en">${escapeHtml(brand.name)}</p>` : ''}<p>${escapeHtml(description)}</p></div></header><section><h2>등록 제품 ${items.length}개</h2><ul class="brand-food-grid">${cards}</ul></section></main><footer data-proved-footer></footer></div></body></html>`;
 }
 
 function renderRelatedBrandLinks(feed, allFeeds, species) {
@@ -479,9 +479,9 @@ function renderRelatedBrandLinks(feed, allFeeds, species) {
   const related = allFeeds.filter(item => item.id !== feed.id && (getBrand(item).id || getBrand(item).slug) === (brand.id || brand.slug)).slice(0, 6);
   const label = brand.displayName || brand.name;
   const relatedLinks = related.length
-    ? \`<div class="food-brand-related__links">\${related.map(item => \`<a href="\${escapeHtml(buildProductPath(item, species))}">\${escapeHtml(splitProductName(item.제품명).primary)}</a>\`).join('')}</div>\`
+    ? `<div class="food-brand-related__links">${related.map(item => `<a href="${escapeHtml(buildProductPath(item, species))}">${escapeHtml(splitProductName(item.제품명).primary)}</a>`).join('')}</div>`
     : '';
-  return \`<section class="food-detail-section food-brand-related" aria-labelledby="foodBrandRelatedHeading"><div class="food-section-heading"><span>+</span><h2 id="foodBrandRelatedHeading">\${escapeHtml(label)}의 다른 사료</h2></div>\${relatedLinks}<a class="food-brand-related__all" href="\${escapeHtml(buildBrandPath(brand))}">\${escapeHtml(label)} 브랜드 전체 제품 보기</a></section>\`;
+  return `<section class="food-detail-section food-brand-related" aria-labelledby="foodBrandRelatedHeading"><div class="food-section-heading"><span>+</span><h2 id="foodBrandRelatedHeading">${escapeHtml(label)}의 다른 사료</h2></div>${relatedLinks}<a class="food-brand-related__all" href="${escapeHtml(buildBrandPath(brand))}">${escapeHtml(label)} 브랜드 전체 제품 보기</a></section>`;
 }
 
 export function buildFoodSitemap(entries) {
@@ -550,7 +550,7 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     for (const feed of feeds) {
       if (!feed?.id || !String(feed?.제품명 || '').trim()) continue;
       const productPath = buildProductPath(feed, species);
-      if (seenPaths.has(productPath)) throw new Error(\`중복 제품 URL이 생성되었습니다: \${productPath}\`);
+      if (seenPaths.has(productPath)) throw new Error(`중복 제품 URL이 생성되었습니다: ${productPath}`);
       seenPaths.add(productPath);
       const outputPath = path.join(repoRoot, productPath.replace(/^\//, ''), 'index.html');
       await mkdir(path.dirname(outputPath), { recursive: true });
@@ -562,7 +562,7 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
   const brandGroups = collectBrandGroups(catFeeds, dogFeeds);
   for (const { brand, items } of brandGroups) {
     const brandPath = buildBrandPath(brand);
-    if (seenPaths.has(brandPath)) throw new Error(\`중복 브랜드 URL이 생성되었습니다: \${brandPath}\`);
+    if (seenPaths.has(brandPath)) throw new Error(`중복 브랜드 URL이 생성되었습니다: ${brandPath}`);
     seenPaths.add(brandPath);
     const outputPath = path.join(repoRoot, brandPath.replace(/^\//, ''), 'index.html');
     await mkdir(path.dirname(outputPath), { recursive: true });
