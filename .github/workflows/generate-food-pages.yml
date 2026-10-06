@@ -7,8 +7,6 @@ on:
       - 'js/food-list.js'
       - 'js/brand-finder.js'
       - 'css/food-list.css'
-      - 'js/brand-finder.js'
-      - 'css/food-list.css'
       - 'tests/unified-food-finder.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'tests/food-seo-pages.test.js'
@@ -19,6 +17,8 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'js/brand-finder.js'
+      - 'css/food-list.css'
       - 'tests/unified-food-finder.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'tests/food-seo-pages.test.js'
