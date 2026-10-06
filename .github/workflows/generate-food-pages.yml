@@ -5,6 +5,10 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'js/brand-finder.js'
+      - 'css/food-list.css'
+      - 'js/brand-finder.js'
+      - 'css/food-list.css'
       - 'tests/unified-food-finder.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'tests/food-seo-pages.test.js'
@@ -68,7 +72,7 @@ jobs:
       - name: Commit generated pages when changed
         shell: bash
         run: |
-          git add -A -- food/cat food/dog sitemap-foods.xml
+          git add -A -- food/index.html food/cat food/dog food/brand sitemap-foods.xml
           if git diff --cached --quiet; then
             echo "Food pages are already current."
             exit 0
