@@ -29,8 +29,9 @@ test('검색어·종·형태·분류·정렬·태그는 하나의 URL state를 �
 test('전체 검색은 종별 서버 query를 bounded merge하고 결과에 species를 보존한다', async () => {
   const source = await read('js/food-list.js');
   assert.match(source, /state\.species === 'all' \? \['cat', 'dog'\]/);
-  assert.match(source, /buildListQuery\(species, state\.loaded\)/);
-  assert.match(source, /\.range\(0, limit - 1\)/);
+  assert.match(source, /fetchListRows\(species, state\.loaded\)/);
+  assert.match(source, /buildListQuery\(species, 0, limit - 1, true\)/);
+  assert.match(source, /return query\.range\(from, to\)/);
   assert.match(source, /\{ \.\.\.row, species: speciesList\[index\] \}/);
   assert.doesNotMatch(source, /from\(getTable\(\)\)[\s\S]{0,200}for \(let from = 0; ;/);
 });
@@ -53,6 +54,24 @@ test('Condition Finder signature와 검색·선택 접근성을 유지한다', a
   assert.match(css, /position: absolute/);
   assert.match(css, /overflow-y: auto/);
 });
+
+test('브랜드 Finder는 조건 Finder 위에 있고 정적 허브 링크를 펼치는 전용 스크립트를 사용한다', async () => {
+  const [html, source, css] = await Promise.all([
+    read('food/index.html'),
+    read('js/brand-finder.js'),
+    read('css/food-list.css')
+  ]);
+  assert.ok(html.indexOf('id="foodBrandFinder"') < html.indexOf('id="foodConditionTitle"'));
+  assert.match(html, /PROVED_BRAND_FINDER_START/);
+  assert.match(html, /brand-finder\.js\?v=20261006-brand-hubs-v1/);
+  assert.match(source, /data-brand-range-toggle/);
+  assert.match(source, /data-brand-initial/);
+  assert.match(source, /aria-expanded/);
+  assert.match(source, /aria-pressed/);
+  assert.match(css, /\.food-brand-range/);
+  assert.match(css, /border-radius: 999px/);
+});
+
 
 test('legacy conditions route는 query와 hash를 보존해 canonical Finder로 이동한다', async () => {
   const html = await read('food/conditions/index.html');
