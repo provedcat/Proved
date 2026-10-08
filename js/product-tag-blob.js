@@ -717,24 +717,26 @@
 
   function renderSimilarFoodsSection(article, sourceFeed, sourceTags, matches, species) {
     article.querySelector('.food-similar-foods')?.remove();
-    if (!Array.isArray(matches) || !matches.length) return;
 
     const sourceBrand = getCandidateBrand(sourceFeed);
     const conditions = sourceTags.map(displayConditionLabel).filter(Boolean).join(' · ');
+    const hasMatches = Array.isArray(matches) && matches.length > 0;
     const section = document.createElement('section');
     section.className = 'food-detail-section food-similar-foods';
     section.setAttribute('aria-labelledby', 'foodSimilarFoodsHeading');
 
-    const links = matches.map(feed => {
-      const brand = getCandidateBrand(feed);
-      return `<span class="food-similar-foods__item"><a class="food-similar-foods__brand" href="${escapeHtml(buildCandidateBrandPath(feed))}">${escapeHtml(brand.displayName)}</a> <a class="food-similar-foods__product" href="${escapeHtml(buildCandidateProductPath(feed, species))}">${escapeHtml(feed.제품명 || '제품명 정보 없음')}</a></span>`;
-    }).join('<span class="food-similar-foods__separator" aria-hidden="true"> · </span>');
+    const links = hasMatches
+      ? matches.map(feed => {
+          const brand = getCandidateBrand(feed);
+          return `<span class="food-similar-foods__item"><a class="food-similar-foods__brand" href="${escapeHtml(buildCandidateBrandPath(feed))}">${escapeHtml(brand.displayName)}</a> <a class="food-similar-foods__product" href="${escapeHtml(buildCandidateProductPath(feed, species))}">${escapeHtml(feed.제품명 || '제품명 정보 없음')}</a></span>`;
+        }).join('<span class="food-similar-foods__separator" aria-hidden="true"> · </span>')
+      : '';
 
     section.innerHTML = `
       <div class="food-section-heading"><span>07</span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기</h2></div>
       <p class="food-similar-foods__brand-hub"><a href="${escapeHtml(buildCandidateBrandPath(sourceFeed))}">${escapeHtml(sourceBrand.displayName)} 사료 보기</a></p>
-      ${conditions ? `<p class="food-similar-foods__conditions">${escapeHtml(conditions)} 조건의 제품</p>` : ''}
-      <p class="food-similar-foods__links">${links}</p>`;
+      ${hasMatches && conditions ? `<p class="food-similar-foods__conditions">${escapeHtml(conditions)} 조건의 제품</p>` : ''}
+      ${hasMatches ? `<p class="food-similar-foods__links">${links}</p>` : ''}`;
     article.appendChild(section);
   }
 
