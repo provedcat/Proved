@@ -113,7 +113,10 @@ test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같
   assert.match(blob, /selectRepresentativeTags\(synthesizeRequiredTags\(candidate, realTags\)\)/);
   assert.match(blob, /return signature === sourceSignature/);
   assert.match(blob, /\.neq\('id', feedId\)/);
-  assert.match(blob, /if \(!Array\.isArray\(matches\) \|\| !matches\.length\) return;/);
+  assert.match(blob, /const hasMatches = Array\.isArray\(matches\) && matches\.length > 0/);
+  assert.doesNotMatch(blob, /if \(!Array\.isArray\(matches\) \|\| !matches\.length\) return;/);
+  assert.match(blob, /\$\{hasMatches && conditions \?/);
+  assert.match(blob, /\$\{hasMatches \? `<p class="food-similar-foods__links">/);
   assert.match(blob, /<span>07<\/span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기<\/h2>/);
   assert.match(blob, /food-similar-foods__brand/);
   assert.match(blob, /food-similar-foods__brand-hub/);
