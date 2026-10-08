@@ -98,7 +98,7 @@ test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제�
   assert.match(blob, /history\.state/);
   assert.match(blob, /params\.get\('id'\)/);
   assert.match(blob, /const \{ feedId, species \} = target/);
-  assert.match(html, /product-tag-blob\.js\?v=20261008-brand-hub-v2/);
+  assert.match(html, /product-tag-blob\.js\?v=20261008-brand-hub-v3/);
 });
 
 test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같을 때만 07 섹션으로 노출한다', async () => {
