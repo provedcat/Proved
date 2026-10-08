@@ -594,6 +594,148 @@
     return { feed, tags: selectRepresentativeTags(completeTags) };
   }
 
+  function getTagSignature(tags) {
+    return (tags || [])
+      .map(tag => String(tag?.slug || tag?.id || '').trim())
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'en'))
+      .join('|');
+  }
+
+  function displayConditionLabel(tag) {
+    const label = getBlobLabel(tag).replace(/\s*\n\s*/g, ' ').trim();
+    if (!label) return '';
+    if (tag.category === 'protein_source' && !/단백질$/u.test(label)) return `${label} 단백질`;
+    return label;
+  }
+
+  function slugifyPath(value) {
+    return String(value || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9가-힣]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-')
+      .slice(0, 96)
+      .replace(/-+$/g, '') || 'food';
+  }
+
+  function getCandidateBrand(feed) {
+    const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
+    const name = relation?.name || feed?.제조사 || '브랜드 정보 없음';
+    return {
+      name,
+      displayName: relation?.name_ko || name,
+      slug: relation?.slug || slugifyPath(name)
+    };
+  }
+
+  function buildCandidateProductPath(feed, species) {
+    const brand = getCandidateBrand(feed);
+    const base = slugifyPath(`${brand.name} ${feed?.제품명 || ''}`);
+    const stableId = String(feed?.id || '').replace(/-/g, '').slice(0, 8).toLowerCase();
+    return `/food/${species === 'dog' ? 'dog' : 'cat'}/${base}--${stableId || 'detail'}/`;
+  }
+
+  function buildCandidateBrandPath(feed) {
+    return `/food/brand/${getCandidateBrand(feed).slug}/`;
+  }
+
+  async function selectInChunks(table, select, column, values, chunkSize = 80) {
+    const unique = [...new Set((values || []).filter(Boolean))];
+    if (!unique.length) return [];
+    const rows = [];
+    for (let index = 0; index < unique.length; index += chunkSize) {
+      const chunk = unique.slice(index, index + chunkSize);
+      const { data, error } = await sb.from(table).select(select).in(column, chunk);
+      if (error) throw error;
+      if (Array.isArray(data)) rows.push(...data);
+    }
+    return rows;
+  }
+
+  async function loadExactBlobMatches(feedId, species, sourceFeed, sourceTags) {
+    const sourceSignature = getTagSignature(sourceTags);
+    if (!sourceSignature || !sourceTags?.length) return [];
+
+    const feedTable = species === 'dog' ? 'dog_feeds' : 'feeds';
+    const mappingTable = species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const mappingIdColumn = species === 'dog' ? 'dog_feed_id' : 'feed_id';
+
+    let query = sb
+      .from(feedTable)
+      .select('id,type,완전식여부,메인단백질,제품명,제조사,brand_id,brands(name,name_ko,slug)')
+      .or('verified.eq.true,searchable_before_review.eq.true')
+      .neq('id', feedId)
+      .limit(600);
+
+    if (sourceFeed?.type) query = query.eq('type', sourceFeed.type);
+    if (sourceFeed?.완전식여부) query = query.eq('완전식여부', sourceFeed.완전식여부);
+
+    const { data: candidates, error: candidateError } = await query;
+    if (candidateError) throw candidateError;
+    if (!Array.isArray(candidates) || !candidates.length) return [];
+
+    const candidateIds = candidates.map(feed => feed.id).filter(Boolean);
+    const mappingRows = await selectInChunks(mappingTable, `${mappingIdColumn},tag_id`, mappingIdColumn, candidateIds);
+    const tagIds = [...new Set(mappingRows.map(row => row.tag_id).filter(Boolean))];
+    const tagRows = tagIds.length
+      ? await selectInChunks('food_tags', 'id,slug,label_ko,label_en,category,sort_order,is_active', 'id', tagIds)
+      : [];
+    const activeTagById = new Map(
+      tagRows
+        .filter(tag => tag?.is_active === true && !['carrageenan_free', 'gum_agar_free'].includes(tag.slug))
+        .map(tag => [tag.id, tag])
+    );
+    const mappedTagIdsByFeed = new Map();
+
+    mappingRows.forEach(row => {
+      const candidateId = row?.[mappingIdColumn];
+      if (!candidateId || !row?.tag_id) return;
+      if (!mappedTagIdsByFeed.has(candidateId)) mappedTagIdsByFeed.set(candidateId, []);
+      mappedTagIdsByFeed.get(candidateId).push(row.tag_id);
+    });
+
+    return candidates
+      .filter(candidate => {
+        const realTags = (mappedTagIdsByFeed.get(candidate.id) || [])
+          .map(tagId => activeTagById.get(tagId))
+          .filter(Boolean);
+        const signature = getTagSignature(
+          selectRepresentativeTags(synthesizeRequiredTags(candidate, realTags))
+        );
+        return signature === sourceSignature;
+      })
+      .sort((a, b) => {
+        const brandA = getCandidateBrand(a).displayName;
+        const brandB = getCandidateBrand(b).displayName;
+        return brandA.localeCompare(brandB, 'ko')
+          || String(a.제품명 || '').localeCompare(String(b.제품명 || ''), 'ko');
+      });
+  }
+
+  function renderSimilarFoodsSection(article, sourceTags, matches, species) {
+    article.querySelector('.food-similar-foods')?.remove();
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    const conditions = sourceTags.map(displayConditionLabel).filter(Boolean).join(' · ');
+    const section = document.createElement('section');
+    section.className = 'food-detail-section food-similar-foods';
+    section.setAttribute('aria-labelledby', 'foodSimilarFoodsHeading');
+
+    const links = matches.map(feed => {
+      const brand = getCandidateBrand(feed);
+      return `<span class="food-similar-foods__item"><a class="food-similar-foods__brand" href="${escapeHtml(buildCandidateBrandPath(feed))}">${escapeHtml(brand.displayName)}</a> <a class="food-similar-foods__product" href="${escapeHtml(buildCandidateProductPath(feed, species))}">${escapeHtml(feed.제품명 || '제품명 정보 없음')}</a></span>`;
+    }).join('<span class="food-similar-foods__separator" aria-hidden="true"> · </span>');
+
+    section.innerHTML = `
+      <div class="food-section-heading"><span>07</span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기</h2></div>
+      ${conditions ? `<p class="food-similar-foods__conditions">${escapeHtml(conditions)} 조건의 제품</p>` : ''}
+      <p class="food-similar-foods__links">${links}</p>`;
+    article.appendChild(section);
+  }
+
   function createBlobPanel() {
     const panel = document.createElement('aside');
     panel.className = 'food-tag-blob';
@@ -666,15 +808,27 @@
     hero.insertAdjacentElement('afterend', profileGrid);
 
     try {
-      const { tags } = await loadProductVisualData(feedId, species);
+      const { feed, tags } = await loadProductVisualData(feedId, species);
       if (serial !== renderSerial || !blobPanel.isConnected) return;
       if (tags.length < 3) {
         blobPanel.innerHTML = '<p class="food-tag-blob__empty">대표 태그를 준비 중입니다.</p>';
         return;
       }
       blobPanel.innerHTML = renderBlobSvg(tags);
+
+      try {
+        const matches = await loadExactBlobMatches(feedId, species, feed, tags);
+        if (serial !== renderSerial || !article.isConnected) return;
+        renderSimilarFoodsSection(article, tags, matches, species);
+      } catch (similarError) {
+        if (serial === renderSerial) {
+          article.querySelector('.food-similar-foods')?.remove();
+          console.warn('[Proved] exact blob matches:', similarError);
+        }
+      }
     } catch (error) {
       if (serial !== renderSerial || !blobPanel.isConnected) return;
+      article.querySelector('.food-similar-foods')?.remove();
       blobPanel.innerHTML = '<p class="food-tag-blob__empty">대표 태그를 불러오지 못했습니다.</p>';
       console.warn('[Proved] product tag blob:', error);
     }
