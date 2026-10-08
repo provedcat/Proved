@@ -26,7 +26,6 @@
   ensureLayoutSystem();
 
   const AUTH_STORAGE_KEY = 'sb-qpklvtgnhrdmzxzlstpp-auth-token';
-  const MY_FIT_ALLOWED_USER_ID = '70720f7f-51c9-415a-948f-c676ede9a35d';
 
   function getPersistedAuthSession() {
     try {
@@ -43,14 +42,8 @@
     return Boolean(getPersistedAuthSession());
   }
 
-  function isMyFitAllowedUser() {
-    return getPersistedAuthSession()?.user?.id === MY_FIT_ALLOWED_USER_ID;
-  }
-
   function isItemVisible(item) {
-    if (item.hidden) return false;
-    if (item.myFitRestricted && !isMyFitAllowedUser()) return false;
-    return true;
+    return !item.hidden;
   }
 
   const globalItems = [
@@ -74,7 +67,7 @@
     food: [
       { label: '사료 찾기', href: '/food/', match: '/food/' },
       { label: '등록 요청', href: '/feed-registration/', match: '/feed-registration/' },
-      { label: '사료랭킹', href: '/food-ranking/', match: '/food-ranking/', myFitRestricted: true }
+      { label: '사료랭킹', href: '/food-ranking/', match: '/food-ranking/' }
     ],
     archive: [
       { label: '계산 기준', href: '/guide/calculation-method/', match: '/guide/calculation-method/' },
@@ -282,6 +275,94 @@
     });
   }
 
+  function setupFloatingTopButton() {
+    const path = normalizedPath();
+    if (path === '/' || path === '/index.html' || document.querySelector('[data-proved-header="home"]')) return;
+    if (document.getElementById('provedFloatingTop')) return;
+
+    const button = document.createElement('button');
+    button.id = 'provedFloatingTop';
+    button.className = 'proved-floating-top';
+    button.type = 'button';
+    button.setAttribute('aria-label', '페이지 맨 위로 이동');
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg>';
+    document.body.appendChild(button);
+
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    const clampPosition = (left, top) => {
+      const margin = 12;
+      const rect = button.getBoundingClientRect();
+      const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+      const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+      return {
+        left: Math.min(Math.max(margin, left), maxLeft),
+        top: Math.min(Math.max(margin, top), maxTop)
+      };
+    };
+
+    const applyPosition = (left, top) => {
+      const next = clampPosition(left, top);
+      button.style.left = next.left + 'px';
+      button.style.top = next.top + 'px';
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
+    };
+
+    const updateVisibility = () => {
+      if (dragging) return;
+      button.classList.toggle('is-visible', window.scrollY > 360);
+    };
+
+    button.addEventListener('pointerdown', event => {
+      if (event.button != null && event.button !== 0) return;
+      const rect = button.getBoundingClientRect();
+      dragging = true;
+      moved = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
+      button.classList.add('is-dragging');
+      button.setPointerCapture?.(event.pointerId);
+    });
+
+    button.addEventListener('pointermove', event => {
+      if (!dragging) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (Math.hypot(dx, dy) > 5) moved = true;
+      if (!moved) return;
+      event.preventDefault();
+      applyPosition(startLeft + dx, startTop + dy);
+    });
+
+    const finishDrag = event => {
+      if (!dragging) return;
+      dragging = false;
+      button.classList.remove('is-dragging');
+      try { button.releasePointerCapture?.(event.pointerId); } catch (_) {}
+      if (!moved) window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.setTimeout(updateVisibility, 0);
+    };
+
+    button.addEventListener('pointerup', finishDrag);
+    button.addEventListener('pointercancel', finishDrag);
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', () => {
+      if (!button.style.left) return;
+      const rect = button.getBoundingClientRect();
+      applyPosition(rect.left, rect.top);
+    });
+
+    updateVisibility();
+  }
+
   document.querySelectorAll('[data-proved-header]').forEach(renderHeader);
   document.querySelectorAll('.proved-site-footer, [data-proved-footer]').forEach(renderFooter);
   window.provedSetHeaderAuthState = setAuthLabel;
@@ -292,6 +373,7 @@
   });
   enterSpeciesCalculatorByDefault();
   enhanceFeedPickerSearch();
+  setupFloatingTopButton();
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     window.setTimeout(runAuthAction, 0);
   }
