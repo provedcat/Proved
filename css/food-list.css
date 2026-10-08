@@ -953,6 +953,47 @@ button { cursor: pointer; }
   cursor: wait;
 }
 
+.food-similar-foods__conditions {
+  margin: -10px 0 18px;
+  color: var(--food-muted);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+.food-similar-foods__links {
+  margin: 0;
+  color: var(--food-ink);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.9;
+}
+.food-similar-foods__item {
+  display: inline;
+}
+.food-similar-foods__brand,
+.food-similar-foods__product {
+  color: var(--food-blue);
+  text-decoration: none;
+}
+.food-similar-foods__brand {
+  font-weight: 800;
+}
+.food-similar-foods__product {
+  font-weight: 650;
+}
+.food-similar-foods__brand:hover,
+.food-similar-foods__product:hover {
+  text-decoration: underline;
+}
+.food-similar-foods__brand:focus-visible,
+.food-similar-foods__product:focus-visible {
+  outline: 2px solid rgba(53, 104, 255, .32);
+  outline-offset: 3px;
+}
+.food-similar-foods__separator {
+  color: #a9b0bc;
+}
+
 .food-empty {
   padding: 76px 20px;
   border-bottom: 1px solid var(--food-line);
