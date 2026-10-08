@@ -1301,10 +1301,9 @@
     if (state.criteriaLoading) return;
     state.criteriaLoading = true;
 
-    const previousText = els.toCriteria?.textContent;
     if (els.toCriteria) {
       els.toCriteria.disabled = true;
-      els.toCriteria.textContent = '비교 가능한 기준 확인 중…';
+      els.toCriteria.setAttribute('aria-busy', 'true');
     }
 
     try {
@@ -1333,7 +1332,7 @@
     } finally {
       state.criteriaLoading = false;
       if (els.toCriteria) {
-        els.toCriteria.textContent = previousText || '기준 정하기';
+        els.toCriteria.removeAttribute('aria-busy');
         els.toCriteria.disabled = state.foods.length < MIN_FOODS;
       }
     }
