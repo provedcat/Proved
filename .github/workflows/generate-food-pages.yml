@@ -5,6 +5,7 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'js/product-tag-blob.js'
       - 'js/brand-finder.js'
       - 'css/food-list.css'
       - 'css/brand-hub.css'
@@ -18,6 +19,7 @@ on:
     paths:
       - 'food/index.html'
       - 'js/food-list.js'
+      - 'js/product-tag-blob.js'
       - 'js/brand-finder.js'
       - 'css/food-list.css'
       - 'css/brand-hub.css'
@@ -49,7 +51,7 @@ jobs:
           node-version: '20'
 
       - name: Test product page generation
-        run: node --test tests/food-seo-pages.test.js tests/unified-food-finder.test.js
+        run: node --check js/product-tag-blob.js && node --test tests/food-seo-pages.test.js tests/unified-food-finder.test.js
 
   refresh-pages:
     if: github.event_name != 'pull_request'
