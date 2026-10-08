@@ -17,7 +17,7 @@
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/css/proved-layout.css?v=20260922-my-shared-layout-v1';
+    link.href = '/css/proved-layout.css?v=20261008-floating-top-v1';
     link.dataset.provedLayout = 'true';
     document.head.appendChild(link);
   }
@@ -206,6 +206,7 @@
         <a href="/cat-food-calculator/">고양이 계산기</a>
         <a href="/dog-food-calculator/">강아지 계산기</a>
         <a href="/food/">사료</a>
+        <a href="/food-ranking/">사료랭킹</a>
         <a href="/guide/calculation-method/">아카이브</a>
         <a href="/my/">MY</a>
       </nav>
