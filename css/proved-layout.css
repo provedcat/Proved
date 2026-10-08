@@ -255,3 +255,72 @@ body {
     padding: 32px 12px 0 !important;
   }
 }
+
+
+/* Global draggable back-to-top control. Hidden on the home page by JS. */
+.proved-floating-top {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 1200;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(53,104,255,.16);
+  border-radius: 50%;
+  background: rgba(255,255,255,.94);
+  color: var(--proved-layout-blue);
+  box-shadow: 0 10px 28px rgba(40,58,112,.14);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease, box-shadow .18s ease;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.proved-floating-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.proved-floating-top.is-dragging {
+  opacity: .42;
+  cursor: grabbing;
+  box-shadow: 0 6px 18px rgba(40,58,112,.10);
+  transition: opacity .08s ease, box-shadow .08s ease;
+}
+
+.proved-floating-top svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.proved-floating-top:focus-visible {
+  outline: 3px solid rgba(53,104,255,.25);
+  outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .proved-floating-top {
+    width: 46px;
+    height: 46px;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proved-floating-top {
+    transition: none;
+  }
+}
