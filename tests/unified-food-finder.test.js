@@ -98,7 +98,7 @@ test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제�
   assert.match(blob, /history\.state/);
   assert.match(blob, /params\.get\('id'\)/);
   assert.match(blob, /const \{ feedId, species \} = target/);
-  assert.match(html, /product-tag-blob\.js\?v=20261008-exact-similar-v1/);
+  assert.match(html, /product-tag-blob\.js\?v=20261008-brand-hub-v2/);
 });
 
 test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같을 때만 07 섹션으로 노출한다', async () => {
@@ -116,6 +116,8 @@ test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같
   assert.match(blob, /if \(!Array\.isArray\(matches\) \|\| !matches\.length\) return;/);
   assert.match(blob, /<span>07<\/span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기<\/h2>/);
   assert.match(blob, /food-similar-foods__brand/);
+  assert.match(blob, /food-similar-foods__brand-hub/);
+  assert.match(blob, /사료 보기<\/a>/);
   assert.match(blob, /food-similar-foods__product/);
   assert.match(blob, /조건의 제품/);
   assert.match(css, /\.food-similar-foods__links/);
