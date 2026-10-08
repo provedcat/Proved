@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>사료랭킹 MY FIT | 프루브</title>
   <meta name="description" content="최대 5개의 사료를 고르고, 나에게 중요한 기준을 정해 선택한 제품 안에서 상대적인 순위를 확인하는 프루브 MY FIT입니다.">
-  <meta name="robots" content="noindex,nofollow">
+  <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="https://proved.kr/food-ranking/">
 
   <meta property="og:locale" content="ko_KR">
@@ -26,8 +26,7 @@
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261008-myfit-ux-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
-  <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
+  <script defer src="/js/proved-header.js?v=20261008-public-ranking-top-v1"></script>
   <script defer src="/js/food-ranking-ui.js?v=20261008-myfit-ux-v1"></script>
 </head>
 <body class="food-ranking-body">
@@ -35,18 +34,7 @@
     <header data-proved-header="food"></header>
 
     <main class="food-ranking-main">
-      <section id="myFitAccessLoading" class="food-ranking-state" aria-live="polite">
-        <p>MY FIT 접근 권한을 확인하고 있습니다.</p>
-      </section>
-
-      <section id="myFitAccessDenied" class="food-ranking-state" aria-labelledby="myFitDeniedTitle" hidden>
-        <p class="food-ranking-eyebrow">FOOD RANKING</p>
-        <h1 id="myFitDeniedTitle">MY FIT</h1>
-        <p>현재 MY FIT 베타에 접근할 수 없는 계정입니다.<br>허용된 계정으로 로그인한 뒤 다시 시도해 주세요.</p>
-        <a class="food-ranking-link" href="/food/">사료 찾기로 돌아가기</a>
-      </section>
-
-      <section id="myFitRestrictedRoot" class="food-ranking-page" aria-labelledby="myFitTitle" hidden>
+      <section id="myFitRestrictedRoot" class="food-ranking-page" aria-labelledby="myFitTitle">
         <header class="food-ranking-hero">
           <p class="food-ranking-eyebrow">FOOD RANKING</p>
           <div class="food-ranking-hero__row">
