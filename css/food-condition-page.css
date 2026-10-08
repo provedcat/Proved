@@ -51,7 +51,15 @@
   gap: 24px;
   margin-bottom: 30px;
 }
-.food-condition-heading h2 { margin: 0; color: var(--food-blue); font-size: 25px; letter-spacing: -.025em; }
+.food-condition-heading h2 {
+  margin: 0;
+  color: var(--food-blue);
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
 .food-condition-heading p { margin: 8px 0 0; color: var(--food-muted); font-size: 13px; line-height: 1.6; }
 .condition-toolbar {
   display: flex;
@@ -210,19 +218,34 @@
 }
 .condition-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .condition-tags button {
-  min-height: 44px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 7px;
   padding: 0 14px;
-  border: 1px solid #ced6e5;
-  border-radius: 0;
+  border: 1px solid #e3e7ef;
+  border-radius: 999px;
   background: #fff;
-  color: #5f6878;
+  color: #4f596b;
+  box-shadow: 0 3px 10px rgba(43, 56, 91, .035);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 750;
+  transition: border-color .16s ease, color .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
-.condition-tags button[aria-pressed="true"] { border-color: var(--food-blue); background: #edf2ff; color: var(--food-blue); font-weight: 850; }
+.condition-tags button:hover,
+.condition-tags button:focus-visible {
+  border-color: rgba(53, 104, 255, .42);
+  color: var(--food-blue);
+  background: #f8faff;
+}
+.condition-tags button[aria-pressed="true"] {
+  border-color: var(--food-blue);
+  background: #f4f7ff;
+  color: var(--food-blue);
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(53, 104, 255, .07);
+}
 .condition-tags button[hidden],
 .condition-tag-search__clear[hidden],
 .condition-tags-empty[hidden] { display: none !important; }
