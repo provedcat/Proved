@@ -98,7 +98,27 @@ test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제�
   assert.match(blob, /history\.state/);
   assert.match(blob, /params\.get\('id'\)/);
   assert.match(blob, /const \{ feedId, species \} = target/);
-  assert.match(html, /product-tag-blob\.js\?v=20260921-soft-fresh-tags-v1/);
+  assert.match(html, /product-tag-blob\.js\?v=20261008-exact-similar-v1/);
+});
+
+test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같을 때만 07 섹션으로 노출한다', async () => {
+  const [blob, css] = await Promise.all([
+    read('js/product-tag-blob.js'),
+    read('css/food-list.css')
+  ]);
+
+  assert.match(blob, /function getTagSignature\(tags\)/);
+  assert.match(blob, /\.map\(tag => String\(tag\?\.slug \|\| tag\?\.id \|\| ''\)\.trim\(\)\)/);
+  assert.match(blob, /\.sort\(\(a, b\) => a\.localeCompare\(b, 'en'\)\)/);
+  assert.match(blob, /selectRepresentativeTags\(synthesizeRequiredTags\(candidate, realTags\)\)/);
+  assert.match(blob, /return signature === sourceSignature/);
+  assert.match(blob, /\.neq\('id', feedId\)/);
+  assert.match(blob, /if \(!Array\.isArray\(matches\) \|\| !matches\.length\) return;/);
+  assert.match(blob, /<span>07<\/span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기<\/h2>/);
+  assert.match(blob, /food-similar-foods__brand/);
+  assert.match(blob, /food-similar-foods__product/);
+  assert.match(blob, /조건의 제품/);
+  assert.match(css, /\.food-similar-foods__links/);
 });
 
 test('상세 화면 후처리는 공용 렌더 observer 하나를 재사용한다', async () => {
