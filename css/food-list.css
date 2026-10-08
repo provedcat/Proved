@@ -955,6 +955,24 @@ button { cursor: pointer; }
   cursor: wait;
 }
 
+.food-similar-foods__brand-hub {
+  margin: -10px 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+.food-similar-foods__brand-hub a {
+  color: var(--food-blue);
+  text-decoration: none;
+}
+.food-similar-foods__brand-hub a:hover {
+  text-decoration: underline;
+}
+.food-similar-foods__brand-hub a:focus-visible {
+  outline: 2px solid rgba(53, 104, 255, .32);
+  outline-offset: 3px;
+}
+
 .food-similar-foods__conditions {
   margin: -10px 0 18px;
   color: var(--food-muted);
