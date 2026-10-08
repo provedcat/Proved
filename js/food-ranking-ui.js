@@ -123,7 +123,7 @@
       chipSections: [
         {
           id: 'info',
-          title: '정보 신뢰도',
+          title: '확인 가능한 정보',
           chips: [
             ['official_calorie', '공식·라벨 열량 확인 가능'],
             ['nutrition_complete', '주요 영양정보 확인 가능']
@@ -1540,7 +1540,7 @@
   async function calculateAndShowResult() {
     if (state.resultLoading) return;
     if (state.foods.length < MIN_FOODS || !state.order.length || state.order.length !== state.selected.size) {
-      showToast('사료와 기준, 우선순위를 먼저 완성해 주세요.');
+      showToast('사료 선택, 기준 선택, 기준 순서를 먼저 완성해 주세요.');
       return;
     }
 
