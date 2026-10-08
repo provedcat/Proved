@@ -693,13 +693,13 @@
     mappingRows.forEach(row => {
       const candidateId = row?.[mappingIdColumn];
       if (!candidateId || !row?.tag_id) return;
-      if (!mappedTagIdsByFeed.has(candidateId)) mappedTagIdsByFeed.set(candidateId, []);
-      mappedTagIdsByFeed.get(candidateId).push(row.tag_id);
+      if (!mappedTagIdsByFeed.has(candidateId)) mappedTagIdsByFeed.set(candidateId, new Set());
+      mappedTagIdsByFeed.get(candidateId).add(row.tag_id);
     });
 
     return candidates
       .filter(candidate => {
-        const realTags = (mappedTagIdsByFeed.get(candidate.id) || [])
+        const realTags = [...(mappedTagIdsByFeed.get(candidate.id) || [])]
           .map(tagId => activeTagById.get(tagId))
           .filter(Boolean);
         const signature = getTagSignature(
