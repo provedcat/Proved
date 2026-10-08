@@ -186,8 +186,10 @@ button { cursor: pointer; }
 .food-brand-finder__heading h2 {
   margin: 0;
   color: var(--food-blue);
+  font-family: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 25px;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: -.025em;
 }
 .food-brand-finder__heading p {
