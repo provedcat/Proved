@@ -11,29 +11,29 @@
   const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
 
   const proteinOptions = [
-    ['prefer_poultry', '가금류 우선'],
-    ['prefer_ruminant', '반추동물 우선'],
-    ['prefer_fish_group', '어류 우선'],
-    ['prefer_single_protein', '단일 단백질원 우선'],
-    ['prefer_chicken', '치킨 우선'],
-    ['prefer_turkey', '칠면조 우선'],
-    ['prefer_duck', '오리 우선'],
-    ['prefer_goose', '거위 우선'],
-    ['prefer_quail', '메추리 우선'],
-    ['prefer_beef', '소고기 우선'],
-    ['prefer_lamb', '양고기 우선'],
-    ['prefer_goat', '염소·산양 우선'],
-    ['prefer_venison', '사슴 우선'],
-    ['prefer_pork', '돼지고기 우선'],
-    ['prefer_rabbit', '토끼 우선'],
-    ['prefer_salmon', '연어 우선'],
-    ['prefer_tuna', '참치 우선'],
-    ['prefer_mackerel', '고등어 우선'],
-    ['prefer_sardine', '정어리 우선'],
-    ['prefer_herring', '청어 우선'],
-    ['prefer_cod', '대구 우선'],
-    ['prefer_pollock', '명태 우선'],
-    ['prefer_trout', '송어 우선']
+    ['prefer_poultry', '가금류 포함'],
+    ['prefer_ruminant', '반추동물 포함'],
+    ['prefer_fish_group', '어류 포함'],
+    ['prefer_single_protein', '단일 동물성 단백질'],
+    ['prefer_chicken', '치킨 포함'],
+    ['prefer_turkey', '칠면조 포함'],
+    ['prefer_duck', '오리 포함'],
+    ['prefer_goose', '거위 포함'],
+    ['prefer_quail', '메추리 포함'],
+    ['prefer_beef', '소고기 포함'],
+    ['prefer_lamb', '양고기 포함'],
+    ['prefer_goat', '염소·산양 포함'],
+    ['prefer_venison', '사슴 포함'],
+    ['prefer_pork', '돼지고기 포함'],
+    ['prefer_rabbit', '토끼 포함'],
+    ['prefer_salmon', '연어 포함'],
+    ['prefer_tuna', '참치 포함'],
+    ['prefer_mackerel', '고등어 포함'],
+    ['prefer_sardine', '정어리 포함'],
+    ['prefer_herring', '청어 포함'],
+    ['prefer_cod', '대구 포함'],
+    ['prefer_pollock', '명태 포함'],
+    ['prefer_trout', '송어 포함']
   ];
 
   const groups = [
@@ -56,7 +56,7 @@
       id: 'basic',
       title: '기본 영양 정보',
       meta: '표시 기준',
-      note: '수분과 열량은 제품 표시값 그대로 비교해요.',
+      note: '수분과 PROVED 기준 열량을 비교해요.',
       directions: [
         ['moisture', '수분', '%'],
         ['calorie', '칼로리', 'kcal / kg']
@@ -64,7 +64,7 @@
     },
     {
       id: 'intake',
-      title: '섭취 기준',
+      title: '같은 열량 기준',
       meta: '1,000 kcal 기준',
       note: '같은 열량을 먹었을 때의 섭취량을 비교해요.',
       directions: [
@@ -79,7 +79,7 @@
       id: 'ingredients',
       title: '원재료',
       meta: '원하는 조건',
-      note: '이미 고른 사료들 중 어떤 원재료 조건을 더 우선할지 정해요.',
+      note: '선택한 사료에서 원하는 원재료 조건을 골라요.',
       chipSections: [
         {
           id: 'preferred_protein',
@@ -95,7 +95,7 @@
             ['avoid_chicken', '치킨', '치킨 제외'],
             ['avoid_fish', '생선', '생선 제외'],
             ['avoid_fish_oil', '생선오일', '생선오일 제외'],
-            ['avoid_meal', 'Meal(육분)', 'Meal(육분) 없음'],
+            ['avoid_meal', '육분', '육분 없음'],
             ['avoid_corn', '옥수수', '옥수수 제외'],
             ['avoid_soy', '콩', '콩 제외'],
             ['avoid_wheat_gluten', '밀·밀글루텐', '밀·밀글루텐 제외'],
@@ -117,7 +117,7 @@
     },
     {
       id: 'information',
-      title: '정보',
+      title: '정보 공개 수준',
       meta: '데이터 기준',
       note: '제품 자체가 아니라 확인할 수 있는 정보의 충실도를 기준으로 봐요.',
       chipSections: [
@@ -125,8 +125,8 @@
           id: 'info',
           title: '정보 신뢰도',
           chips: [
-            ['official_calorie', '공식·라벨 칼로리 있음'],
-            ['nutrition_complete', '영양정보가 충분함']
+            ['official_calorie', '공식·라벨 열량 확인 가능'],
+            ['nutrition_complete', '주요 영양정보 확인 가능']
           ]
         }
       ]
@@ -156,6 +156,8 @@
     foodSearchVisible: 20,
     favoriteFoods: [],
     favoritesLoading: false,
+    criteriaAvailability: new Map(),
+    criteriaLoading: false,
     selected: new Map(),
     order: [],
     drag: null,
@@ -202,6 +204,7 @@
     els.resultFoodCount = $('myFitResultFoodCount');
     els.resultCriteriaCount = $('myFitResultCriteriaCount');
     els.resultSpecies = $('myFitResultSpecies');
+    els.resultLead = $('myFitResultLead');
     els.resultNotice = $('myFitResultNotice');
     els.resultList = $('myFitResultList');
     els.resultCriteriaMeta = $('myFitResultCriteriaMeta');
@@ -622,11 +625,12 @@
               <div class="myfit-direction-row__label">
                 <strong>${escapeHtml(label)}</strong>
                 <small>${escapeHtml(detail)}</small>
+                <small class="myfit-criterion-availability" data-availability-label="${id}"></small>
               </div>
               <div class="myfit-direction" data-direction-control="${id}" data-value="none" role="group" aria-label="${escapeHtml(label)} 비교 방향">
-                <button type="button" data-direction="low" aria-pressed="false">낮게</button>
+                <button type="button" data-direction="low" aria-pressed="false">낮을수록 우선</button>
                 <button type="button" data-direction="none" aria-pressed="true">선택 안 함</button>
-                <button type="button" data-direction="high" aria-pressed="false">높게</button>
+                <button type="button" data-direction="high" aria-pressed="false">높을수록 우선</button>
               </div>
             </div>`).join('')}
         </div>` : '';
@@ -644,7 +648,8 @@
           <div class="myfit-chip-grid">
             ${section.chips.map(([id, label]) => `
               <button type="button" class="myfit-chip" data-chip-criterion="${id}" data-chip-label="${escapeHtml(label)}" aria-pressed="false">
-                ${escapeHtml(label)}
+                <span>${escapeHtml(label)}</span>
+                <small class="myfit-chip-reason" data-availability-label="${id}"></small>
               </button>`).join('')}
           </div>
           ${section.searchable ? '<p class="myfit-chip-search-empty" hidden>검색 결과가 없어요.</p>' : ''}
@@ -785,7 +790,7 @@
 
     state.order = state.order.filter(id => state.selected.has(id)).slice(0, MAX_CRITERIA);
 
-    els.slots.innerHTML = Array.from({ length: MAX_CRITERIA }, (_, index) => {
+    els.slots.innerHTML = Array.from({ length: selectedCount }, (_, index) => {
       const id = state.order[index];
       const label = id ? criterionLabel(id) : '';
       return `
@@ -807,10 +812,11 @@
           </button>`).join('')
       : '<p class="myfit-chip-pool__empty">선택한 기준이 모두 순서에 들어갔어요.</p>';
 
-    const selectedCount = state.selected.size;
     const placedCount = state.order.length;
     const complete = selectedCount > 0 && placedCount === selectedCount;
-    if (els.priorityStatus) els.priorityStatus.textContent = complete ? '순서가 완성됐어요.' : `${placedCount} / ${selectedCount} 배치`;
+    if (els.priorityStatus) els.priorityStatus.textContent = complete
+      ? '모든 기준의 순서를 정했어요.'
+      : `${selectedCount}개 중 ${placedCount}개 순서 지정`;
     if (els.result) els.result.disabled = !complete;
 
     bindDragTargets();
@@ -1341,6 +1347,9 @@
 
   function renderResult(model) {
     if (!model || !els.resultList) return;
+    if (els.resultLead && !state.savedRecordId) {
+      els.resultLead.textContent = '선택한 사료들 안에서, 내 기준에 더 잘 맞는 순서예요.';
+    }
 
     if (els.resultFoodCount) els.resultFoodCount.textContent = `${model.foods.length}개`;
     if (els.resultCriteriaCount) els.resultCriteriaCount.textContent = `${model.activeModels.length}개`;
@@ -1656,8 +1665,11 @@
     if (els.saveStatus) {
       const date = record.created_at ? new Date(record.created_at) : null;
       els.saveStatus.textContent = date && !Number.isNaN(date.getTime())
-        ? `${date.toLocaleDateString('ko-KR')} 저장된 결과`
-        : '저장된 MY FIT 결과';
+        ? `${date.toLocaleDateString('ko-KR')} 저장 당시의 결과`
+        : '저장 당시의 MY FIT 결과';
+    }
+    if (els.resultLead) {
+      els.resultLead.textContent = '저장 당시의 랭킹이에요. 제품 정보는 현재 등록 정보를 표시합니다.';
     }
     showScreen('result', { persist: false, scroll: false });
   }
