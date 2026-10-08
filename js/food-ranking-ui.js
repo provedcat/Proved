@@ -11,29 +11,29 @@
   const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
 
   const proteinOptions = [
-    ['prefer_poultry', '가금류 우선'],
-    ['prefer_ruminant', '반추동물 우선'],
-    ['prefer_fish_group', '어류 우선'],
-    ['prefer_single_protein', '단일 단백질원 우선'],
-    ['prefer_chicken', '치킨 우선'],
-    ['prefer_turkey', '칠면조 우선'],
-    ['prefer_duck', '오리 우선'],
-    ['prefer_goose', '거위 우선'],
-    ['prefer_quail', '메추리 우선'],
-    ['prefer_beef', '소고기 우선'],
-    ['prefer_lamb', '양고기 우선'],
-    ['prefer_goat', '염소·산양 우선'],
-    ['prefer_venison', '사슴 우선'],
-    ['prefer_pork', '돼지고기 우선'],
-    ['prefer_rabbit', '토끼 우선'],
-    ['prefer_salmon', '연어 우선'],
-    ['prefer_tuna', '참치 우선'],
-    ['prefer_mackerel', '고등어 우선'],
-    ['prefer_sardine', '정어리 우선'],
-    ['prefer_herring', '청어 우선'],
-    ['prefer_cod', '대구 우선'],
-    ['prefer_pollock', '명태 우선'],
-    ['prefer_trout', '송어 우선']
+    ['prefer_poultry', '가금류 포함'],
+    ['prefer_ruminant', '반추동물 포함'],
+    ['prefer_fish_group', '어류 포함'],
+    ['prefer_single_protein', '단일 동물성 단백질'],
+    ['prefer_chicken', '치킨 포함'],
+    ['prefer_turkey', '칠면조 포함'],
+    ['prefer_duck', '오리 포함'],
+    ['prefer_goose', '거위 포함'],
+    ['prefer_quail', '메추리 포함'],
+    ['prefer_beef', '소고기 포함'],
+    ['prefer_lamb', '양고기 포함'],
+    ['prefer_goat', '염소·산양 포함'],
+    ['prefer_venison', '사슴 포함'],
+    ['prefer_pork', '돼지고기 포함'],
+    ['prefer_rabbit', '토끼 포함'],
+    ['prefer_salmon', '연어 포함'],
+    ['prefer_tuna', '참치 포함'],
+    ['prefer_mackerel', '고등어 포함'],
+    ['prefer_sardine', '정어리 포함'],
+    ['prefer_herring', '청어 포함'],
+    ['prefer_cod', '대구 포함'],
+    ['prefer_pollock', '명태 포함'],
+    ['prefer_trout', '송어 포함']
   ];
 
   const groups = [
@@ -56,7 +56,7 @@
       id: 'basic',
       title: '기본 영양 정보',
       meta: '표시 기준',
-      note: '수분과 열량은 제품 표시값 그대로 비교해요.',
+      note: '수분과 PROVED 기준 열량을 비교해요.',
       directions: [
         ['moisture', '수분', '%'],
         ['calorie', '칼로리', 'kcal / kg']
@@ -64,7 +64,7 @@
     },
     {
       id: 'intake',
-      title: '섭취 기준',
+      title: '같은 열량 기준',
       meta: '1,000 kcal 기준',
       note: '같은 열량을 먹었을 때의 섭취량을 비교해요.',
       directions: [
@@ -79,7 +79,7 @@
       id: 'ingredients',
       title: '원재료',
       meta: '원하는 조건',
-      note: '이미 고른 사료들 중 어떤 원재료 조건을 더 우선할지 정해요.',
+      note: '선택한 사료에서 원하는 원재료 조건을 골라요.',
       chipSections: [
         {
           id: 'preferred_protein',
@@ -95,7 +95,7 @@
             ['avoid_chicken', '치킨', '치킨 제외'],
             ['avoid_fish', '생선', '생선 제외'],
             ['avoid_fish_oil', '생선오일', '생선오일 제외'],
-            ['avoid_meal', 'Meal(육분)', 'Meal(육분) 없음'],
+            ['avoid_meal', '육분', '육분 없음'],
             ['avoid_corn', '옥수수', '옥수수 제외'],
             ['avoid_soy', '콩', '콩 제외'],
             ['avoid_wheat_gluten', '밀·밀글루텐', '밀·밀글루텐 제외'],
@@ -117,16 +117,16 @@
     },
     {
       id: 'information',
-      title: '정보',
+      title: '정보 공개 수준',
       meta: '데이터 기준',
       note: '제품 자체가 아니라 확인할 수 있는 정보의 충실도를 기준으로 봐요.',
       chipSections: [
         {
           id: 'info',
-          title: '정보 신뢰도',
+          title: '확인 가능한 정보',
           chips: [
-            ['official_calorie', '공식·라벨 칼로리 있음'],
-            ['nutrition_complete', '영양정보가 충분함']
+            ['official_calorie', '공식·라벨 열량 확인 가능'],
+            ['nutrition_complete', '주요 영양정보 확인 가능']
           ]
         }
       ]
@@ -156,6 +156,8 @@
     foodSearchVisible: 20,
     favoriteFoods: [],
     favoritesLoading: false,
+    criteriaAvailability: new Map(),
+    criteriaLoading: false,
     selected: new Map(),
     order: [],
     drag: null,
@@ -202,6 +204,7 @@
     els.resultFoodCount = $('myFitResultFoodCount');
     els.resultCriteriaCount = $('myFitResultCriteriaCount');
     els.resultSpecies = $('myFitResultSpecies');
+    els.resultLead = $('myFitResultLead');
     els.resultNotice = $('myFitResultNotice');
     els.resultList = $('myFitResultList');
     els.resultCriteriaMeta = $('myFitResultCriteriaMeta');
@@ -379,7 +382,7 @@
       <button type="button" class="myfit-food-result myfit-favorite-food${selected ? ' is-selected' : ''}"
         data-favorite-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
         <span>
-          <small>★ 즐겨찾기 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
+          <small>★ 관심 사료 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
           <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
           <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
         </span>
@@ -622,11 +625,12 @@
               <div class="myfit-direction-row__label">
                 <strong>${escapeHtml(label)}</strong>
                 <small>${escapeHtml(detail)}</small>
+                <small class="myfit-criterion-availability" data-availability-label="${id}"></small>
               </div>
               <div class="myfit-direction" data-direction-control="${id}" data-value="none" role="group" aria-label="${escapeHtml(label)} 비교 방향">
-                <button type="button" data-direction="low" aria-pressed="false">낮게</button>
+                <button type="button" data-direction="low" aria-pressed="false">낮을수록 우선</button>
                 <button type="button" data-direction="none" aria-pressed="true">선택 안 함</button>
-                <button type="button" data-direction="high" aria-pressed="false">높게</button>
+                <button type="button" data-direction="high" aria-pressed="false">높을수록 우선</button>
               </div>
             </div>`).join('')}
         </div>` : '';
@@ -644,7 +648,8 @@
           <div class="myfit-chip-grid">
             ${section.chips.map(([id, label]) => `
               <button type="button" class="myfit-chip" data-chip-criterion="${id}" data-chip-label="${escapeHtml(label)}" aria-pressed="false">
-                ${escapeHtml(label)}
+                <span>${escapeHtml(label)}</span>
+                <small class="myfit-chip-reason" data-availability-label="${id}"></small>
               </button>`).join('')}
           </div>
           ${section.searchable ? '<p class="myfit-chip-search-empty" hidden>검색 결과가 없어요.</p>' : ''}
@@ -685,6 +690,8 @@
   }
 
   function setDirection(id, direction) {
+    const availability = state.criteriaAvailability.get(id);
+    if (availability && !availability.available) return;
     const current = state.selected.get(id);
     if (direction === 'none') {
       state.selected.delete(id);
@@ -701,6 +708,8 @@
   }
 
   function toggleChip(id) {
+    const availability = state.criteriaAvailability.get(id);
+    if (availability && !availability.available) return;
     if (state.selected.has(id)) {
       state.selected.delete(id);
       state.order = state.order.filter(item => item !== id);
@@ -724,23 +733,32 @@
       const id = control.dataset.directionControl;
       const value = state.selected.get(id);
       const displayValue = value === 'low' || value === 'high' ? value : 'none';
+      const availability = state.criteriaAvailability.get(id);
+      const unavailable = Boolean(availability && !availability.available);
+      const maxedOut = !state.selected.has(id) && selectedCount >= MAX_CRITERIA;
+
       control.dataset.value = displayValue;
-      control.classList.toggle('is-disabled', !state.selected.has(id) && selectedCount >= MAX_CRITERIA);
+      control.classList.toggle('is-disabled', maxedOut || unavailable);
+      control.classList.toggle('is-unavailable', unavailable);
       control.querySelectorAll('button').forEach(button => {
         const direction = button.dataset.direction;
         button.setAttribute('aria-pressed', String(direction === displayValue));
-        button.disabled = !state.selected.has(id) && selectedCount >= MAX_CRITERIA && direction !== 'none';
+        button.disabled = unavailable || (maxedOut && direction !== 'none');
       });
     });
 
     document.querySelectorAll('[data-chip-criterion]').forEach(button => {
       const id = button.dataset.chipCriterion;
       const selected = state.selected.has(id);
+      const availability = state.criteriaAvailability.get(id);
+      const unavailable = Boolean(availability && !availability.available);
       button.classList.toggle('is-selected', selected);
+      button.classList.toggle('is-unavailable', unavailable);
       button.setAttribute('aria-pressed', String(selected));
-      button.disabled = !selected && selectedCount >= MAX_CRITERIA;
+      button.disabled = unavailable || (!selected && selectedCount >= MAX_CRITERIA);
     });
 
+    updateCriteriaAvailabilityUi();
     if (!els.priorityScreen?.hidden) renderPriority();
   }
 
@@ -784,8 +802,9 @@
     if (!els.slots || !els.pool) return;
 
     state.order = state.order.filter(id => state.selected.has(id)).slice(0, MAX_CRITERIA);
+    const selectedCount = state.selected.size;
 
-    els.slots.innerHTML = Array.from({ length: MAX_CRITERIA }, (_, index) => {
+    els.slots.innerHTML = Array.from({ length: selectedCount }, (_, index) => {
       const id = state.order[index];
       const label = id ? criterionLabel(id) : '';
       return `
@@ -807,10 +826,11 @@
           </button>`).join('')
       : '<p class="myfit-chip-pool__empty">선택한 기준이 모두 순서에 들어갔어요.</p>';
 
-    const selectedCount = state.selected.size;
     const placedCount = state.order.length;
     const complete = selectedCount > 0 && placedCount === selectedCount;
-    if (els.priorityStatus) els.priorityStatus.textContent = complete ? '순서가 완성됐어요.' : `${placedCount} / ${selectedCount} 배치`;
+    if (els.priorityStatus) els.priorityStatus.textContent = complete
+      ? '모든 기준의 순서를 정했어요.'
+      : `${selectedCount}개 중 ${placedCount}개 순서 지정`;
     if (els.result) els.result.disabled = !complete;
 
     bindDragTargets();
@@ -1243,6 +1263,91 @@
       .filter(Boolean);
   }
 
+  function assessCriterionAvailability(id, foods) {
+    const isFewerThickeners = id === 'fewer_thickeners';
+    const numericReader = numericCriterionReaders[id] || (isFewerThickeners ? thickenerCount : null);
+
+    if (numericReader) {
+      const values = foods.map(food => numericReader(food));
+      if (values.some(value => value === null || !Number.isFinite(value))) {
+        return { available: false, reason: 'missing', label: '정보 부족' };
+      }
+      const unique = [...new Set(values.map(value => Number(value.toFixed(8))))];
+      if (unique.length < 2) {
+        return { available: false, reason: 'same', label: '모두 동일' };
+      }
+      return { available: true, reason: '', label: '' };
+    }
+
+    const statuses = foods.map(food => evaluateCondition(food, id));
+    if (statuses.some(value => value === null)) {
+      return { available: false, reason: 'missing', label: '정보 부족' };
+    }
+    if (statuses.every(value => value === statuses[0])) {
+      return { available: false, reason: 'same', label: '모두 동일' };
+    }
+    return { available: true, reason: '', label: '' };
+  }
+
+  function updateCriteriaAvailabilityUi() {
+    document.querySelectorAll('[data-availability-label]').forEach(label => {
+      const id = label.dataset.availabilityLabel;
+      const availability = state.criteriaAvailability.get(id);
+      label.textContent = availability && !availability.available ? availability.label : '';
+    });
+  }
+
+  async function refreshCriteriaAvailability() {
+    if (state.criteriaLoading) return;
+    state.criteriaLoading = true;
+
+    if (els.toCriteria) {
+      els.toCriteria.disabled = true;
+      els.toCriteria.setAttribute('aria-busy', 'true');
+    }
+
+    try {
+      const foods = await loadSelectedFoodDetails();
+      if (foods.length !== state.foods.length) throw new Error('선택한 사료 정보를 모두 불러오지 못했습니다.');
+
+      const nextAvailability = new Map();
+      criteria.forEach((item, id) => {
+        nextAvailability.set(id, assessCriterionAvailability(id, foods));
+      });
+      state.criteriaAvailability = nextAvailability;
+
+      let changed = false;
+      [...state.selected.keys()].forEach(id => {
+        const availability = state.criteriaAvailability.get(id);
+        if (availability && !availability.available) {
+          state.selected.delete(id);
+          state.order = state.order.filter(item => item !== id);
+          changed = true;
+        }
+      });
+
+      syncCriteriaUi();
+      updateCriteriaAvailabilityUi();
+      if (changed) persistSessionState();
+    } finally {
+      state.criteriaLoading = false;
+      if (els.toCriteria) {
+        els.toCriteria.removeAttribute('aria-busy');
+        els.toCriteria.disabled = state.foods.length < MIN_FOODS;
+      }
+    }
+  }
+
+  async function openCriteriaScreen() {
+    try {
+      await refreshCriteriaAvailability();
+      showScreen('criteria');
+    } catch (error) {
+      console.error('MY FIT criteria availability failed:', error);
+      showToast('비교 가능한 기준을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  }
+
   function compareResultEntries(a, b, criteriaModels) {
     const scoreDiff = b.fitScore - a.fitScore;
     if (Math.abs(scoreDiff) > 1e-9) return scoreDiff;
@@ -1315,6 +1420,35 @@
     };
   }
 
+  function booleanResultText(model, status) {
+    const passFail = {
+      prefer_single_protein: ['✓ 단일 동물성 단백질', '단일 동물성 단백질 아님'],
+      avoid_chicken: ['✓ 치킨 없음', '치킨 포함'],
+      avoid_fish: ['✓ 생선 없음', '생선 포함'],
+      avoid_fish_oil: ['✓ 생선오일 없음', '생선오일 포함'],
+      avoid_meal: ['✓ 육분 없음', '육분 포함'],
+      avoid_corn: ['✓ 옥수수 없음', '옥수수 포함'],
+      avoid_soy: ['✓ 콩 없음', '콩 포함'],
+      avoid_wheat_gluten: ['✓ 밀·밀글루텐 없음', '밀·밀글루텐 포함'],
+      avoid_grain: ['✓ 곡물 없음', '곡물 포함'],
+      no_thickener: ['✓ 점증제 없음', '점증제 포함'],
+      carrageenan_free: ['✓ 카라기난 없음', '카라기난 포함'],
+      gum_free: ['✓ 검류 없음', '검류 포함'],
+      gum_agar_free: ['✓ 검류·한천 없음', '검류 또는 한천 포함'],
+      official_calorie: ['✓ 공식·라벨 열량 확인', '공식·라벨 열량 미확인'],
+      nutrition_complete: ['✓ 주요 영양정보 확인', '주요 영양정보 부족']
+    };
+
+    if (passFail[model.id]) return passFail[model.id][status ? 0 : 1];
+
+    if (model.id.startsWith('prefer_')) {
+      const base = String(model.label || '').replace(/ 포함$/, '');
+      return status ? `✓ ${base} 포함` : `${base} 미포함`;
+    }
+
+    return status ? `✓ ${model.label}` : `${model.label} 미충족`;
+  }
+
   function resultCriterionChip(model, entry) {
     const result = entry.criteria[model.id];
     let text = model.label;
@@ -1324,13 +1458,8 @@
       className += ' is-muted';
       text += model.reason === 'missing' ? ' · 확인불가' : ' · 동일';
     } else if (model.kind === 'boolean') {
-      if (result.status) {
-        className += ' is-positive';
-        text += ' ✓';
-      } else {
-        className += ' is-neutral';
-        text += ' —';
-      }
+      className += result.status ? ' is-positive' : ' is-neutral';
+      text = booleanResultText(model, Boolean(result.status));
     } else {
       className += ' is-ranked';
       text += ` · ${result.rank}위`;
@@ -1341,6 +1470,9 @@
 
   function renderResult(model) {
     if (!model || !els.resultList) return;
+    if (els.resultLead && !state.savedRecordId) {
+      els.resultLead.textContent = '선택한 사료들 안에서, 내 기준에 더 잘 맞는 순서예요.';
+    }
 
     if (els.resultFoodCount) els.resultFoodCount.textContent = `${model.foods.length}개`;
     if (els.resultCriteriaCount) els.resultCriteriaCount.textContent = `${model.activeModels.length}개`;
@@ -1408,7 +1540,7 @@
   async function calculateAndShowResult() {
     if (state.resultLoading) return;
     if (state.foods.length < MIN_FOODS || !state.order.length || state.order.length !== state.selected.size) {
-      showToast('사료와 기준, 우선순위를 먼저 완성해 주세요.');
+      showToast('사료 선택, 기준 선택, 기준 순서를 먼저 완성해 주세요.');
       return;
     }
 
@@ -1656,8 +1788,11 @@
     if (els.saveStatus) {
       const date = record.created_at ? new Date(record.created_at) : null;
       els.saveStatus.textContent = date && !Number.isNaN(date.getTime())
-        ? `${date.toLocaleDateString('ko-KR')} 저장된 결과`
-        : '저장된 MY FIT 결과';
+        ? `${date.toLocaleDateString('ko-KR')} 저장 당시의 결과`
+        : '저장 당시의 MY FIT 결과';
+    }
+    if (els.resultLead) {
+      els.resultLead.textContent = '저장 당시의 랭킹이에요. 제품 정보는 현재 등록 정보를 표시합니다.';
     }
     showScreen('result', { persist: false, scroll: false });
   }
@@ -1724,7 +1859,7 @@
       if (chip) toggleChip(chip.dataset.chipCriterion);
     });
 
-    els.toCriteria?.addEventListener('click', () => showScreen('criteria'));
+    els.toCriteria?.addEventListener('click', openCriteriaScreen);
     els.backToFoods?.addEventListener('click', () => showScreen('foods'));
     els.toPriority?.addEventListener('click', () => showScreen('priority'));
     els.backToCriteria?.addEventListener('click', () => showScreen('criteria'));
@@ -1749,9 +1884,9 @@
       leaveSavedSnapshot();
       showScreen('priority');
     });
-    els.chooseCriteriaAgain?.addEventListener('click', () => {
+    els.chooseCriteriaAgain?.addEventListener('click', async () => {
       leaveSavedSnapshot();
-      showScreen('criteria');
+      await openCriteriaScreen();
     });
     els.compareFoodsAgain?.addEventListener('click', () => {
       leaveSavedSnapshot();
@@ -1796,6 +1931,16 @@
       } catch (error) {
         console.warn('MY FIT result restore failed:', error);
         state.currentScreen = 'priority';
+      }
+    }
+
+    if (state.currentScreen === 'criteria' || state.currentScreen === 'priority') {
+      try {
+        await refreshCriteriaAvailability();
+        if (!state.selected.size && state.currentScreen === 'priority') state.currentScreen = 'criteria';
+      } catch (error) {
+        console.warn('MY FIT criteria restore failed:', error);
+        state.currentScreen = 'foods';
       }
     }
 

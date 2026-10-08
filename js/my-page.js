@@ -637,7 +637,7 @@
             '<span>MY FIT · ' + escapeHtml(speciesLabel(row.species)) + '</span>' +
             '<time datetime="' + escapeHtml(row.created_at || '') + '">' + escapeHtml(date) + '</time>' +
           '</div>' +
-          '<strong class="my-fit-saved-card__top">1위 · ' + escapeHtml(topName) + '</strong>' +
+          '<strong class="my-fit-saved-card__top">저장 당시 1위 · ' + escapeHtml(topName) + '</strong>' +
           '<p>' + escapeHtml(String(foodIds.length)) + '개 사료 · ' + escapeHtml(String(criteriaRows.length)) + '개 기준</p>' +
           '<div class="my-fit-saved-card__preview">' + preview + '</div>' +
         '</a>' +
@@ -649,6 +649,7 @@
   async function deleteMyFitSaved(button) {
     const id = String(button?.dataset.deleteMyFit || '');
     if (!id || button.disabled) return;
+    if (!window.confirm('저장한 MY FIT 결과를 삭제할까요?\n삭제하면 되돌릴 수 없어요.')) return;
 
     const userResponse = await sb.auth.getUser();
     const user = userResponse.data && userResponse.data.user;

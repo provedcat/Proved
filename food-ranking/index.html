@@ -24,11 +24,11 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/food-list.css?v=20260924-diet-handoff-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261001-myfit-save-v1">
+  <link rel="stylesheet" href="/css/food-ranking-page.css?v=20261008-myfit-ux-v1">
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script defer src="/js/proved-header.js?v=20260928-my-fit-ranking-v2"></script>
   <script defer src="/js/food-ranking-access.js?v=20260928-beta-user-v1"></script>
-  <script defer src="/js/food-ranking-ui.js?v=20261001-myfit-save-v1"></script>
+  <script defer src="/js/food-ranking-ui.js?v=20261008-myfit-ux-v1"></script>
 </head>
 <body class="food-ranking-body">
   <div class="food-shell">
@@ -69,8 +69,8 @@
             <header class="myfit-screen__header">
               <div>
                 <p class="myfit-kicker">01 · FOODS</p>
-                <h2 id="myFitFoodTitle">비교할 사료를 골라주세요</h2>
-                <p>2개 이상, 최대 5개까지 선택할 수 있어요. 첫 사료를 고르면 같은 동물의 사료만 이어서 검색됩니다.</p>
+                <h2 id="myFitFoodTitle">비교할 사료를 2~5개 골라주세요</h2>
+                <p>첫 사료를 선택하면 같은 동물의 사료끼리 비교할 수 있어요.</p>
               </div>
               <div class="myfit-count" id="myFitFoodCount" aria-live="polite"><strong>0</strong><span>/ 5</span></div>
             </header>
@@ -84,8 +84,8 @@
 
               <section class="myfit-favorites" id="myFitFavorites" aria-labelledby="myFitFavoritesTitle" hidden>
                 <div class="myfit-favorites__head">
-                  <h3 id="myFitFavoritesTitle">즐겨찾기</h3>
-                  <span>자주 보는 사료를 먼저 골라보세요.</span>
+                  <h3 id="myFitFavoritesTitle">관심 사료</h3>
+                  <span>저장해둔 사료를 먼저 보여드릴게요.</span>
                 </div>
                 <div class="myfit-favorites__list" id="myFitFavoritesList"></div>
               </section>
@@ -104,7 +104,7 @@
 
             <div class="myfit-sticky-action">
               <button type="button" class="myfit-primary-button" id="myFitToCriteria" disabled>
-                기준 정하기
+                기준 선택하기
                 <span aria-hidden="true">→</span>
               </button>
             </div>
@@ -115,8 +115,8 @@
               <div>
                 <button type="button" class="myfit-back-button" id="myFitBackToFoods" aria-label="사료 선택으로 돌아가기">←</button>
                 <p class="myfit-kicker">02 · CRITERIA</p>
-                <h2 id="myFitCriteriaTitle">어떤 기준으로 볼까요?</h2>
-                <p>낮게 또는 높게 보고 싶은 방향을 선택하세요. 최대 5개까지 고를 수 있어요.</p>
+                <h2 id="myFitCriteriaTitle">비교 기준을 골라주세요</h2>
+                <p>각 기준에서 원하는 방향을 선택하세요. 비교에 쓸 수 있는 기준만 선택할 수 있어요.</p>
               </div>
               <div class="myfit-count" id="myFitCriteriaCount" aria-live="polite"><strong>0</strong><span>/ 5</span></div>
             </header>
@@ -125,7 +125,7 @@
 
             <div class="myfit-sticky-action">
               <button type="button" class="myfit-primary-button" id="myFitToPriority" disabled>
-                우선순위 정하기
+                기준 순서 정하기
                 <span aria-hidden="true">→</span>
               </button>
             </div>
@@ -136,19 +136,19 @@
               <div>
                 <button type="button" class="myfit-back-button" id="myFitBackToCriteria" aria-label="기준 선택으로 돌아가기">←</button>
                 <p class="myfit-kicker">03 · PRIORITY</p>
-                <h2 id="myFitPriorityTitle">무엇이 더 중요한가요?</h2>
-                <p>위에 놓인 기준일수록 더 중요하게 반영돼요. 칩을 탭하거나 손가락으로 끌어 놓으세요.</p>
+                <h2 id="myFitPriorityTitle">중요한 기준부터 순서를 정해주세요</h2>
+                <p>위에 놓인 기준일수록 더 크게 반영돼요. 각 기준의 상대 순위를 합쳐 MY FIT 순위를 만들어요.</p>
               </div>
             </header>
 
-            <div class="myfit-rank-board" aria-label="기준 우선순위">
+            <div class="myfit-rank-board" aria-label="기준 순서">
               <div id="myFitRankSlots" class="myfit-rank-slots"></div>
             </div>
 
             <section class="myfit-chip-dock" aria-labelledby="myFitChipDockTitle">
               <div class="myfit-chip-dock__heading">
                 <h3 id="myFitChipDockTitle">선택한 기준</h3>
-                <span id="myFitPriorityStatus">아래 칩을 위에 놓아주세요.</span>
+                <span id="myFitPriorityStatus">아래 기준을 위에서부터 중요한 순서로 놓아주세요.</span>
               </div>
               <div id="myFitChipPool" class="myfit-chip-pool"></div>
             </section>
@@ -163,10 +163,10 @@
           <section class="myfit-screen myfit-result-screen" id="myFitResultScreen" data-myfit-screen="result" aria-labelledby="myFitResultTitle" hidden>
             <header class="myfit-screen__header myfit-result-header">
               <div>
-                <button type="button" class="myfit-back-button" id="myFitBackToPriority" aria-label="우선순위로 돌아가기">←</button>
+                <button type="button" class="myfit-back-button" id="myFitBackToPriority" aria-label="기준 순서로 돌아가기">←</button>
                 <p class="myfit-kicker">04 · RESULT</p>
-                <h2 id="myFitResultTitle">당신이 선택한 기준에서의 순위</h2>
-                <p>점수 없이, 선택한 기준별 상대적인 우위를 보여드려요.</p>
+                <h2 id="myFitResultTitle">당신의 랭킹</h2>
+                <p id="myFitResultLead">선택한 사료들 안에서, 내 기준에 더 잘 맞는 순서예요.</p>
               </div>
             </header>
 
