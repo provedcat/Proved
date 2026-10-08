@@ -382,7 +382,7 @@
       <button type="button" class="myfit-food-result myfit-favorite-food${selected ? ' is-selected' : ''}"
         data-favorite-food-key="${escapeHtml(key)}" ${disabled ? 'disabled' : ''}>
         <span>
-          <small>★ 즐겨찾기 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
+          <small>★ 관심 사료 · ${escapeHtml(getBrand(food))} · ${getSpeciesLabel(food.species)}</small>
           <strong>${escapeHtml(food.제품명 || '제품명 정보 없음')}</strong>
           <em>${escapeHtml([food.type === 'wet' ? '습식' : food.type === 'dry' ? '건식' : '', food.완전식여부 || '', food.메인단백질 || ''].filter(Boolean).join(' · '))}</em>
         </span>
@@ -690,6 +690,8 @@
   }
 
   function setDirection(id, direction) {
+    const availability = state.criteriaAvailability.get(id);
+    if (availability && !availability.available) return;
     const current = state.selected.get(id);
     if (direction === 'none') {
       state.selected.delete(id);
@@ -706,6 +708,8 @@
   }
 
   function toggleChip(id) {
+    const availability = state.criteriaAvailability.get(id);
+    if (availability && !availability.available) return;
     if (state.selected.has(id)) {
       state.selected.delete(id);
       state.order = state.order.filter(item => item !== id);
@@ -729,23 +733,32 @@
       const id = control.dataset.directionControl;
       const value = state.selected.get(id);
       const displayValue = value === 'low' || value === 'high' ? value : 'none';
+      const availability = state.criteriaAvailability.get(id);
+      const unavailable = Boolean(availability && !availability.available);
+      const maxedOut = !state.selected.has(id) && selectedCount >= MAX_CRITERIA;
+
       control.dataset.value = displayValue;
-      control.classList.toggle('is-disabled', !state.selected.has(id) && selectedCount >= MAX_CRITERIA);
+      control.classList.toggle('is-disabled', maxedOut || unavailable);
+      control.classList.toggle('is-unavailable', unavailable);
       control.querySelectorAll('button').forEach(button => {
         const direction = button.dataset.direction;
         button.setAttribute('aria-pressed', String(direction === displayValue));
-        button.disabled = !state.selected.has(id) && selectedCount >= MAX_CRITERIA && direction !== 'none';
+        button.disabled = unavailable || (maxedOut && direction !== 'none');
       });
     });
 
     document.querySelectorAll('[data-chip-criterion]').forEach(button => {
       const id = button.dataset.chipCriterion;
       const selected = state.selected.has(id);
+      const availability = state.criteriaAvailability.get(id);
+      const unavailable = Boolean(availability && !availability.available);
       button.classList.toggle('is-selected', selected);
+      button.classList.toggle('is-unavailable', unavailable);
       button.setAttribute('aria-pressed', String(selected));
-      button.disabled = !selected && selectedCount >= MAX_CRITERIA;
+      button.disabled = unavailable || (!selected && selectedCount >= MAX_CRITERIA);
     });
 
+    updateCriteriaAvailabilityUi();
     if (!els.priorityScreen?.hidden) renderPriority();
   }
 
@@ -789,6 +802,7 @@
     if (!els.slots || !els.pool) return;
 
     state.order = state.order.filter(id => state.selected.has(id)).slice(0, MAX_CRITERIA);
+    const selectedCount = state.selected.size;
 
     els.slots.innerHTML = Array.from({ length: selectedCount }, (_, index) => {
       const id = state.order[index];
@@ -1249,6 +1263,92 @@
       .filter(Boolean);
   }
 
+  function assessCriterionAvailability(id, foods) {
+    const isFewerThickeners = id === 'fewer_thickeners';
+    const numericReader = numericCriterionReaders[id] || (isFewerThickeners ? thickenerCount : null);
+
+    if (numericReader) {
+      const values = foods.map(food => numericReader(food));
+      if (values.some(value => value === null || !Number.isFinite(value))) {
+        return { available: false, reason: 'missing', label: '정보 부족' };
+      }
+      const unique = [...new Set(values.map(value => Number(value.toFixed(8))))];
+      if (unique.length < 2) {
+        return { available: false, reason: 'same', label: '모두 동일' };
+      }
+      return { available: true, reason: '', label: '' };
+    }
+
+    const statuses = foods.map(food => evaluateCondition(food, id));
+    if (statuses.some(value => value === null)) {
+      return { available: false, reason: 'missing', label: '정보 부족' };
+    }
+    if (statuses.every(value => value === statuses[0])) {
+      return { available: false, reason: 'same', label: '모두 동일' };
+    }
+    return { available: true, reason: '', label: '' };
+  }
+
+  function updateCriteriaAvailabilityUi() {
+    document.querySelectorAll('[data-availability-label]').forEach(label => {
+      const id = label.dataset.availabilityLabel;
+      const availability = state.criteriaAvailability.get(id);
+      label.textContent = availability && !availability.available ? availability.label : '';
+    });
+  }
+
+  async function refreshCriteriaAvailability() {
+    if (state.criteriaLoading) return;
+    state.criteriaLoading = true;
+
+    const previousText = els.toCriteria?.textContent;
+    if (els.toCriteria) {
+      els.toCriteria.disabled = true;
+      els.toCriteria.textContent = '비교 가능한 기준 확인 중…';
+    }
+
+    try {
+      const foods = await loadSelectedFoodDetails();
+      if (foods.length !== state.foods.length) throw new Error('선택한 사료 정보를 모두 불러오지 못했습니다.');
+
+      const nextAvailability = new Map();
+      criteria.forEach((item, id) => {
+        nextAvailability.set(id, assessCriterionAvailability(id, foods));
+      });
+      state.criteriaAvailability = nextAvailability;
+
+      let changed = false;
+      [...state.selected.keys()].forEach(id => {
+        const availability = state.criteriaAvailability.get(id);
+        if (availability && !availability.available) {
+          state.selected.delete(id);
+          state.order = state.order.filter(item => item !== id);
+          changed = true;
+        }
+      });
+
+      syncCriteriaUi();
+      updateCriteriaAvailabilityUi();
+      if (changed) persistSessionState();
+    } finally {
+      state.criteriaLoading = false;
+      if (els.toCriteria) {
+        els.toCriteria.textContent = previousText || '기준 정하기';
+        els.toCriteria.disabled = state.foods.length < MIN_FOODS;
+      }
+    }
+  }
+
+  async function openCriteriaScreen() {
+    try {
+      await refreshCriteriaAvailability();
+      showScreen('criteria');
+    } catch (error) {
+      console.error('MY FIT criteria availability failed:', error);
+      showToast('비교 가능한 기준을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  }
+
   function compareResultEntries(a, b, criteriaModels) {
     const scoreDiff = b.fitScore - a.fitScore;
     if (Math.abs(scoreDiff) > 1e-9) return scoreDiff;
@@ -1321,6 +1421,35 @@
     };
   }
 
+  function booleanResultText(model, status) {
+    const passFail = {
+      prefer_single_protein: ['✓ 단일 동물성 단백질', '단일 동물성 단백질 아님'],
+      avoid_chicken: ['✓ 치킨 없음', '치킨 포함'],
+      avoid_fish: ['✓ 생선 없음', '생선 포함'],
+      avoid_fish_oil: ['✓ 생선오일 없음', '생선오일 포함'],
+      avoid_meal: ['✓ 육분 없음', '육분 포함'],
+      avoid_corn: ['✓ 옥수수 없음', '옥수수 포함'],
+      avoid_soy: ['✓ 콩 없음', '콩 포함'],
+      avoid_wheat_gluten: ['✓ 밀·밀글루텐 없음', '밀·밀글루텐 포함'],
+      avoid_grain: ['✓ 곡물 없음', '곡물 포함'],
+      no_thickener: ['✓ 점증제 없음', '점증제 포함'],
+      carrageenan_free: ['✓ 카라기난 없음', '카라기난 포함'],
+      gum_free: ['✓ 검류 없음', '검류 포함'],
+      gum_agar_free: ['✓ 검류·한천 없음', '검류 또는 한천 포함'],
+      official_calorie: ['✓ 공식·라벨 열량 확인', '공식·라벨 열량 미확인'],
+      nutrition_complete: ['✓ 주요 영양정보 확인', '주요 영양정보 부족']
+    };
+
+    if (passFail[model.id]) return passFail[model.id][status ? 0 : 1];
+
+    if (model.id.startsWith('prefer_')) {
+      const base = String(model.label || '').replace(/ 포함$/, '');
+      return status ? `✓ ${base} 포함` : `${base} 미포함`;
+    }
+
+    return status ? `✓ ${model.label}` : `${model.label} 미충족`;
+  }
+
   function resultCriterionChip(model, entry) {
     const result = entry.criteria[model.id];
     let text = model.label;
@@ -1330,13 +1459,8 @@
       className += ' is-muted';
       text += model.reason === 'missing' ? ' · 확인불가' : ' · 동일';
     } else if (model.kind === 'boolean') {
-      if (result.status) {
-        className += ' is-positive';
-        text += ' ✓';
-      } else {
-        className += ' is-neutral';
-        text += ' —';
-      }
+      className += result.status ? ' is-positive' : ' is-neutral';
+      text = booleanResultText(model, Boolean(result.status));
     } else {
       className += ' is-ranked';
       text += ` · ${result.rank}위`;
@@ -1736,7 +1860,7 @@
       if (chip) toggleChip(chip.dataset.chipCriterion);
     });
 
-    els.toCriteria?.addEventListener('click', () => showScreen('criteria'));
+    els.toCriteria?.addEventListener('click', openCriteriaScreen);
     els.backToFoods?.addEventListener('click', () => showScreen('foods'));
     els.toPriority?.addEventListener('click', () => showScreen('priority'));
     els.backToCriteria?.addEventListener('click', () => showScreen('criteria'));
@@ -1761,9 +1885,9 @@
       leaveSavedSnapshot();
       showScreen('priority');
     });
-    els.chooseCriteriaAgain?.addEventListener('click', () => {
+    els.chooseCriteriaAgain?.addEventListener('click', async () => {
       leaveSavedSnapshot();
-      showScreen('criteria');
+      await openCriteriaScreen();
     });
     els.compareFoodsAgain?.addEventListener('click', () => {
       leaveSavedSnapshot();
@@ -1808,6 +1932,16 @@
       } catch (error) {
         console.warn('MY FIT result restore failed:', error);
         state.currentScreen = 'priority';
+      }
+    }
+
+    if (state.currentScreen === 'criteria' || state.currentScreen === 'priority') {
+      try {
+        await refreshCriteriaAvailability();
+        if (!state.selected.size && state.currentScreen === 'priority') state.currentScreen = 'criteria';
+      } catch (error) {
+        console.warn('MY FIT criteria restore failed:', error);
+        state.currentScreen = 'foods';
       }
     }
 
