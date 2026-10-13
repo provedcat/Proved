@@ -163,3 +163,38 @@ test('소프트·반습식과 화식은 Blob 제조 태그에서 우선 노출�
   assert.match(source, /soft_semi_moist: '#A58ADB'/);
   assert.match(source, /fresh_cooked: '#8B9FE3'/);
 });
+
+test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 제안한다', async () => {
+  const [html, source, css, registration, registrationHtml] = await Promise.all([
+    read('food/index.html'), read('js/food-list.js'), read('css/food-list.css'),
+    read('js/feed-registration.js'), read('feed-registration/index.html')
+  ]);
+  assert.match(html, /food-search-fuzzy\.js\?v=20261013-fuzzy-v1/);
+  assert.match(html, /food-list\.js\?v=20261013-zero-results-v1/);
+  assert.match(source, /ProvedFoodSearchFuzzy\?\.suggestFoods/);
+  assert.match(source, /혹시 이 사료를 찾으셨나요\?/);
+  assert.match(source, /이 사료를 찾아주세요/);
+  assert.match(source, /buildRegistrationRequestPath/);
+  assert.match(source, /params\.set\('q', state\.query\.trim\(\)\.slice\(0, 120\)\)/);
+  assert.match(registration, /params\.get\('q'\)/);
+  assert.match(registration, /feedTextRequestInput'\)\.value = searchQuery/);
+  assert.match(registrationHtml, /feed-registration\.js\?v=20261013-search-prefill-v1/);
+  assert.match(css, /\.food-empty__suggestions/);
+  assert.match(css, /\.food-empty__request/);
+});
+
+test('0건 검색어만 개인정보 제외 익명 집계 함수로 전송한다', async () => {
+  const [source, sql] = await Promise.all([
+    read('js/food-list.js'),
+    read('supabase/migrations/20261013000000_create_food_zero_result_searches.sql')
+  ]);
+  assert.match(source, /function scheduleZeroResultSearchLog/);
+  assert.match(source, /if \(state\.query\) scheduleZeroResultSearchLog\(\)/);
+  assert.match(source, /state\.total !== 0/);
+  assert.match(source, /record_food_zero_result_search/);
+  assert.match(source, /loggedZeroResults\.has\(key\)/);
+  assert.match(sql, /create table if not exists public\.food_zero_result_searches/);
+  assert.match(sql, /on conflict \(search_day, search_query, species, feed_type, role, tag_count\)/);
+  assert.match(sql, /alter table public\.food_zero_result_searches enable row level security/);
+  assert.match(sql, /grant execute on function public\.record_food_zero_result_search/);
+});
