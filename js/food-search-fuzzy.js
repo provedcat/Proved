@@ -25,7 +25,7 @@
   function boundedDistance(a, b, limit) {
     if (a === b) return 0;
     if (Math.abs(a.length - b.length) > limit) return limit + 1;
-    const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
     let previousPrevious = null;
     for (let i = 1; i <= a.length; i += 1) {
       const next = [i];
@@ -39,7 +39,7 @@
         next.push(cost);
       }
       previousPrevious = prev;
-      for (let j = 0; j < next.length; j += 1) prev[j] = next[j];
+      prev = next;
     }
     return prev[b.length];
   }
