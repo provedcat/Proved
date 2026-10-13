@@ -359,6 +359,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   registrationState.slotIndex = Math.max(0, Math.min(2, Number(params.get('slot')) || 0));
   setChoice('species', params.get('species') === 'dog' ? 'dog' : 'cat');
   setChoice('type', params.get('type') === 'wet' ? 'wet' : 'dry');
+  const searchQuery = String(params.get('q') || '').trim().slice(0, 120);
+  if (searchQuery) document.getElementById('feedTextRequestInput').value = searchQuery;
   document.querySelectorAll('[data-species]').forEach(button => button.addEventListener('click', () => setChoice('species', button.dataset.species)));
   document.querySelectorAll('[data-type]').forEach(button => button.addEventListener('click', () => setChoice('type', button.dataset.type)));
   document.getElementById('feedTextRequestBtn').addEventListener('click', submitTextRegistration);
