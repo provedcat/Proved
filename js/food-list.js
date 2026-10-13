@@ -38,6 +38,7 @@
     total: 0,
     loaded: PAGE_SIZE,
     rows: [],
+    suggestions: [],
     loading: false,
     requestSerial: 0,
     tags: [],
@@ -72,6 +73,8 @@
 
   const els = {};
   let searchTimer = null;
+  let zeroResultLogTimer = null;
+  const loggedZeroResults = new Set();
 
   function $(id) { return document.getElementById(id); }
 
@@ -543,12 +546,14 @@
 
   function bindEvents() {
     els.searchInput.addEventListener('input', () => {
+      window.clearTimeout(zeroResultLogTimer);
       state.query = els.searchInput.value.trim().slice(0, 120);
       els.searchClear.hidden = !state.query;
       clearTimeout(searchTimer);
       searchTimer = window.setTimeout(() => updateFinder(true), 280);
     });
     els.searchClear.addEventListener('click', () => {
+      window.clearTimeout(zeroResultLogTimer);
       clearTimeout(searchTimer); state.query = ''; els.searchInput.value = ''; els.searchClear.hidden = true;
       updateFinder(true); els.searchInput.focus();
     });
@@ -773,11 +778,16 @@
         || compareFeedRows(a, b)
       );
 
-    return { data: matches.slice(0, limit), count: matches.length, error: null };
+    const suggestions = matches.length ? [] : (window.ProvedFoodSearchFuzzy?.suggestFoods(
+      rows, state.query, buildFoodSearchText, 3
+    ) || []);
+    return { data: matches.slice(0, limit), count: matches.length, suggestions, error: null };
   }
 
   async function loadFeeds(reset) {
     if (state.loading && !reset) return;
+    window.clearTimeout(zeroResultLogTimer);
+    if (reset) state.suggestions = [];
     const serial = ++state.requestSerial; state.loading = true; els.listStatus.textContent = ''; els.loadMore.hidden = true;
     if (reset) { state.rows = []; state.total = 0; renderSkeletons(); }
     else { state.loaded += PAGE_SIZE; els.loadMore.textContent = '불러오는 중…'; els.loadMore.hidden = false; els.loadMore.disabled = true; }
@@ -795,6 +805,10 @@
         ? (a, b) => foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query) || compareFeedRows(a, b)
         : compareFeedRows);
       state.rows = combined.slice(0, state.loaded); state.total = responses.reduce((sum, response) => sum + (Number(response.count) || 0), 0);
+      state.suggestions = state.total ? [] : responses
+        .flatMap(response => response.suggestions || [])
+        .filter((feed, index, all) => all.findIndex(other => other.id === feed.id && other.species === feed.species) === index)
+        .slice(0, 3);
       state.loading = false; els.loadMore.disabled = false; els.loadMore.textContent = '더 보기'; renderResults(); persistFinderPosition();
     } catch (error) {
       if (serial !== state.requestSerial) return; state.loading = false; els.results.innerHTML = ''; els.resultsCount.textContent = '사료 목록'; els.listStatus.textContent = `사료 목록을 불러오지 못했습니다. ${error.message || ''}`.trim();
@@ -807,6 +821,42 @@
     const secondaryA = state.sort === 'product' ? getBrand(a).name : String(a.제품명 || '');
     const secondaryB = state.sort === 'product' ? getBrand(b).name : String(b.제품명 || '');
     return primaryA.localeCompare(primaryB, 'ko') || secondaryA.localeCompare(secondaryB, 'ko') || a.species.localeCompare(b.species) || String(a.id).localeCompare(String(b.id));
+  }
+
+  function buildRegistrationRequestPath() {
+    const params = new URLSearchParams();
+    params.set('q', state.query.trim().slice(0, 120));
+    if (state.species !== 'all') params.set('species', state.species);
+    if (state.type !== 'all') params.set('type', state.type);
+    return '/feed-registration/?' + params.toString();
+  }
+
+  function scheduleZeroResultSearchLog() {
+    window.clearTimeout(zeroResultLogTimer);
+    const query = state.query.trim();
+    if (query.length < 3 || !/[가-힣a-z]/i.test(query)) return;
+    const context = {
+      p_query: query,
+      p_species: state.species,
+      p_feed_type: state.type,
+      p_role: state.role,
+      p_tag_count: state.selectedTagIds.length,
+      p_suggestion_count: state.suggestions.length
+    };
+    const key = JSON.stringify(context);
+    if (loggedZeroResults.has(key)) return;
+    zeroResultLogTimer = window.setTimeout(async () => {
+      if (state.query !== query || state.loading || state.total !== 0) return;
+      if (loggedZeroResults.size >= 100) return;
+      loggedZeroResults.add(key);
+      try {
+        const { error } = await foodSb.rpc('record_food_zero_result_search', context);
+        if (error) throw error;
+      } catch (error) {
+        loggedZeroResults.delete(key);
+        console.warn('[Proved] zero-result search log:', error);
+      }
+    }, 1600);
   }
 
   function renderResults() {
@@ -823,8 +873,15 @@
         state.type !== 'all' && ['type', '전체 형태로 보기'],
         state.role !== 'all' && ['role', '전체 분류로 보기']
       ].filter(Boolean);
-      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><span>조건을 하나씩 넓혀 다시 찾아보세요.</span><div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
+      const suggestions = state.query && state.suggestions.length
+        ? `<div class="food-empty__suggestions"><h3>혹시 이 사료를 찾으셨나요?</h3><p>검색어와 비슷한 이름의 제품이에요. 정확한 제품명과 규격을 확인해 주세요.</p><div class="food-empty__suggestions-list">${state.suggestions.map(feed => `<a class="food-empty__suggestion" href="${escapeHtml(buildProductPath(feed))}"><b>${escapeHtml(getBrand(feed).name)}</b> ${escapeHtml(feed.제품명 || '제품 정보 보기')}</a>`).join('')}</div></div>`
+        : '';
+      const requestLink = state.query
+        ? `<a class="food-empty__request" href="${escapeHtml(buildRegistrationRequestPath())}">이 사료를 찾아주세요 →</a><p class="food-empty__request-hint">사료 이름을 보내거나 라벨 사진으로 등록을 요청할 수 있어요.</p>`
+        : '';
+      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><p class="food-empty__description">조건을 넓혀 다시 찾아보거나, 찾는 사료를 요청해 주세요.</p>${suggestions}${requestLink}<div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
       els.loadMore.hidden = true;
+      if (state.query) scheduleZeroResultSearchLog();
       return;
     }
 
