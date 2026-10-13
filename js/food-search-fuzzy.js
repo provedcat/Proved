@@ -57,7 +57,9 @@
         exact += 1;
         continue;
       }
-      const limit = permittedEdits(token);
+      // A two-character typo is allowed only with other query tokens as context.
+      const limit = token.length === 2 && tokens.length >= 2 && !/\d/.test(token)
+        ? 1 : permittedEdits(token);
       if (!limit) return null;
       let best = limit + 1;
       for (const word of words) {
