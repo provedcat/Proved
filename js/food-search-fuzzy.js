@@ -77,8 +77,8 @@
     const ranked = [];
     for (const feed of rows) {
       const score = scoreCandidate(searchTextFor(feed), tokens);
-      // Exact matches are handled by the normal search; this function is fallback only.
-      if (!score || score.edits === 0) continue;
+      // Only called when the strict search returns no results; compact spacing matches belong here too.
+      if (!score) continue;
       ranked.push({ feed, ...score });
     }
     ranked.sort((a, b) => a.edits - b.edits || b.exact - a.exact);
