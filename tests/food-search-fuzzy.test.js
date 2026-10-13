@@ -20,8 +20,8 @@ test('공백이 생략된 제품명과 단어 순서가 바뀐 오타도 찾는�
   assert.equal(matches[0]?.id, 'baby');
 });
 
-test('정확히 검색 가능한 제품은 오타 후보 목록으로 보여주지 않는다', () => {
-  assert.deepEqual(fuzzy.suggestFoods(foods, '로얄캐닌 베이비 무스', searchText), []);
+test('띄어쓰기 없는 브랜드와 제품명도 대안 검색에서 찾는다', () => {
+  assert.equal(fuzzy.suggestFoods(foods, '로얄캐닌베이비무스', searchText)[0]?.id, 'baby');
 });
 
 test('중요 규격 숫자 85g을 80g으로 자동 보정하지 않는다', () => {
