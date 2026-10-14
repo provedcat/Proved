@@ -644,6 +644,10 @@
   function clearAllTags() { state.selectedTagIds = []; state.matchingFeedIds = { cat: null, dog: null }; renderConditionFinder(); updateFinder(true); }
 
   function applyRecovery(kind) {
+    if (kind === 'all-filters') {
+      state.species = 'all'; state.type = 'all'; state.role = 'all';
+      state.selectedTagIds = []; state.matchingFeedIds = { cat: null, dog: null };
+    }
     if (kind === 'query') { state.query = ''; els.searchInput.value = ''; }
     if (kind === 'tags') state.selectedTagIds = [];
     if (kind === 'species') state.species = 'all';
@@ -880,12 +884,24 @@
   async function loadFeeds(reset) {
     if (state.loading && !reset) return;
     window.clearTimeout(zeroResultLogTimer);
-    if (reset) state.suggestions = [];
+    if (reset) { state.suggestions = []; state.outsideMatches = []; state.outsideTotal = 0; }
     const serial = ++state.requestSerial; state.loading = true; els.listStatus.textContent = ''; els.loadMore.hidden = true;
     if (reset) { state.rows = []; state.total = 0; renderSkeletons(); }
     else { state.loaded += PAGE_SIZE; els.loadMore.textContent = '불러오는 중…'; els.loadMore.hidden = false; els.loadMore.disabled = true; }
     const speciesList = state.species === 'all' ? ['cat', 'dog'] : [state.species];
     try {
+      if (state.query) {
+        const { filtered, outside, suggestions } = await searchAllProducts(state.query);
+        if (serial !== state.requestSerial) return;
+        state.rows = filtered.slice(0, state.loaded);
+        state.total = filtered.length;
+        state.outsideMatches = outside.slice(0, 6);
+        state.outsideTotal = outside.length;
+        state.suggestions = suggestions;
+        state.loading = false; els.loadMore.disabled = false; els.loadMore.textContent = '더 보기';
+        renderResults(); persistFinderPosition();
+        return;
+      }
       if (reset || state.selectedTagIds.length) {
         const idSets = await Promise.all(speciesList.map(species => resolveMatchingFeedIds(species)));
         speciesList.forEach((species, index) => { state.matchingFeedIds[species] = idSets[index]; });
@@ -898,10 +914,9 @@
         ? (a, b) => foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query) || compareFeedRows(a, b)
         : compareFeedRows);
       state.rows = combined.slice(0, state.loaded); state.total = responses.reduce((sum, response) => sum + (Number(response.count) || 0), 0);
-      state.suggestions = state.total ? [] : responses
-        .flatMap(response => response.suggestions || [])
-        .filter((feed, index, all) => all.findIndex(other => other.id === feed.id && other.species === feed.species) === index)
-        .slice(0, 3);
+      state.suggestions = [];
+      state.outsideMatches = [];
+      state.outsideTotal = 0;
       state.loading = false; els.loadMore.disabled = false; els.loadMore.textContent = '더 보기'; renderResults(); persistFinderPosition();
     } catch (error) {
       if (serial !== state.requestSerial) return; state.loading = false; els.results.innerHTML = ''; els.resultsCount.textContent = '사료 목록'; els.listStatus.textContent = `사료 목록을 불러오지 못했습니다. ${error.message || ''}`.trim();
@@ -966,15 +981,26 @@
         state.type !== 'all' && ['type', '전체 형태로 보기'],
         state.role !== 'all' && ['role', '전체 분류로 보기']
       ].filter(Boolean);
+      const outsideMatches = state.query && state.outsideMatches.length
+        ? '<div class="food-empty__outside"><h3>선택한 조건 밖에서 사료를 찾았어요</h3>'
+          + '<p>검색어와 일치하는 사료가 전체 목록에는 있어요. 현재 선택한 조건과 맞지 않아 목록에서 제외된 제품이에요.</p>'
+          + '<div class="food-empty__suggestions-list">' + state.outsideMatches.map(feed =>
+            '<a class="food-empty__suggestion" href="' + escapeHtml(buildProductPath(feed)) + '">'
+            + '<b>' + escapeHtml(getBrand(feed).name) + '</b> ' + escapeHtml(feed.제품명 || '제품 정보 보기')
+            + '<small>' + escapeHtml([getSpeciesLabel(feed.species), getTypeLabel(feed.type), getRoleLabel(feed.완전식여부)].join(' · ')) + '</small></a>'
+          ).join('') + '</div>'
+          + (state.outsideTotal > state.outsideMatches.length ? '<p>외 ' + formatNumber(state.outsideTotal - state.outsideMatches.length, 0) + '개 제품</p>' : '')
+          + '<button type="button" class="food-empty__reset-filters" data-recovery="all-filters">전체 조건 해제하고 결과 보기</button></div>'
+        : '';
       const suggestions = state.query && state.suggestions.length
         ? `<div class="food-empty__suggestions"><h3>혹시 이 사료를 찾으셨나요?</h3><p>검색어와 비슷한 이름의 제품이에요. 정확한 제품명과 규격을 확인해 주세요.</p><div class="food-empty__suggestions-list">${state.suggestions.map(feed => `<a class="food-empty__suggestion" href="${escapeHtml(buildProductPath(feed))}"><b>${escapeHtml(getBrand(feed).name)}</b> ${escapeHtml(feed.제품명 || '제품 정보 보기')}</a>`).join('')}</div></div>`
         : '';
-      const requestLink = state.query
+      const requestLink = state.query && !state.outsideMatches.length
         ? `<a class="food-empty__request" href="${escapeHtml(buildRegistrationRequestPath())}">이 사료를 찾아주세요 →</a><p class="food-empty__request-hint">사료 이름을 보내거나 라벨 사진으로 등록을 요청할 수 있어요.</p>`
         : '';
-      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><p class="food-empty__description">조건을 넓혀 다시 찾아보거나, 찾는 사료를 요청해 주세요.</p>${suggestions}${requestLink}<div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
+      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><p class="food-empty__description">조건을 넓혀 다시 찾아보거나, 찾는 사료를 요청해 주세요.</p>${outsideMatches}${suggestions}${requestLink}<div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
       els.loadMore.hidden = true;
-      if (state.query) scheduleZeroResultSearchLog();
+      if (state.query && !state.outsideMatches.length) scheduleZeroResultSearchLog();
       return;
     }
 
