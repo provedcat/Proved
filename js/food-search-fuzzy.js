@@ -16,7 +16,48 @@
       .trim();
   }
 
-  // An edit of a number can change a product size or formula: never fuzzy-match it.
+  // Ignore packaging capacity only; preserve product model codes (e.g. 001, 12+).
+  function normalizeQuery(value) {
+    const withoutSize = String(value || '').normalize('NFKC')
+      .replace(/\d+(?:[.,]\d+)?\s*(?:kg|g|ml|oz|그램|그람|킬로그램|밀리리터|리터)(?=\s|$)/gi, ' ');
+    return normalize(withoutSize);
+  }
+
+  function tokenize(value) {
+    return [...new Set(normalizeQuery(value).split(' ').filter(Boolean))];
+  }
+
+  // "베이비무스" matches text containing both "베이비" and "무스",
+  // even if those parts are separated by other words in a real product name.
+  function isCompoundMatch(text, token) {
+    if (token.length < 4 || token.length > 30 || /\d/.test(token)) return false;
+    function partsMatch(offset, count) {
+      if (offset === token.length) return count >= 2;
+      if (count >= 3) return false;
+      for (let end = offset + 2; end <= token.length; end += 1) {
+        const part = token.slice(offset, end);
+        const rest = token.length - end;
+        if (rest > 0 && rest < 2) continue;
+        if (text.includes(part) && partsMatch(end, count + 1)) return true;
+      }
+      return false;
+    }
+    return partsMatch(0, 0);
+  }
+
+  function tokenMatches(text, compact, token) {
+    return text.includes(token) || compact.includes(token) || isCompoundMatch(text, token);
+  }
+
+  function matchesText(searchText, query) {
+    const tokens = tokenize(query);
+    if (!tokens.length) return false;
+    const text = normalize(searchText);
+    const compact = text.replace(/\s+/g, '');
+    return tokens.every(token => tokenMatches(text, compact, token));
+  }
+
+  // An edit of a number can change a product model: never fuzzy-match it.
   function permittedEdits(token) {
     if (token.length < 3 || /\d/.test(token)) return 0;
     return token.length >= 6 ? 2 : 1;
@@ -53,7 +94,7 @@
     let exact = 0;
 
     for (const token of tokens) {
-      if (text.includes(token) || compact.includes(token)) {
+      if (tokenMatches(text, compact, token)) {
         exact += 1;
         continue;
       }
@@ -74,7 +115,7 @@
   }
 
   function suggestFoods(rows, query, searchTextFor, limit = 3) {
-    const tokens = [...new Set(normalize(query).split(' ').filter(Boolean))];
+    const tokens = tokenize(query);
     if (!tokens.length || tokens.join('').length < 3 || !Array.isArray(rows)) return [];
     const ranked = [];
     for (const feed of rows) {
@@ -87,5 +128,5 @@
     return ranked.slice(0, limit).map(item => item.feed);
   }
 
-  return { normalize, permittedEdits, boundedDistance, scoreCandidate, suggestFoods };
+  return { normalize, normalizeQuery, tokenize, isCompoundMatch, matchesText, permittedEdits, boundedDistance, scoreCandidate, suggestFoods };
 });
