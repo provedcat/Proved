@@ -723,6 +723,104 @@
       .registration-file__preview { width:78px; height:98px; }
       .registration-file__plus { display:none; }
     }
+
+    /* AI product lookup: search results and explicit product selection */
+    .registration-search-results {
+      margin-top:22px;
+      padding:22px 20px;
+      border:1px solid #D6E0EF;
+      border-radius:16px;
+      background:#F8FAFE;
+      color:var(--reg-ink);
+      text-align:left;
+    }
+    .registration-search-results h3 {
+      margin:0 0 10px;
+      color:var(--reg-blue);
+      font-size:17px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .registration-search-results__intro,
+    .registration-search-results__hint {
+      margin:8px 0;
+      color:var(--reg-muted);
+      font-size:12px;
+      line-height:1.7;
+      word-break:keep-all;
+    }
+    .registration-search-results__list {
+      display:grid;
+      gap:10px;
+      margin:18px 0 0;
+      padding:0;
+      list-style:none;
+    }
+    .registration-search-result {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:15px;
+      border:1px solid #D7E2F1;
+      border-radius:12px;
+      background:#fff;
+    }
+    .registration-search-result__body { min-width:0; flex:1 1 200px; }
+    .registration-search-result__body strong {
+      display:block;
+      overflow-wrap:anywhere;
+      color:var(--reg-ink);
+      font-size:13px;
+      font-weight:780;
+      line-height:1.55;
+    }
+    .registration-search-result__body p {
+      margin:7px 0 0;
+      color:var(--reg-muted);
+      font-size:11px;
+      line-height:1.5;
+    }
+    .registration-search-result__type {
+      display:inline-block;
+      margin-top:5px;
+      color:var(--reg-blue);
+      font-size:11px;
+      font-weight:700;
+    }
+    .registration-search-result__select {
+      min-height:42px;
+      padding:9px 14px;
+      border:1px solid var(--reg-blue);
+      border-radius:10px;
+      background:var(--reg-blue);
+      color:#fff;
+      font-size:12px;
+      font-weight:800;
+    }
+    .registration-search-result__select:disabled { opacity:.6; cursor:wait; }
+    .registration-search-results__actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:16px;
+    }
+    .registration-search-results__actions button {
+      min-height:44px;
+      flex:1 1 140px;
+      padding:10px 12px;
+      border:1px solid #A7BDE9;
+      border-radius:10px;
+      background:#fff;
+      color:var(--reg-blue);
+      font-size:12px;
+      font-weight:750;
+    }
+    .registration-search-results button:focus-visible {
+      outline:2px solid var(--reg-blue);
+      outline-offset:3px;
+    }
   </style>
   <link rel="stylesheet" href="/css/proved-layout.css?v=20260831-registration-font-v1" data-proved-layout>
 </head>
@@ -769,7 +867,7 @@
         <section class="registration-form" aria-labelledby="nameRegistrationTitle">
           <label id="nameRegistrationTitle" for="feedTextRequestInput">브랜드 + 제품명</label>
           <input id="feedTextRequestInput" class="registration-input" type="text" maxlength="120" autocomplete="off" placeholder="예: 힐스 캣 어덜트 유리너리 헤어볼 컨트롤 스튜">
-          <p class="registration-help">실제 판매 제품 하나로 확인되는 경우 등록할 수 있습니다.<br>브랜드나 제품군만 입력하면 추가 정보가 필요할 수 있어요.</p>
+          <p class="registration-help">브랜드와 제품명을 붙여 써도 검색할 수 있어요. AI가 실제 제품을 확인하고, 후보가 여러 개라면 선택할 수 있도록 보여드려요.<br>제품을 특정하기 어려우면 추가 정보나 라벨 사진을 요청할 수 있어요.</p>
           <button id="feedTextRequestBtn" type="button" class="registration-submit">제품명으로 등록</button>
           <div id="feedTextRequestWait" class="registration-wait" role="status" aria-live="polite" aria-hidden="true">
             <p id="feedTextRequestAlert" class="registration-wait__alert">창을 닫거나 등록 버튼을 다시 누르지 마세요.</p>
@@ -846,6 +944,7 @@
     <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>
   </footer>
 
-  <script src="/js/feed-registration.js?v=20261013-search-prefill-v1"></script>
+  <script src="/js/registration-search-results.js?v=20261014-registration-search-v1"></script>
+  <script src="/js/feed-registration.js?v=20261014-registration-search-v1"></script>
 </body>
 </html>
