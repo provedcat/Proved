@@ -781,7 +781,9 @@
       if (table === 'feeds' || table === 'dog_feeds') {
         query = query.or('verified.eq.true,searchable_before_review.eq.true');
       }
-      const { data, error } = await query.order(sortColumn).range(from, from + pageSize - 1);
+      query = query.order(sortColumn);
+      if (sortColumn === 'feed_id' || sortColumn === 'dog_feed_id') query = query.order('tag_id');
+      const { data, error } = await query.range(from, from + pageSize - 1);
       if (error) throw error;
       rows.push(...(data || []));
       if (!data || data.length < pageSize) break;
