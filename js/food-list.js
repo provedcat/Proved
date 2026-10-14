@@ -1000,7 +1000,7 @@
       const requestLink = state.query && !state.outsideMatches.length
         ? `<a class="food-empty__request" href="${escapeHtml(buildRegistrationRequestPath())}">이 사료를 찾아주세요 →</a><p class="food-empty__request-hint">사료 이름을 보내거나 라벨 사진으로 등록을 요청할 수 있어요.</p>`
         : '';
-      els.results.innerHTML = `<div class="food-empty"><strong>검색 결과가 없습니다.</strong><p class="food-empty__description">조건을 넓혀 다시 찾아보거나, 찾는 사료를 요청해 주세요.</p>${outsideMatches}${suggestions}${requestLink}<div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
+      els.results.innerHTML = `<div class="food-empty"><strong>${state.outsideMatches.length ? "선택한 조건에 맞는 사료가 없어요." : "검색 결과가 없습니다."}</strong><p class="food-empty__description">${state.outsideMatches.length ? "전체 목록에는 일치하는 제품이 있어요. 아래에서 확인해 주세요." : "조건을 넓혀 다시 찾아보거나, 찾는 사료를 요청해 주세요."}</p>${outsideMatches}${suggestions}${requestLink}<div class="food-empty__actions">${actions.map(([key, label]) => `<button type="button" data-recovery="${key}">${label}</button>`).join('')}</div></div>`;
       els.loadMore.hidden = true;
       if (state.query && !state.outsideMatches.length) scheduleZeroResultSearchLog();
       return;
