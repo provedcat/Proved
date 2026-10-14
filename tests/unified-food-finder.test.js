@@ -189,7 +189,7 @@ test('0건 검색어만 개인정보 제외 익명 집계 함수로 전송한다
     read('supabase/migrations/20261013000000_create_food_zero_result_searches.sql')
   ]);
   assert.match(source, /function scheduleZeroResultSearchLog/);
-  assert.match(source, /if \(state\.query\) scheduleZeroResultSearchLog\(\)/);
+  assert.match(source, /if \(state\.query && !state\.outsideMatches\.length\) scheduleZeroResultSearchLog\(\)/);
   assert.match(source, /state\.total !== 0/);
   assert.match(source, /record_food_zero_result_search/);
   assert.match(source, /loggedZeroResults\.has\(key\)/);
