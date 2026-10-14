@@ -59,7 +59,8 @@ const registrationState = {
   imageFile: null,
   previewUrl: null,
   slotIndex: 0,
-  returnTo: ''
+  returnTo: '',
+  candidateRequestId: null
 };
 let textWaitTimers = [];
 let calculatorReturnTimer = null;
@@ -217,18 +218,80 @@ function hideTextWait() {
   if (alert) alert.textContent = '창을 닫거나 등록 버튼을 다시 누르지 마세요.';
 }
 
+function renderRegistrationSearchResult(result, requestId = null) {
+  registrationState.candidateRequestId = requestId;
+  const container = document.getElementById('feedTextRequestMsg');
+  if (!container) return;
+  const results = window.ProvedRegistrationSearchResults;
+  if (!results) {
+    renderMessage('feedTextRequestMsg', result?.안내 || result?.오류 || '제품 정보를 확인할 수 없습니다.', 'warning');
+    return;
+  }
+  container.innerHTML = results.renderResponse(result);
+}
+
+async function submitRegistrationCandidate(candidateIndex) {
+  if (registrationState.busy || !registrationState.candidateRequestId
+    || !Number.isInteger(candidateIndex) || candidateIndex < 0) return;
+  const container = document.getElementById('feedTextRequestMsg');
+  const button = container?.querySelector('[data-register-candidate-index="' + candidateIndex + '"]');
+  if (!button) return;
+
+  registrationState.busy = true;
+  container.querySelectorAll('[data-register-candidate-index]').forEach(element => { element.disabled = true; });
+  button.textContent = '선택한 사료 확인 중…';
+  showTextWait();
+  try {
+    const result = await parseResponse(await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'text_candidate_select',
+        request_id: registrationState.candidateRequestId,
+        candidate_index: candidateIndex
+      })
+    }));
+
+    if (result.중복 || result.성공) {
+      const productName = getRegisteredProductName(result, document.getElementById('feedTextRequestInput').value);
+      renderMessage('feedTextRequestMsg', result.중복
+        ? '이미 등록된 제품입니다. ' + productName
+        : result.검색가능 === false
+          ? productName + ' 자료를 저장했습니다. 검수 후 검색에 표시됩니다.'
+          : productName + ' 등록 완료 — 계산기에서 검색할 수 있습니다.',
+        result.검색가능 === false ? 'warning' : 'success');
+      registrationState.candidateRequestId = null;
+      document.getElementById('feedTextRequestInput').value = '';
+      showReturnNotice({ result, fallbackName: productName, searchable: result.검색가능 !== false });
+      return;
+    }
+
+    renderRegistrationSearchResult(result, registrationState.candidateRequestId);
+  } catch (error) {
+    console.error('[Registration] candidate selection failed:', error);
+    renderRegistrationSearchResult({
+      성공: false,
+      오류: '선택한 제품을 등록하지 못했습니다. 잠시 후 다시 시도하거나 제품명을 수정해 주세요.',
+      outcome: 'selection_failed'
+    }, registrationState.candidateRequestId);
+  } finally {
+    hideTextWait();
+    registrationState.busy = false;
+  }
+}
+
 async function submitTextRegistration() {
   if (registrationState.busy) return;
   const input = document.getElementById('feedTextRequestInput');
   const button = document.getElementById('feedTextRequestBtn');
   const query = String(input.value || '').trim();
-  if (query.split(/\s+/).filter(Boolean).length < 2) {
-    renderMessage('feedTextRequestMsg', '브랜드와 정확한 제품명을 함께 입력해 주세요. 예: 조공 소피캣 닭', 'warning');
+  if (query.length < 2) {
+    renderMessage('feedTextRequestMsg', '제품명을 두 글자 이상 입력해 주세요. 브랜드와 제품명을 붙여 써도 AI가 확인합니다.', 'warning');
     input.focus();
     return;
   }
 
   registrationState.busy = true;
+  registrationState.candidateRequestId = null;
   button.disabled = true;
   button.classList.add('is-loading');
   button.textContent = '사료 정보 확인 중…';
@@ -260,7 +323,7 @@ async function submitTextRegistration() {
       result.outcome === 'needs_more_info' || result.status === 'needs_more_info' ||
       Object.values(validation).some(value => value === false);
     if (needsMoreInfo) {
-      renderMessage('feedTextRequestMsg', result.안내 || '브랜드와 정확한 제품명을 함께 입력해 주세요.', 'warning');
+      renderRegistrationSearchResult(result, requestId);
       return;
     }
     if (result.중복) {
@@ -268,7 +331,10 @@ async function submitTextRegistration() {
       showReturnNotice({ result, fallbackName: query, searchable: result.검색가능 !== false });
       return;
     }
-    if (!result.성공) throw new Error(result.오류 || '제품 정보를 등록하지 못했습니다.');
+    if (!result.성공) {
+      renderRegistrationSearchResult(result, requestId);
+      return;
+    }
     const names = Array.isArray(result.제품명) ? result.제품명.join(', ') : (result.제품명 || query);
     renderMessage('feedTextRequestMsg', result.검색가능 === false
       ? `${names} 자료를 저장했습니다. 검수 후 검색에 표시됩니다.`
@@ -277,7 +343,7 @@ async function submitTextRegistration() {
     showReturnNotice({ result, fallbackName: names, searchable: result.검색가능 !== false });
   } catch (error) {
     console.error(error);
-    renderMessage('feedTextRequestMsg', '제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+    renderRegistrationSearchResult({ 성공: false, 오류: '사료 검색 서버에 연결하지 못했습니다. 잠시 후 다시 시도하거나 라벨 사진을 등록해 주세요.', outcome: 'request_failed' });
   } finally {
     hideTextWait();
     registrationState.busy = false;
@@ -364,6 +430,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('[data-species]').forEach(button => button.addEventListener('click', () => setChoice('species', button.dataset.species)));
   document.querySelectorAll('[data-type]').forEach(button => button.addEventListener('click', () => setChoice('type', button.dataset.type)));
   document.getElementById('feedTextRequestBtn').addEventListener('click', submitTextRegistration);
+  document.getElementById('feedTextRequestMsg').addEventListener('click', event => {
+    const candidateButton = event.target.closest('[data-register-candidate-index]');
+    if (candidateButton) {
+      const index = Number(candidateButton.dataset.registerCandidateIndex);
+      if (Number.isInteger(index) && index >= 0) submitRegistrationCandidate(index);
+      return;
+    }
+    if (event.target.closest('[data-registration-refine]')) {
+      document.getElementById('feedTextRequestInput').focus();
+      return;
+    }
+    if (event.target.closest('[data-registration-upload-trigger]')) {
+      document.getElementById('uploadInput').click();
+    }
+  });
   document.getElementById('feedTextRequestInput').addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); submitTextRegistration(); }
   });
