@@ -169,8 +169,8 @@ test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 �
     read('food/index.html'), read('js/food-list.js'), read('css/food-list.css'),
     read('js/feed-registration.js'), read('feed-registration/index.html')
   ]);
-  assert.match(html, /food-search-fuzzy\.js\?v=20261013-fuzzy-v1/);
-  assert.match(html, /food-list\.js\?v=20261013-zero-results-v1/);
+  assert.match(html, /food-search-fuzzy\.js\?v=20261014-search-alias-v1/);
+  assert.match(html, /food-list\.js\?v=20261014-search-alias-v1/);
   assert.match(source, /ProvedFoodSearchFuzzy\?\.suggestFoods/);
   assert.match(source, /혹시 이 사료를 찾으셨나요\?/);
   assert.match(source, /이 사료를 찾아주세요/);
@@ -197,4 +197,28 @@ test('0건 검색어만 개인정보 제외 익명 집계 함수로 전송한다
   assert.match(sql, /on conflict \(search_day, search_query, species, feed_type, role, tag_count\)/);
   assert.match(sql, /alter table public\.food_zero_result_searches enable row level security/);
   assert.match(sql, /grant execute on function public\.record_food_zero_result_search/);
+});
+
+test('검색어가 태그·브랜드 별칭까지 검색하고 선택 필터 밖 제품도 보여준다', async () => {
+  const [source, html, css] = await Promise.all([
+    read('js/food-list.js'), read('food/index.html'), read('css/food-list.css')
+  ]);
+  assert.match(source, /brands\(name,name_ko,search_aliases,official_url\)/);
+  assert.match(source, /brand\?\.search_aliases/);
+  assert.match(source, /function loadSearchCatalog/);
+  assert.match(source, /feed_food_tags/);
+  assert.match(source, /dog_feed_food_tags/);
+  assert.match(source, /is_active === true/);
+  assert.match(source, /low_temp_cooked/);
+  assert.match(source, /freeze_dried/);
+  assert.match(source, /tag\.label_ko/);
+  assert.match(source, /async function searchAllProducts/);
+  assert.match(source, /const outside = filtered\.length \? \[\] : matches\.filter/);
+  assert.match(source, /function matchesCurrentFilters/);
+  assert.match(source, /state\.selectedTagIds\.every/);
+  assert.match(source, /선택한 조건 밖에서 사료를 찾았어요/);
+  assert.match(source, /data-recovery="all-filters"/);
+  assert.match(source, /if \(state\.query && !state\.outsideMatches\.length\) scheduleZeroResultSearchLog/);
+  assert.match(html, /food-list\.css\?v=20261014-search-alias-v1/);
+  assert.match(css, /\.food-empty__outside/);
 });
