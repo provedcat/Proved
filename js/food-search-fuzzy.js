@@ -18,10 +18,9 @@
 
   // Ignore packaging capacity only; preserve product model codes (e.g. 001, 12+).
   function normalizeQuery(value) {
-    return normalize(value)
-      .replace(/(^|\s)\d+(?:[.,]\d+)?\s*(?:kg|g|ml|oz|그램|그람|킬로그램|밀리리터|리터)(?=\s|$)/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    const withoutSize = String(value || '').normalize('NFKC')
+      .replace(/\d+(?:[.,]\d+)?\s*(?:kg|g|ml|oz|그램|그람|킬로그램|밀리리터|리터)(?=\s|$)/gi, ' ');
+    return normalize(withoutSize);
   }
 
   function tokenize(value) {
