@@ -39,6 +39,8 @@
     loaded: PAGE_SIZE,
     rows: [],
     suggestions: [],
+    outsideMatches: [],
+    outsideTotal: 0,
     loading: false,
     requestSerial: 0,
     tags: [],
@@ -54,7 +56,7 @@
   const listColumns = [
     'id', 'type', '제조사', '제품명', '완전식여부', '메인단백질',
     'final_me', 'ca_p_ratio', 'verified', 'verification_status',
-    'searchable_before_review', 'brand_id', 'brands(name,official_url)'
+    'searchable_before_review', 'brand_id', 'brands(name,name_ko,search_aliases,official_url)'
   ].join(',');
 
   const detailColumns = [
@@ -315,33 +317,38 @@
   }
 
   function buildFoodSearchText(feed) {
+    const brand = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
     const typeTerms = feed?.type === 'dry'
       ? '건식 드라이 dry'
       : feed?.type === 'wet' ? '습식 wet 캔 파우치' : '';
     return normalizeFoodSearchText([
       getBrand(feed).name,
+      brand?.name_ko,
+      ...(Array.isArray(brand?.search_aliases) ? brand.search_aliases : []),
       feed?.제조사,
       feed?.제품명,
       feed?.완전식여부,
       feed?.메인단백질,
+      feed?._searchTags,
       typeTerms,
       getSpeciesLabel(feed?.species)
     ].filter(Boolean).join(' '));
   }
 
   function matchesFoodSearch(feed, rawQuery) {
+    const text = feed?._searchText || buildFoodSearchText(feed);
+    const helper = window.ProvedFoodSearchFuzzy;
+    if (helper?.matchesText) return helper.matchesText(text, rawQuery);
     const tokens = tokenizeFoodSearchQuery(rawQuery);
-    if (!tokens.length) return true;
-    const text = buildFoodSearchText(feed);
-    return tokens.every(token => text.includes(token));
+    return tokens.length > 0 && tokens.every(token => text.includes(token));
   }
 
   function foodSearchRelevance(feed, rawQuery) {
-    const tokens = tokenizeFoodSearchQuery(rawQuery);
-    const phrase = normalizeFoodSearchText(rawQuery);
+    const tokens = window.ProvedFoodSearchFuzzy?.tokenize(rawQuery) || tokenizeFoodSearchQuery(rawQuery);
+    const phrase = window.ProvedFoodSearchFuzzy?.normalizeQuery(rawQuery) || normalizeFoodSearchText(rawQuery);
     const product = normalizeFoodSearchText(feed?.제품명);
     const brand = normalizeFoodSearchText(getBrand(feed).name);
-    const text = buildFoodSearchText(feed);
+    const text = feed?._searchText || buildFoodSearchText(feed);
     let score = 0;
     if (phrase && product.includes(phrase)) score += 120;
     if (phrase && brand.includes(phrase)) score += 100;
@@ -351,6 +358,7 @@
       if (product.startsWith(token)) score += 6;
       if (brand.startsWith(token)) score += 5;
       if (text.includes(token)) score += 2;
+      else if (window.ProvedFoodSearchFuzzy?.matchesText(text, token)) score += 2;
     });
     return score;
   }
