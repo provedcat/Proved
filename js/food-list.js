@@ -766,6 +766,91 @@
     return query.range(from, to);
   }
 
+  let searchCatalogPromise = null;
+  let searchCatalogFetchedAt = 0;
+
+  async function fetchPagedSearchRows(table, columns, sortColumn = 'id') {
+    const pageSize = 1000;
+    const rows = [];
+    for (let from = 0; ; from += pageSize) {
+      let query = foodSb.from(table).select(columns);
+      if (table === 'feeds' || table === 'dog_feeds') {
+        query = query.or('verified.eq.true,searchable_before_review.eq.true');
+      }
+      const { data, error } = await query.order(sortColumn).range(from, from + pageSize - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < pageSize) break;
+    }
+    return rows;
+  }
+
+  async function loadSearchCatalog() {
+    if (searchCatalogPromise && Date.now() - searchCatalogFetchedAt < 120000) return searchCatalogPromise;
+    searchCatalogFetchedAt = Date.now();
+    searchCatalogPromise = (async () => {
+      const [cats, dogs, catMappings, dogMappings, tags] = await Promise.all([
+        fetchPagedSearchRows('feeds', listColumns),
+        fetchPagedSearchRows('dog_feeds', listColumns),
+        fetchPagedSearchRows('feed_food_tags', 'feed_id,tag_id', 'feed_id'),
+        fetchPagedSearchRows('dog_feed_food_tags', 'dog_feed_id,tag_id', 'dog_feed_id'),
+        fetchPagedSearchRows('food_tags', 'id,slug,label_ko,label_en,category,is_active')
+      ]);
+      const tagById = new Map(tags.filter(tag => tag.is_active === true).map(tag => [String(tag.id), tag]));
+      const tagIdsByFood = new Map();
+      for (const [species, mappings, feedColumn] of [
+        ['cat', catMappings, 'feed_id'], ['dog', dogMappings, 'dog_feed_id']
+      ]) {
+        mappings.forEach(row => {
+          const id = row[feedColumn];
+          if (!id || !tagById.has(String(row.tag_id))) return;
+          const key = species + ':' + id;
+          if (!tagIdsByFood.has(key)) tagIdsByFood.set(key, new Set());
+          tagIdsByFood.get(key).add(String(row.tag_id));
+        });
+      }
+      const enrich = (feed, species) => {
+        const ids = tagIdsByFood.get(species + ':' + feed.id) || new Set();
+        const tagTexts = [...ids].map(id => {
+          const tag = tagById.get(id);
+          const aliases = tag.slug === 'low_temp_cooked' || tag.slug === 'fresh_cooked'
+            ? '화식' : tag.slug === 'freeze_dried' ? '동결 프리즈드라이' : '';
+          return [tag.label_ko, tag.label_en, tag.slug.replace(/_/g, ' '), aliases]
+            .filter(Boolean).join(' ');
+        });
+        const product = { ...feed, species, _tagIds: ids, _searchTags: tagTexts.join(' ') };
+        product._searchText = buildFoodSearchText(product);
+        return product;
+      };
+      return [...cats.map(feed => enrich(feed, 'cat')), ...dogs.map(feed => enrich(feed, 'dog'))];
+    })().catch(error => {
+      searchCatalogPromise = null;
+      throw error;
+    });
+    return searchCatalogPromise;
+  }
+
+  function matchesCurrentFilters(feed) {
+    if (state.species !== 'all' && feed.species !== state.species) return false;
+    if (state.type !== 'all' && feed.type !== state.type) return false;
+    if (state.role !== 'all' && feed.완전식여부 !== state.role) return false;
+    return state.selectedTagIds.every(id => feed._tagIds?.has(String(id)));
+  }
+
+  async function searchAllProducts(query) {
+    const products = await loadSearchCatalog();
+    const matches = products.filter(feed => matchesFoodSearch(feed, query));
+    const filtered = matches.filter(matchesCurrentFilters).sort((a, b) =>
+      foodSearchRelevance(b, query) - foodSearchRelevance(a, query) || compareFeedRows(a, b)
+    );
+    const outside = filtered.length ? [] : matches.filter(feed => !matchesCurrentFilters(feed))
+      .sort((a, b) => foodSearchRelevance(b, query) - foodSearchRelevance(a, query) || compareFeedRows(a, b));
+    const suggestions = matches.length ? [] : (window.ProvedFoodSearchFuzzy?.suggestFoods(
+      products, query, feed => feed._searchText, 3
+    ) || []);
+    return { filtered, outside, suggestions };
+  }
+
   async function fetchListRows(species, limit) {
     if (!state.query) return buildListQuery(species, 0, limit - 1, true);
 
