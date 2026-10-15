@@ -169,29 +169,14 @@ function updateCalculatorSpeciesCopy(species = state.selectedPetSpecies || 'cat'
   updateBcsImage();
 }
 
-const BCS_DESCRIPTIONS = {
-  5: '갈비뼈가 만져지고, 위에서 봤을 때 허리가 보이며 복부가 적당히 들어간 이상적인 체형입니다.',
-  6: '갈비뼈는 만져지지만 지방층이 조금 두꺼워지고, 허리선이 덜 뚜렷한 체형입니다.',
-  7: '갈비뼈를 만지기 어려워지며 허리선이 뚜렷하지 않고 복부 지방이 증가한 체형입니다.',
-  8: '갈비뼈가 두꺼운 지방층 아래에 있어 잘 만져지지 않고 허리선이 거의 보이지 않는 체형입니다.',
-  9: '갈비뼈를 만지기 매우 어렵고 허리선이 없으며 복부와 몸통에 뚜렷한 지방 축적이 보이는 체형입니다.'
-};
-
 function updateBcsImage() {
-  const value = Number(document.getElementById('bcsValue')?.value);
-  const species = state.selectedPetSpecies || 'cat';
+  const species = state.selectedPetSpecies === 'dog' ? 'dog' : 'cat';
   const image = document.getElementById('bcsSelectedImage');
-  document.querySelectorAll('[data-bcs-card-image]').forEach(cardImage => {
-    cardImage.onload = () => cardImage.classList.remove('hidden');
-    cardImage.onerror = () => cardImage.classList.add('hidden');
-    cardImage.src = `/images/bcs/${species}-bcs-${cardImage.dataset.bcsCardImage}.webp`;
-    cardImage.alt = `${species === 'dog' ? '강아지' : '고양이'} BCS ${cardImage.dataset.bcsCardImage} 단계 예시`;
-  });
-  if (!image || !value) return;
-  image.onload = () => image.classList.remove('hidden');
-  image.onerror = () => image.classList.add('hidden');
-  image.src = `/images/bcs/${species}-bcs-${value}.webp`;
-  image.alt = `${species === 'dog' ? '강아지' : '고양이'} BCS ${value} 단계 예시`;
+  if (!image) return;
+  const src = '/images/bcs/' + species + '-bcs-diet-5-9.webp';
+  if (image.getAttribute('src') !== src) image.src = src;
+  image.alt = (species === 'dog' ? '강아지' : '고양이') + ' BCS 5부터 9까지의 체형 실루엣. 왼쪽부터 순서대로 5, 6, 7, 8, 9점.';
+  image.height = species === 'dog' ? 331 : 334;
 }
 
 function initializeBcsChoices() {
@@ -214,7 +199,7 @@ function initializeBcsChoices() {
       button.classList.toggle('is-selected', selected);
       button.setAttribute('aria-pressed', String(selected));
     });
-    description.textContent = value ? BCS_DESCRIPTIONS[value] : '현재 체형과 가장 가까운 단계를 선택해 주세요.';
+    description.textContent = '현재 체형에 가장 가까운 점수를 선택해 주세요. 5는 가장 이상적인 체형입니다.';
     updateBcsImage();
   };
   field._bcsSync = sync;
