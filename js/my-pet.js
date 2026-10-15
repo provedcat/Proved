@@ -373,6 +373,12 @@
     const bcsToggle = $('myPetBcsToggle');
     const bcsOptions = $('myPetBcsOptions');
     const bcsSelect = $('myPetBcsScore');
+    const bcsGuideImage = $('myPetBcsGuideImage');
+    const bcsGuideSrc = pet.species === 'dog'
+      ? '/images/bcs/dog-bcs-silhouette.webp'
+      : '/images/bcs/cat-bcs-silhouette.webp';
+    const bcsGuideAlt = (pet.species === 'dog' ? '강아지' : '고양이') +
+      '의 옆모습과 위에서 내려다본 모습. 왼쪽부터 BCS 1점에서 9점까지 체형이 변화하는 실루엣.';
     const saveButton = $('myPetWeightSave');
     const cancelButton = $('myPetWeightCancel');
     const status = $('myPetWeightStatus');
@@ -394,7 +400,14 @@
       bcsOptions.hidden = !isOpen;
       bcsToggle.setAttribute('aria-expanded', String(isOpen));
       bcsToggle.innerHTML = (isOpen ? '− BCS 기록' : '+ BCS 기록') + ' <span>(선택)</span>';
-      if (isOpen && !editingDate) bcsSelect.value = String(weightUtils.suggestedBcs(records));
+      if (isOpen) {
+        if (bcsGuideImage.getAttribute('src') !== bcsGuideSrc) {
+          bcsGuideImage.src = bcsGuideSrc;
+          bcsGuideImage.alt = bcsGuideAlt;
+          bcsGuideImage.height = pet.species === 'dog' ? 331 : 334;
+        }
+        if (!editingDate) bcsSelect.value = String(weightUtils.suggestedBcs(records));
+      }
     }
 
     function resetForm() {
