@@ -40,4 +40,25 @@ assert.match(trend, /tooltipBcs/);
 assert.match(html, /id="myPetBcsToggle"/);
 assert.match(html, /id="myPetRecalculate"/);
 assert.match(html, /id="petWeightChart"/);
+
+const css = fs.readFileSync(path.join(root, 'css/my-pet.css'), 'utf8');
+const digits = Array.from(html.matchAll(/<span class="my-pet-bcs-guide__score(?: my-pet-bcs-guide__score--ideal)?">(\\d)<\\/span>/g), match => Number(match[1]));
+assert.deepEqual(digits, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+assert.match(html, /my-pet-bcs-guide__score--ideal">5<\\/span>/);
+assert.equal((html.match(/my-pet-bcs-guide__score--ideal/g) || []).length, 1);
+assert.match(html, /현재 체형에 가장 가까운 점수를 선택해 주세요\\./);
+assert.match(html, /5는 가장 이상적인 체형입니다\\./);
+assert.match(html, /id="myPetBcsGuideImage"/);
+assert.match(pet, /pet\\.species === 'dog'[\\s\\S]*?images\\/bcs\\/dog-bcs-silhouette\\.webp/);
+assert.match(pet, /images\\/bcs\\/cat-bcs-silhouette\\.webp/);
+assert.match(css, /grid-template-columns: repeat\\(9, minmax\\(0, 1fr\\)\\)/);
+assert.match(css, /my-pet-bcs-guide__scroll[\\s\\S]*?overflow-x: auto/);
+for (const species of ['cat', 'dog']) {
+  const imagePath = path.join(root, 'images', 'bcs', species + '-bcs-silhouette.webp');
+  const bytes = fs.readFileSync(imagePath);
+  assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(bytes.length > 5000, species + ' guide asset should have image data');
+}
+
 console.log('MY PET weight + optional BCS tests passed');
