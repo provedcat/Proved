@@ -379,6 +379,14 @@
       : '/images/bcs/cat-bcs-silhouette.webp';
     const bcsGuideAlt = (pet.species === 'dog' ? '강아지' : '고양이') +
       '의 옆모습과 위에서 내려다본 모습. 왼쪽부터 BCS 1점에서 9점까지 체형이 변화하는 실루엣.';
+    // The source silhouettes are not spaced in perfectly equal ninths.
+    // Centers average the side and top-view columns measured from each image.
+    const bcsGuideCenters = pet.species === 'dog'
+      ? [5.94, 16.61, 27.20, 37.98, 48.75, 59.82, 70.76, 82.00, 93.33]
+      : [6.13, 16.56, 27.02, 37.59, 48.53, 59.63, 70.60, 81.50, 92.41];
+    bcsOptions.querySelectorAll('.my-pet-bcs-guide__score').forEach(function (label, index) {
+      label.style.left = bcsGuideCenters[index] + '%';
+    });
     const saveButton = $('myPetWeightSave');
     const cancelButton = $('myPetWeightCancel');
     const status = $('myPetWeightStatus');
