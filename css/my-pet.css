@@ -527,3 +527,74 @@
   .my-pet-weight-form { padding: 16px; }
   .my-pet-weight-form__fields { grid-template-columns: 1fr; }
 }
+
+/* BCS guide: labels share exactly the same nine-column width as the images.
+   Narrow screens scroll the whole aligned pair together instead of squeezing
+   each cat/dog silhouette until the body shapes are hard to distinguish. */
+.my-pet-bcs-guide {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--my-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.my-pet-bcs-guide__scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.my-pet-bcs-guide__scroll:focus-visible {
+  outline: 2px solid var(--my-blue);
+  outline-offset: 2px;
+}
+.my-pet-bcs-guide__chart {
+  width: 100%;
+  min-width: 520px;
+}
+.my-pet-bcs-guide__numbers {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  align-items: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.my-pet-bcs-guide__score {
+  min-width: 0;
+  color: var(--my-copy);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 730;
+  line-height: 1.4;
+  text-align: center;
+}
+.my-pet-bcs-guide__score--ideal {
+  color: var(--my-blue);
+  font-weight: 850;
+}
+.my-pet-bcs-guide__chart img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  border: 0;
+}
+.my-pet-bcs-guide__description {
+  margin-top: 10px;
+}
+.my-pet-bcs-guide__description p {
+  margin: 0;
+  color: var(--my-copy);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+}
+.my-pet-bcs-guide__description p + p {
+  margin-top: 2px;
+}
+@media (max-width: 720px) {
+  .my-pet-bcs-guide__chart { min-width: 630px; }
+}
