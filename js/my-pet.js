@@ -83,7 +83,8 @@
 
   function formatWeight(value) {
     const number = Number(value);
-    return Number.isFinite(number) ? number.toFixed(1) + 'kg' : '—';
+    return value !== null && value !== undefined && value !== '' && Number.isFinite(number)
+      ? number.toFixed(2) + 'kg' : '—';
   }
 
   function formatDate(value) {
@@ -382,6 +383,8 @@
     let editingDate = null;
     const today = localToday();
     dateInput.max = today;
+    dateInput.min = pet.birth_date || '';
+    kgInput.max = pet.species === 'dog' ? '149.99' : '20';
 
     function setStatus(message) {
       status.textContent = message || '';
@@ -489,9 +492,9 @@
 
       const day = dateInput.value;
       const kg = Number(kgInput.value);
-      const limit = pet.species === 'dog' ? 150 : 20;
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > localToday()) {
-        setStatus('오늘 또는 이전 날짜를 선택해 주세요.');
+      const limit = pet.species === 'dog' ? 149.99 : 20;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > localToday() || (pet.birth_date && day < pet.birth_date)) {
+        setStatus('생년월일 이후부터 오늘까지의 날짜를 선택해 주세요.');
         return;
       }
       if (!kgInput.value || !Number.isFinite(kg) || kg < 0.1 || kg > limit) {
