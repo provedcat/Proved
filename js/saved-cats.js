@@ -356,12 +356,8 @@ async function upsertWeightRecord(catId, userId, weightKg) {
     recorded_date: recordedDate
   };
 
-  const { error: upsertError } = await sb
-    .from('weight_records')
-    .upsert(payload, { onConflict: 'pet_id,recorded_date' });
-
-  if (!upsertError) return;
-
+  // Preserve an optional BCS from MY PET when a calculator result is saved
+  // on the same day. Only change weight_kg on existing records.
   const { data: existingRows, error: selectError } = await sb
     .from('weight_records')
     .select('pet_id')
@@ -369,26 +365,18 @@ async function upsertWeightRecord(catId, userId, weightKg) {
     .eq('user_id', userId)
     .eq('recorded_date', recordedDate)
     .limit(1);
-
-  if (selectError) throw upsertError;
+  if (selectError) throw selectError;
 
   if (existingRows && existingRows.length > 0) {
-    const { error: updateError } = await sb
-      .from('weight_records')
+    const { error } = await sb.from('weight_records')
       .update({ weight_kg: weightKg })
-      .eq('pet_id', catId)
-      .eq('user_id', userId)
-      .eq('recorded_date', recordedDate);
-
-    if (updateError) throw updateError;
+      .eq('pet_id', catId).eq('user_id', userId).eq('recorded_date', recordedDate);
+    if (error) throw error;
     return;
   }
 
-  const { error: insertError } = await sb
-    .from('weight_records')
-    .insert(payload);
-
-  if (insertError) throw insertError;
+  const { error } = await sb.from('weight_records').insert(payload);
+  if (error) throw error;
 }
 
 async function saveFeedingRecord(catId, currentResult) {
