@@ -86,7 +86,28 @@
                   <option value="7">7</option><option value="8">8</option><option value="9">9</option>
                 </select>
               </label>
-              <p>최근에 기록한 BCS를 기본으로 보여줘요. 직접 확인한 날에만 선택해 주세요.</p>
+              <div class="my-pet-bcs-guide">
+                <div class="my-pet-bcs-guide__scroll" role="region" aria-label="BCS 1점부터 9점까지 체형 비교" tabindex="0">
+                  <div class="my-pet-bcs-guide__chart">
+                    <div class="my-pet-bcs-guide__numbers" aria-hidden="true">
+                  <span class="my-pet-bcs-guide__score">1</span>
+                  <span class="my-pet-bcs-guide__score">2</span>
+                  <span class="my-pet-bcs-guide__score">3</span>
+                  <span class="my-pet-bcs-guide__score">4</span>
+                  <span class="my-pet-bcs-guide__score my-pet-bcs-guide__score--ideal">5</span>
+                  <span class="my-pet-bcs-guide__score">6</span>
+                  <span class="my-pet-bcs-guide__score">7</span>
+                  <span class="my-pet-bcs-guide__score">8</span>
+                  <span class="my-pet-bcs-guide__score">9</span>
+                    </div>
+                    <img id="myPetBcsGuideImage" alt="" width="900" height="334" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <div class="my-pet-bcs-guide__description">
+                  <p>현재 체형에 가장 가까운 점수를 선택해 주세요.</p>
+                  <p>5는 가장 이상적인 체형입니다.</p>
+                </div>
+              </div>
             </div>
             <div class="my-pet-weight-form__actions">
               <button id="myPetWeightSave" class="my-pet-weight-form__save" type="submit">기록 저장</button>
