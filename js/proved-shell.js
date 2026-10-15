@@ -283,6 +283,14 @@ async function provedResolveLoginDestination() {
 
   if (requestedSpecies) {
     const matchingPets = pets.filter(pet => (pet.species || 'cat') === requestedSpecies);
+    // MY PET weight records can request a specific pet. Verify membership
+    // against the authenticated user's pets; never trust URL identity alone.
+    const requestedId = new URLSearchParams(window.location.search).get('pet_id');
+    const requestedPet = requestedId && matchingPets.find(pet => String(pet.id) === requestedId);
+    if (requestedPet) {
+      await setActivePet(requestedPet, { route: 'calculator' });
+      return;
+    }
     const last = provedGetLastActivePet();
     const matchingLast = last && matchingPets.find(pet => String(pet.id) === String(last.id));
 
