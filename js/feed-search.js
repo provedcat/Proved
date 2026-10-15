@@ -56,7 +56,7 @@ function getActiveFeedTable() {
 }
 
 function getFeedSearchColumns() {
-  return 'id,제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부,calorie_source_detail,calorie_source_url,needs_calorie_review,verified,verification_status,searchable_before_review';
+  return 'id,제품명,제조사,메인단백질,final_me,eb_칼슘,eb_인,수분,전성분,완전식여부,cal_source,needs_calorie_review,verified,verification_status,searchable_before_review';
 }
 
 function isProvisionalFeed(feed) {
@@ -158,7 +158,7 @@ function selectFeed(type, slotId, feedData, listId) {
     ingredients: feedData.전성분 || '',
     complete: feedData.완전식여부 || '',
     lifeStage: `${feedData.제품명 || ''} ${feedData.전성분 || ''}`,
-    estimatedCalories: /추정|계산|estimated|calculated/i.test(feedData.calorie_source_detail || '') && !feedData.calorie_source_url,
+    estimatedCalories: ['estimated', 'estimated_corrected'].includes(feedData.cal_source),
     needsCalorieReview: feedData.needs_calorie_review === true,
     provisional,
     verificationStatus: feedData.verification_status || (provisional ? 'pending_review' : 'approved')

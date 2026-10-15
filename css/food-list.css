@@ -904,6 +904,7 @@ button { cursor: pointer; }
 .food-source-row dt { color: var(--food-muted); font-size: 11px; font-weight: 800; }
 .food-source-row dd { margin: 0; color: var(--food-ink); font-size: 13px; font-weight: 700; line-height: 1.55; }
 .food-source-row dd.is-review { color: var(--food-blue); }
+.food-source-row dd a, .food-detail-section > .food-table-note a { color: var(--food-blue); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 
 .food-source-favorite {
   appearance: none;

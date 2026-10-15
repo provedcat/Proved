@@ -65,7 +65,7 @@
     'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
     'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
     'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
-    'calorie_confidence', 'needs_calorie_review', '쿠팡_링크', 'brand_id',
+    'calorie_confidence', 'needs_calorie_review', 'calorie_note', 'calorie_source_url', 'source_urls', '쿠팡_링크', 'brand_id',
     'brands(name,official_url)'
   ].join(',');
   const detailColumnsWithoutCoupang = detailColumns
@@ -1232,8 +1232,9 @@
       ['인', feed.인, feed.dm_인]
     ].filter(([, asFed, dm]) => isPresent(asFed) || isPresent(dm));
 
-    const verificationLabel = feed.verified === true ? '검수 완료' : '검수 전';
+    const verificationLabel = feed.verified === true ? '관리자 등록' : '검수 전';
     const calorieSourceLabel = getCalorieSourceLabel(feed.cal_source);
+    const sourceLinks = renderProductSourceLinks(feed);
     const officialLink = brand.officialUrl
       ? `<a class="food-brand-link" href="${escapeHtml(brand.officialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(brand.name)} 공식 홈페이지 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"></path><path d="m10 14 9-9"></path><path d="M19 13v6H5V5h6"></path></svg></a>`
       : '';
@@ -1339,8 +1340,11 @@
         <section class="food-detail-section" aria-labelledby="foodSourceHeading">
           ${sectionHeading(feed.전성분 ? '06' : '05', '정보 상태', 'foodSourceHeading')}
           <dl class="food-source-list">
-            <div class="food-source-row"><dt>영양정보</dt><dd class="${feed.verified === true ? '' : 'is-review'}">${escapeHtml(verificationLabel)}</dd></div>
-            <div class="food-source-row"><dt>열량</dt><dd>${escapeHtml(calorieSourceLabel)}</dd></div>
+            <div class="food-source-row"><dt>등록 상태</dt><dd class="${feed.verified === true ? '' : 'is-review'}">${escapeHtml(verificationLabel)}</dd></div>
+            <div class="food-source-row"><dt>열량 분류</dt><dd>${escapeHtml(calorieSourceLabel)}</dd></div>
+            ${feed.needs_calorie_review === true ? '<div class="food-source-row"><dt>열량 재검토</dt><dd class="is-review">추가 확인 필요</dd></div>' : ''}
+            ${feed.calorie_note ? `<div class="food-source-row"><dt>열량 설명</dt><dd>${escapeHtml(feed.calorie_note)}</dd></div>` : ''}
+            <div class="food-source-row"><dt>제품별 근거</dt><dd>${sourceLinks || '등록된 온라인 근거 링크 없음'}</dd></div>
             <div class="food-source-row">
               <dt>즐겨찾기</dt>
               <dd>
@@ -1354,6 +1358,7 @@
               </dd>
             </div>
           </dl>
+          <p class="food-table-note">등록 상태는 외부 영양 인증을 뜻하지 않습니다. 브랜드 홈페이지도 제품별 영양 근거와는 다릅니다. <a href="/guide/feed-reading/sources/">출처·검수 기준 보기 →</a></p>
         </section>
         ${coupangCta}
       </article>`;
@@ -1370,6 +1375,26 @@
 
   function mineralCard(label, value, sub) {
     return `<div class="food-mineral-item"><p class="food-mineral-item__label">${escapeHtml(label)}</p><p class="food-mineral-item__value">${escapeHtml(value)}</p><p class="food-mineral-item__sub">${escapeHtml(sub)}</p></div>`;
+  }
+
+  function renderProductSourceLinks(feed) {
+    const entries = [...(Array.isArray(feed.source_urls) ? feed.source_urls : []),
+      ...(feed.calorie_source_url ? [{ url: feed.calorie_source_url }] : [])];
+    const seen = new Set();
+    return entries.map(entry => typeof entry === 'string' ? entry : entry?.url)
+      .filter(url => {
+        if (typeof url !== 'string' || seen.has(url)) return false;
+        try {
+          if (!['http:', 'https:'].includes(new URL(url).protocol)) return false;
+        } catch {
+          return false;
+        }
+        seen.add(url);
+        return true;
+      }).slice(0, 6).map((url, index) => {
+        const domain = new URL(url).hostname;
+        return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">자료 ${index + 1} · ${escapeHtml(domain)}</a>`;
+      }).join(' · ');
   }
 
   function getCalorieSourceLabel(source) {
