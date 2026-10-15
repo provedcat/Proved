@@ -99,12 +99,12 @@ test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 
     calorie_source_url: 'https://example.com/calorie'
   };
   const html = renderProductPage(template, feed, 'cat', [feed]);
-  assert.match(html, /등록 상태<\\/dt><dd class="is-review">검수 전/);
+  assert.match(html, /등록 상태<\/dt><dd class="is-review">검수 전/);
   assert.match(html, /Proved 추정값 · 습식 보정/);
-  assert.match(html, /열량 재검토<\\/dt><dd class="is-review">추가 확인 필요/);
-  assert.match(html, /href="https:\\/\\/example.com\\/food\\?name=cat&amp;lang=ko"/);
-  assert.match(html, /href="https:\\/\\/example.com\\/calorie"/);
-  assert.doesNotMatch(html, /href="javascript:|href="https:\\/\\/%"/);
+  assert.match(html, /열량 재검토<\/dt><dd class="is-review">추가 확인 필요/);
+  assert.match(html, /href="https:\/\/example.com\/food\?name=cat&amp;lang=ko"/);
+  assert.match(html, /href="https:\/\/example.com\/calorie"/);
+  assert.doesNotMatch(html, /href="javascript:|href="https:\/\/%"/);
   assert.equal((html.match(/자료 1 · example.com/g) || []).length, 1);
 });
 
@@ -114,7 +114,7 @@ test('실시간 상세와 계산기는 출처 필드를 읽고 추정 열량 구
   assert.match(detail, /'source_urls'/);
   assert.match(detail, /'calorie_source_url'/);
   assert.match(detail, /등록된 온라인 근거 링크 없음/);
-  assert.match(search, /estimatedCalories: \\['estimated', 'estimated_corrected'\\]\\.includes\\(feedData\\.cal_source\\)/);
+  assert.match(search, /estimatedCalories: \['estimated', 'estimated_corrected'\]\.includes\(feedData\.cal_source\)/);
 });
 
 test('브랜드 Finder는 한글 초성·영문 알파벳과 실제 허브 href를 정적 HTML로 출력한다', async () => {
