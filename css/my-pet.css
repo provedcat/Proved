@@ -555,13 +555,15 @@
   min-width: 520px;
 }
 .my-pet-bcs-guide__numbers {
-  display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  align-items: center;
+  position: relative;
   width: 100%;
+  height: 20px;
   margin-bottom: 4px;
 }
 .my-pet-bcs-guide__score {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
   min-width: 0;
   color: var(--my-copy);
   font: inherit;
