@@ -490,7 +490,7 @@
       const day = dateInput.value;
       const kg = Number(kgInput.value);
       const limit = pet.species === 'dog' ? 150 : 20;
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(day) || day > localToday()) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > localToday()) {
         setStatus('오늘 또는 이전 날짜를 선택해 주세요.');
         return;
       }
