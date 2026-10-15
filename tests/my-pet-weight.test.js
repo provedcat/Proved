@@ -51,7 +51,9 @@ assert.match(html, /5는 가장 이상적인 체형입니다\./);
 assert.match(html, /id="myPetBcsGuideImage"/);
 assert.match(pet, /pet\.species === 'dog'[\s\S]*?images\/bcs\/dog-bcs-silhouette\.webp/);
 assert.match(pet, /images\/bcs\/cat-bcs-silhouette\.webp/);
-assert.match(css, /grid-template-columns: repeat\(9, minmax\(0, 1fr\)\)/);
+assert.match(css, /my-pet-bcs-guide__score[\s\S]*?position: absolute/);
+assert.match(pet, /const bcsGuideCenters = pet\.species === 'dog'/);
+assert.match(pet, /label\.style\.left = bcsGuideCenters\[index\] \+ '%'/);
 assert.match(css, /my-pet-bcs-guide__scroll[\s\S]*?overflow-x: auto/);
 for (const species of ['cat', 'dog']) {
   const imagePath = path.join(root, 'images', 'bcs', species + '-bcs-silhouette.webp');
