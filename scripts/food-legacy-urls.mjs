@@ -115,6 +115,7 @@ export async function restoreLegacyProductUrls(repoRoot, previousPaths, currentE
   }
 
   aliases.sort();
+  await mkdir(path.join(repoRoot, 'scripts'), { recursive: true });
   await writeFile(path.join(repoRoot, REGISTRY_PATH), JSON.stringify(aliases, null, 2) + '\n', 'utf8');
   return aliases;
 }
