@@ -160,7 +160,12 @@ function renderProductSourceLinks(feed) {
   const seen = new Set();
   return entries.map(entry => typeof entry === 'string' ? entry : entry?.url)
     .filter(url => {
-      if (typeof url !== 'string' || !/^https?:\/\//i.test(url) || seen.has(url)) return false;
+      if (typeof url !== 'string' || seen.has(url)) return false;
+      try {
+        if (!['http:', 'https:'].includes(new URL(url).protocol)) return false;
+      } catch {
+        return false;
+      }
       seen.add(url);
       return true;
     }).slice(0, 6).map((url, index) =>
