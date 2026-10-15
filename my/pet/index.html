@@ -14,9 +14,10 @@
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
   <link rel="stylesheet" href="/css/my-page.css?v=20260924-my-page-polish-v3">
-  <link rel="stylesheet" href="/css/my-pet.css?v=20260929-avatar-v1">
+  <link rel="stylesheet" href="/css/my-pet.css?v=20261015-weight-bcs-v1">
   <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
-  <script defer src="/js/my-pet.js?v=20260929-avatar-v1"></script>
+  <script defer src="/js/pet-weight-records.js?v=20261015-weight-bcs-v1"></script>
+  <script defer src="/js/my-pet.js?v=20261015-weight-bcs-v1"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -63,6 +64,61 @@
           <div class="my-pet-chart-wrap">
             <canvas id="petWeightChart" aria-label="반려동물 체중 변화 그래프" role="img"></canvas>
             <p id="petWeightEmpty" class="my-pet-empty" hidden></p>
+          </div>
+
+          <form id="myPetWeightForm" class="my-pet-weight-form" novalidate>
+            <h3>체중 기록 추가</h3>
+            <p class="my-pet-weight-form__hint">식단을 바꾸지 않고 체중만 기록할 수 있어요.</p>
+            <div class="my-pet-weight-form__fields">
+              <label for="myPetWeightDate">측정 날짜
+                <input type="date" id="myPetWeightDate" required>
+              </label>
+              <label for="myPetWeightKg">몸무게 (kg)
+                <input type="number" id="myPetWeightKg" min="0.1" max="150" step="0.01" placeholder="4.10" inputmode="decimal" required>
+              </label>
+            </div>
+            <button id="myPetBcsToggle" class="my-pet-bcs-toggle" type="button" aria-expanded="false" aria-controls="myPetBcsOptions">+ BCS 기록 <span>(선택)</span></button>
+            <div id="myPetBcsOptions" class="my-pet-bcs-options" hidden>
+              <label for="myPetBcsScore">체형 점수 (1~9)
+                <select id="myPetBcsScore">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5 · 이상적</option><option value="6">6</option>
+                  <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                </select>
+              </label>
+              <div class="my-pet-bcs-guide">
+                <div class="my-pet-bcs-guide__scroll" role="region" aria-label="BCS 1점부터 9점까지 체형 비교" tabindex="0">
+                  <div class="my-pet-bcs-guide__chart">
+                    <div class="my-pet-bcs-guide__numbers" aria-hidden="true">
+                  <span class="my-pet-bcs-guide__score">1</span>
+                  <span class="my-pet-bcs-guide__score">2</span>
+                  <span class="my-pet-bcs-guide__score">3</span>
+                  <span class="my-pet-bcs-guide__score">4</span>
+                  <span class="my-pet-bcs-guide__score my-pet-bcs-guide__score--ideal">5</span>
+                  <span class="my-pet-bcs-guide__score">6</span>
+                  <span class="my-pet-bcs-guide__score">7</span>
+                  <span class="my-pet-bcs-guide__score">8</span>
+                  <span class="my-pet-bcs-guide__score">9</span>
+                    </div>
+                    <img id="myPetBcsGuideImage" alt="" width="900" height="334" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <div class="my-pet-bcs-guide__description">
+                  <p>현재 체형에 가장 가까운 점수를 선택해 주세요.</p>
+                  <p>5는 가장 이상적인 체형입니다.</p>
+                </div>
+              </div>
+            </div>
+            <div class="my-pet-weight-form__actions">
+              <button id="myPetWeightSave" class="my-pet-weight-form__save" type="submit">기록 저장</button>
+              <button id="myPetWeightCancel" class="my-pet-weight-form__cancel" type="button" hidden>수정 취소</button>
+            </div>
+            <p id="myPetWeightStatus" class="my-pet-weight-form__status" role="status" aria-live="polite"></p>
+          </form>
+          <div id="myPetWeightRecords" class="my-pet-weight-records" aria-label="체중 기록 목록"></div>
+          <div id="myPetWeightRecalculateWrap" class="my-pet-weight-recalculate" hidden>
+            <p>급여 계획은 그대로 유지했어요. 새로운 체중으로 다시 계산할 수도 있어요.</p>
+            <button type="button" id="myPetRecalculate">변경된 체중으로 다시 계산하기 →</button>
           </div>
         </section>
 

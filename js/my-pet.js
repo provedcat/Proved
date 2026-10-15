@@ -4,6 +4,7 @@
   const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const weightUtils = window.ProvedWeightRecords;
 
   const PET_PALETTE = [
     { accent: '#C3C7F4', soft: '#EEF0FF' },
@@ -82,7 +83,8 @@
 
   function formatWeight(value) {
     const number = Number(value);
-    return Number.isFinite(number) ? number.toFixed(1) + 'kg' : '—';
+    return value !== null && value !== undefined && value !== '' && Number.isFinite(number)
+      ? number.toFixed(2) + 'kg' : '—';
   }
 
   function formatDate(value) {
@@ -118,22 +120,13 @@
   async function loadWeightRecords(userId, petId) {
     const response = await sb
       .from('weight_records')
-      .select('weight_kg,recorded_date')
+      .select('weight_kg,recorded_date,bcs_score')
       .eq('user_id', userId)
       .eq('pet_id', petId)
       .order('recorded_date', { ascending: true });
 
     if (response.error) throw response.error;
-    return (response.data || [])
-      .map(function (row) {
-        return {
-          weight_kg: Number(row.weight_kg),
-          recorded_date: row.recorded_date
-        };
-      })
-      .filter(function (row) {
-        return Number.isFinite(row.weight_kg) && row.recorded_date;
-      });
+    return weightUtils.normalizeWeightRecords(response.data);
   }
 
   async function loadFeedingRecords(userId, petId) {
@@ -213,7 +206,7 @@
     if (!records.length) {
       canvas.hidden = true;
       empty.hidden = false;
-      empty.textContent = '아직 저장된 체중 기록이 없습니다. 급여 계산 결과를 저장하면 체중 기록이 이곳에 쌓입니다.';
+      empty.textContent = '아직 체중 기록이 없습니다. 아래에서 처음 기록을 추가해 보세요.';
       return;
     }
 
@@ -265,7 +258,10 @@
             borderWidth: 1,
             callbacks: {
               label: function (context) {
-                return Number(context.parsed.y).toFixed(1) + 'kg';
+                return Number(context.parsed.y).toFixed(2) + 'kg';
+              },
+              afterLabel: function (context) {
+                return weightUtils.tooltipBcs(records[context.dataIndex]);
               }
             }
           }
@@ -363,6 +359,222 @@
     }).join('');
   }
 
+
+  function localToday() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+  }
+
+  function setupWeightRecording(user, pet, initialRecords) {
+    const form = $('myPetWeightForm');
+    const dateInput = $('myPetWeightDate');
+    const kgInput = $('myPetWeightKg');
+    const bcsToggle = $('myPetBcsToggle');
+    const bcsOptions = $('myPetBcsOptions');
+    const bcsSelect = $('myPetBcsScore');
+    const bcsGuideImage = $('myPetBcsGuideImage');
+    const bcsGuideSrc = pet.species === 'dog'
+      ? '/images/bcs/dog-bcs-silhouette.webp'
+      : '/images/bcs/cat-bcs-silhouette.webp';
+    const bcsGuideAlt = (pet.species === 'dog' ? '강아지' : '고양이') +
+      '의 옆모습과 위에서 내려다본 모습. 왼쪽부터 BCS 1점에서 9점까지 체형이 변화하는 실루엣.';
+    // The source silhouettes are not spaced in perfectly equal ninths.
+    // Centers average the side and top-view columns measured from each image.
+    const bcsGuideCenters = pet.species === 'dog'
+      ? [5.94, 16.61, 27.20, 37.98, 48.75, 59.82, 70.76, 82.00, 93.33]
+      : [6.13, 16.56, 27.02, 37.59, 48.53, 59.63, 70.60, 81.50, 92.41];
+    bcsOptions.querySelectorAll('.my-pet-bcs-guide__score').forEach(function (label, index) {
+      label.style.left = bcsGuideCenters[index] + '%';
+    });
+    const saveButton = $('myPetWeightSave');
+    const cancelButton = $('myPetWeightCancel');
+    const status = $('myPetWeightStatus');
+    const history = $('myPetWeightRecords');
+    const recalculateWrap = $('myPetWeightRecalculateWrap');
+    const recalculateButton = $('myPetRecalculate');
+    let records = initialRecords;
+    let editingDate = null;
+    const today = localToday();
+    dateInput.max = today;
+    dateInput.min = pet.birth_date || '';
+    kgInput.max = pet.species === 'dog' ? '149.99' : '20';
+
+    function setStatus(message) {
+      status.textContent = message || '';
+    }
+
+    function setBcsOpen(isOpen) {
+      bcsOptions.hidden = !isOpen;
+      bcsToggle.setAttribute('aria-expanded', String(isOpen));
+      bcsToggle.innerHTML = (isOpen ? '− BCS 기록' : '+ BCS 기록') + ' <span>(선택)</span>';
+      if (isOpen) {
+        if (bcsGuideImage.getAttribute('src') !== bcsGuideSrc) {
+          bcsGuideImage.src = bcsGuideSrc;
+          bcsGuideImage.alt = bcsGuideAlt;
+          bcsGuideImage.height = pet.species === 'dog' ? 331 : 334;
+        }
+        if (!editingDate) bcsSelect.value = String(weightUtils.suggestedBcs(records));
+      }
+    }
+
+    function resetForm() {
+      editingDate = null;
+      dateInput.disabled = false;
+      dateInput.value = today;
+      const latest = records[records.length - 1];
+      kgInput.value = latest ? String(latest.weight_kg) : '';
+      bcsSelect.value = String(weightUtils.suggestedBcs(records));
+      setBcsOpen(false);
+      saveButton.textContent = '기록 저장';
+      cancelButton.hidden = true;
+    }
+
+    function renderHistory() {
+      if (!records.length) {
+        history.innerHTML = '';
+        return;
+      }
+      history.innerHTML = records.slice().reverse().map(function (record) {
+        const bcs = weightUtils.normalizeBcs(record.bcs_score);
+        return '<div class="my-pet-weight-record">' +
+          '<div><time datetime="' + escapeHtml(record.recorded_date) + '">' +
+          escapeHtml(record.recorded_date) + '</time>' +
+          '<div><strong>' + escapeHtml(record.weight_kg.toFixed(2)) + 'kg</strong>' +
+          (bcs === null ? '' : '<small>BCS ' + bcs + '/9</small>') +
+          '</div></div>' +
+          '<div class="my-pet-weight-record__buttons">' +
+          '<button type="button" data-edit-date="' + escapeHtml(record.recorded_date) + '" aria-label="' + escapeHtml(record.recorded_date) + ' 기록 수정">수정</button>' +
+          '<button type="button" data-delete-date="' + escapeHtml(record.recorded_date) + '" aria-label="' + escapeHtml(record.recorded_date) + ' 기록 삭제">삭제</button>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    async function refreshWeights() {
+      records = await loadWeightRecords(user.id, pet.id);
+      renderHeroAndProfile(pet, records);
+      renderWeightChart(records, pet);
+      renderHistory();
+    }
+
+    function startEdit(record) {
+      editingDate = record.recorded_date;
+      dateInput.value = record.recorded_date;
+      dateInput.disabled = true;
+      kgInput.value = String(record.weight_kg);
+      bcsSelect.value = String(weightUtils.normalizeBcs(record.bcs_score) || weightUtils.suggestedBcs(records));
+      setBcsOpen(weightUtils.normalizeBcs(record.bcs_score) !== null);
+      saveButton.textContent = '기록 수정';
+      cancelButton.hidden = false;
+      recalculateWrap.hidden = true;
+      setStatus('해당 날짜의 체중 기록을 수정합니다.');
+      form.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      kgInput.focus();
+    }
+
+    bcsToggle.addEventListener('click', function () {
+      setBcsOpen(bcsOptions.hidden);
+    });
+
+    cancelButton.addEventListener('click', function () {
+      resetForm();
+      setStatus('');
+    });
+
+    history.addEventListener('click', async function (event) {
+      const edit = event.target.closest('[data-edit-date]');
+      const remove = event.target.closest('[data-delete-date]');
+      if (edit) {
+        const record = records.find(row => row.recorded_date === edit.dataset.editDate);
+        if (record) startEdit(record);
+        return;
+      }
+      if (!remove) return;
+      const date = remove.dataset.deleteDate;
+      if (!window.confirm(date + ' 체중 기록을 삭제할까요? 급여 계산 기록은 그대로 유지됩니다.')) return;
+      try {
+        const { data, error } = await sb.from('weight_records').delete()
+          .eq('user_id', user.id).eq('pet_id', pet.id).eq('recorded_date', date)
+          .select('recorded_date');
+        if (error) throw error;
+        if (!data || !data.length) throw new Error('삭제할 기록을 찾지 못했습니다.');
+        await refreshWeights();
+        resetForm();
+        recalculateWrap.hidden = true;
+        setStatus('체중 기록을 삭제했습니다. 기존 급여 계획은 변경되지 않았습니다.');
+      } catch (error) {
+        setStatus('삭제 실패: ' + (error.message || String(error)));
+      }
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (saveButton.disabled) return;
+
+      const day = dateInput.value;
+      const kg = Number(kgInput.value);
+      const limit = pet.species === 'dog' ? 149.99 : 20;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > localToday() || (pet.birth_date && day < pet.birth_date)) {
+        setStatus('생년월일 이후부터 오늘까지의 날짜를 선택해 주세요.');
+        return;
+      }
+      if (!kgInput.value || !Number.isFinite(kg) || kg < 0.1 || kg > limit) {
+        setStatus('체중을 0.1kg 이상 ' + limit + 'kg 이하로 입력해 주세요.');
+        return;
+      }
+      if (!editingDate && records.some(row => row.recorded_date === day)) {
+        setStatus('이 날짜에는 기록이 있어요. 아래 목록에서 수정을 선택해 주세요.');
+        return;
+      }
+
+      const bcs = bcsOptions.hidden ? null : weightUtils.normalizeBcs(bcsSelect.value);
+      if (!bcsOptions.hidden && bcs === null) {
+        setStatus('BCS는 1부터 9 사이에서 선택해 주세요.');
+        return;
+      }
+      const payload = { weight_kg: kg, bcs_score: bcs };
+      saveButton.disabled = true;
+      setStatus('체중을 저장하는 중입니다...');
+      try {
+        let query;
+        if (editingDate) {
+          query = sb.from('weight_records').update(payload)
+            .eq('user_id', user.id).eq('pet_id', pet.id)
+            .eq('recorded_date', editingDate).select('recorded_date');
+        } else {
+          query = sb.from('weight_records').insert({
+            ...payload, pet_id: pet.id, user_id: user.id, recorded_date: day
+          }).select('recorded_date');
+        }
+        const { data, error } = await query;
+        if (error) throw error;
+        if (!data || !data.length) throw new Error('기록이 저장되지 않았습니다.');
+        await refreshWeights();
+        resetForm();
+        recalculateWrap.hidden = false;
+        setStatus('체중 기록을 저장했습니다. 기존 급여 계획은 그대로 유지됩니다.');
+      } catch (error) {
+        setStatus('저장 실패: ' + (error.message || String(error)));
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    recalculateButton.addEventListener('click', function () {
+      // The existing calculator loads latest weight_records for the selected pet.
+      // Do not write to feeding_records or mutate any saved diet here.
+      try {
+        localStorage.setItem('proved:last_active_pet', JSON.stringify({
+          id: pet.id, name: pet.name, species: pet.species, savedAt: new Date().toISOString()
+        }));
+      } catch (_) { /* A validated pet_id query still permits the handoff. */ }
+      window.location.assign(weightUtils.recalculationUrl(pet));
+    });
+
+    renderHistory();
+    resetForm();
+  }
+
   function setupPetDeletion(user, pet) {
     const button = $('myPetDeleteButton');
     const status = $('myPetDeleteStatus');
@@ -438,6 +650,7 @@
       showContent();
       renderHeroAndProfile(pet, results[0]);
       renderWeightChart(results[0], pet);
+      setupWeightRecording(user, pet, results[0]);
       renderCurrentDiet(results[1]);
       renderRecentCalculations(results[1]);
       setupPetDeletion(user, pet);

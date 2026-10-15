@@ -257,19 +257,14 @@ async function selectTrendCat(cat) {
 async function loadWeightRecordsForCat(catId) {
   const { data, error } = await sb
     .from('weight_records')
-    .select('weight_kg, recorded_date')
+    .select('weight_kg, recorded_date, bcs_score')
     .eq('user_id', state.currentUser.id)
     .eq('pet_id', catId)
     .order('recorded_date', { ascending: true });
 
   if (error) throw error;
 
-  return (data || [])
-    .map(record => ({
-      weight_kg: Number(record.weight_kg),
-      recorded_date: record.recorded_date
-    }))
-    .filter(record => Number.isFinite(record.weight_kg) && record.recorded_date);
+  return window.ProvedWeightRecords.normalizeWeightRecords(data);
 }
 
 function renderWeightTrendChart(records) {
@@ -333,7 +328,8 @@ function renderWeightTrendChart(records) {
           titleFont: { weight: '500' },
           bodyFont: { weight: 'bold' },
           callbacks: {
-            label: context => `체중 : ${Number(context.parsed.y).toFixed(1)}kg`
+            label: context => `체중 : ${Number(context.parsed.y).toFixed(2)}kg`,
+            afterLabel: context => window.ProvedWeightRecords.tooltipBcs(records[context.dataIndex])
           }
         }
       },

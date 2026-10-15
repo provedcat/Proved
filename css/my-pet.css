@@ -461,3 +461,142 @@
     grid-column: 2;
   }
 }
+
+/* Optional body condition score on the existing weight-only chart. */
+.my-pet-weight-form {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid var(--my-line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.72);
+}
+.my-pet-weight-form h3 { margin: 0; color: var(--my-ink); font-size: 17px; font-weight: 760; }
+.my-pet-weight-form__hint { margin: 6px 0 18px; color: var(--my-copy); font-size: 12px; line-height: 1.5; }
+.my-pet-weight-form__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.my-pet-weight-form label, .my-pet-bcs-options label { display: grid; gap: 7px; min-width: 0; color: var(--my-ink); font-size: 12px; font-weight: 700; }
+.my-pet-weight-form input, .my-pet-weight-form select {
+  box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid var(--my-line); border-radius: 11px; background: #fff;
+  color: var(--my-ink); font: inherit; font-size: 15px; font-weight: 600;
+}
+.my-pet-weight-form input:focus-visible, .my-pet-weight-form select:focus-visible,
+.my-pet-weight-form button:focus-visible, .my-pet-weight-records button:focus-visible,
+.my-pet-weight-recalculate button:focus-visible {
+  outline: 2px solid var(--my-blue); outline-offset: 2px;
+}
+.my-pet-bcs-toggle {
+  margin: 14px 0 0; padding: 5px 0; border: 0; background: transparent;
+  color: var(--my-blue); font: inherit; font-size: 12px; font-weight: 750;
+  cursor: pointer;
+}
+.my-pet-bcs-toggle span { color: var(--my-soft); font-weight: 600; }
+.my-pet-bcs-options[hidden], .my-pet-weight-form__cancel[hidden],
+.my-pet-weight-recalculate[hidden] { display: none !important; }
+.my-pet-bcs-options { margin-top: 9px; padding: 13px; background: rgba(243,242,255,.75); border-radius: 12px; }
+.my-pet-bcs-options p { margin: 9px 0 0; color: var(--my-copy); font-size: 11px; line-height: 1.55; }
+.my-pet-weight-form__actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.my-pet-weight-form__save {
+  flex: 1; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 12px;
+  background: var(--my-blue); color: white; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer;
+}
+.my-pet-weight-form__save:disabled { opacity: .5; cursor: wait; }
+.my-pet-weight-form__cancel { border: 0; background: transparent; color: var(--my-copy); font: inherit; font-size: 12px; cursor: pointer; }
+.my-pet-weight-form__status { margin: 10px 0 0; min-height: 0; color: var(--my-copy); font-size: 12px; line-height: 1.5; }
+.my-pet-weight-records { display: grid; margin-top: 16px; border-top: 1px solid var(--my-line); max-height: 280px; overflow: auto; }
+.my-pet-weight-record {
+  display: flex; gap: 10px; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid var(--my-line);
+}
+.my-pet-weight-record time { color: var(--my-copy); font-size: 12px; }
+.my-pet-weight-record strong { color: var(--my-ink); font-size: 14px; }
+.my-pet-weight-record small { margin-left: 8px; color: var(--my-soft); font-size: 11px; }
+.my-pet-weight-record__buttons { display: flex; gap: 4px; flex-shrink: 0; }
+.my-pet-weight-record__buttons button {
+  min-width: 44px; min-height: 44px; padding: 8px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--my-copy); font: inherit; font-size: 12px; cursor: pointer;
+}
+.my-pet-weight-record__buttons button:hover { background: rgba(112,102,156,.08); }
+.my-pet-weight-recalculate { margin-top: 16px; padding: 16px; border-radius: 14px; background: rgba(242,238,255,.60); }
+.my-pet-weight-recalculate p { margin: 0 0 10px; font-size: 12px; color: var(--my-copy); line-height: 1.6; }
+.my-pet-weight-recalculate button {
+  width: 100%; min-height: 44px; padding: 10px 14px; border: 1px solid var(--my-blue);
+  border-radius: 12px; background: #fff; color: var(--my-blue);
+  font: inherit; font-size: 13px; font-weight: 750; cursor: pointer;
+}
+@media (max-width: 390px) {
+  .my-pet-weight-form { padding: 16px; }
+  .my-pet-weight-form__fields { grid-template-columns: 1fr; }
+}
+
+/* BCS guide: labels share exactly the same nine-column width as the images.
+   Narrow screens scroll the whole aligned pair together instead of squeezing
+   each cat/dog silhouette until the body shapes are hard to distinguish. */
+.my-pet-bcs-guide {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--my-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.my-pet-bcs-guide__scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.my-pet-bcs-guide__scroll:focus-visible {
+  outline: 2px solid var(--my-blue);
+  outline-offset: 2px;
+}
+.my-pet-bcs-guide__chart {
+  width: 100%;
+  min-width: 520px;
+}
+.my-pet-bcs-guide__numbers {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-bottom: 4px;
+}
+.my-pet-bcs-guide__score {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  min-width: 0;
+  color: var(--my-copy);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 730;
+  line-height: 1.4;
+  text-align: center;
+}
+.my-pet-bcs-guide__score--ideal {
+  color: var(--my-blue);
+  font-weight: 850;
+}
+.my-pet-bcs-guide__chart img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  border: 0;
+}
+.my-pet-bcs-guide__description {
+  margin-top: 10px;
+}
+.my-pet-bcs-guide__description p {
+  margin: 0;
+  color: var(--my-copy);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+}
+.my-pet-bcs-guide__description p + p {
+  margin-top: 2px;
+}
+@media (max-width: 720px) {
+  .my-pet-bcs-guide__chart { min-width: 630px; }
+}
