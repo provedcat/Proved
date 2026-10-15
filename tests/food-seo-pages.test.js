@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { copyFile, mkdir, mkdtemp, readFile, rm } = require('node:fs/promises');
+const { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 
@@ -160,4 +160,49 @@ test('목록 결과는 크롤러가 따라갈 수 있는 제품 링크를 출력
   const source = await readFile(path.join(__dirname, '..', 'js', 'food-list.js'), 'utf8');
   assert.match(source, /<a class="food-result" href="\$\{escapeHtml\(buildProductPath\(feed\)\)\}"/);
   assert.doesNotMatch(source, /<button class="food-result"/);
+});
+
+test('과거 제품 주소는 동일 UUID 제품으로 복구하고 변경 주소를 다음 생성에도 보존한다', async () => {
+  const { buildProductPath, buildFoodSitemap, writeGeneratedPages } = await loadGenerator();
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-legacy-urls-'));
+  try {
+    await mkdir(path.join(tempRoot, 'food'), { recursive: true });
+    await copyFile(path.join(__dirname, '..', 'food', 'index.html'), path.join(tempRoot, 'food', 'index.html'));
+
+    const oldFeed = { ...CAT_FEED, brands: { ...BRAND, name: 'Farmina Pet Foods' } };
+    const oldPath = buildProductPath(oldFeed, 'cat');
+    const newPath = buildProductPath(CAT_FEED, 'cat');
+    const unrelatedPath = '/food/cat/no-longer-listed--22222222/';
+    assert.notEqual(oldPath, newPath);
+    await writeFile(path.join(tempRoot, 'sitemap-foods.xml'), buildFoodSitemap([
+      { path: oldPath },
+      { path: unrelatedPath }
+    ]));
+
+    await writeGeneratedPages({ repoRoot: tempRoot, catFeeds: [CAT_FEED], dogFeeds: [] });
+    const oldHtml = await readFile(path.join(tempRoot, oldPath, 'index.html'), 'utf8');
+    const target = new URL(newPath, 'https://proved.kr').href;
+    assert.ok(oldHtml.includes('<link rel="canonical" href="' + target + '">'));
+    assert.ok(oldHtml.includes('<meta http-equiv="refresh" content="0;url=' + target + '">'));
+    assert.ok(oldHtml.includes('location.replace('));
+    const sitemap = await readFile(path.join(tempRoot, 'sitemap-foods.xml'), 'utf8');
+    assert.ok(sitemap.includes(target));
+    assert.ok(!sitemap.includes(new URL(oldPath, 'https://proved.kr').href));
+    await assert.rejects(readFile(path.join(tempRoot, unrelatedPath, 'index.html'), 'utf8'));
+
+    const renamedFeed = { ...CAT_FEED, 제품명: 'N&D 새로운 국내 표기' };
+    const newestPath = buildProductPath(renamedFeed, 'cat');
+    await writeGeneratedPages({ repoRoot: tempRoot, catFeeds: [renamedFeed], dogFeeds: [] });
+    const oldHtmlAgain = await readFile(path.join(tempRoot, oldPath, 'index.html'), 'utf8');
+    const previousHtml = await readFile(path.join(tempRoot, newPath, 'index.html'), 'utf8');
+    const newestTarget = new URL(newestPath, 'https://proved.kr').href;
+    assert.ok(oldHtmlAgain.includes(newestTarget));
+    assert.ok(previousHtml.includes(newestTarget));
+    const registry = JSON.parse(await readFile(path.join(tempRoot, 'scripts/legacy-food-paths.json'), 'utf8'));
+    assert.ok(registry.includes(oldPath));
+    assert.ok(registry.includes(newPath));
+    assert.ok(!registry.includes(unrelatedPath));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
