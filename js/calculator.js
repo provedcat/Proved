@@ -185,6 +185,7 @@ function initializeBcsChoices() {
   const valueInput = document.getElementById('bcsValue');
   const description = document.getElementById('bcsDescription');
   const buttons = [...document.querySelectorAll('[data-bcs]')];
+  if (!diet || !field || !valueInput || !description) return;
   if (field.dataset.initialized === 'true') {
     field._bcsSync?.();
     return;
@@ -225,6 +226,7 @@ function updateDogConditionalFields() {
 }
 
 function markCalculationDirty() {
+  window.provedFeedingPlan?.invalidate();
   updateFeedingPreview();
   if (!state.lastResult) return;
   state.isCalculationDirty = true;
@@ -347,19 +349,11 @@ function getSelectedWetEntries() {
 }
 
 function getAllocationPreview(foodKcal, dryRatio, wetRatio) {
-  const switching = document.getElementById('drySwitching')?.checked;
-  const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
-  const dryTotal = switching ? dryFeeds.reduce((sum, _, index) => sum + (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0), 0) : 100;
-  const dryGrams = dryFeeds.reduce((sum, feed, index) => {
-    const share = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (dryTotal || 100) : 1;
-    return sum + Math.round((foodKcal * dryRatio * share) / (feed.kcal / 1000));
-  }, 0);
+  const dryFeeds = (document.getElementById('drySwitching')?.checked ? state.dryFeeds : [state.dryFeeds[0]]).filter(Boolean);
   const wetEntries = getSelectedWetEntries();
-  const additionalWetPct = wetEntries.slice(1).reduce((sum, { sid }) => sum + (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0), 0);
-  const wetGrams = wetEntries.reduce((sum, { sid, feed }, index) => {
-    const share = wetEntries.length === 1 ? 1 : index === 0 ? (100 - additionalWetPct) / 100 : (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0) / 100;
-    return sum + Math.round((foodKcal * wetRatio * Math.max(0, share)) / (feed.kcal / 1000));
-  }, 0);
+  const grams = (feed, energy) => Number(feed.kcal) > 0 ? Math.round(energy / (Number(feed.kcal) / 1000) * 10) / 10 : 0;
+  const dryGrams = dryFeeds.reduce((sum, feed) => sum + grams(feed, foodKcal * dryRatio / dryFeeds.length), 0);
+  const wetGrams = wetEntries.reduce((sum, entry) => sum + grams(entry.feed, foodKcal * wetRatio / wetEntries.length), 0);
   return { dryGrams, wetGrams, dryFeeds, wetEntries };
 }
 
@@ -402,17 +396,9 @@ function updateFeedingPreview() {
 // 건사료 교체 토글
 // -----------------------------------------------
 function toggleDrySwitching() {
-  const on   = document.getElementById('drySwitching').checked;
-  const area = document.getElementById('dryArea2');
-  const wrap = document.getElementById('drySwPctWrap1');
-  if (on) {
-    area.classList.remove('hidden');
-    wrap.classList.remove('hidden');
-    wrap.classList.add('flex');
-  } else {
-    area.classList.add('hidden');
-    wrap.classList.remove('flex');
-    wrap.classList.add('hidden');
+  const on = document.getElementById('drySwitching').checked;
+  document.getElementById('dryArea2').classList.toggle('hidden', !on);
+  if (!on) {
     state.dryFeeds[1] = null;
     document.getElementById('dryInput2').value = '';
     document.getElementById('drySelected2').classList.add('hidden');
@@ -439,11 +425,6 @@ function addWetSlot() {
       <input type="text" id="wetInput_${slotId}" placeholder="습식사료 검색..."
         class="flex-1">
       ${!isFirst ? `
-        <div class="pc-subratio">
-          <input type="number" id="wetPct_${slotId}" value="50" min="0" max="100"
-            class="pc-subratio-input">
-          <span >%</span>
-        </div>
         <button type="button" onclick="removeWetSlot(${slotId})"
           class="pc-remove-feed" aria-label="습식사료 삭제">✕</button>
       ` : ''}
@@ -464,18 +445,6 @@ function addWetSlot() {
   const input = document.getElementById(`wetInput_${slotId}`);
   input.addEventListener('input', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
   input.addEventListener('focus', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
-  const wetRatioInput = document.getElementById(`wetPct_${slotId}`);
-  if (wetRatioInput) {
-    wetRatioInput.addEventListener('input', markCalculationDirty);
-    wetRatioInput.addEventListener('change', markCalculationDirty);
-  }
-
-  // Apply the requested preset once, immediately after a slot is added.
-  const defaults = getWetDefaultPercentages(state.wetSlotIds.length);
-  state.wetSlotIds.slice(1).forEach((id, index) => {
-    const ratioInput = document.getElementById(`wetPct_${id}`);
-    if (ratioInput) ratioInput.value = String(defaults[index + 1]);
-  });
   markCalculationDirty();
 
   if (state.wetSlotIds.length >= 3) {
@@ -509,7 +478,7 @@ function showCalculatorError(id, message, focusId) {
   return focusTarget;
 }
 
-function calculate() {
+function calculate(mode = 'prepare') {
   clearCalculatorErrors();
   const name = document.getElementById('catName').value.trim();
   const weight = Number(document.getElementById('catWeight').value);
@@ -558,19 +527,9 @@ function calculate() {
   if (duplicateDry) firstErrors.push(showCalculatorError('dryFeedError', '이미 선택한 건사료입니다. 다른 제품을 선택해 주세요.', 'dryInput2'));
   if (duplicateWet) firstErrors.push(showCalculatorError('wetFeedError', '이미 선택한 습식사료입니다. 다른 제품을 선택해 주세요.', `wetInput_${duplicateWet.sid}`));
   if (wetRatio > 0 && wetEntries.length === 0) firstErrors.push(showCalculatorError('wetFeedError', '습식사료 비율이 있으므로 습식사료를 선택해 주세요.', `wetInput_${state.wetSlotIds[0]}`));
-  const wetRatioValues = wetEntries.slice(1).map(entry => ({
-    entry,
-    input: document.getElementById(`wetPct_${entry.sid}`),
-    rawValue: document.getElementById(`wetPct_${entry.sid}`)?.value ?? '',
-    value: Number(document.getElementById(`wetPct_${entry.sid}`)?.value)
-  }));
-  const invalidWetRatio = wetRatioValues.find(({ rawValue, value }) => rawValue.trim() === '' || !Number.isFinite(value) || value < 0 || value > 100);
-  if (invalidWetRatio) {
-    firstErrors.push(showCalculatorError('wetRatioError', '습식사료별 비율은 0% 이상 100% 이하의 숫자로 입력해 주세요.', `wetPct_${invalidWetRatio.entry.sid}`));
-  }
-  const additionalWetPct = wetRatioValues.reduce((sum, { value }) => sum + (Number.isFinite(value) ? value : 0), 0);
-  if (!invalidWetRatio && wetEntries.length > 1 && additionalWetPct > 100) {
-    firstErrors.push(showCalculatorError('wetRatioError', '추가한 습식사료의 비율 합계는 100%를 넘을 수 없습니다.', `wetPct_${wetEntries[1].sid}`));
+  const selectedFeeds = [...(document.getElementById('drySwitching').checked ? state.dryFeeds : [state.dryFeeds[0]]).filter(Boolean), ...wetEntries.map(entry => entry.feed)];
+  if (selectedFeeds.some(feed => !Number.isFinite(Number(feed.kcal)) || Number(feed.kcal) <= 0)) {
+    firstErrors.push(showCalculatorError('dryFeedError', '선택한 사료 중 열량 정보가 없는 제품이 있습니다. 제품 열량을 확인해 주세요.', 'dryInput1'));
   }
   const firstError = firstErrors.find(Boolean);
   if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
@@ -587,28 +546,45 @@ function calculate() {
   const requestedTreatKcal = document.getElementById('treatKcalInput') ? getTreatKcal() : Math.round(DER * legacyTreatPct);
   const treatKcal = Math.min(requestedTreatKcal, DER);
   const treatReservePct = DER > 0 ? treatKcal / DER : 0;
-  const foodKcal = DER - treatKcal;
+  const targetFoodKcal = DER - treatKcal;
   const switching = document.getElementById('drySwitching').checked;
-  const resultData = { 건사료_결과: [], 습식사료_결과: [] };
-  const resultCards = [];
   const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
-  const totalDrySubPct = switching ? dryFeeds.reduce((sum, _, i) => sum + (Number(document.getElementById(`drySwPct${i + 1}`)?.value) || 0), 0) : 100;
-  dryFeeds.forEach((feed, index) => {
-    const subPct = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1;
-    const kcal = foodKcal * dryRatio * subPct;
-    const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.건사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
+  if (mode !== 'confirm') {
+    if (!window.provedFeedingPlan) {
+      window.location.assign(typeof provedGetSpeciesPath === 'function'
+        ? provedGetSpeciesPath(species) : (species === 'dog' ? '/dog-food-calculator/' : '/cat-food-calculator/'));
+      return;
+    }
+    window.provedFeedingPlan.begin({ DER, targetFoodKcal, treatKcal, dryRatio, wetRatio });
+    return;
+  }
+  const allocated = window.provedFeedingPlan?.getCurrentPlan();
+  if (!allocated || Math.abs(allocated.targetFoodKcal - targetFoodKcal) > 0.01 ||
+      Math.abs(allocated.dryRatio - dryRatio) > 0.0001 || allocated.DER !== DER) {
+    window.provedFeedingPlan?.invalidate();
+    showCalculatorError('dryFeedError', '급여 조건이 변경되었습니다. 다시 계산해 주세요.', 'dryInput1');
+    return;
+  }
+  const foodKcal = Math.round(allocated.actualFoodKcal);
+  const resultData = { 건사료_결과: [], 습식사료_결과: [] };
+  const escapeName = value => String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+  allocated.rows.forEach(row => {
+    if (row.grams <= 0) return;
+    const feed = row.feed;
+    const item = {
+      사료_id: feed.id || null, 이름: feed.name, 급여량_g: row.grams,
+      담당칼로리: Math.round(row.actualKcal),
+      비율: allocated.actualFoodKcal > 0 ? Math.round(row.actualKcal / allocated.actualFoodKcal * 100) : 0,
+      에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture
+    };
+    resultData[row.type === 'dry' ? '건사료_결과' : '습식사료_결과'].push(item);
   });
-  wetEntries.forEach(({ sid, feed }, index) => {
-    let subPct;
-    if (wetEntries.length === 1) subPct = 1;
-    else if (index === 0) subPct = (100 - additionalWetPct) / 100;
-    else subPct = Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100;
-    const kcal = foodKcal * wetRatio * subPct;
-    const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.습식사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
-  });
-  [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${item.이름}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
+  const resultCards = [];
+  [...resultData.건사료_결과.map(item => ({ ...item, type: '건사료' })),
+   ...resultData.습식사료_결과.map(item => ({ ...item, type: '습식사료' }))]
+    .forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${escapeName(item.이름)}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
   const dryTotalGrams = resultData.건사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
   const wetTotalGrams = resultData.습식사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
   document.getElementById('resultTitle').textContent = '하루 급여 계획';
@@ -624,10 +600,26 @@ function calculate() {
   renderCompactPlanAnalysis(resultData, weight);
   updateMobileFeedingSummary({ dryTotalGrams, wetTotalGrams, complete: true });
   renderDogCalculationContext(species, caloriePlan, [...dryFeeds, ...wetEntries.map(entry => entry.feed)]);
-  const warningAllocations = [
-    ...dryFeeds.map((feed, index) => ({ feed, share: dryRatio * (switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1) })),
-    ...wetEntries.map(({ sid, feed }, index) => ({ feed, share: wetRatio * (wetEntries.length === 1 ? 1 : index === 0 ? (100 - additionalWetPct) / 100 : Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100) }))
-  ];
+  const warningAllocations = allocated.rows.filter(row => row.actualKcal > 0).map(row => ({
+    feed: row.feed,
+    share: allocated.actualFoodKcal > 0 ? row.actualKcal / allocated.actualFoodKcal : 0
+  }));
+  const actualDailyKcal = allocated.actualFoodKcal + treatKcal;
+  const difference = actualDailyKcal - DER;
+  const roundedDifference = Math.round(difference);
+  const signed = roundedDifference > 0 ? '+' : '';
+  document.getElementById('planResultTarget').textContent = DER.toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultActual').textContent = Math.round(actualDailyKcal).toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultDelta').textContent = signed + roundedDifference.toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultDifferenceNote').textContent = Math.abs(difference) < 1
+    ? '목표 열량과 계획 열량이 거의 일치합니다.'
+    : difference > 0 ? '계획 열량이 목표보다 높습니다. 급여량을 다시 확인해 주세요.'
+      : '계획 열량이 목표보다 낮습니다. 급여량을 다시 확인해 주세요.';
+  document.getElementById('planEnergyDifference').classList.toggle('is-different', Math.abs(difference) >= 1);
+  const actualDryPct = allocated.actualFoodKcal > 0 ? allocated.dryKcal / allocated.actualFoodKcal * 100 : null;
+  document.getElementById('planResultRatioNote').textContent = actualDryPct !== null && Math.abs(actualDryPct - dryRatio * 100) >= 1
+    ? '건식 목표 ' + Math.round(dryRatio * 100) + '% / 실제 ' + Math.round(actualDryPct) + '% · 직접 입력한 양에 따라 비율이 달라졌습니다.'
+    : '';
   renderDietWarnings({ species, plan: caloriePlan, allocations: warningAllocations, treatKcal, diet, bcs });
   document.getElementById('resultArea').classList.remove('hidden');
   const capResult = document.getElementById('capResult');
@@ -638,7 +630,14 @@ function calculate() {
   waterResult.innerHTML = '';
   document.getElementById('capBtn').setAttribute('aria-expanded', 'false');
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
-  state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, caloriePlan, bcs: diet ? bcs : null, ...resultData };
+  state.lastResult = {
+    species, DER, foodKcal, targetFoodKcal, plannedDailyKcal: actualDailyKcal,
+    differenceKcal: difference, treatReservePct, treatKcal,
+    dryRatio: allocated.actualFoodKcal > 0 ? allocated.dryKcal / allocated.actualFoodKcal : dryRatio,
+    wetRatio: allocated.actualFoodKcal > 0 ? allocated.wetKcal / allocated.actualFoodKcal : wetRatio,
+    targetDryRatio: dryRatio, targetWetRatio: wetRatio,
+    caloriePlan, bcs: diet ? bcs : null, ...resultData
+  };
   markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
@@ -756,7 +755,7 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
   if (calculatorPage && feedsStep && petInfoStep) calculatorPage.insertBefore(feedsStep, petInfoStep);
 
   const resultLabel = document.querySelector('#resultArea > .pc-section-title');
-  if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
+  if (resultLabel) resultLabel.innerHTML = '<span>05</span> 급여량 확인';
   const shareButton = document.getElementById('openShareModalBtn');
   if (shareButton) shareButton.textContent = '저장용 이미지 만들기';
   updateMobileFeedingSummary();

@@ -1,0 +1,35 @@
+/* 2026-10-16: clear progression from food selection to ratio, grams, confirmation. */
+#feedingCheckStep{order:3}
+#planAdjustStep{order:4}
+#resultArea{order:5}
+#calculatorPage > #planAdjustStep{background:#fff!important}
+#planAdjustStep.hidden,#resultArea.hidden,#feedingCheckStep.hidden{display:none!important}
+.pc-plan-adjust-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;border-block:1px solid var(--border-subtle,#e3e7ed)}
+.pc-plan-adjust-toolbar strong{font-size:14px;color:var(--brand-primary,#2f6fed)}
+.pc-plan-adjust-toolbar button{min-height:42px;padding:10px 12px;border:1px solid var(--brand-primary,#2f6fed);background:#fff;color:var(--brand-primary,#2f6fed);font-size:12px;font-weight:700;cursor:pointer}
+.pc-plan-adjust-rows{display:grid;gap:0}
+.pc-plan-adjust-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(185px,240px);align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--border-subtle,#e3e7ed)}
+.pc-plan-adjust-row__heading{min-width:0}
+.pc-plan-adjust-row__heading strong{display:block;color:var(--text-primary,#263b60);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.pc-plan-adjust-row__heading small{display:block;margin-top:6px;color:var(--text-secondary,#6d7788);font-size:11px}
+.pc-plan-adjust-row__controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(82px,100px);gap:8px}
+.pc-plan-adjust-row__controls select{min-width:0;width:100%;padding:10px 6px;border:1px solid var(--border-subtle,#dce2ec);background:#fff;color:var(--text-primary,#263b60);font-size:13px}
+.pc-plan-adjust-row__controls label{display:flex;align-items:center;gap:4px;color:var(--text-secondary,#6d7788);font-size:13px}
+.pc-plan-adjust-row__controls input{width:100%;min-width:0;padding:10px 4px;text-align:right;border:1px solid var(--border-subtle,#dce2ec);background:#fff;color:var(--text-primary,#263b60);font-size:15px}
+.pc-plan-adjust-row__controls input:disabled{background:var(--page-background,#f7f8fb);color:var(--text-secondary,#6d7788);opacity:1}
+.pc-plan-adjust-summary,.pc-plan-result-difference{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:20px 0;border-top:1px solid var(--border-subtle,#e3e7ed)}
+.pc-plan-adjust-summary>div,.pc-plan-result-difference>div{display:grid;gap:6px;min-width:0}
+.pc-plan-adjust-summary span,.pc-plan-result-difference span{font-size:11px;color:var(--text-secondary,#6d7788)}
+.pc-plan-adjust-summary strong,.pc-plan-result-difference strong{font-size:clamp(14px,2.8vw,20px);color:var(--brand-primary,#2f6fed);font-variant-numeric:tabular-nums}
+.pc-plan-adjust-summary strong.is-different,.pc-plan-result-difference.is-different #planResultDelta{color:#b05a28}
+.pc-plan-adjust-status,.pc-plan-result-difference p{margin:0;font-size:13px;line-height:1.6;color:var(--text-secondary,#6d7788)}
+.pc-plan-result-difference{margin:0 auto;width:min(100%,560px);padding:18px 0 12px}
+.pc-plan-result-difference p{grid-column:1/-1}
+#planAdjustConfirm{width:100%}
+body:not(.pc-plan-adjust-visible) #mobileFeedingSummary{display:none!important}
+body.pc-calculator-check-active #mobileFeedingSummary{display:none!important}
+@media(max-width:600px){
+  .pc-plan-adjust-row{grid-template-columns:1fr;gap:10px}
+  .pc-plan-adjust-row__controls{grid-template-columns:minmax(0,1fr) minmax(95px,125px)}
+  .pc-plan-adjust-toolbar{align-items:flex-start}
+}

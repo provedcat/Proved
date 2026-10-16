@@ -48,8 +48,8 @@ const petDetail = read('js/my-pet.js');
 const detail = read('js/food-list.js');
 const compare = read('js/food-compare.js');
 
-assert.match(calculator, /건사료_결과\.push\(\{ 사료_id: feed\.id/);
-assert.match(calculator, /습식사료_결과\.push\(\{ 사료_id: feed\.id/);
+assert.match(calculator, /사료_id: feed\.id \|\| null/, 'calculated products must retain their UUIDs');
+assert.match(calculator, /resultData\[row\.type === 'dry' \? '건사료_결과' : '습식사료_결과'\]\.push\(item\)/, 'adjusted grams must be saved for both species and food types');
 assert.match(savedCats, /provedOnFeedingPlanSaved\(\{ userId, petId: catId, result: currentResult \}\)/);
 assert.match(shell, /await window\.provedRestoreSavedDietAndHandoff\(normalizedPet\)/);
 assert.match(entry, /\.from\('feeding_records'\)/);
