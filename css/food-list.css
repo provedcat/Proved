@@ -198,6 +198,15 @@ button { cursor: pointer; }
   font-size: 13px;
   line-height: 1.6;
 }
+.food-brand-finder__featured {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 22px;
+}
+.food-brand-finder__featured + .food-brand-finder__ranges {
+  margin-top: 18px;
+}
 .food-brand-finder__ranges {
   display: flex;
   flex-wrap: wrap;
@@ -1182,6 +1191,7 @@ button { cursor: pointer; }
   .food-filter-grid { grid-template-columns: 1fr; gap: 24px; padding: 28px 0 32px; }
   .food-filter-options { gap: 6px 16px; }
   .food-brand-finder { padding: 30px 20px 34px; }
+  .food-brand-finder__featured { gap: 7px; margin-top: 18px; }
   .food-brand-finder__ranges { margin-top: 20px; }
   .food-brand-finder__panel { margin-top: 13px; }
   .food-brand-finder__initials {
