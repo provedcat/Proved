@@ -14,9 +14,10 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
   <link rel="stylesheet" href="/css/proved-colors.css?v=20260818-color-system-v2" data-proved-colors>
-  <link rel="stylesheet" href="/css/my-page.css?v=20261001-myfit-saved-v1">
-  <script defer src="/js/proved-header.js?v=20260922-pet-detail-v1"></script>
+  <link rel="stylesheet" href="/css/my-page.css?v=20261016-support-v1">
+  <script defer src="/js/proved-header.js?v=20261016-about-v1"></script>
   <script defer src="/js/my-page.js?v=20261008-myfit-ux-v1"></script>
+  <script defer src="/js/my-support-notice.js?v=20261016-v1"></script>
 </head>
 <body class="my-body">
   <div class="my-site-shell">
@@ -42,6 +43,11 @@
             <p>내 반려동물과 저장한 선택을 한곳에서 이어봅니다.</p>
           </div>
         </header>
+
+        <section class="my-support-quicklink" aria-label="운영자 문의">
+          <a href="/support/">운영자에게 쪽지 보내기 <span aria-hidden="true">↗</span></a>
+          <span id="mySupportNotice" role="status">받은 답변 확인하기</span>
+        </section>
 
         <section class="my-section my-section--pets" aria-labelledby="myPetsTitle">
           <div class="my-section-heading">

@@ -209,6 +209,7 @@
         <a href="/food-ranking/">사료랭킹</a>
         <a href="/guide/calculation-method/">아카이브</a>
         <a href="/my/">MY</a>
+        <a href="/about/">PROVED</a>
       </nav>
       <p class="proved-site-footer__copyright">© 2026 프루브. All rights reserved.</p>`;
   }

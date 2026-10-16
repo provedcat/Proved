@@ -1,0 +1,44 @@
+name: PROVED Introduction and Support
+on:
+  pull_request:
+    paths:
+      - 'about/**'
+      - 'privacy/**'
+      - 'terms/**'
+      - 'support/**'
+      - 'css/proved-about.css'
+      - 'css/my-page.css'
+      - 'js/proved-header.js'
+      - 'js/proved-support.js'
+      - 'js/my-support-notice.js'
+      - 'my/index.html'
+      - 'sitemap.xml'
+      - 'tests/proved-about-support.test.js'
+      - '.github/workflows/proved-about-support.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'about/**'
+      - 'privacy/**'
+      - 'terms/**'
+      - 'support/**'
+      - 'js/proved-support.js'
+      - 'js/my-support-notice.js'
+      - 'tests/proved-about-support.test.js'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: JavaScript syntax checks
+        run: |
+          node --check js/proved-header.js
+          node --check js/proved-support.js
+          node --check js/my-support-notice.js
+      - name: Feature contract tests
+        run: node --test tests/proved-about-support.test.js
