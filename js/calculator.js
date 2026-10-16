@@ -615,6 +615,10 @@ function calculate(mode = 'prepare') {
     : difference > 0 ? '계획 열량이 목표보다 높습니다. 급여량을 다시 확인해 주세요.'
       : '계획 열량이 목표보다 낮습니다. 급여량을 다시 확인해 주세요.';
   document.getElementById('planEnergyDifference').classList.toggle('is-different', Math.abs(difference) >= 1);
+  const actualDryPct = allocated.actualFoodKcal > 0 ? allocated.dryKcal / allocated.actualFoodKcal * 100 : null;
+  document.getElementById('planResultRatioNote').textContent = actualDryPct !== null && Math.abs(actualDryPct - dryRatio * 100) >= 1
+    ? '건식 목표 ' + Math.round(dryRatio * 100) + '% / 실제 ' + Math.round(actualDryPct) + '% · 직접 입력한 양에 따라 비율이 달라졌습니다.'
+    : '';
   renderDietWarnings({ species, plan: caloriePlan, allocations: warningAllocations, treatKcal, diet, bcs });
   document.getElementById('resultArea').classList.remove('hidden');
   const capResult = document.getElementById('capResult');
