@@ -156,6 +156,37 @@ test('브랜드 Finder는 한글 초성·영문 알파벳과 실제 허브 href�
   assert.match(html, />로얄캐닌<\/span>/);
 });
 
+test('대표 브랜드 6개는 초성 선택 전 정적 링크로 표시되고 순서를 유지한다', async () => {
+  const { renderBrandFinder } = await loadGenerator();
+  const featured = [
+    ['로얄캐닌', '로얄캐닌-royal-canin'],
+    ['힐스', 'hill-s'],
+    ['퓨리나', 'purina'],
+    ['파미나', 'farmina'],
+    ['오리젠', 'orijen'],
+    ['지위픽', 'ziwi-peak']
+  ];
+  const groups = featured.map(([label, slug]) => ({
+    brand: { name: label, nameKo: label, displayName: label, slug, aliases: [label] },
+    items: [{ species: 'cat' }]
+  }));
+  const html = renderBrandFinder(groups);
+  const shortcuts = html.match(/<nav class="food-brand-finder__featured"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+  assert.ok(shortcuts, '대표 브랜드는 접힌 폴더 밖에 있어야 함');
+  assert.ok(html.indexOf('food-brand-finder__featured') < html.indexOf('food-brand-finder__ranges'));
+  assert.equal((shortcuts.match(/class="food-brand-chip"/g) || []).length, 6);
+  let previous = -1;
+  for (const [label, slug] of featured) {
+    const link = `href="/food/brand/${slug}/"><span>${label}</span>`;
+    const position = shortcuts.indexOf(link);
+    assert.ok(position > previous, `${label}은 지정한 순서로 링크에 있어야 함`);
+    previous = position;
+  }
+  const partial = renderBrandFinder(groups.slice(0, 1));
+  assert.equal((partial.match(/<nav class="food-brand-finder__featured"[^>]*>/g) || []).length, 1);
+  assert.equal((partial.match(/<nav class="food-brand-finder__featured"[\s\S]*?<\/nav>/g) || [])[0].match(/class="food-brand-chip"/g).length, 1);
+});
+
 test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루트 Finder와 사이트맵에 연결된다', async () => {
   const { buildBrandPath, buildProductPath, writeGeneratedPages } = await loadGenerator();
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-food-pages-'));
