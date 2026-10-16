@@ -183,6 +183,16 @@
         : difference > 0
           ? '현재 계획이 목표 열량보다 높습니다. 직접 입력한 양을 확인해 주세요.'
           : '현재 계획이 목표 열량보다 낮습니다. 자동 맞춤 제품을 추가하거나 급여량을 조정해 주세요.';
+      const actualDry = current.actualFoodKcal > 0 ? current.dryKcal / current.actualFoodKcal * 100 : null;
+      const targetDry = context.dryRatio * 100;
+      byId('planAdjustRatioNote').textContent = actualDry !== null && Math.abs(actualDry - targetDry) >= 1
+        ? '목표 건식 ' + format(targetDry) + '% / 실제 건식 ' + format(actualDry) + '% · 제품별 직접 입력으로 비율이 달라졌습니다.'
+        : '';
+      byId('planAdjustDirect').textContent = rows.every(row => row.mode === 'manual')
+        ? '목표 열량에 맞추기로 돌아가기' : '직접 급여량 계산하기';
+      byId('planAdjustModeTitle').textContent = rows.every(row => row.mode === 'manual')
+        ? '직접 급여량 계산 중'
+        : rows.some(row => row.mode === 'manual') ? '목표 열량에 맞추기 · 일부 직접 입력' : '목표 열량에 맞추기';
       setStatus('');
       if (typeof updateMobileFeedingSummary === 'function') {
         const dry = current.rows.filter(row => row.type === 'dry').reduce((sum, row) => sum + row.grams, 0);
@@ -220,7 +230,9 @@
     document.body.classList.toggle('pc-plan-adjust-visible', visible);
   }
   function confirm() {
-    if (!getCurrentPlan()) return setStatus('각 사료의 급여량을 확인해 주세요.');
+    const plan = getCurrentPlan();
+    if (!plan) return setStatus('각 사료의 급여량을 확인해 주세요.');
+    if (plan.actualFoodKcal <= 0) return setStatus('급여량이 모두 0g입니다. 하나 이상의 사료 급여량을 입력해 주세요.');
     if (typeof calculate === 'function') calculate('confirm');
   }
   function initialize() {
