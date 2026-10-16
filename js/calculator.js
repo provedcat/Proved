@@ -594,10 +594,21 @@ function calculate(mode = 'prepare') {
   renderCompactPlanAnalysis(resultData, weight);
   updateMobileFeedingSummary({ dryTotalGrams, wetTotalGrams, complete: true });
   renderDogCalculationContext(species, caloriePlan, [...dryFeeds, ...wetEntries.map(entry => entry.feed)]);
-  const warningAllocations = [
-    ...dryFeeds.map((feed, index) => ({ feed, share: dryRatio * (switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1) })),
-    ...wetEntries.map(({ sid, feed }, index) => ({ feed, share: wetRatio * (wetEntries.length === 1 ? 1 : index === 0 ? (100 - additionalWetPct) / 100 : Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100) }))
-  ];
+  const warningAllocations = allocated.rows.filter(row => row.actualKcal > 0).map(row => ({
+    feed: row.feed,
+    share: allocated.actualFoodKcal > 0 ? row.actualKcal / allocated.actualFoodKcal : 0
+  }));
+  const actualDailyKcal = allocated.actualFoodKcal + treatKcal;
+  const difference = actualDailyKcal - DER;
+  const signed = difference > 0 ? '+' : '';
+  document.getElementById('planResultTarget').textContent = DER.toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultActual').textContent = Math.round(actualDailyKcal).toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultDelta').textContent = signed + Math.round(difference).toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultDifferenceNote').textContent = Math.abs(difference) < 1
+    ? '목표 열량과 계획 열량이 거의 일치합니다.'
+    : difference > 0 ? '계획 열량이 목표보다 높습니다. 급여량을 다시 확인해 주세요.'
+      : '계획 열량이 목표보다 낮습니다. 급여량을 다시 확인해 주세요.';
+  document.getElementById('planEnergyDifference').classList.toggle('is-different', Math.abs(difference) >= 1);
   renderDietWarnings({ species, plan: caloriePlan, allocations: warningAllocations, treatKcal, diet, bcs });
   document.getElementById('resultArea').classList.remove('hidden');
   const capResult = document.getElementById('capResult');
@@ -726,7 +737,7 @@ if (typeof window !== 'undefined') window.addEventListener('DOMContentLoaded', (
   if (calculatorPage && feedsStep && petInfoStep) calculatorPage.insertBefore(feedsStep, petInfoStep);
 
   const resultLabel = document.querySelector('#resultArea > .pc-section-title');
-  if (resultLabel) resultLabel.innerHTML = '<span>04</span> 오늘의 급여 계획';
+  if (resultLabel) resultLabel.innerHTML = '<span>05</span> 급여량 확인';
   const shareButton = document.getElementById('openShareModalBtn');
   if (shareButton) shareButton.textContent = '저장용 이미지 만들기';
   updateMobileFeedingSummary();
