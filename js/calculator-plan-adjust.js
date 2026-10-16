@@ -98,6 +98,7 @@
     rows = [];
     current = null;
     byId('planAdjustStep')?.classList.add('hidden');
+    document.body.classList.remove('pc-plan-adjust-visible');
     hideResult();
   }
   function selectedRows() {
@@ -199,8 +200,10 @@
     current = null;
     if (!rows.length) return;
     hideResult();
+    byId('planAdjustDirect').textContent = '직접 급여량 계산하기';
     renderRows();
     refresh();
+    document.body.classList.add('pc-plan-adjust-visible');
     const step = byId('planAdjustStep');
     step.classList.remove('hidden');
     step.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -210,6 +213,11 @@
     if (rows.some(row => row.mode === 'manual' &&
       (!Number.isFinite(Number(row.grams)) || row.grams === '' || Number(row.grams) < 0 || Number(row.grams) > 10000))) return null;
     return { ...current, targetFoodKcal: context.targetFoodKcal, dryRatio: context.dryRatio, DER: context.DER };
+  }
+  function setMode(mode) {
+    const visible = mode === 'plan' && Boolean(context);
+    byId('planAdjustStep')?.classList.toggle('hidden', !visible);
+    document.body.classList.toggle('pc-plan-adjust-visible', visible);
   }
   function confirm() {
     if (!getCurrentPlan()) return setStatus('각 사료의 급여량을 확인해 주세요.');
@@ -228,6 +236,15 @@
         row.grams = current.rows.find(item => item.key === row.key)?.grams ?? row.grams;
       }
       hideResult();
+      refresh();
+    });
+    list.addEventListener('change', event => {
+      const input = event.target.closest('[data-plan-grams]');
+      if (!input) return;
+      const row = rows.find(item => item.key === input.dataset.planGrams);
+      if (!row || row.mode !== 'manual' || input.value === '' || !Number.isFinite(Number(input.value))) return;
+      row.grams = roundGrams(Math.max(0, Number(input.value)));
+      input.value = String(row.grams);
       refresh();
     });
     list.addEventListener('input', event => {
@@ -255,5 +272,5 @@
     });
     byId('planAdjustConfirm')?.addEventListener('click', confirm);
   }
-  return { allocateFeedingPlan, begin, getCurrentPlan, invalidate, initialize };
+  return { allocateFeedingPlan, begin, getCurrentPlan, invalidate, setMode, initialize };
 });
