@@ -477,7 +477,7 @@ function showCalculatorError(id, message, focusId) {
   return focusTarget;
 }
 
-function calculate() {
+function calculate(mode = 'prepare') {
   clearCalculatorErrors();
   const name = document.getElementById('catName').value.trim();
   const weight = Number(document.getElementById('catWeight').value);
@@ -526,19 +526,9 @@ function calculate() {
   if (duplicateDry) firstErrors.push(showCalculatorError('dryFeedError', '이미 선택한 건사료입니다. 다른 제품을 선택해 주세요.', 'dryInput2'));
   if (duplicateWet) firstErrors.push(showCalculatorError('wetFeedError', '이미 선택한 습식사료입니다. 다른 제품을 선택해 주세요.', `wetInput_${duplicateWet.sid}`));
   if (wetRatio > 0 && wetEntries.length === 0) firstErrors.push(showCalculatorError('wetFeedError', '습식사료 비율이 있으므로 습식사료를 선택해 주세요.', `wetInput_${state.wetSlotIds[0]}`));
-  const wetRatioValues = wetEntries.slice(1).map(entry => ({
-    entry,
-    input: document.getElementById(`wetPct_${entry.sid}`),
-    rawValue: document.getElementById(`wetPct_${entry.sid}`)?.value ?? '',
-    value: Number(document.getElementById(`wetPct_${entry.sid}`)?.value)
-  }));
-  const invalidWetRatio = wetRatioValues.find(({ rawValue, value }) => rawValue.trim() === '' || !Number.isFinite(value) || value < 0 || value > 100);
-  if (invalidWetRatio) {
-    firstErrors.push(showCalculatorError('wetRatioError', '습식사료별 비율은 0% 이상 100% 이하의 숫자로 입력해 주세요.', `wetPct_${invalidWetRatio.entry.sid}`));
-  }
-  const additionalWetPct = wetRatioValues.reduce((sum, { value }) => sum + (Number.isFinite(value) ? value : 0), 0);
-  if (!invalidWetRatio && wetEntries.length > 1 && additionalWetPct > 100) {
-    firstErrors.push(showCalculatorError('wetRatioError', '추가한 습식사료의 비율 합계는 100%를 넘을 수 없습니다.', `wetPct_${wetEntries[1].sid}`));
+  const selectedFeeds = [...(document.getElementById('drySwitching').checked ? state.dryFeeds : [state.dryFeeds[0]]).filter(Boolean), ...wetEntries.map(entry => entry.feed)];
+  if (selectedFeeds.some(feed => !Number.isFinite(Number(feed.kcal)) || Number(feed.kcal) <= 0)) {
+    firstErrors.push(showCalculatorError('dryFeedError', '선택한 사료 중 열량 정보가 없는 제품이 있습니다. 제품 열량을 확인해 주세요.', 'dryInput1'));
   }
   const firstError = firstErrors.find(Boolean);
   if (firstError) { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); window.setTimeout(() => firstError.focus?.({ preventScroll: true }), 250); return; }
