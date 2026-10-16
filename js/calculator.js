@@ -185,6 +185,7 @@ function initializeBcsChoices() {
   const valueInput = document.getElementById('bcsValue');
   const description = document.getElementById('bcsDescription');
   const buttons = [...document.querySelectorAll('[data-bcs]')];
+  if (!diet || !field || !valueInput || !description) return;
   if (field.dataset.initialized === 'true') {
     field._bcsSync?.();
     return;
