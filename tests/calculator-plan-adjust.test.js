@@ -68,6 +68,13 @@ const diet = read('js/calculator-diet-entry.js');
 for (const file of ['cat-food-calculator/index.html', 'dog-food-calculator/index.html']) {
   const html = read(file);
   assert.doesNotMatch(html, /id="drySwPct|id="drySwPctWrap|id="wetPct_/, file + ' must not show product percentages');
+  // The ratio slider must retain the existing real-time group gram preview.
+  assert.match(html, /id="feedingPreview"[^>]*aria-live="polite"/, file + ' must show live gram preview');
+  assert.match(html, /id="previewDryGrams"/, file + ' must show dry grams');
+  assert.match(html, /id="previewWetGrams"/, file + ' must show wet grams');
+  assert.ok(html.indexOf('id="ratioSlider"') < html.indexOf('id="feedingPreview"'), file + ' preview must follow slider');
+  assert.ok(html.indexOf('id="feedingPreview"') < html.indexOf('이 구성으로 계산하기'), file + ' preview must appear before calculate button');
+  assert.match(html, /예상값입니다\. 제품별 급여량은 다음 단계에서 조정/, file + ' must distinguish estimate from final grams');
   assert.match(html, /id="planAdjustStep"/);
   assert.match(html, /id="planEnergyDifference"/);
   assert.match(html, /calculator-plan-adjust\.js/);
@@ -78,6 +85,10 @@ for (const file of ['cat-food-calculator/index.html', 'dog-food-calculator/index
 assert.doesNotMatch(calculator, /document\.getElementById\(`wetPct_|document\.getElementById\(`drySwPct/);
 assert.doesNotMatch(session, /wetPct_|drySwPct/);
 assert.doesNotMatch(diet, /wetPct_|drySwPct/);
+assert.match(calculator, /function updateRatio\(v\) \{[\s\S]*?updateFeedingPreview\(\)/, 'slider must refresh gram preview');
+assert.match(calculator, /function updateFeedingPreview\(\) \{[\s\S]*?getAllocationPreview\(/, 'preview must use selected food energy');
+assert.match(calculator, /previewDryGrams/, 'dry grams must be populated');
+assert.match(calculator, /previewWetGrams/, 'wet grams must be populated');
 assert.match(calculator, /calculate\(mode = 'prepare'\)/);
 assert.match(calculator, /getCurrentPlan\(\)/);
 assert.match(calculator, /differenceKcal: difference/);
