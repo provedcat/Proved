@@ -134,20 +134,6 @@
       : Math.max(0, Math.min(100, dry.reduce((sum, entry) => sum + (entry.pct || 0), 0)));
     if (slider) slider.value = String(dryShare);
 
-    if (dry.length > 1) {
-      const total = dry.reduce((sum, item) => sum + (item.pct || 0), 0);
-      dry.forEach((entry, index) => {
-        const input = document.getElementById('drySwPct' + (index + 1));
-        if (input) input.value = String(total > 0 ? Math.round(entry.pct / total * 100) : (index === 0 ? 50 : 50));
-      });
-    }
-    if (wet.length > 1) {
-      const total = wet.reduce((sum, item) => sum + (item.pct || 0), 0);
-      wet.slice(1).forEach((entry, index) => {
-        const input = document.getElementById('wetPct_' + state.wetSlotIds[index + 1]);
-        if (input) input.value = String(total > 0 ? Math.round(entry.pct / total * 100) : 0);
-      });
-    }
     if (typeof updateRatio === 'function') updateRatio(String(dryShare));
     if (typeof saveCalculatorDraft === 'function') saveCalculatorDraft();
   }
