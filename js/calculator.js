@@ -549,7 +549,12 @@ function calculate(mode = 'prepare') {
   const switching = document.getElementById('drySwitching').checked;
   const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
   if (mode !== 'confirm') {
-    window.provedFeedingPlan?.begin({ DER, targetFoodKcal, treatKcal, dryRatio, wetRatio });
+    if (!window.provedFeedingPlan) {
+      window.location.assign(typeof provedGetSpeciesPath === 'function'
+        ? provedGetSpeciesPath(species) : (species === 'dog' ? '/dog-food-calculator/' : '/cat-food-calculator/'));
+      return;
+    }
+    window.provedFeedingPlan.begin({ DER, targetFoodKcal, treatKcal, dryRatio, wetRatio });
     return;
   }
   const allocated = window.provedFeedingPlan?.getCurrentPlan();
@@ -600,10 +605,11 @@ function calculate(mode = 'prepare') {
   }));
   const actualDailyKcal = allocated.actualFoodKcal + treatKcal;
   const difference = actualDailyKcal - DER;
-  const signed = difference > 0 ? '+' : '';
+  const roundedDifference = Math.round(difference);
+  const signed = roundedDifference > 0 ? '+' : '';
   document.getElementById('planResultTarget').textContent = DER.toLocaleString('ko-KR') + ' kcal';
   document.getElementById('planResultActual').textContent = Math.round(actualDailyKcal).toLocaleString('ko-KR') + ' kcal';
-  document.getElementById('planResultDelta').textContent = signed + Math.round(difference).toLocaleString('ko-KR') + ' kcal';
+  document.getElementById('planResultDelta').textContent = signed + roundedDifference.toLocaleString('ko-KR') + ' kcal';
   document.getElementById('planResultDifferenceNote').textContent = Math.abs(difference) < 1
     ? '목표 열량과 계획 열량이 거의 일치합니다.'
     : difference > 0 ? '계획 열량이 목표보다 높습니다. 급여량을 다시 확인해 주세요.'
@@ -619,7 +625,14 @@ function calculate(mode = 'prepare') {
   waterResult.innerHTML = '';
   document.getElementById('capBtn').setAttribute('aria-expanded', 'false');
   document.getElementById('waterBtn').setAttribute('aria-expanded', 'false');
-  state.lastResult = { species, DER, foodKcal, treatReservePct, treatKcal, dryRatio, wetRatio, caloriePlan, bcs: diet ? bcs : null, ...resultData };
+  state.lastResult = {
+    species, DER, foodKcal, targetFoodKcal, plannedDailyKcal: actualDailyKcal,
+    differenceKcal: difference, treatReservePct, treatKcal,
+    dryRatio: allocated.actualFoodKcal > 0 ? allocated.dryKcal / allocated.actualFoodKcal : dryRatio,
+    wetRatio: allocated.actualFoodKcal > 0 ? allocated.wetKcal / allocated.actualFoodKcal : wetRatio,
+    targetDryRatio: dryRatio, targetWetRatio: wetRatio,
+    caloriePlan, bcs: diet ? bcs : null, ...resultData
+  };
   markCalculationFresh();
   state.lastSavedResultKey = null;
   updateSaveFeedingButtonVisibility();
