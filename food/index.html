@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="/css/proved-header.css?v=20260922-pet-detail-v1">
-  <link rel="stylesheet" href="/css/food-list.css?v=20261014-search-alias-v1">
+  <link rel="stylesheet" href="/css/food-list.css?v=20261017-featured-brands-v1">
   <link rel="stylesheet" href="/css/food-condition-page.css?v=20261008-condition-pills-v1">
   <link rel="stylesheet" href="/css/food-coupang-cta-desktop.css?v=20260909-desktop-link-v1">
   <link rel="stylesheet" href="/css/food-detail-refinements.css?v=20260921-detail-structure-v9">
@@ -123,11 +123,12 @@
           <div class="food-brand-finder__heading">
             <div>
               <h2 id="foodBrandFinderTitle">브랜드로 찾기</h2>
-              <p>초성 또는 알파벳을 선택해 같은 브랜드의 등록 사료를 한곳에서 확인하세요.</p>
+              <p>브랜드를 바로 선택하거나 초성·알파벳으로 등록된 사료를 찾아보세요.</p>
             </div>
           </div>
           <!-- PROVED_BRAND_FINDER_START -->
-<div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
+<nav class="food-brand-finder__featured" aria-label="대표 브랜드 바로가기"><a class="food-brand-chip" href="/food/brand/로얄캐닌-royal-canin/"><span>로얄캐닌</span></a><a class="food-brand-chip" href="/food/brand/hill-s/"><span>힐스</span></a><a class="food-brand-chip" href="/food/brand/purina/"><span>퓨리나</span></a><a class="food-brand-chip" href="/food/brand/farmina/"><span>파미나</span></a><a class="food-brand-chip" href="/food/brand/orijen/"><span>오리젠</span></a><a class="food-brand-chip" href="/food/brand/ziwi-peak/"><span>지위픽</span></a></nav>
+    <div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
       <button class="food-brand-range" type="button" data-brand-range-toggle="ko" aria-expanded="false" aria-controls="foodBrandRangeKo">
         <span>ㄱ ~ ㅎ</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
       </button>
