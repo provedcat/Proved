@@ -225,6 +225,7 @@ function updateDogConditionalFields() {
 }
 
 function markCalculationDirty() {
+  window.provedFeedingPlan?.invalidate();
   updateFeedingPreview();
   if (!state.lastResult) return;
   state.isCalculationDirty = true;
@@ -347,19 +348,11 @@ function getSelectedWetEntries() {
 }
 
 function getAllocationPreview(foodKcal, dryRatio, wetRatio) {
-  const switching = document.getElementById('drySwitching')?.checked;
-  const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
-  const dryTotal = switching ? dryFeeds.reduce((sum, _, index) => sum + (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0), 0) : 100;
-  const dryGrams = dryFeeds.reduce((sum, feed, index) => {
-    const share = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (dryTotal || 100) : 1;
-    return sum + Math.round((foodKcal * dryRatio * share) / (feed.kcal / 1000));
-  }, 0);
+  const dryFeeds = (document.getElementById('drySwitching')?.checked ? state.dryFeeds : [state.dryFeeds[0]]).filter(Boolean);
   const wetEntries = getSelectedWetEntries();
-  const additionalWetPct = wetEntries.slice(1).reduce((sum, { sid }) => sum + (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0), 0);
-  const wetGrams = wetEntries.reduce((sum, { sid, feed }, index) => {
-    const share = wetEntries.length === 1 ? 1 : index === 0 ? (100 - additionalWetPct) / 100 : (Number(document.getElementById(`wetPct_${sid}`)?.value) || 0) / 100;
-    return sum + Math.round((foodKcal * wetRatio * Math.max(0, share)) / (feed.kcal / 1000));
-  }, 0);
+  const grams = (feed, energy) => Number(feed.kcal) > 0 ? Math.round(energy / (Number(feed.kcal) / 1000) * 10) / 10 : 0;
+  const dryGrams = dryFeeds.reduce((sum, feed) => sum + grams(feed, foodKcal * dryRatio / dryFeeds.length), 0);
+  const wetGrams = wetEntries.reduce((sum, entry) => sum + grams(entry.feed, foodKcal * wetRatio / wetEntries.length), 0);
   return { dryGrams, wetGrams, dryFeeds, wetEntries };
 }
 
@@ -402,17 +395,9 @@ function updateFeedingPreview() {
 // 건사료 교체 토글
 // -----------------------------------------------
 function toggleDrySwitching() {
-  const on   = document.getElementById('drySwitching').checked;
-  const area = document.getElementById('dryArea2');
-  const wrap = document.getElementById('drySwPctWrap1');
-  if (on) {
-    area.classList.remove('hidden');
-    wrap.classList.remove('hidden');
-    wrap.classList.add('flex');
-  } else {
-    area.classList.add('hidden');
-    wrap.classList.remove('flex');
-    wrap.classList.add('hidden');
+  const on = document.getElementById('drySwitching').checked;
+  document.getElementById('dryArea2').classList.toggle('hidden', !on);
+  if (!on) {
     state.dryFeeds[1] = null;
     document.getElementById('dryInput2').value = '';
     document.getElementById('drySelected2').classList.add('hidden');
@@ -439,11 +424,6 @@ function addWetSlot() {
       <input type="text" id="wetInput_${slotId}" placeholder="습식사료 검색..."
         class="flex-1">
       ${!isFirst ? `
-        <div class="pc-subratio">
-          <input type="number" id="wetPct_${slotId}" value="50" min="0" max="100"
-            class="pc-subratio-input">
-          <span >%</span>
-        </div>
         <button type="button" onclick="removeWetSlot(${slotId})"
           class="pc-remove-feed" aria-label="습식사료 삭제">✕</button>
       ` : ''}
@@ -464,18 +444,6 @@ function addWetSlot() {
   const input = document.getElementById(`wetInput_${slotId}`);
   input.addEventListener('input', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
   input.addEventListener('focus', () => searchFeed('wet', input.value, `wetList_${slotId}`, slotId));
-  const wetRatioInput = document.getElementById(`wetPct_${slotId}`);
-  if (wetRatioInput) {
-    wetRatioInput.addEventListener('input', markCalculationDirty);
-    wetRatioInput.addEventListener('change', markCalculationDirty);
-  }
-
-  // Apply the requested preset once, immediately after a slot is added.
-  const defaults = getWetDefaultPercentages(state.wetSlotIds.length);
-  state.wetSlotIds.slice(1).forEach((id, index) => {
-    const ratioInput = document.getElementById(`wetPct_${id}`);
-    if (ratioInput) ratioInput.value = String(defaults[index + 1]);
-  });
   markCalculationDirty();
 
   if (state.wetSlotIds.length >= 3) {
