@@ -424,6 +424,9 @@ function renderBrandInitialGroups(initials, groups, range) {
   }).join('');
 }
 
+// Curated shortcuts keep the most recognizable brand hubs visible without opening alphabet filters.
+const FEATURED_BRAND_SLUGS = ["로얄캐닌-royal-canin","hill-s","purina","farmina","orijen","ziwi-peak"];
+
 export function renderBrandFinder(brandGroups) {
   const koGroups = new Map(HANGUL_INITIALS.map(initial => [initial, []]));
   const enGroups = new Map(LATIN_INITIALS.map(initial => [initial, []]));
@@ -440,7 +443,16 @@ export function renderBrandFinder(brandGroups) {
     if (enGroups.has(en)) enGroups.get(en).push(entry);
   }
 
-  return `<div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
+  const bySlug = new Map(sorted.map(({ brand }) => [brand.slug || slugify(brand.name), brand]));
+  const featuredLinks = FEATURED_BRAND_SLUGS.map(slug => bySlug.get(slug))
+    .filter(Boolean)
+    .map(brand => `<a class="food-brand-chip" href="${escapeHtml(buildBrandPath(brand))}"><span>${escapeHtml(brand.displayName || brand.name)}</span></a>`)
+    .join('');
+  const featuredMarkup = featuredLinks
+    ? `<nav class="food-brand-finder__featured" aria-label="대표 브랜드 바로가기">${featuredLinks}</nav>\n    `
+    : '';
+
+  return `${featuredMarkup}<div class="food-brand-finder__ranges" aria-label="브랜드 이름 범위">
       <button class="food-brand-range" type="button" data-brand-range-toggle="ko" aria-expanded="false" aria-controls="foodBrandRangeKo">
         <span>ㄱ ~ ㅎ</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
       </button>
