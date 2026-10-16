@@ -5,7 +5,7 @@ const PROVED_PENDING_REGISTERED_FEED_MAX_AGE_MS = 15 * 60 * 1000;
 const calculatorDraftFieldSelectors = [
   '#catName', '#catBirth', '#catWeight', '#catNeutered',
   '#isDiet', '#bcsValue', '#isPregnant', '#isLactating', '#dogExpectedAdultWeight',
-  '#drySwitching', '#drySwPct1', '#drySwPct2', '#ratioSlider', '#treatKcalInput',
+  '#drySwitching', '#ratioSlider', '#treatKcalInput',
   'input[name="dogActivity"]', 'input[name="treatReservePct"]'
 ];
 
@@ -24,8 +24,7 @@ function buildWetFeedDraft(slotIds = [], wetFeedMap = {}, readValue = () => '') 
   return slotIds.slice(0, 3).map(slotId => ({
     slotId,
     feed: wetFeedMap[slotId] || null,
-    input: readValue(`wetInput_${slotId}`) || '',
-    ratio: readValue(`wetPct_${slotId}`) || ''
+    input: readValue(`wetInput_${slotId}`) || ''
   }));
 }
 
@@ -261,8 +260,6 @@ function restoreCalculatorDraft() {
     state.wetFeedMap[saved.slotId] = saved.feed || null;
     const input = document.getElementById(`wetInput_${saved.slotId}`);
     if (input) input.value = saved.input || saved.feed?.display || saved.feed?.name || '';
-    const ratio = document.getElementById(`wetPct_${saved.slotId}`);
-    if (ratio && saved.ratio !== '') ratio.value = saved.ratio;
     renderRestoredFeed('wet', saved.slotId, saved.feed);
   });
 
