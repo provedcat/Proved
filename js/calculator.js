@@ -545,28 +545,40 @@ function calculate(mode = 'prepare') {
   const requestedTreatKcal = document.getElementById('treatKcalInput') ? getTreatKcal() : Math.round(DER * legacyTreatPct);
   const treatKcal = Math.min(requestedTreatKcal, DER);
   const treatReservePct = DER > 0 ? treatKcal / DER : 0;
-  const foodKcal = DER - treatKcal;
+  const targetFoodKcal = DER - treatKcal;
   const switching = document.getElementById('drySwitching').checked;
-  const resultData = { 건사료_결과: [], 습식사료_결과: [] };
-  const resultCards = [];
   const dryFeeds = switching ? state.dryFeeds.filter(Boolean) : [state.dryFeeds[0]].filter(Boolean);
-  const totalDrySubPct = switching ? dryFeeds.reduce((sum, _, i) => sum + (Number(document.getElementById(`drySwPct${i + 1}`)?.value) || 0), 0) : 100;
-  dryFeeds.forEach((feed, index) => {
-    const subPct = switching ? (Number(document.getElementById(`drySwPct${index + 1}`)?.value) || 0) / (totalDrySubPct || 100) : 1;
-    const kcal = foodKcal * dryRatio * subPct;
-    const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.건사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(dryRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
+  if (mode !== 'confirm') {
+    window.provedFeedingPlan?.begin({ DER, targetFoodKcal, treatKcal, dryRatio, wetRatio });
+    return;
+  }
+  const allocated = window.provedFeedingPlan?.getCurrentPlan();
+  if (!allocated || Math.abs(allocated.targetFoodKcal - targetFoodKcal) > 0.01 ||
+      Math.abs(allocated.dryRatio - dryRatio) > 0.0001 || allocated.DER !== DER) {
+    window.provedFeedingPlan?.invalidate();
+    showCalculatorError('dryFeedError', '급여 조건이 변경되었습니다. 다시 계산해 주세요.', 'dryInput1');
+    return;
+  }
+  const foodKcal = Math.round(allocated.actualFoodKcal);
+  const resultData = { 건사료_결과: [], 습식사료_결과: [] };
+  const escapeName = value => String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+  allocated.rows.forEach(row => {
+    if (row.grams <= 0) return;
+    const feed = row.feed;
+    const item = {
+      사료_id: feed.id || null, 이름: feed.name, 급여량_g: row.grams,
+      담당칼로리: Math.round(row.actualKcal),
+      비율: allocated.actualFoodKcal > 0 ? Math.round(row.actualKcal / allocated.actualFoodKcal * 100) : 0,
+      에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture
+    };
+    resultData[row.type === 'dry' ? '건사료_결과' : '습식사료_결과'].push(item);
   });
-  wetEntries.forEach(({ sid, feed }, index) => {
-    let subPct;
-    if (wetEntries.length === 1) subPct = 1;
-    else if (index === 0) subPct = (100 - additionalWetPct) / 100;
-    else subPct = Number(document.getElementById(`wetPct_${sid}`)?.value || 0) / 100;
-    const kcal = foodKcal * wetRatio * subPct;
-    const grams = Math.round(kcal / (feed.kcal / 1000));
-    if (grams > 0 || kcal > 0) resultData.습식사료_결과.push({ 사료_id: feed.id || null, 이름: feed.name, 급여량_g: grams, 담당칼로리: Math.round(kcal), 비율: Math.round(wetRatio * subPct * 100), 에너지기준_칼슘: feed.ebCa, 에너지기준_인: feed.ebP, 수분_pct: feed.moisture });
-  });
-  [...resultData.건사료_결과.map(item => ({...item, type:'건사료'})), ...resultData.습식사료_결과.map(item => ({...item, type:'습식사료'}))].forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${item.이름}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
+  const resultCards = [];
+  [...resultData.건사료_결과.map(item => ({ ...item, type: '건사료' })),
+   ...resultData.습식사료_결과.map(item => ({ ...item, type: '습식사료' }))]
+    .forEach((item, index) => resultCards.push(`<article class="pc-result-card pc-result-card--${item.type === '건사료' ? 'dry' : 'wet'}"><span class="pc-feed-index">${String(index + 1).padStart(2, '0')}</span><div><span>${item.type === '건사료' ? 'DRY FOOD' : 'WET FOOD'}</span><h3>${escapeName(item.이름)}</h3><p>${item.담당칼로리} kcal · 식단 ${item.비율}%</p></div><strong>${item.급여량_g}<small>g</small></strong></article>`));
   const dryTotalGrams = resultData.건사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
   const wetTotalGrams = resultData.습식사료_결과.reduce((sum, item) => sum + item.급여량_g, 0);
   document.getElementById('resultTitle').textContent = '하루 급여 계획';
