@@ -63,7 +63,9 @@
     });
     plan.classList.toggle('hidden', mode !== 'plan');
     check.classList.toggle('hidden', mode !== 'check');
-    results.classList.toggle('hidden', mode !== 'plan' || !state.lastResult);
+    window.provedFeedingPlan?.setMode(mode);
+    document.body.classList.toggle('pc-calculator-check-active', mode === 'check');
+    results.classList.toggle('hidden', mode !== 'plan' || !state.lastResult || state.isCalculationDirty);
     byId('calculatorModeDescription').textContent = mode === 'check'
       ? '현재 급여하는 양을 입력해 하루 참고 열량과 비교합니다.'
       : '하루 목표 열량을 기준으로 급여 계획을 계산합니다.';
