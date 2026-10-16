@@ -29,3 +29,95 @@
 [hidden]{display:none!important}button:disabled{opacity:.5;cursor:wait}
 @media(max-width:700px){.pa-main{width:calc(100% - 32px);margin:32px auto 70px}.pa-section{padding:34px 0 40px}.pa-feature-grid{grid-template-columns:1fr}.pa-inbox-layout{grid-template-columns:1fr}.pa-thread-list{max-height:160px}.pa-messages{height:330px}.pa-button{width:100%}.pa-actions{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* About editorial layout — desktop and mobile references, 2026-10-16.
+   Scoped to the About page so Support, Privacy, and Terms retain existing styles. */
+body.pa-about-page{background:#fff;color:#08224b}
+body.pa-about-page .pa-main{width:min(calc(100% - 32px),1040px);max-width:1040px;margin:44px auto 90px;font-size:16px;line-height:1.93;letter-spacing:-.018em}
+body.pa-about-page .pa-main p{font-size:16px;line-height:1.94;letter-spacing:-.015em}
+body.pa-about-page .pa-main strong{font-weight:760}
+body.pa-about-page .pa-main a{color:#315ed9}
+body.pa-about-page .pa-kicker,body.pa-about-page .pa-number{color:#285cdb!important;font-size:12px!important;font-weight:850!important;line-height:1.5!important;letter-spacing:.105em!important}
+body.pa-about-page .pa-about-hero{padding:0 0 90px}
+body.pa-about-page .pa-about-hero .pa-kicker{margin:0 0 30px!important}
+body.pa-about-page .pa-about-hero h1{margin:0 0 35px;color:#09214b;font-size:clamp(31px,4.7vw,45px);font-weight:860;line-height:1.37;letter-spacing:-.065em;word-break:keep-all}
+body.pa-about-page .pa-about-hero h1 span{display:block}
+body.pa-about-page .pa-about-hero h1 .pa-hero-blue{color:#315edc}
+body.pa-about-page .pa-hero-muted{margin:0 0 27px!important;color:#66748a;line-height:2.05!important}
+body.pa-about-page .pa-hero-summary{margin:0!important;font-weight:520;color:#09244c;line-height:2.05!important}
+body.pa-about-page .pa-about-section{display:grid;grid-template-columns:minmax(0,34%) minmax(0,1fr);gap:38px;border-top:1px solid #dbe3ef;padding:72px 0 74px}
+body.pa-about-page .pa-about-section-heading{min-width:0}
+body.pa-about-page .pa-number{margin:0 0 19px!important}
+body.pa-about-page .pa-about-section h2{margin:0;font-size:clamp(23px,2.6vw,29px);font-weight:800;letter-spacing:-.055em;line-height:1.52;color:#0b244e}
+body.pa-about-page .pa-about-section h3{margin:0 0 24px;font-weight:790;color:#0d2857;letter-spacing:-.045em;font-size:23px;line-height:1.5}
+body.pa-about-page .pa-about-section-content{min-width:0}
+body.pa-about-page .pa-about-section-content>p{margin:0 0 20px!important;color:#53617f}
+body.pa-about-page .pa-about-section-content>p:last-child{margin-bottom:0!important}
+body.pa-about-page .pa-operator{border-left:2px solid #2f62d8;margin:37px 0 0;padding:6px 0 9px 21px}
+body.pa-about-page .pa-operator strong{font-size:17px;color:#0a295a}
+body.pa-about-page .pa-operator p{font-size:13px!important;line-height:1.7!important;color:#657594;margin:12px 0 17px!important}
+body.pa-about-page .pa-operator a{font-size:13px;font-weight:800;text-decoration:none;color:#2a5ccf}
+body.pa-about-page .pa-operator a:hover{text-decoration:underline;text-underline-offset:4px}
+body.pa-about-page .pa-table-wrap{margin:24px 0 17px;max-width:100%;overflow-x:auto}
+body.pa-about-page .pa-about-table{width:100%;border-collapse:collapse;table-layout:fixed;border-spacing:0;text-align:left;color:#41537b;font-size:14px;line-height:1.75}
+body.pa-about-page .pa-about-table th,body.pa-about-page .pa-about-table td{border-bottom:1px solid #dce4f0;padding:18px 15px;vertical-align:top;word-break:keep-all}
+body.pa-about-page .pa-about-table thead th{font-size:12px;color:#536585;font-weight:650;padding:8px 15px 13px}
+body.pa-about-page .pa-about-table th:first-child{width:33%}
+body.pa-about-page .pa-about-table tbody th{font-size:14px;font-weight:790;color:#0b2858}
+body.pa-about-page .pa-about-section-content .pa-fineprint{font-size:12px!important;line-height:1.85!important;color:#64758e;margin:10px 0 0!important}
+body.pa-about-page .pa-about-section--process{display:block}
+body.pa-about-page .pa-about-section--process .pa-about-section-heading{margin:0 0 31px}
+body.pa-about-page .pa-process-steps{padding:0;list-style:none;margin:24px 0 37px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:38px}
+body.pa-about-page .pa-process-steps li{position:relative;min-width:0;text-align:center}
+body.pa-about-page .pa-process-steps li:not(:last-child)::after{content:"→";position:absolute;top:69px;right:-31px;font-size:32px;font-weight:300;color:#a9c1f8}
+body.pa-about-page .pa-process-steps img{width:min(100%,190px);height:164px;object-fit:contain;display:block;margin:0 auto 19px}
+body.pa-about-page .pa-process-steps h3{font-size:17px;line-height:1.5!important;margin:0 0 13px;font-weight:810;letter-spacing:-.035em}
+body.pa-about-page .pa-process-steps h3 span{color:#2458d9;margin-right:5px;font-size:15px}
+body.pa-about-page .pa-process-steps p{font-size:13px!important;line-height:1.9!important;color:#68758f;margin:0!important}
+body.pa-about-page .pa-notice{background:#f2f6fd;border-radius:11px;padding:24px 28px;margin:0}
+body.pa-about-page .pa-notice strong{display:block;font-size:14px;color:#092653;margin-bottom:9px}
+body.pa-about-page .pa-notice p{font-size:13px!important;color:#66758e;margin:0!important;line-height:1.8!important}
+body.pa-about-page .pa-evidence-title{font-size:13px!important;margin:28px 0 11px!important;color:#4b6189!important}
+body.pa-about-page .pa-evidence-tags{display:flex;gap:8px;list-style:none;flex-wrap:wrap;margin:0;padding:0}
+body.pa-about-page .pa-evidence-tags li{background:#f1f5fc;border-radius:6px;padding:8px 12px;color:#4d6191;font-size:12px}
+body.pa-about-page .pa-about-contact-link{margin:9px 0 4px;background:#315ed9;box-shadow:none;border:1px solid #315ed9;border-radius:8px;color:#fff!important;font-size:14px;font-weight:790;min-height:49px}
+body.pa-about-page .pa-about-section-content .pa-about-contact-link + .pa-fineprint{margin-top:15px!important}
+body.pa-about-page .pa-affiliate-note{border:1px dashed #c9d7ec;border-radius:9px;color:#5f7190;padding:17px 20px;font-size:13px;line-height:1.95;margin-top:26px}
+body.pa-about-page .pa-about-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:25px 0 0}
+body.pa-about-page .pa-about-actions .pa-button{min-height:44px;border-radius:8px;font-size:14px;font-weight:760;background:#fff;border-color:#d7e1f0;padding:9px 18px;color:#14315c!important}
+body.pa-about-page .pa-about-actions .pa-button:hover{border-color:#315ed9;color:#315ed9!important}
+body.pa-about-page .pa-about-section:last-child{padding-bottom:20px}
+@media(max-width:680px){
+  body.pa-about-page .pa-main{width:calc(100% - 26px);margin:44px auto 60px}
+  body.pa-about-page .pa-main p{font-size:15px;line-height:1.95}
+  body.pa-about-page .pa-about-hero{padding-bottom:59px}
+  body.pa-about-page .pa-about-hero .pa-kicker{margin-bottom:27px!important}
+  body.pa-about-page .pa-about-hero h1{font-size:clamp(32px,9.4vw,39px);line-height:1.35;margin-bottom:35px;letter-spacing:-.062em}
+  body.pa-about-page .pa-hero-muted{font-size:15px!important;line-height:2.05!important;margin-bottom:24px!important}
+  body.pa-about-page .pa-hero-summary{font-size:15px!important;line-height:1.98!important}
+  body.pa-about-page .pa-desktop-break{display:none}
+  body.pa-about-page .pa-about-section{display:block;padding:54px 0 57px}
+  body.pa-about-page .pa-about-section-heading{margin:0 0 31px}
+  body.pa-about-page .pa-number{margin-bottom:17px!important}
+  body.pa-about-page .pa-about-section h2{font-size:24px;line-height:1.51;letter-spacing:-.052em}
+  body.pa-about-page .pa-about-section h3{font-size:22px;line-height:1.5;margin-bottom:24px}
+  body.pa-about-page .pa-about-section-content>p{font-size:15px!important;margin-bottom:23px!important}
+  body.pa-about-page .pa-operator{margin-top:31px}
+  body.pa-about-page .pa-table-wrap{margin:16px 0 16px}
+  body.pa-about-page .pa-about-table th,body.pa-about-page .pa-about-table td{font-size:12px;padding:14px 8px}
+  body.pa-about-page .pa-about-table th:first-child{width:37%}
+  body.pa-about-page .pa-about-table thead th{font-size:11px;padding:8px}
+  body.pa-about-page .pa-about-table tbody th{font-size:12px}
+  body.pa-about-page .pa-about-section--process .pa-about-section-heading{margin-bottom:18px}
+  body.pa-about-page .pa-process-steps{display:grid;grid-template-columns:1fr;gap:47px;margin:25px 0 38px}
+  body.pa-about-page .pa-process-steps li:not(:last-child)::after{content:"↓";top:auto;right:50%;bottom:-37px;transform:translateX(50%);font-size:25px}
+  body.pa-about-page .pa-process-steps img{height:150px;width:200px;margin-bottom:14px}
+  body.pa-about-page .pa-process-steps p{font-size:13px!important}
+  body.pa-about-page .pa-notice{padding:18px 19px}
+  body.pa-about-page .pa-about-actions{gap:9px}
+  body.pa-about-page .pa-about-actions .pa-button{width:auto;font-size:13px;flex:1 1 auto}
+}
+@media(max-width:350px){
+  body.pa-about-page .pa-about-hero h1{font-size:31px}
+  body.pa-about-page .pa-about-actions .pa-button{width:100%}
+}

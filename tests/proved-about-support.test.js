@@ -12,7 +12,7 @@ test('global footer links to one PROVED introduction', () => {
 test('introduction and independent policy pages have stable canonical paths', () => {
   const about = read('about/index.html');
   assert.match(about, /https:\/\/proved\.kr\/about\//);
-  assert.match(about, /무엇을, 얼마나 먹여야 할까/);
+  assert.match(about, /무엇을, 얼마나 먹어야 할까/);
   assert.match(about, /mailto:provedcat@gmail\.com/);
   assert.match(about, /href="\/support\/"/);
   assert.match(about, /href="\/privacy\/"/);
