@@ -1,0 +1,39 @@
+name: Calculator Regression
+
+on:
+  pull_request:
+    paths:
+      - 'js/calculator*.js'
+      - 'cat-food-calculator/index.html'
+      - 'dog-food-calculator/index.html'
+      - 'css/calculator*.css'
+      - 'tests/*calculator*.test.js'
+      - '.github/workflows/calculator-regression.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/calculator*.js'
+      - 'cat-food-calculator/index.html'
+      - 'dog-food-calculator/index.html'
+      - 'css/calculator*.css'
+      - 'tests/*calculator*.test.js'
+      - '.github/workflows/calculator-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  calculator-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify calculator regression tests
+        run: |
+          node tests/cat-calculator.test.js
+          node tests/dog-calculator.test.js
+          node tests/calculator-mobile-flow.test.js
+          node tests/calculator-diet-handoff.test.js
+          node tests/calculator-plan-adjust.test.js
