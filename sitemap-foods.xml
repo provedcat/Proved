@@ -81,6 +81,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/brand/%ED%95%98%EB%A6%BC-%ED%8E%AB%ED%91%B8%EB%93%9C/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/brand/%ED%95%98%EB%A6%BC/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -907,6 +912,16 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/%ED%95%98%EB%A6%BC-%EB%8D%94%EB%A6%AC%EC%96%BC-%EC%BA%A3-%EA%B7%B8%EB%A0%88%EC%9D%B8%ED%94%84%EB%A6%AC-%ED%81%AC%EB%9F%B0%EC%B9%98-%ED%82%A4%ED%8A%BC-%EB%8B%AD%EA%B3%A0%EA%B8%B0--621c3c5c/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%ED%95%98%EB%A6%BC-%ED%8E%AB%ED%91%B8%EB%93%9C-%EB%8D%94%EB%A6%AC%EC%96%BC-%EB%B0%88-%EC%BA%A3-%EC%B0%B8%EC%B9%98--97053cc2/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%ED%95%98%EB%A6%BC%ED%8E%AB%ED%91%B8%EB%93%9C-%EB%B0%A5%EC%9D%B4%EB%B3%B4%EC%95%BD-cat-%EA%B1%B1%EC%A0%95%EC%97%86%EB%8A%94-%ED%97%A4%EC%96%B4%EB%B3%BC--66ce48fd/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
