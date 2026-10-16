@@ -1,0 +1,28 @@
+name: About Page Reference Design
+on:
+  pull_request:
+    paths:
+      - 'about/**'
+      - 'css/proved-about.css'
+      - 'images/about/**'
+      - 'tests/about-reference-layout.test.js'
+      - '.github/workflows/about-reference-layout.yml'
+permissions:
+  contents: read
+jobs:
+  reference-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check About page markup and responsive design contract
+        run: node --test tests/about-reference-layout.test.js
+      - name: Validate process SVG files
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for name in ('source', 'ai', 'review'):
+              ET.parse(f'images/about/process-{name}.svg')
+          PY
