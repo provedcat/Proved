@@ -76,6 +76,8 @@ test('제품 HTML에 고유 canonical, 검색 설명, 본문과 구조화 데이
   assert.match(html, /<h1 id="foodDetailTitle">N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류<\/h1>/);
   assert.match(html, /<script id="foodStructuredData" type="application\/ld\+json">/);
   assert.match(html, /"@type":"Product"/);
+  assert.doesNotMatch(html, /"@type"\s*:\s*"CollectionPage"/);
+  assert.equal((html.match(/<script[^>]*type="application\/ld\+json">/g) || []).length, 1);
   assert.match(html, /window\.__PROVED_FOOD_PAGE__=.*"id":"11111111-2222-4333-8444-555555555555"/);
   assert.match(html, /href="\/food\/brand\/farmina\/"/);
 });

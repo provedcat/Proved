@@ -306,6 +306,17 @@ export function renderProductPage(template, feed, species, allFeeds = []) {
   const pageConfig = { species, id: String(feed.id), slug: buildProductSlug(feed), path: productPath };
 
   let html = template;
+  // The list template has CollectionPage JSON-LD for /food/. Product pages
+  // must not inherit that schema alongside their own Product JSON-LD.
+  html = html.replace(/<script type="application\/ld\+json">([\s\S]*?)<\/script>\s*/g, (tag, jsonText) => {
+    try {
+      const data = JSON.parse(jsonText);
+      if (data['@type'] === 'CollectionPage' && data.url === `${SITE_ORIGIN}/food/`) return '';
+    } catch {
+      // Preserve unrelated scripts. A malformed schema is not our responsibility here.
+    }
+    return tag;
+  });
   html = replaceHeadValue(html, /<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`, 'title');
   html = replaceHeadValue(html, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeHtml(description)}">`, 'description');
   html = replaceHeadValue(html, /<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`, 'canonical');
