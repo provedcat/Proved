@@ -156,7 +156,7 @@ test('브랜드 Finder는 한글 초성·영문 알파벳과 실제 허브 href�
   assert.match(html, />로얄캐닌<\/span>/);
 });
 
-test('대표 브랜드 6개는 초성 선택 전 정적 링크로 표시되고 순서를 유지한다', async () => {
+test('대표 브랜드 8개는 초성 선택 전 정적 링크로 표시되고 순서를 유지한다', async () => {
   const { renderBrandFinder } = await loadGenerator();
   const featured = [
     ['로얄캐닌', '로얄캐닌-royal-canin'],
@@ -164,7 +164,9 @@ test('대표 브랜드 6개는 초성 선택 전 정적 링크로 표시되고 �
     ['퓨리나', 'purina'],
     ['파미나', 'farmina'],
     ['오리젠', 'orijen'],
-    ['지위픽', 'ziwi-peak']
+    ['지위픽', 'ziwi-peak'],
+    ['펫큐리안', 'petcurean-펫큐리안'],
+    ['하림', '하림']
   ];
   const groups = featured.map(([label, slug]) => ({
     brand: { name: label, nameKo: label, displayName: label, slug, aliases: [label] },
@@ -174,7 +176,7 @@ test('대표 브랜드 6개는 초성 선택 전 정적 링크로 표시되고 �
   const shortcuts = html.match(/<nav class="food-brand-finder__featured"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
   assert.ok(shortcuts, '대표 브랜드는 접힌 폴더 밖에 있어야 함');
   assert.ok(html.indexOf('food-brand-finder__featured') < html.indexOf('food-brand-finder__ranges'));
-  assert.equal((shortcuts.match(/class="food-brand-chip"/g) || []).length, 6);
+  assert.equal((shortcuts.match(/class="food-brand-chip"/g) || []).length, 8);
   let previous = -1;
   for (const [label, slug] of featured) {
     const link = `href="/food/brand/${slug}/"><span>${label}</span>`;
