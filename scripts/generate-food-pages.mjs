@@ -425,7 +425,7 @@ function renderBrandInitialGroups(initials, groups, range) {
 }
 
 // Curated shortcuts keep the most recognizable brand hubs visible without opening alphabet filters.
-const FEATURED_BRAND_SLUGS = ["로얄캐닌-royal-canin","hill-s","purina","farmina","orijen","ziwi-peak"];
+const FEATURED_BRAND_SLUGS = ["로얄캐닌-royal-canin","hill-s","purina","farmina","orijen","ziwi-peak","petcurean-펫큐리안","하림"];
 
 export function renderBrandFinder(brandGroups) {
   const koGroups = new Map(HANGUL_INITIALS.map(initial => [initial, []]));
