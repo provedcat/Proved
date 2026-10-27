@@ -1029,3 +1029,31 @@ button:focus-visible {
   from { transform: rotate(-135deg) scale(.9); opacity: .35; }
   to { transform: rotate(-90deg) scale(1); opacity: 1; }
 }
+
+
+/* WSAVA 참고 자료 표시: 공식 인증/제휴 배지와 구분되는 텍스트 라벨 */
+.ed-mini-graphic--wsava { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center; }
+.ed-wsava-label { color:#3568ff; font-size:29px; line-height:1; font-weight:820; letter-spacing:.045em; }
+.ed-wsava-caption { color:var(--ed-soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
+.ed-meaning-compare { margin:24px 0 28px; padding:24px; background:var(--ed-white); border:1px solid var(--ed-line); }
+.ed-meaning-compare figcaption { color:var(--ed-blue); font-weight:800; font-size:16px; margin-bottom:18px; }
+.ed-meaning-grid { display:grid; grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr); gap:12px; align-items:stretch; }
+.ed-meaning-card { text-align:center; padding:22px 12px; border:1px solid var(--ed-line); min-width:0; }
+.ed-meaning-card--unknown { background:linear-gradient(135deg,#eaf0f9,#f7f9fc 65%,#eef3fa); }
+.ed-meaning-card--none { background:#fff; }
+.ed-meaning-symbol { height:102px; display:grid; place-items:center; font-size:88px; font-weight:750; line-height:1; }
+.ed-meaning-card--unknown .ed-meaning-symbol { color:#9aafcb; text-shadow:0 0 22px rgba(100,132,175,.30); }
+.ed-meaning-card--none .ed-meaning-symbol { color:var(--ed-blue); }
+.ed-meaning-card h3 { margin:8px 0; color:var(--ed-blue); font-size:18px; }
+.ed-meaning-card p { margin:0!important; font-size:13px!important; line-height:1.6!important; }
+.ed-meaning-separator { display:grid; place-items:center; color:var(--ed-blue); font-size:25px; font-weight:800; }
+@media(max-width:560px) {
+ .ed-wsava-label { font-size:20px; }
+ .ed-meaning-compare { padding:14px; }
+ .ed-meaning-grid { grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr); gap:5px; }
+ .ed-meaning-card { padding:16px 6px; }
+ .ed-meaning-symbol { font-size:60px; height:76px; }
+ .ed-meaning-card h3 { font-size:14px; }
+ .ed-meaning-card p { font-size:11px!important; }
+ .ed-meaning-separator { font-size:18px; }
+}
