@@ -196,6 +196,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/brand/hill-s-pet-nutrition/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/brand/hill-s/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -1792,6 +1797,11 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-z-d-%ED%95%98%EC%9D%B4%EB%93%9C%EB%A1%A4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%B9%98%ED%82%A8-%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B2%84--5be1f858/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/hill-s-pet-nutrition-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%ED%82%A4%ED%8A%BC-%EC%B9%98%ED%82%A8-%EB%A0%88%EC%8B%9C%ED%94%BC--cea71d37/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
