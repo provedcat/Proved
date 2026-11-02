@@ -178,7 +178,7 @@ test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 �
   assert.match(source, /params\.set\('q', state\.query\.trim\(\)\.slice\(0, 120\)\)/);
   assert.match(registration, /params\.get\('q'\)/);
   assert.match(registration, /feedTextRequestInput'\)\.value = searchQuery/);
-  assert.match(registrationHtml, /feed-registration\.js\?v=20261013-search-prefill-v1/);
+  assert.match(registrationHtml, /feed-registration\.js\?v=20261014-registration-search-v1/);
   assert.match(css, /\.food-empty__suggestions/);
   assert.match(css, /\.food-empty__request/);
 });

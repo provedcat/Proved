@@ -7,12 +7,14 @@ on:
       - 'js/food-list.js'
       - 'js/food-search-fuzzy.js'
       - 'js/feed-registration.js'
+      - 'js/registration-search-results.js'
       - 'feed-registration/index.html'
       - 'js/product-tag-blob.js'
       - 'js/brand-finder.js'
       - 'css/food-list.css'
       - 'css/brand-hub.css'
       - 'tests/unified-food-finder.test.js'
+      - 'tests/registration-search-results.test.js'
       - 'tests/food-search-fuzzy.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'scripts/food-legacy-urls.mjs'
@@ -27,12 +29,14 @@ on:
       - 'js/food-list.js'
       - 'js/food-search-fuzzy.js'
       - 'js/feed-registration.js'
+      - 'js/registration-search-results.js'
       - 'feed-registration/index.html'
       - 'js/product-tag-blob.js'
       - 'js/brand-finder.js'
       - 'css/food-list.css'
       - 'css/brand-hub.css'
       - 'tests/unified-food-finder.test.js'
+      - 'tests/registration-search-results.test.js'
       - 'tests/food-search-fuzzy.test.js'
       - 'scripts/generate-food-pages.mjs'
       - 'scripts/food-legacy-urls.mjs'
@@ -63,7 +67,7 @@ jobs:
           node-version: '20'
 
       - name: Test product page generation
-        run: node --check js/product-tag-blob.js && node --check js/food-list.js && node --check js/food-search-fuzzy.js && node --check js/feed-registration.js && node --test tests/food-seo-pages.test.js tests/unified-food-finder.test.js tests/food-search-fuzzy.test.js
+        run: node --check js/product-tag-blob.js && node --check js/food-list.js && node --check js/food-search-fuzzy.js && node --check js/feed-registration.js && node --check js/registration-search-results.js && node --test tests/food-seo-pages.test.js tests/unified-food-finder.test.js tests/food-search-fuzzy.test.js tests/registration-search-results.test.js
 
   refresh-pages:
     if: github.event_name != 'pull_request'
