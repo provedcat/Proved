@@ -46,6 +46,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/brand/%EC%8B%9C%EA%B7%B8%EB%8B%88%EC%B2%98%EB%B0%94%EC%9D%B4/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/brand/%EC%8B%9C%EB%8B%88%EB%A9%80/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -96,7 +101,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/brand/%ED%9E%90%EC%8A%A4%ED%8E%AB%EB%89%B4%ED%8A%B8%EB%A6%AC%EC%85%98-hill-s-pet-nutrition/</loc>
+    <loc>https://proved.kr/food/brand/%ED%97%A4%EC%9D%BC%EB%A1%9C/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -192,6 +197,11 @@
   </url>
   <url>
     <loc>https://proved.kr/food/brand/fussie-cat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/brand/halo/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -806,6 +816,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/cat/%EC%8B%9C%EA%B7%B8%EB%8B%88%EC%B2%98%EB%B0%94%EC%9D%B4-%EC%8B%9C%EA%B7%B8%EB%8B%88%EC%B2%98%EB%B0%94%EC%9D%B4-%EC%BA%A3-a-a-%EC%8B%9D%EC%9A%95%EC%B4%89%EC%A7%84-and-%EA%B8%B0%EB%A0%A5%ED%9A%8C%EB%B3%B5-%EC%BA%94--18c0f208/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/cat/%EC%8B%9C%EB%8B%88%EB%A9%80-%EC%8B%9C%EB%8B%88%EB%A9%80-%EC%8A%AC%EB%A1%9C%EC%9A%B0-%ED%8C%8C%ED%85%8C-%EC%BA%A3-%EC%B9%98%ED%82%A8--3c11eafb/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -1176,7 +1191,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/%ED%9E%90%EC%8A%A4%ED%8E%AB%EB%89%B4%ED%8A%B8%EB%A6%AC%EC%85%98-hill-s-pet-nutrition-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-z-d-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%EA%B1%B4%EC%82%AC%EB%A3%8C--de68d6ed/</loc>
+    <loc>https://proved.kr/food/cat/%ED%97%A4%EC%9D%BC%EB%A1%9C-%ED%97%A4%EC%9D%BC%EB%A1%9C-%EA%B1%B4%EC%82%AC%EB%A3%8C-%EC%BA%A3-%EC%B9%98%ED%82%A8--7402015a/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1676,6 +1691,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/cat/halo-%ED%97%A4%EC%9D%BC%EB%A1%9C-%EA%B1%B4%EC%82%AC%EB%A3%8C-%EC%BA%A3-%EC%9D%B8%EB%8F%84%EC%96%B4-%EC%B9%98%ED%82%A8--9551cec4/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/cat/harlow-blend-%ED%95%A0%EB%A1%9C%EC%9A%B0-%EB%B8%94%EB%9E%9C%EB%93%9C-002-%EC%B9%98%ED%82%A8-%ED%86%A0%ED%95%91-%EA%B0%80%EC%93%B0%EC%98%A4%EB%B6%80%EC%8B%9C-and-%EB%B2%A0%EB%A6%AC--b386797a/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -1702,11 +1722,6 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/harlow-blend-%ED%95%A0%EB%A1%9C%EC%9A%B0-%EB%B8%94%EB%A0%8C%EB%93%9C-008-%ED%8A%9C%EB%82%98-%EB%AC%B4%EC%8A%A4tuna-mousse--8406fbd8/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%ED%82%A4%ED%8A%BC-%ED%97%AC%EC%8B%9C-%ED%80%B4%EC%A7%84-%EC%B9%98%ED%82%A8-and-%EC%8C%80--32d5637d/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1751,22 +1766,17 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%ED%82%A4%ED%8A%BC-%ED%97%AC%EC%8B%9C-%ED%80%B4%EC%A7%84-%EC%B9%98%ED%82%A8-and-%EB%9D%BC%EC%9D%B4%EC%8A%A4-%EB%A9%94%EB%93%A4%EB%A6%AC--45e30af3/</loc>
+    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%96%B4%EB%8D%9C%ED%8A%B8-%ED%97%AC%EC%8A%A4-%ED%80%B4%EC%A7%84-%EC%B9%98%ED%82%A8-and-%EC%8C%80--32f1e3af/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%ED%82%A4%ED%8A%BC-%ED%97%AC%EC%8B%9C-%ED%80%B4%EC%A7%84-%EC%B9%98%ED%82%A8-and-%EC%8C%80-%EB%A9%94%EB%93%A4%EB%A6%AC--32d5637d/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%ED%8D%BC%ED%8E%99%ED%8A%B8-%EB%8B%A4%EC%9D%B4%EC%A0%9C%EC%8A%A4%EC%B2%9C--3ad34ea5/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4-%EC%96%B4%EB%8D%9C%ED%8A%B8-%ED%97%AC%EC%8A%A4-%ED%80%B4%EC%A7%84-%EC%B9%98%ED%82%A8-and-%EC%8C%80-adult-healthy-cuisine-chicken-and-rice-medley--32f1e3af/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC-%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-z-d-%ED%95%98%EC%9D%B4%EB%93%9C%EB%A1%A4%EB%9D%BC%EC%9D%B4%EC%A6%88%EB%93%9C-%EC%B9%98%ED%82%A8-%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B2%84--fe54b66b/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1792,6 +1802,11 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-i-d-%EC%9C%84%EB%93%9C-%EC%B9%98%ED%82%A8--c3056e32/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/hill-s-%ED%9E%90%EC%8A%A4-%ED%94%84%EB%A6%AC%EC%8A%A4%ED%81%AC%EB%A6%BD%EC%85%98-%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-i-d-%EC%B9%98%ED%82%A8-and-%EC%B1%84%EC%86%8C-%EC%8A%A4%ED%8A%9C-%EB%B0%98%EB%A0%A4%EB%AC%98%EC%9A%A9-%EC%8A%B5%EC%8B%9D%EC%82%AC%EB%A3%8C--a9c4c9f4/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
