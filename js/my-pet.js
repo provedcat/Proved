@@ -286,6 +286,62 @@
     });
   }
 
+  // Compare only this pet's actual dated weight records, never a population norm.
+  function renderGrowthInsight(records, pet) {
+    const comment = $('petGrowthComment');
+    const peer = $('petGrowthPeer');
+    const peerNote = $('petGrowthPeerNote');
+    const adult = $('petGrowthAdult');
+    const adultNote = $('petGrowthAdultNote');
+    if (!comment || !peer || !adult) return;
+
+    // Peer ranking and adult-weight predictions require licensed, validated
+    // species/sex/age and dog adult-size reference curves. Do not synthesize
+    // percentiles from a single pet's history or extrapolate an adult size.
+    peer.textContent = '분석 준비 중';
+    peerNote.textContent = '검증된 또래 비교 자료가 연결되면 100마리 중 순서로 보여드려요.';
+    adult.textContent = '예측 보류';
+    adultNote.textContent = '충분한 기록과 검증된 성장 예측 기준이 필요해요.';
+
+    const valid = (records || []).filter(function (row) {
+      return /^\\d{4}-\\d{2}-\\d{2}$/.test(row.recorded_date)
+        && Number.isFinite(row.weight_kg) && row.weight_kg > 0;
+    });
+    if (valid.length === 0) {
+      comment.textContent = '아직 기록이 없어요. 몸무게를 기록하면 이전 측정과 비교해 드릴게요.';
+      return;
+    }
+    if (valid.length === 1) {
+      comment.textContent = '첫 몸무게 ' + valid[0].weight_kg.toFixed(2)
+        + 'kg을 기록했어요. 다음 측정부터 변화량과 속도를 확인할 수 있어요.';
+      return;
+    }
+    const last = valid[valid.length - 1];
+    const previous = valid[valid.length - 2];
+    const lastTime = new Date(last.recorded_date + 'T00:00:00').getTime();
+    const previousTime = new Date(previous.recorded_date + 'T00:00:00').getTime();
+    const days = Math.round((lastTime - previousTime) / 86400000);
+    if (!Number.isFinite(days) || days <= 0) {
+      comment.textContent = '측정 날짜를 확인해 주세요. 날짜 간격이 있어야 체중 변화를 비교할 수 있어요.';
+      return;
+    }
+    const delta = last.weight_kg - previous.weight_kg;
+    const change = Math.abs(delta);
+    const direction = delta > 0.005 ? '늘었어요' : delta < -0.005 ? '줄었어요' : '거의 같아요';
+    const changeText = Math.abs(delta) < 0.005 ? '체중이 거의 같아요.'
+      : '몸무게가 ' + change.toFixed(2) + 'kg ' + direction + '.';
+    let trend = '';
+    if (valid.length >= 3) {
+      const earlier = valid[valid.length - 3];
+      const before = previous.weight_kg - earlier.weight_kg;
+      if (delta > 0.005 && before > 0.005) trend = ' 최근 두 번의 측정에서 모두 증가했어요.';
+      else if (delta < -0.005 && before < -0.005) trend = ' 최근 두 번의 측정에서 모두 감소했어요.';
+      else trend = ' 이전 측정 구간과 변화 방향이 달라졌거나 비슷하게 유지되고 있어요.';
+    }
+    comment.textContent = '직전 측정(' + previous.recorded_date + ') 이후 ' + days
+      + '일 동안 ' + changeText + trend + ' 이 설명은 개별 기록의 변화만 나타내며 건강 평가가 아니에요.';
+  }
+
   function getFoodsFromResult(resultData) {
     const result = resultData && typeof resultData === 'object' ? resultData : {};
     const dry = Array.isArray(result.건사료_결과) ? result.건사료_결과.map(function (item) {
@@ -454,6 +510,7 @@
       records = await loadWeightRecords(user.id, pet.id);
       renderHeroAndProfile(pet, records);
       renderWeightChart(records, pet);
+      renderGrowthInsight(records, pet);
       renderHistory();
     }
 
@@ -650,6 +707,7 @@
       showContent();
       renderHeroAndProfile(pet, results[0]);
       renderWeightChart(results[0], pet);
+      renderGrowthInsight(results[0], pet);
       setupWeightRecording(user, pet, results[0]);
       renderCurrentDiet(results[1]);
       renderRecentCalculations(results[1]);
