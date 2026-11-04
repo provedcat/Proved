@@ -600,3 +600,16 @@
 @media (max-width: 720px) {
   .my-pet-bcs-guide__chart { min-width: 630px; }
 }
+
+/* MY PET Growth Insight: directly below the existing weight chart. */
+.my-pet-growth { margin: 18px 0 24px; padding: 20px; border: 1px solid #e2e7f1; border-radius: 20px; background: #fff; }
+.my-pet-growth__heading p { margin: 0 0 5px; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: #3568ff; }
+.my-pet-growth__heading h3 { margin: 0 0 16px; font-size: 19px; color: #27334a; }
+.my-pet-growth__comment { padding: 16px; border-radius: 14px; background: #f3f6ff; color: #34445e; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.my-pet-growth__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.my-pet-growth__stats > div { min-width: 0; border: 1px solid #e6eaf3; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.my-pet-growth__stats span { font-size: 12px; font-weight: 700; color: #65738b; }
+.my-pet-growth__stats strong { font-size: 17px; line-height: 1.4; color: #2b3449; }
+.my-pet-growth__stats small { font-size: 12px; line-height: 1.55; color: #78849a; }
+.my-pet-growth__disclaimer { margin: 12px 0 0; color: #7b879a; font-size: 12px; line-height: 1.6; }
+@media(max-width: 440px) { .my-pet-growth { padding: 16px; } .my-pet-growth__stats { grid-template-columns: 1fr; } }
