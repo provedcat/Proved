@@ -304,7 +304,7 @@
     adultNote.textContent = '충분한 기록과 검증된 성장 예측 기준이 필요해요.';
 
     const valid = (records || []).filter(function (row) {
-      return /^\\d{4}-\\d{2}-\\d{2}$/.test(row.recorded_date)
+      return /^\d{4}-\d{2}-\d{2}$/.test(row.recorded_date)
         && Number.isFinite(row.weight_kg) && row.weight_kg > 0;
     });
     if (valid.length === 0) {
