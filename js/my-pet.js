@@ -330,8 +330,16 @@
     const direction = delta > 0.005 ? '늘었어요' : delta < -0.005 ? '줄었어요' : '거의 같아요';
     const changeText = Math.abs(delta) < 0.005 ? '체중이 거의 같아요.'
       : '몸무게가 ' + change.toFixed(2) + 'kg ' + direction + '.';
-    let stage = '';\n    if (pet.species === 'cat' && pet.birth_date) {\n      const ageWeeks = (lastTime - new Date(pet.birth_date + 'T00:00:00').getTime()) / 604800000;\n      if (ageWeeks >= 78) stage = '현재는 대체로 성묘 체중에 도달하는 시기예요. ';\n      else if (ageWeeks >= 52) stage = '현재는 성묘 체중에 가까워지는 시기예요. ';\n      else if (ageWeeks >= 8) stage = '현재 성장기 체중 기록을 살펴보고 있어요. ';\n    }\n    let trend = '';
-    // A single interval is not enough to distinguish lasting weight changes.\n    if (valid.length >= 3) {
+    let stage = '';
+    if (pet.species === 'cat' && pet.birth_date) {
+      const ageWeeks = (lastTime - new Date(pet.birth_date + 'T00:00:00').getTime()) / 604800000;
+      if (ageWeeks >= 78) stage = '현재는 대체로 성묘 체중에 도달하는 시기예요. ';
+      else if (ageWeeks >= 52) stage = '현재는 성묘 체중에 가까워지는 시기예요. ';
+      else if (ageWeeks >= 8) stage = '현재 성장기 체중 기록을 살펴보고 있어요. ';
+    }
+    let trend = '';
+    // A single interval is not enough to distinguish lasting weight changes.
+    if (valid.length >= 3) {
       const earlier = valid[valid.length - 3];
       const before = previous.weight_kg - earlier.weight_kg;
       if (delta > 0.005 && before > 0.005) trend = ' 최근 두 번의 측정에서 모두 증가했어요.';
@@ -642,7 +650,8 @@
 
       const petName = pet.name || '이 반려동물';
       const confirmed = window.confirm(
-        petName + '의 반려동물 정보와 체중·급여 기록을 삭제할까요?\n삭제한 정보는 복구할 수 없습니다.'
+        petName + '의 반려동물 정보와 체중·급여 기록을 삭제할까요?
+삭제한 정보는 복구할 수 없습니다.'
       );
       if (!confirmed) return;
 
