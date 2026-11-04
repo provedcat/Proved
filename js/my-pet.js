@@ -299,9 +299,9 @@
     // species/sex/age and dog adult-size reference curves. Do not synthesize
     // percentiles from a single pet's history or extrapolate an adult size.
     peer.textContent = '분석 준비 중';
-    peerNote.textContent = '검증된 또래 비교 자료가 연결되면 100마리 중 순서로 보여드려요.';
+    peerNote.textContent = 'WALTHAM 성장 곡선의 성별·연령별 원본 수치 확인 후 제공해요.';
     adult.textContent = '예측 보류';
-    adultNote.textContent = '충분한 기록과 검증된 성장 예측 기준이 필요해요.';
+    adultNote.textContent = '성장 기록과 검증된 예측 기준이 연결되면 제공해요.';
 
     const valid = (records || []).filter(function (row) {
       return /^\d{4}-\d{2}-\d{2}$/.test(row.recorded_date)
@@ -330,8 +330,8 @@
     const direction = delta > 0.005 ? '늘었어요' : delta < -0.005 ? '줄었어요' : '거의 같아요';
     const changeText = Math.abs(delta) < 0.005 ? '체중이 거의 같아요.'
       : '몸무게가 ' + change.toFixed(2) + 'kg ' + direction + '.';
-    let trend = '';
-    if (valid.length >= 3) {
+    let stage = '';\n    if (pet.species === 'cat' && pet.birth_date) {\n      const ageWeeks = (lastTime - new Date(pet.birth_date + 'T00:00:00').getTime()) / 604800000;\n      if (ageWeeks >= 78) stage = '현재는 대체로 성묘 체중에 도달하는 시기예요. ';\n      else if (ageWeeks >= 52) stage = '현재는 성묘 체중에 가까워지는 시기예요. ';\n      else if (ageWeeks >= 8) stage = '현재 성장기 체중 기록을 살펴보고 있어요. ';\n    }\n    let trend = '';
+    // A single interval is not enough to distinguish lasting weight changes.\n    if (valid.length >= 3) {
       const earlier = valid[valid.length - 3];
       const before = previous.weight_kg - earlier.weight_kg;
       if (delta > 0.005 && before > 0.005) trend = ' 최근 두 번의 측정에서 모두 증가했어요.';
