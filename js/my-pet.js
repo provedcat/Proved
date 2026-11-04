@@ -650,8 +650,7 @@
 
       const petName = pet.name || '이 반려동물';
       const confirmed = window.confirm(
-        petName + '의 반려동물 정보와 체중·급여 기록을 삭제할까요?
-삭제한 정보는 복구할 수 없습니다.'
+        petName + '의 반려동물 정보와 체중·급여 기록을 삭제할까요?\n삭제한 정보는 복구할 수 없습니다.'
       );
       if (!confirmed) return;
 
