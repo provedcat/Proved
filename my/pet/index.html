@@ -67,13 +67,18 @@
           </div>
 
           <section class="my-pet-growth" id="petGrowthInsight" aria-labelledby="petGrowthTitle">
-            <div class="my-pet-growth__heading"><p>GROWTH INSIGHT</p><h3 id="petGrowthTitle">우리 아이 성장 기록</h3></div>
-            <div class="my-pet-growth__comment" id="petGrowthComment" role="status" aria-live="polite">체중 기록을 분석하고 있어요.</div>
-            <div class="my-pet-growth__stats">
-              <div><span>또래 몸무게 비교</span><strong id="petGrowthPeer">—</strong><small id="petGrowthPeerNote">비교 기준 자료를 확인하고 있어요.</small></div>
-              <div><span>예상 성체 몸무게</span><strong id="petGrowthAdult">—</strong><small id="petGrowthAdultNote">충분한 기록과 검증된 예측 기준이 필요해요.</small></div>
+            <div class="my-pet-growth__heading">
+              <p>GROWTH INSIGHT</p>
+              <h3 id="petGrowthTitle">우리 아이 성장 기록</h3>
             </div>
-            <p class="my-pet-growth__disclaimer">성장 코멘트는 우리 아이의 이전 체중 기록만 비교합니다. 건강 상태를 판정하지 않으며, 또래 순위나 성체 예상 체중은 검증된 기준이 없으면 표시하지 않습니다.</p>
+            <div class="my-pet-growth__stage">
+              <span>성장 단계</span>
+              <strong id="petGrowthStage">확인 중</strong>
+            </div>
+            <div class="my-pet-growth__comment-wrap">
+              <h4>체중 변화와 해석</h4>
+              <p class="my-pet-growth__comment" id="petGrowthComment" role="status" aria-live="polite">체중 기록을 분석하고 있어요.</p>
+            </div>
           </section>
 
           <form id="myPetWeightForm" class="my-pet-weight-form" novalidate>

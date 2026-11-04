@@ -288,58 +288,75 @@
 
   // Compare only this pet's actual dated weight records, never a population norm.
   function renderGrowthInsight(records, pet) {
+    const stageElement = $('petGrowthStage');
     const comment = $('petGrowthComment');
-    const peer = $('petGrowthPeer');
-    const peerNote = $('petGrowthPeerNote');
-    const adult = $('petGrowthAdult');
-    const adultNote = $('petGrowthAdultNote');
-    if (!comment || !peer || !adult) return;
+    if (!stageElement || !comment) return;
 
-    // Peer ranking and adult-weight predictions require licensed, validated
-    // species/sex/age and dog adult-size reference curves. Do not synthesize
-    // percentiles from a single pet's history or extrapolate an adult size.
-    peer.textContent = '분석 준비 중';
-    peerNote.textContent = '검증된 또래 비교 자료가 연결되면 100마리 중 순서로 보여드려요.';
-    adult.textContent = '예측 보류';
-    adultNote.textContent = '충분한 기록과 검증된 성장 예측 기준이 필요해요.';
+    const today = new Date();
+    const birth = pet.birth_date ? new Date(pet.birth_date + 'T00:00:00') : null;
+    const ageWeeks = birth && !Number.isNaN(birth.getTime())
+      ? (today.getTime() - birth.getTime()) / 604800000 : null;
+    if (ageWeeks === null || ageWeeks < 0) {
+      stageElement.textContent = '생년월일 확인 필요';
+    } else if (pet.species === 'cat') {
+      stageElement.textContent = ageWeeks < 52 ? '성장기'
+        : ageWeeks < 78 ? '성묘 전환기 · 성장 마무리 단계' : '성묘기';
+    } else {
+      // Without a verified projected adult-size group, do not give dogs
+      // a falsely precise maturity age (small and giant breeds differ).
+      stageElement.textContent = ageWeeks < 52 ? '성장기'
+        : ageWeeks < 104 ? '성견 전환기 · 체격별 성장 차이' : '성견기';
+    }
 
     const valid = (records || []).filter(function (row) {
       return /^\d{4}-\d{2}-\d{2}$/.test(row.recorded_date)
         && Number.isFinite(row.weight_kg) && row.weight_kg > 0;
     });
-    if (valid.length === 0) {
-      comment.textContent = '아직 기록이 없어요. 몸무게를 기록하면 이전 측정과 비교해 드릴게요.';
+    if (!valid.length) {
+      comment.textContent = '체중을 기록하면 이전 측정과 비교해 변화량을 알려드려요.';
       return;
     }
     if (valid.length === 1) {
-      comment.textContent = '첫 몸무게 ' + valid[0].weight_kg.toFixed(2)
-        + 'kg을 기록했어요. 다음 측정부터 변화량과 속도를 확인할 수 있어요.';
+      comment.textContent = '처음 기록한 몸무게는 ' + valid[0].weight_kg.toFixed(2)
+        + 'kg이에요. 다음 기록부터 체중 변화 추세를 확인할 수 있어요.';
       return;
     }
+
     const last = valid[valid.length - 1];
     const previous = valid[valid.length - 2];
-    const lastTime = new Date(last.recorded_date + 'T00:00:00').getTime();
-    const previousTime = new Date(previous.recorded_date + 'T00:00:00').getTime();
-    const days = Math.round((lastTime - previousTime) / 86400000);
+    const elapsed = (new Date(last.recorded_date + 'T00:00:00') -
+      new Date(previous.recorded_date + 'T00:00:00')) / 86400000;
+    const days = Math.round(elapsed);
     if (!Number.isFinite(days) || days <= 0) {
-      comment.textContent = '측정 날짜를 확인해 주세요. 날짜 간격이 있어야 체중 변화를 비교할 수 있어요.';
+      comment.textContent = '측정 날짜를 확인해 주세요. 서로 다른 날짜의 기록이 필요해요.';
       return;
     }
+
     const delta = last.weight_kg - previous.weight_kg;
-    const change = Math.abs(delta);
-    const direction = delta > 0.005 ? '늘었어요' : delta < -0.005 ? '줄었어요' : '거의 같아요';
-    const changeText = Math.abs(delta) < 0.005 ? '체중이 거의 같아요.'
-      : '몸무게가 ' + change.toFixed(2) + 'kg ' + direction + '.';
+    const absolute = Math.abs(delta);
+    const pct = (absolute / previous.weight_kg) * 100;
+    const direction = delta > 0.005 ? '늘었어요' : delta < -0.005 ? '줄었어요' : '거의 변하지 않았어요';
+    const changeText = absolute < 0.005 ? '체중이 거의 변하지 않았어요.'
+      : '체중이 ' + absolute.toFixed(2) + 'kg(' + pct.toFixed(1) + '%) ' + direction + '.';
+
     let trend = '';
     if (valid.length >= 3) {
       const earlier = valid[valid.length - 3];
-      const before = previous.weight_kg - earlier.weight_kg;
-      if (delta > 0.005 && before > 0.005) trend = ' 최근 두 번의 측정에서 모두 증가했어요.';
-      else if (delta < -0.005 && before < -0.005) trend = ' 최근 두 번의 측정에서 모두 감소했어요.';
-      else trend = ' 이전 측정 구간과 변화 방향이 달라졌거나 비슷하게 유지되고 있어요.';
+      const previousDelta = previous.weight_kg - earlier.weight_kg;
+      if (delta > 0.005 && previousDelta > 0.005) trend = ' 최근 두 측정 구간에서 연속으로 증가했어요.';
+      else if (delta < -0.005 && previousDelta < -0.005) trend = ' 최근 두 측정 구간에서 연속으로 감소했어요.';
+      else trend = ' 앞선 구간과 비교하면 변화 방향이 달라졌거나 비슷하게 유지됐어요.';
     }
-    comment.textContent = '직전 측정(' + previous.recorded_date + ') 이후 ' + days
-      + '일 동안 ' + changeText + trend + ' 이 설명은 개별 기록의 변화만 나타내며 건강 평가가 아니에요.';
+
+    const catMaturing = pet.species === 'cat' && ageWeeks !== null && ageWeeks >= 52 && ageWeeks < 78;
+    const catAdult = pet.species === 'cat' && ageWeeks !== null && ageWeeks >= 78;
+    const interpretation = catMaturing
+      ? ' 성묘 체중에 가까워지는 시기이므로 증가량 자체보다는 최근 체중이 어떻게 변화하는지 살펴보세요.'
+      : catAdult
+        ? ' 성묘기에는 성장량보다 체중 유지 또는 변화 추세를 살펴보세요.'
+        : ' 다음 기록과 비교하면 변화 추세를 더 자세히 볼 수 있어요.';
+    comment.textContent = '직전 측정(' + previous.recorded_date + ') 후 ' + days + '일 동안 '
+      + changeText + trend + interpretation;
   }
 
   function getFoodsFromResult(resultData) {
