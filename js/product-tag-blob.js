@@ -735,8 +735,10 @@
     section.innerHTML = `
       <div class="food-section-heading"><span>07</span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기</h2></div>
       <p class="food-similar-foods__brand-hub"><a href="${escapeHtml(buildCandidateBrandPath(sourceFeed))}">${escapeHtml(sourceBrand.displayName)} 사료 보기</a></p>
-      ${hasMatches && conditions ? `<p class="food-similar-foods__conditions">${escapeHtml(conditions)} 조건의 제품</p>` : ''}
-      ${hasMatches ? `<p class="food-similar-foods__links">${links}</p>` : ''}`;
+      ${hasMatches ? `<div class="food-similar-foods__match-group">
+        ${conditions ? `<p class="food-similar-foods__conditions">${escapeHtml(conditions)} 조건의 제품</p>` : ''}
+        <p class="food-similar-foods__links">${links}</p>
+      </div>` : ''}`;
     article.appendChild(section);
   }
 
