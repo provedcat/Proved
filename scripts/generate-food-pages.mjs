@@ -85,6 +85,39 @@ export function buildProductPath(feed, species) {
   return `/food/${species === 'dog' ? 'dog' : 'cat'}/${buildProductSlug(feed)}/`;
 }
 
+function getProductSearchName(feed) {
+  const brand = getBrand(feed);
+  const product = splitProductName(feed?.제품명).primary;
+  const normalized = value => String(value || '').normalize('NFKC').toLocaleLowerCase('ko').replace(/[\\s·_-]+/g, '');
+  const normalizedProduct = normalized(product);
+  const brandNames = [brand.displayName, brand.nameKo, brand.name, ...brand.aliases];
+  const hasBrandPrefix = brandNames.some(value => {
+    const prefix = normalized(value);
+    return prefix.length >= 2 && normalizedProduct.startsWith(prefix);
+  });
+  return hasBrandPrefix ? product : `${brand.displayName} ${product}`;
+}
+
+function searchCalorie(feed) {
+  // Values awaiting manual review must not become definitive facts in Google titles.
+  if (feed?.needs_calorie_review === true || feed?.cal_source === 'manual_review') return null;
+  const kcalPerKg = Number(feed?.final_me);
+  if (!isPresent(feed?.final_me) || kcalPerKg <= 0) return null;
+  return {
+    per100g: formatNumber(kcalPerKg / 10, 2),
+    perKg: formatNumber(kcalPerKg, 1),
+    estimated: ['estimated', 'estimated_corrected'].includes(feed?.cal_source)
+  };
+}
+
+function buildSearchTitle(feed) {
+  const name = getProductSearchName(feed);
+  const calorie = searchCalorie(feed);
+  return calorie
+    ? `${name} 칼로리 | 100g당 ${calorie.per100g}kcal${calorie.estimated ? ' (추정)' : ''} | 프루브`
+    : `${name} 칼로리·영양성분 | 프루브`;
+}
+
 function speciesLabel(species) {
   return species === 'dog' ? '강아지' : '고양이';
 }
@@ -118,15 +151,20 @@ function formatRatio(value) {
 }
 
 function buildDescription(feed, species) {
-  const brand = getBrand(feed);
-  const product = splitProductName(feed.제품명);
+  const calorie = searchCalorie(feed);
   const facts = [
-    isPresent(feed.final_me) ? `열량 ${formatNumber(feed.final_me, 1)} kcal/kg` : '',
-    isPresent(feed.dm_단백) ? `DM 단백질 ${formatNumber(feed.dm_단백, 2)}%` : '',
+    calorie
+      ? `100g당 ${calorie.per100g}kcal (${calorie.perKg}kcal/kg, ${calorieSourceLabel(feed.cal_source)})`
+      : '칼로리 확인 또는 검토 중',
+    isPresent(feed.조단백) ? `조단백 ${formatNumber(feed.조단백, 2)}%` : '',
     isPresent(feed.ca_p_ratio) ? `칼슘·인 비율 ${formatNumber(feed.ca_p_ratio, 2)}:1` : ''
   ].filter(Boolean);
-  const detail = facts.length ? `${facts.join(', ')} 등 ` : '';
-  const description = `${brand.name} ${product.primary} ${speciesLabel(species)} ${typeLabel(feed.type)} 성분 정보. ${detail}등록 영양정보를 프루브에서 확인하세요.`;
+  const available = [
+    feed.전성분 ? '전성분' : '',
+    ['조단백', '조지방', '수분', '칼슘', '인'].some(key => isPresent(feed[key])) ? '영양성분' : ''
+  ].filter(Boolean);
+  const details = available.length ? `${available.join('·')}을 확인하고 ` : '';
+  const description = `${getProductSearchName(feed)} ${speciesLabel(species)} ${typeLabel(feed.type)}. ${facts.join(', ')}. ${details}급여량을 계산하세요. | 프루브`;
   return description.length > 160 ? `${description.slice(0, 157).trim()}…` : description;
 }
 
@@ -286,7 +324,7 @@ function buildStructuredData(feed, species, canonicalUrl, description) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: `${brand.displayName} ${product.primary}`,
+    name: getProductSearchName(feed),
     description,
     url: canonicalUrl,
     category: `${speciesLabel(species)} ${typeLabel(feed.type)}`,
@@ -300,7 +338,7 @@ export function renderProductPage(template, feed, species, allFeeds = []) {
   const product = splitProductName(feed.제품명);
   const productPath = buildProductPath(feed, species);
   const canonicalUrl = new URL(productPath, SITE_ORIGIN).href;
-  const title = `${brand.displayName} ${product.primary} 성분·칼로리·급여량 | 프루브`;
+  const title = buildSearchTitle(feed);
   const description = buildDescription(feed, species);
   const structuredData = buildStructuredData(feed, species, canonicalUrl, description);
   const pageConfig = { species, id: String(feed.id), slug: buildProductSlug(feed), path: productPath };
