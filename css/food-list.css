@@ -966,59 +966,57 @@ button { cursor: pointer; }
 }
 
 .food-similar-foods__brand-hub {
-  margin: -10px 0 8px;
-  font-size: 13px;
+  margin: 2px 0 0;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1.6;
 }
-.food-similar-foods__brand-hub a {
-  color: var(--food-blue);
-  text-decoration: none;
-}
-.food-similar-foods__brand-hub a:hover {
-  text-decoration: underline;
-}
-.food-similar-foods__brand-hub a:focus-visible {
-  outline: 2px solid rgba(53, 104, 255, .32);
-  outline-offset: 3px;
-}
-
-.food-similar-foods__conditions {
-  margin: -10px 0 18px;
-  color: var(--food-muted);
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.65;
-}
-.food-similar-foods__links {
-  margin: 0;
-  color: var(--food-ink);
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.9;
-}
-.food-similar-foods__item {
-  display: inline;
-}
+.food-similar-foods__brand-hub a,
 .food-similar-foods__brand,
 .food-similar-foods__product {
   color: var(--food-blue);
   text-decoration: none;
+}
+.food-similar-foods__brand-hub a:hover,
+.food-similar-foods__brand:hover,
+.food-similar-foods__product:hover {
+  text-decoration: underline;
+}
+.food-similar-foods__brand-hub a:focus-visible,
+.food-similar-foods__brand:focus-visible,
+.food-similar-foods__product:focus-visible {
+  outline: 2px solid rgba(53, 104, 255, .32);
+  outline-offset: 3px;
+}
+
+/* The matching condition belongs with the products below, not the brand hub. */
+.food-similar-foods__match-group {
+  margin-top: 18px;
+}
+.food-similar-foods__conditions {
+  margin: 0 0 10px;
+  color: var(--food-ink);
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.food-similar-foods__links {
+  margin: 0;
+  color: var(--food-ink);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.food-similar-foods__item {
+  display: inline;
 }
 .food-similar-foods__brand {
   font-weight: 800;
 }
 .food-similar-foods__product {
   font-weight: 650;
-}
-.food-similar-foods__brand:hover,
-.food-similar-foods__product:hover {
-  text-decoration: underline;
-}
-.food-similar-foods__brand:focus-visible,
-.food-similar-foods__product:focus-visible {
-  outline: 2px solid rgba(53, 104, 255, .32);
-  outline-offset: 3px;
 }
 .food-similar-foods__separator {
   color: #a9b0bc;
