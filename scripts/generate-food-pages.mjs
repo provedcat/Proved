@@ -88,7 +88,7 @@ export function buildProductPath(feed, species) {
 function getProductSearchName(feed) {
   const brand = getBrand(feed);
   const product = splitProductName(feed?.제품명).primary;
-  const normalized = value => String(value || '').normalize('NFKC').toLocaleLowerCase('ko').replace(/[\\s·_-]+/g, '');
+  const normalized = value => String(value || '').normalize('NFKC').toLocaleLowerCase('ko').replace(/[\s·_-]+/g, '');
   const normalizedProduct = normalized(product);
   const brandNames = [brand.displayName, brand.nameKo, brand.name, ...brand.aliases];
   const hasBrandPrefix = brandNames.some(value => {
