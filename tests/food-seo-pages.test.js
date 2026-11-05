@@ -95,6 +95,8 @@ test('브랜드 중복을 제거하고 공식 칼로리를 100g당 값으로 검
   const html = renderProductPage(template, feed, 'cat');
   assert.match(html, /<title>나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브<\/title>/);
   assert.doesNotMatch(html, /나인케어 나인케어 키튼/);
+  const spacedName = renderProductPage(template, { ...feed, 제품명: '나인 케어 키튼' }, 'cat');
+  assert.doesNotMatch(spacedName, /나인케어 나인 케어 키튼/);
   assert.match(html, /<meta name="description" content="[^"]*100g당 332\.5kcal[^"]*전성분·영양성분[^"]*">/);
   assert.match(html, /<meta property="og:title" content="나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브">/);
   assert.match(html, /<meta name="twitter:title" content="나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브">/);
@@ -250,7 +252,7 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     const rootHtml = await readFile(path.join(tempRoot, 'food', 'index.html'), 'utf8');
     const sitemap = await readFile(path.join(tempRoot, 'sitemap-foods.xml'), 'utf8');
 
-    assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 | 100g당 420kcal | 프루브/);
+    assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 \| 100g당 420kcal \| 프루브/);
     assert.match(catHtml, /href="\/food\/brand\/farmina\/"/);
     assert.match(brandHtml, /<link rel="canonical" href="https:\/\/proved\.kr\/food\/brand\/farmina\/">/);
     for (const id of ['foodSearchInput', 'foodSpeciesFilters', 'foodTypeFilters', 'foodRoleFilters', 'foodConditionFolders', 'foodSelectedConditions', 'foodLoadMore']) {
