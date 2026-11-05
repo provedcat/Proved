@@ -201,7 +201,8 @@ test('비슷한 사료의 안내와 링크는 같은 그룹이며 브랜드 이�
   assert.match(blob, /class="food-similar-foods__match-group"/);
   assert.match(blob, /<p class="food-similar-foods__conditions">/);
   assert.match(blob, /<p class="food-similar-foods__links">/);
-  assert.match(css, /\.food-similar-foods__match-group \{\s*margin-top: 18px/);
+  assert.match(css, /\.food-similar-foods__match-group \{\s*margin-top: 42px/);
+  assert.match(css, /\.food-similar-foods__conditions \{[\s\S]*?color: var\(--food-muted\)/);
   assert.match(css, /\.food-similar-foods__conditions \{[\s\S]*?font-size: 15px/);
 });
 
@@ -298,7 +299,7 @@ test('검색어가 태그·브랜드 별칭까지 검색하고 선택 필터 밖
   assert.match(source, /선택한 조건 밖에서 사료를 찾았어요/);
   assert.match(source, /data-recovery="all-filters"/);
   assert.match(source, /if \(state\.query && !state\.outsideMatches\.length\) scheduleZeroResultSearchLog/);
-  assert.match(html, /food-list\.css\?v=20261105-similar-group-v1/);
+  assert.match(html, /food-list\.css\?v=20261105-similar-hint-v2/);
   assert.match(css, /\.food-empty__outside/);
 });
 
