@@ -179,7 +179,7 @@ test('정적 제품 HTML과 JS 상세 화면의 SEO 제목·설명 규칙이 일
   assert.match(browserSource, /brands\(name,name_ko,official_url\)/);
   assert.match(browserSource, /prerenderedPage\.path === normalizePathname\(window\.location\.pathname\)/);
   assert.match(browserSource, /els\.detailContent\?\.dataset\.prerenderedFeedId === String\(feed\.id\)/);
-  assert.match(template, /food-list\.js\?v=20261105-seo-hydration-v1/);
+  assert.match(template, /food-list\.js\?v=20261105-managed-filters-v1/);
 });
 
 test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 출력하지 않는다', async () => {
