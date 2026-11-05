@@ -75,6 +75,8 @@ test('제품 HTML에 고유 canonical, 검색 설명, 본문과 구조화 데이
   assert.match(html, /<section id="foodListView"[^>]* hidden>/);
   assert.doesNotMatch(html, /<section id="foodDetailView"[^>]* hidden>/);
   assert.match(html, /<h1 id="foodDetailTitle">N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류<\/h1>/);
+  assert.match(html, /<h2 id="foodListTitle">사료 추천, 내 기준으로 찾기<\/h2>/);
+  assert.equal((html.match(/<h1\b/g) || []).length, 1, '제품 페이지에는 실제 상세 H1만 있어야 함');
   assert.match(html, /<script id="foodStructuredData" type="application\/ld\+json">/);
   assert.match(html, /"@type":"Product"/);
   assert.doesNotMatch(html, /"@type"\s*:\s*"CollectionPage"/);
@@ -310,6 +312,7 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 \| 100g당 420kcal \| 프루브/);
     assert.match(catHtml, /href="\/food\/brand\/farmina\/"/);
     assert.match(brandHtml, /<link rel="canonical" href="https:\/\/proved\.kr\/food\/brand\/farmina\/">/);
+    assert.equal((brandHtml.match(/<h1\b/g) || []).length, 1, '브랜드 허브에도 H1은 하나만');
     for (const id of ['foodSearchInput', 'foodSpeciesFilters', 'foodTypeFilters', 'foodRoleFilters', 'foodConditionFolders', 'foodSelectedConditions', 'foodLoadMore']) {
       assert.ok(brandHtml.includes(`id="${id}"`));
     }
@@ -393,6 +396,28 @@ test('사이트맵은 실제 제품 변경일만 반영하고 재생성 시 기�
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test('네이버 진단: 개인정보처리방침·이용약관에 각각 고유한 설명이 있다', async () => {
+  const privacy = await readFile(path.join(__dirname, '..', 'privacy', 'index.html'), 'utf8');
+  const terms = await readFile(path.join(__dirname, '..', 'terms', 'index.html'), 'utf8');
+  const getDescription = html => html.match(/<meta name="description" content="([^"]+)">/)?.[1];
+  const privacyDescription = getDescription(privacy);
+  const termsDescription = getDescription(terms);
+  assert.ok(privacyDescription?.includes('개인정보처리방침'));
+  assert.ok(termsDescription?.includes('이용약관'));
+  assert.notEqual(privacyDescription, termsDescription);
+  assert.equal((privacy.match(/<meta name="description"/g) || []).length, 1);
+  assert.equal((terms.match(/<meta name="description"/g) || []).length, 1);
+});
+
+test('목록에서 상세로 이동 시 H1의 역할과 시각 스타일이 전환된다', async () => {
+  const source = await readFile(path.join(__dirname, '..', 'js', 'food-list.js'), 'utf8');
+  const css = await readFile(path.join(__dirname, '..', 'css', 'food-list.css'), 'utf8');
+  assert.match(source, /function syncFoodListHeading\(isListVisible\)/);
+  assert.match(source, /function showList\([\s\S]*?syncFoodListHeading\(true\)/);
+  assert.match(source, /function renderDetail\([\s\S]*?syncFoodListHeading\(false\)/);
+  assert.match(css, /\.food-list-hero h1, \.food-list-hero h2 \{/);
 });
 
 test('목록 결과는 크롤러가 따라갈 수 있는 제품 링크를 출력한다', async () => {
