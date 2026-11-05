@@ -40,8 +40,9 @@ test('태그는 고양이와 강아지 relation을 분리하고 AND 교집합으
   const source = await read('js/food-list.js');
   assert.match(source, /'dog_feed_food_tags' : 'feed_food_tags'/);
   assert.match(source, /'dog_feed_id' : 'feed_id'/);
-  assert.match(source, /tags\.size === required\.size/);
-  assert.match(source, /\.in\('tag_id', state\.selectedTagIds\)/);
+  assert.match(source, /\[\.\.\.required\]\.every\(id => tags\.has\(id\)\)/);
+  assert.match(source, /\.in\('tag_id', queryTags\)/);
+  assert.match(source, /\.\.\.managed\]/);
 });
 
 test('Condition Finder signature와 검색·선택 접근성을 유지한다', async () => {
