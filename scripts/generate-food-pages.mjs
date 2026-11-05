@@ -582,7 +582,7 @@ function renderBrandHub(brand, items, template) {
     .replace('<div id="foodResults"', `<section id="brandStaticProducts"><h2>등록 제품 ${items.length}개</h2><ul class="brand-food-grid">${cards}</ul></section><div id="foodResults"`)
     .replace('</head>', `<link rel="stylesheet" href="/css/brand-hub.css"><script id="foodBrandScope" type="application/json">${jsonForHtml(scope)}</script></head>`)
     .replace(/<script defer src="\/js\/brand-finder\.js[^" ]*"><\/script>/, '')
-    .replace(/food-list\.js\?v=[^" ]+/, 'food-list.js?v=20261105-brand-filters-v1');
+    .replace(/food-list\.js\?v=[^" ]+/, 'food-list.js?v=20261105-managed-filters-v1');
   return html;
 }
 
