@@ -1239,7 +1239,18 @@
     });
   }
 
+  function syncFoodListHeading(isListVisible) {
+    const current = document.getElementById('foodListTitle');
+    const tag = isListVisible ? 'h1' : 'h2';
+    if (!current || current.tagName.toLowerCase() === tag) return;
+    const heading = document.createElement(tag);
+    for (const attribute of current.attributes) heading.setAttribute(attribute.name, attribute.value);
+    heading.textContent = current.textContent;
+    current.replaceWith(heading);
+  }
+
   function showList(fromPopState, finderState = history.state?.foodFinder) {
+    syncFoodListHeading(true);
     updateListMetadata();
     els.detailView.hidden = true;
     els.listView.hidden = false;
@@ -1256,6 +1267,7 @@
   }
 
   function renderDetail(feed) {
+    syncFoodListHeading(false);
     const brand = getBrand(feed);
     const product = splitProductName(feed.제품명);
     const semanticClass = getFeedSemanticClass(feed);
