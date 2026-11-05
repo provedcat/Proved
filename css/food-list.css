@@ -57,7 +57,7 @@ button { cursor: pointer; }
   font-weight: 800;
   letter-spacing: .14em;
 }
-.food-list-hero h1 {
+.food-list-hero h1, .food-list-hero h2 {
   margin: 0;
   color: var(--food-ink);
   font-size: clamp(52px, 7vw, 88px);
@@ -1183,7 +1183,7 @@ button { cursor: pointer; }
 @media (max-width: 720px) {
   .food-shell { width: calc(100% - (2 * var(--proved-page-gutter-mobile, 16px))); }
   .food-list-hero { padding: 56px 20px 44px; }
-  .food-list-hero h1 { font-size: clamp(44px, 15vw, 62px); }
+  .food-list-hero h1, .food-list-hero h2 { font-size: clamp(44px, 15vw, 62px); }
   .food-list-hero__lead { margin-top: 20px; font-size: 14px; }
   .food-controls { padding: 32px 20px 0; }
   .food-search-field__row { min-height: 62px; }
