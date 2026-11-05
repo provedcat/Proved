@@ -116,12 +116,36 @@ function getRegisteredFeedId(result) {
     result?.feed_id,
     result?.registeredFeedId,
     result?.등록된사료ID,
+    result?.등록ID,
     result?.사료ID,
     Array.isArray(result?.result_feed_ids) ? result.result_feed_ids[0] : null,
     Array.isArray(result?.feed_ids) ? result.feed_ids[0] : null
   ];
   return values.find(value => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''))) || null;
 }
+
+// The calculator picker applies both visibility and positive kcal/kg filters.
+// Check the persisted row instead of assuming registration implies calculability.
+async function isRegisteredFeedCalculable(result) {
+  const feedId = getRegisteredFeedId(result);
+  if (!feedId) return false;
+  const table = registrationState.species === 'dog' ? 'dog_feeds' : 'feeds';
+  try {
+    const { data, error } = await sb.from(table)
+      .select('id,final_me,verified,searchable_before_review')
+      .eq('id', feedId)
+      .maybeSingle();
+    if (error || !data) return false;
+    return Number(data.final_me) > 0 &&
+      (data.verified === true || data.searchable_before_review === true);
+  } catch (error) {
+    console.warn('Could not confirm feed calculator availability.', error);
+    return false;
+  }
+}
+
+const PENDING_NUTRITION_MESSAGE =
+  '제품은 등록되었지만 급여량 계산에 필요한 정보를 확인 중입니다. 관리자 검수 후 정상등록 됩니다.';
 
 function getRegisteredProductName(result, fallbackName = '') {
   const value = Array.isArray(result?.제품명) ? result.제품명[0] : result?.제품명;
@@ -153,14 +177,17 @@ function returnToCalculator() {
   window.location.replace(destination);
 }
 
-function showReturnNotice({ result = {}, fallbackName = '', searchable = true } = {}) {
+function showReturnNotice({ result = {}, fallbackName = '', searchable = false } = {}) {
   const complete = document.getElementById('registrationComplete');
   const message = document.getElementById('registrationReturnMessage');
   const button = document.getElementById('registrationReturnButton');
   if (!complete || !message || !button) return;
 
   if (!searchable) {
-    message.textContent = '제품 자료를 저장했습니다. 검수가 끝나면 계산기에서 검색할 수 있습니다.';
+    if (calculatorReturnTimer) window.clearTimeout(calculatorReturnTimer);
+    calculatorReturnTimer = null;
+    try { sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY); } catch (_) { /* optional storage */ }
+    message.textContent = PENDING_NUTRITION_MESSAGE;
     button.hidden = true;
     complete.classList.add('is-visible');
     complete.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -264,17 +291,21 @@ async function submitTextRegistration() {
       return;
     }
     if (result.중복) {
-      renderMessage('feedTextRequestMsg', `${result.verified ? '이미 등록된' : '이미 검수 전으로 등록된'} 제품입니다. ${result.제품명 || ''}`.trim(), result.verified ? 'success' : 'warning');
-      showReturnNotice({ result, fallbackName: query, searchable: result.검색가능 !== false });
+      const calculable = await isRegisteredFeedCalculable(result);
+      renderMessage('feedTextRequestMsg', calculable
+        ? `이미 등록된 제품입니다. ${result.제품명 || ''}`.trim()
+        : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+      showReturnNotice({ result, fallbackName: query, searchable: calculable });
       return;
     }
     if (!result.성공) throw new Error(result.오류 || '제품 정보를 등록하지 못했습니다.');
     const names = Array.isArray(result.제품명) ? result.제품명.join(', ') : (result.제품명 || query);
-    renderMessage('feedTextRequestMsg', result.검색가능 === false
-      ? `${names} 자료를 저장했습니다. 검수 후 검색에 표시됩니다.`
-      : `${names} 등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.`, result.검색가능 === false ? 'warning' : 'success');
+    const calculable = await isRegisteredFeedCalculable(result);
+    renderMessage('feedTextRequestMsg', calculable
+      ? `${names} 등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.`
+      : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
     input.value = '';
-    showReturnNotice({ result, fallbackName: names, searchable: result.검색가능 !== false });
+    showReturnNotice({ result, fallbackName: names, searchable: calculable });
   } catch (error) {
     console.error(error);
     renderMessage('feedTextRequestMsg', '제품 정보를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
@@ -315,13 +346,14 @@ async function submitImageRegistration() {
       body:JSON.stringify({ action:'upload', base64Data:base64, mimeType:file.type, fileName:file.name, type:registrationState.type, species:registrationState.species })
     }));
     if (!result.성공) throw new Error(result.안내 || result.오류 || '등록하지 못했습니다.');
-    renderMessage('uploadMsg', result.검색가능 === false
-      ? '제품 자료를 저장했습니다. 검수 후 검색에 표시됩니다.'
-      : '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.', result.검색가능 === false ? 'warning' : 'success');
+    const calculable = await isRegisteredFeedCalculable(result);
+    renderMessage('uploadMsg', calculable
+      ? '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.'
+      : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
     document.getElementById('uploadInput').value = '';
     registrationState.imageFile = null;
-    document.getElementById('uploadPrompt').textContent = '분석 완료';
-    showReturnNotice({ result, searchable: result.검색가능 !== false });
+    document.getElementById('uploadPrompt').textContent = calculable ? '분석 완료' : '검수 대기';
+    showReturnNotice({ result, searchable: calculable });
   } catch (error) {
     console.error(error);
     renderMessage('uploadMsg', error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
