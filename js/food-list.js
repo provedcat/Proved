@@ -5,7 +5,9 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
   const PAGE_SIZE = 24;
   const SITE_ORIGIN = 'https://proved.kr';
-  const FOOD_LIST_PATH = '/food/';
+  const brandScope = JSON.parse(document.getElementById('foodBrandScope')?.textContent || 'null');
+  const FOOD_LIST_PATH = brandScope?.path || '/food/';
+  const defaultSort = brandScope ? 'product' : 'brand';
   const FOOD_LIST_TITLE = '고양이·강아지 사료 목록 | 프루브';
   const FOOD_LIST_DESCRIPTION = '프루브에 등록된 고양이·강아지 사료를 브랜드와 제품명으로 검색하고 열량, 수분, 칼슘·인 비율과 상세 영양정보를 확인합니다.';
   const TAG_CATEGORY_ORDER = [
@@ -485,7 +487,7 @@
     state.species = detailRoute?.species || normalizeEnum(params.get('species'), ['cat', 'dog'], 'all');
     state.type = normalizeEnum(params.get('type'), ['all', 'dry', 'wet'], 'all');
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
-    state.sort = normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
+    state.sort = brandScope ? 'product' : normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
     state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').map(value => value.trim()).filter(Boolean))].slice(0, 20);
     state.loaded = Math.max(PAGE_SIZE, Number(history.state?.foodFinder?.loaded) || PAGE_SIZE);
@@ -497,7 +499,7 @@
     if (state.species !== 'all') params.set('species', state.species);
     if (state.type !== 'all') params.set('type', state.type);
     if (state.role !== 'all') params.set('role', state.role);
-    if (state.sort !== 'brand') params.set('sort', state.sort);
+    if (state.sort !== defaultSort) params.set('sort', state.sort);
     if (state.query) params.set('q', state.query);
     if (state.selectedTagIds.length) params.set('tags', state.selectedTagIds.join(','));
     const queryString = params.toString();
@@ -761,6 +763,7 @@
 
   function buildListQuery(species, from, to, withCount = false) {
     let query = foodSb.from(getTable(species)).select(listColumns, withCount ? { count: 'exact' } : undefined).or('verified.eq.true,searchable_before_review.eq.true');
+    if (brandScope) query = query.eq('brand_id', brandScope.id);
     if (state.type !== 'all') query = query.eq('type', state.type);
     if (state.role !== 'all') query = query.eq('완전식여부', state.role);
     const ids = state.matchingFeedIds[species];
@@ -780,6 +783,7 @@
       let query = foodSb.from(table).select(columns);
       if (table === 'feeds' || table === 'dog_feeds') {
         query = query.or('verified.eq.true,searchable_before_review.eq.true');
+        if (brandScope) query = query.eq('brand_id', brandScope.id);
       }
       query = query.order(sortColumn);
       if (sortColumn === 'feed_id' || sortColumn === 'dog_feed_id') query = query.order('tag_id');
@@ -837,6 +841,7 @@
   }
 
   function matchesCurrentFilters(feed) {
+    if (brandScope && String(feed.brand_id) !== brandScope.id) return false;
     if (state.species !== 'all' && feed.species !== state.species) return false;
     if (state.type !== 'all' && feed.type !== state.type) return false;
     if (state.role !== 'all' && feed.완전식여부 !== state.role) return false;
@@ -847,10 +852,10 @@
     const products = await loadSearchCatalog();
     const matches = products.filter(feed => matchesFoodSearch(feed, query));
     const filtered = matches.filter(matchesCurrentFilters).sort((a, b) =>
-      foodSearchRelevance(b, query) - foodSearchRelevance(a, query) || compareFeedRows(a, b)
+      (brandScope ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b)
     );
     const outside = filtered.length ? [] : matches.filter(feed => !matchesCurrentFilters(feed))
-      .sort((a, b) => foodSearchRelevance(b, query) - foodSearchRelevance(a, query) || compareFeedRows(a, b));
+      .sort((a, b) => (brandScope ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b));
     const suggestions = matches.length ? [] : (window.ProvedFoodSearchFuzzy?.suggestFoods(
       products, query, feed => feed._searchText, 3
     ) || []);
@@ -970,6 +975,7 @@
   }
 
   function renderResults() {
+    if (brandScope) document.getElementById('brandStaticProducts')?.setAttribute('hidden', '');
     const species = getSpeciesLabel();
     const searchSuffix = state.query ? ` · “${state.query}” 검색` : '';
     const conditionSuffix = state.selectedTagIds.length ? ` · 조건 ${state.selectedTagIds.length}개` : '';
@@ -1129,14 +1135,14 @@
   }
 
   function updateListMetadata() {
-    document.title = FOOD_LIST_TITLE;
-    setMetaContent('meta[name="description"]', FOOD_LIST_DESCRIPTION);
+    document.title = brandScope?.title || FOOD_LIST_TITLE;
+    setMetaContent('meta[name="description"]', brandScope?.description || FOOD_LIST_DESCRIPTION);
     setMetaContent('meta[name="robots"]', 'index,follow,max-image-preview:large');
     setMetaContent('meta[property="og:type"]', 'website');
-    setMetaContent('meta[property="og:title"]', FOOD_LIST_TITLE);
+    setMetaContent('meta[property="og:title"]', brandScope?.title || FOOD_LIST_TITLE);
     setMetaContent('meta[property="og:description"]', '브랜드와 제품명으로 사료를 찾고 등록된 영양정보를 확인하세요.');
     setMetaContent('meta[property="og:url"]', `${SITE_ORIGIN}${FOOD_LIST_PATH}`);
-    setMetaContent('meta[name="twitter:title"]', FOOD_LIST_TITLE);
+    setMetaContent('meta[name="twitter:title"]', brandScope?.title || FOOD_LIST_TITLE);
     setMetaContent('meta[name="twitter:description"]', '브랜드와 제품명으로 사료를 찾고 등록된 영양정보를 확인하세요.');
     setCanonicalUrl(`${SITE_ORIGIN}${FOOD_LIST_PATH}`);
     setStructuredData(null);

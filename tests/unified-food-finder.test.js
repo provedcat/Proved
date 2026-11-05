@@ -222,3 +222,32 @@ test('검색어가 태그·브랜드 별칭까지 검색하고 선택 필터 밖
   assert.match(html, /food-list\.css\?v=20261017-featured-brands-v1/);
   assert.match(css, /\.food-empty__outside/);
 });
+
+test('브랜드 Finder는 검색·필터 해제·URL 복원에서도 브랜드 범위와 제품명순을 유지한다', async () => {
+  const vm = require('node:vm');
+  const source = await read('js/food-list.js');
+  const calls = [];
+  const query = new Proxy({}, { get: (_, method) => (...args) => { calls.push([method, ...args]); return query; } });
+  const scope = { id: 'purina-id', path: '/food/brand/purina/' };
+  const context = {
+    window: { supabase: { createClient: () => ({ from: () => query }) }, location: { pathname: scope.path, search: '?species=dog&type=dry&sort=brand&q=치킨' } },
+    document: { getElementById: id => id === 'foodBrandScope' ? { textContent: JSON.stringify(scope) } : null },
+    history: { state: null, replaceState: (_, __, url) => { context.writtenUrl = url; } },
+    URLSearchParams, Set, Map, console
+  };
+  context.window.history = context.history;
+  vm.createContext(context);
+  vm.runInContext(source.slice(0, source.indexOf('  foodSb.auth.onAuthStateChange')) + '\n globalThis.finder = { state, readStateFromUrl, writeListStateToUrl, buildListQuery, matchesCurrentFilters, fetchPagedSearchRows };\n})();', context);
+  const { finder } = context;
+  finder.readStateFromUrl();
+  assert.equal(finder.state.sort, 'product');
+  finder.writeListStateToUrl();
+  assert.ok(context.writtenUrl.startsWith(scope.path + '?'));
+  assert.ok(!context.writtenUrl.includes('sort=brand'));
+  finder.buildListQuery('dog', 0, 23, true);
+  assert.ok(calls.some(([method, field, value]) => method === 'eq' && field === 'brand_id' && value === scope.id));
+  assert.equal(calls.find(([method]) => method === 'order')[1], '제품명');
+  finder.state.species = finder.state.type = finder.state.role = 'all';
+  assert.equal(finder.matchesCurrentFilters({ brand_id: 'other-brand' }), false);
+  assert.equal(finder.matchesCurrentFilters({ brand_id: scope.id }), true);
+});
