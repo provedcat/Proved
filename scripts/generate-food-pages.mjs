@@ -90,7 +90,8 @@ function getProductSearchName(feed) {
   const product = splitProductName(feed?.제품명).primary;
   const normalized = value => String(value || '').normalize('NFKC').toLocaleLowerCase('ko').replace(/[\s·_-]+/g, '');
   const normalizedProduct = normalized(product);
-  const brandNames = [brand.displayName, brand.nameKo, brand.name, ...brand.aliases];
+  // Only the actual brand names qualify: aliases may name a product line (e.g. N&D).
+  const brandNames = [brand.displayName, brand.nameKo, brand.name];
   const hasBrandPrefix = brandNames.some(value => {
     const prefix = normalized(value);
     return prefix.length >= 2 && normalizedProduct.startsWith(prefix);
