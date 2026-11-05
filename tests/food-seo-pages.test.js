@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } = require('node:fs/promises');
 const os = require('node:os');
+const vm = require('node:vm');
 const path = require('node:path');
 
 const BRAND = {
@@ -123,6 +124,60 @@ test('추정 열량은 검색 제목에서 표시하고 검토 필요·미등록
     assert.match(html, /칼로리 확인 또는 검토 중/);
     assert.doesNotMatch(html, /<title>[^<]*100g당/);
   }
+});
+
+test('정적 제품 HTML과 JS 상세 화면의 SEO 제목·설명 규칙이 일치한다', async () => {
+  const { renderProductPage } = await loadGenerator();
+  const template = await readFile(path.join(__dirname, '..', 'food', 'index.html'), 'utf8');
+  const browserSource = await readFile(path.join(__dirname, '..', 'js', 'food-list.js'), 'utf8');
+
+  const extract = (start, end) => {
+    const from = browserSource.indexOf(start);
+    const to = browserSource.indexOf(end, from);
+    assert.ok(from >= 0 && to > from, 'SEO helper source range: ' + start);
+    return browserSource.slice(from, to);
+  };
+  // Execute the browser's real SEO builders, not a test-only copy of the algorithm.
+  let species = 'cat';
+  const script = [
+    extract('  function isPresent(', '  function safeHttpUrl('),
+    extract('  function seoProductName(', '  function updateListMetadata('),
+    extract('  function getCalorieSourceLabel(', '  function energyIcon('),
+    '({ buildSeoTitle, buildSeoDescription })'
+  ].join('\n');
+  const browserSeo = vm.runInNewContext(script, {
+    Intl,
+    getSpeciesLabel: () => species === 'dog' ? '강아지' : '고양이'
+  });
+
+  const nineCare = { ...BRAND, name: '9Care', name_ko: '나인케어' };
+  const feeds = [
+    { species: 'cat', feed: { ...CAT_FEED, 제품명: '나인케어 키튼', brands: nineCare, final_me: 3325 } },
+    { species: 'cat', feed: { ...CAT_FEED, cal_source: 'estimated' } },
+    { species: 'cat', feed: { ...CAT_FEED, needs_calorie_review: true } },
+    { species: 'cat', feed: { ...CAT_FEED, final_me: null } },
+    { species: 'dog', feed: { ...DOG_FEED, cal_source: 'estimated_corrected' } }
+  ];
+
+  for (const item of feeds) {
+    species = item.species;
+    const { feed } = item;
+    const relation = feed.brands;
+    const name = relation.name;
+    const nameKo = relation.name_ko || '';
+    const brand = { name, nameKo, displayName: nameKo || name };
+    const product = { primary: feed.제품명 };
+    const rendered = renderProductPage(template, feed, species);
+    const staticTitle = rendered.match(/<title>([^<]+)<\/title>/)?.[1].replaceAll('&amp;', '&');
+    const staticDescription = rendered.match(/<meta name="description" content="([^"]+)">/)?.[1].replaceAll('&amp;', '&');
+    assert.equal(browserSeo.buildSeoTitle(feed, brand, product), staticTitle, feed.제품명 + ': title');
+    assert.equal(browserSeo.buildSeoDescription(feed, brand, product), staticDescription, feed.제품명 + ': description');
+  }
+
+  assert.match(browserSource, /brands\(name,name_ko,official_url\)/);
+  assert.match(browserSource, /prerenderedPage\.path === normalizePathname\(window\.location\.pathname\)/);
+  assert.match(browserSource, /els\.detailContent\?\.dataset\.prerenderedFeedId === String\(feed\.id\)/);
+  assert.match(template, /food-list\.js\?v=20261105-seo-hydration-v1/);
 });
 
 test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 출력하지 않는다', async () => {
