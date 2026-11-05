@@ -213,6 +213,12 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 성분·칼로리·급여량/);
     assert.match(catHtml, /href="\/food\/brand\/farmina\/"/);
     assert.match(brandHtml, /<link rel="canonical" href="https:\/\/proved\.kr\/food\/brand\/farmina\/">/);
+    for (const id of ['foodSearchInput', 'foodSpeciesFilters', 'foodTypeFilters', 'foodRoleFilters', 'foodConditionFolders', 'foodSelectedConditions', 'foodLoadMore']) {
+      assert.ok(brandHtml.includes(`id="${id}"`));
+    }
+    assert.match(brandHtml, /"id":"bbbbbbbb-2222-4333-8444-555555555555"/);
+    assert.match(brandHtml, /<option value="product" selected>제품명순/);
+    assert.doesNotMatch(brandHtml, /<option value="brand">/);
     assert.match(brandHtml, /고양이 · 건사료/);
     assert.match(brandHtml, /강아지 · 건사료/);
     assert.match(brandHtml, /"@type":"CollectionPage"/);

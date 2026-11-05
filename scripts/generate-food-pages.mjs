@@ -484,12 +484,11 @@ function collectBrandGroups(catFeeds, dogFeeds) {
   return [...groups.values()];
 }
 
-function renderBrandHub(brand, items) {
+function renderBrandHub(brand, items, template) {
   const brandPath = buildBrandPath(brand);
   const canonicalUrl = new URL(brandPath, SITE_ORIGIN).href;
   const label = brand.displayName || brand.name;
   const sortedItems = [...items].sort((a, b) => {
-    if (a.species !== b.species) return a.species.localeCompare(b.species);
     return String(a.feed.제품명 || '').localeCompare(String(b.feed.제품명 || ''), 'ko');
   });
   const title = `${label} 사료 성분·칼로리·급여량 | 프루브`;
@@ -516,7 +515,25 @@ function renderBrandHub(brand, items) {
       }))
     }
   };
-  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><link rel="stylesheet" href="/css/proved-header.css"><link rel="stylesheet" href="/css/food-list.css"><link rel="stylesheet" href="/css/brand-hub.css"><script id="brandStructuredData" type="application/ld+json">${jsonForHtml(structuredData)}</script><script defer src="/js/proved-header.js"></script></head><body><div class="food-shell"><header data-proved-header="food"></header><main class="brand-hub"><nav class="brand-breadcrumb"><a href="/food/#foodBrandFinder">사료 찾기</a><span>›</span><span>${escapeHtml(label)}</span></nav><header class="brand-hub-hero">${logo}<div><p class="food-eyebrow">BRAND</p><h1>${escapeHtml(label)}</h1>${brand.nameKo && brand.nameKo !== brand.name ? `<p class="brand-hub-en">${escapeHtml(brand.name)}</p>` : ''}<p>${escapeHtml(description)}</p></div></header><section><h2>등록 제품 ${items.length}개</h2><ul class="brand-food-grid">${cards}</ul></section></main><footer data-proved-footer></footer></div></body></html>`;
+  const hero = `<nav class="brand-breadcrumb"><a href="/food/#foodBrandFinder">사료 찾기</a><span>›</span><span>${escapeHtml(label)}</span></nav><header class="brand-hub-hero">${logo}<div><p class="food-eyebrow">BRAND</p><h1 id="foodListTitle">${escapeHtml(label)}</h1><p>${escapeHtml(description)}</p></div></header>`;
+  const scope = { id: brand.id, path: brandPath, title, description };
+  let html = template
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeHtml(description)}">`)
+    .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`)
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script id="brandStructuredData" type="application/ld+json">${jsonForHtml(structuredData)}</script>`)
+    .replace(/<div class="food-list-hero">[\s\S]*?<\/div>/, hero)
+    .replace(/<section id="foodBrandFinder"[\s\S]*?<\/section>/, '')
+    .replace('<main class="food-main">', '<main class="food-main brand-hub">')
+    .replace('<option value="brand">브랜드순</option>', '')
+    .replace('<option value="product">제품명순</option>', '<option value="product" selected>제품명순</option>')
+    .replace('브랜드 또는 제품명 검색', `${escapeHtml(label)} 제품 검색`)
+    .replace('예: RAWZ, 로우즈 연어', '제품명이나 조건을 입력하세요')
+    .replace('<div id="foodResults"', `<section id="brandStaticProducts"><h2>등록 제품 ${items.length}개</h2><ul class="brand-food-grid">${cards}</ul></section><div id="foodResults"`)
+    .replace('</head>', `<link rel="stylesheet" href="/css/brand-hub.css"><script id="foodBrandScope" type="application/json">${jsonForHtml(scope)}</script></head>`)
+    .replace(/<script defer src="\/js\/brand-finder\.js[^" ]*"><\/script>/, '')
+    .replace(/food-list\.js\?v=[^" ]+/, 'food-list.js?v=20261105-brand-filters-v1');
+  return html;
 }
 
 function renderRelatedBrandLinks(feed, allFeeds, species) {
@@ -614,7 +631,7 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     seenPaths.add(brandPath);
     const outputPath = path.join(repoRoot, brandPath.replace(/^\//, ''), 'index.html');
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, renderBrandHub(brand, items), 'utf8');
+    await writeFile(outputPath, renderBrandHub(brand, items, rawTemplate), 'utf8');
     entries.push({ path: brandPath, id: brand.id || brand.slug, kind: 'brand' });
   }
 
