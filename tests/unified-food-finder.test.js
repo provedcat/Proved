@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFile } = require('node:fs/promises');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const root = path.join(__dirname, '..');
 const read = file => readFile(path.join(root, file), 'utf8');
@@ -142,6 +143,49 @@ test('기능성 전체는 처방식 및 관리목적의 합집합으로 검색�
   assert.match(source, /some\(id => tags\.has\(id\)\)/);
   assert.match(source, /state\.managedTagIds\.some\(tagId => feed\._tagIds\?\.has\(tagId\)\)/);
   assert.doesNotMatch(source, /\.in\('tag_id', state\.selectedTagIds\)/);
+});
+
+test('기능성 통합 필터의 OR와 개별 태그 AND가 고양이·강아지 매핑에서 실제로 작동한다', async () => {
+  const source = await read('js/food-list.js');
+  const start = source.indexOf('  async function resolveMatchingFeedIds(species) {');
+  const end = source.indexOf('  function buildListQuery(', start);
+  assert.ok(start >= 0 && end > start);
+  const state = {
+    managedTagIds: ['vet', 'urinary', 'digestive'],
+    selectedTagIds: ['managed:all']
+  };
+  const rows = [
+    { feed_id: 'cat-vet', tag_id: 'vet' },
+    { feed_id: 'cat-urinary', tag_id: 'urinary' },
+    { feed_id: 'cat-urinary', tag_id: 'chicken' },
+    { feed_id: 'cat-digestive', tag_id: 'digestive' },
+    { feed_id: 'cat-normal', tag_id: 'chicken' },
+    { dog_feed_id: 'dog-vet', tag_id: 'vet' },
+    { dog_feed_id: 'dog-normal', tag_id: 'chicken' }
+  ];
+  const requestedTagSets = [];
+  const foodSb = {
+    from(table) {
+      const feedColumn = table === 'dog_feed_food_tags' ? 'dog_feed_id' : 'feed_id';
+      return {
+        select() { return this; },
+        in(_column, ids) { this.tags = ids; requestedTagSets.push(ids); return this; },
+        async range() {
+          return { data: rows.filter(row => row[feedColumn] && this.tags.includes(row.tag_id)), error: null };
+        }
+      };
+    }
+  };
+  const resolve = vm.runInNewContext(source.slice(start, end) + '\nresolveMatchingFeedIds', {
+    state, MANAGED_FILTER_ID: 'managed:all', foodSb, Set
+  });
+  assert.deepEqual([...await resolve('cat')].sort(), ['cat-digestive', 'cat-urinary', 'cat-vet']);
+  assert.deepEqual([...await resolve('dog')], ['dog-vet']);
+  state.selectedTagIds = ['managed:all', 'chicken'];
+  assert.deepEqual([...await resolve('cat')], ['cat-urinary']);
+  state.selectedTagIds = ['chicken'];
+  assert.deepEqual([...await resolve('cat')].sort(), ['cat-normal', 'cat-urinary']);
+  assert.ok(requestedTagSets.every(ids => !ids.includes('managed:all')));
 });
 
 test('제품 기본정보에 확인된 처방식 여부와 개별 관리 목적을 표시한다', async () => {
