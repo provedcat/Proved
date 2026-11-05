@@ -98,7 +98,7 @@ test('제품 상세 Blob은 SEO 경로와 legacy query 경로 모두에서 제�
   assert.match(blob, /history\.state/);
   assert.match(blob, /params\.get\('id'\)/);
   assert.match(blob, /const \{ feedId, species \} = target/);
-  assert.match(html, /product-tag-blob\.js\?v=20261008-brand-hub-v3/);
+  assert.match(html, /product-tag-blob\.js\?v=20261105-similar-group-v1/);
 });
 
 test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같을 때만 07 섹션으로 노출한다', async () => {
@@ -170,7 +170,7 @@ test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 �
     read('js/feed-registration.js'), read('feed-registration/index.html')
   ]);
   assert.match(html, /food-search-fuzzy\.js\?v=20261014-search-alias-v1/);
-  assert.match(html, /food-list\.js\?v=20261105-seo-hydration-v1/);
+  assert.match(html, /food-list\.js\?v=20261105-managed-filters-v1/);
   assert.match(source, /ProvedFoodSearchFuzzy\?\.suggestFoods/);
   assert.match(source, /혹시 이 사료를 찾으셨나요\?/);
   assert.match(source, /이 사료를 찾아주세요/);
@@ -219,7 +219,7 @@ test('검색어가 태그·브랜드 별칭까지 검색하고 선택 필터 밖
   assert.match(source, /선택한 조건 밖에서 사료를 찾았어요/);
   assert.match(source, /data-recovery="all-filters"/);
   assert.match(source, /if \(state\.query && !state\.outsideMatches\.length\) scheduleZeroResultSearchLog/);
-  assert.match(html, /food-list\.css\?v=20261017-featured-brands-v1/);
+  assert.match(html, /food-list\.css\?v=20261105-similar-group-v1/);
   assert.match(css, /\.food-empty__outside/);
 });
 
