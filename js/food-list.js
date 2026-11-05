@@ -10,6 +10,9 @@
   const defaultSort = brandScope ? 'product' : 'brand';
   const FOOD_LIST_TITLE = '고양이·강아지 사료 목록 | 프루브';
   const FOOD_LIST_DESCRIPTION = '프루브에 등록된 고양이·강아지 사료를 브랜드와 제품명으로 검색하고 열량, 수분, 칼슘·인 비율과 상세 영양정보를 확인합니다.';
+  // Virtual filter combining verified veterinary diets and nutrition-management foods.
+  // It is never sent to the UUID tag column: resolve it to real tag IDs first.
+  const MANAGED_FILTER_ID = 'managed:all';
   const TAG_CATEGORY_ORDER = [
     'ingredient_condition', 'processing_method', 'preparation_type',
     'protein_source', 'life_stage', 'management_purpose'
@@ -46,6 +49,7 @@
     loading: false,
     requestSerial: 0,
     tags: [],
+    managedTagIds: [],
     selectedTagIds: [],
     activeTagCategory: '',
     tagSearchQueries: {},
@@ -386,9 +390,6 @@
     if (!feed?.id) return [];
     const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
     const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
-    const categories = feed.type === 'wet'
-      ? ['preparation_type', 'ingredient_condition']
-      : ['processing_method'];
     const { data: mappings, error: mappingError } = await foodSb
       .from(mappingTable)
       .select('tag_id')
@@ -397,33 +398,43 @@
 
     const tagIds = [...new Set(mappings.map(row => row.tag_id).filter(Boolean))];
     if (!tagIds.length) return feed.type === 'dry' ? ['익스트루전'] : [];
+    const categories = ['management_purpose', 'product_class', ...(feed.type === 'wet'
+      ? ['preparation_type', 'ingredient_condition']
+      : ['processing_method'])];
     const { data: tags, error: tagError } = await foodSb
       .from('food_tags')
-      .select('id,label_ko,category,sort_order,is_active')
+      .select('id,slug,label_ko,category,sort_order,is_active')
       .in('id', tagIds)
       .eq('is_active', true)
       .in('category', categories);
     if (tagError) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const sorted = (tags || []).sort(compareTags);
-    if (feed.type === 'wet') {
-      return sorted
-        .map(tag => String(tag.label_ko || '').trim())
-        .filter(label => label && !/프리|없음|무점증제|무겔화제/.test(label));
-    }
-    const processing = sorted.map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
-    if (!processing.length) return ['익스트루전'];
+    const isVeterinary = sorted.some(tag => tag.category === 'product_class' && tag.slug === 'veterinary_diet');
+    const management = sorted.filter(tag => tag.category === 'management_purpose')
+      .map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
+    const preparation = sorted.filter(tag => feed.type === 'wet'
+      ? ['preparation_type', 'ingredient_condition'].includes(tag.category)
+      : tag.category === 'processing_method')
+      .map(tag => String(tag.label_ko || '').trim())
+      .filter(label => label && (feed.type !== 'wet' || !/프리|없음|무점증제|무겔화제/.test(label)));
 
-    // RAWZ Meal Free Dry Food의 "Dehydrated"는 완제품 공법이 아니라
-    // 렌더링 밀(meal)을 쓰지 않은 탈수 원료 표현이므로 완제품은 익스트루전으로 분류한다.
+    // "Dehydrated" in a RAWZ Meal Free ingredient name does not describe
+    // the finished dry-food process.
     const productName = String(feed.제품명 || '').normalize('NFKC').toLowerCase();
     const brandName = String(feed.제조사 || '').normalize('NFKC').toLowerCase();
-    const isRawzMealFreeDry = feed.type === 'dry'
+    const rawzMealFree = feed.type === 'dry'
       && (brandName.includes('rawz') || productName.includes('rawz') || productName.includes('로우즈'))
       && (productName.includes('meal free') || productName.includes('밀프리') || productName.includes('밀 프리'));
-    if (isRawzMealFreeDry) return ['익스트루전'];
+    const processLabels = feed.type === 'dry'
+      ? rawzMealFree ? ['익스트루전'] : preparation.length
+        ? preparation.map(label => /^압출$/i.test(label) ? '익스트루전' : label)
+        : ['익스트루전']
+      : preparation;
 
-    return processing.map(label => /^압출$/i.test(label) ? '익스트루전' : label);
+    // The management purpose is intentionally visible again in Basic Info,
+    // independently from the Blob. Veterinary status is based on a real tag.
+    return [...new Set([...(isVeterinary ? ['처방식'] : []), ...management, ...processLabels])];
   }
 
   function getRoleLabel(role) {
@@ -678,7 +689,7 @@
       .from('food_tags')
       .select('id,label_ko,category,sort_order,is_active')
       .eq('is_active', true)
-      .in('category', TAG_CATEGORY_ORDER)
+      .in('category', [...TAG_CATEGORY_ORDER, 'product_class'])
       .order('sort_order', { ascending: true });
 
     state.tagsLoading = false;
@@ -693,7 +704,20 @@
       return;
     }
 
-    state.tags = (data || []).filter(tag => tag.id && tag.label_ko && TAG_CATEGORY_LABELS[tag.category]);
+    const activeTags = (data || []).filter(tag => tag.id && tag.label_ko);
+    state.managedTagIds = activeTags.filter(tag =>
+      tag.category === 'management_purpose'
+      || (tag.category === 'product_class' && tag.slug === 'veterinary_diet')
+    ).map(tag => String(tag.id));
+    state.tags = activeTags.filter(tag => TAG_CATEGORY_LABELS[tag.category]);
+    if (state.managedTagIds.length) {
+      state.tags.push({
+        id: MANAGED_FILTER_ID,
+        label_ko: '처방식·기능성 전체',
+        category: 'management_purpose',
+        sort_order: -1
+      });
+    }
     const availableIds = new Set(state.tags.map(tag => String(tag.id)));
     state.selectedTagIds = state.selectedTagIds.filter(id => availableIds.has(String(id)));
     els.conditionStatus.textContent = '';
@@ -725,7 +749,7 @@
     }).join('');
     const selected = state.selectedTagIds.map(id => state.tags.find(tag => String(tag.id) === id)).filter(Boolean);
     els.conditionReset.hidden = !selected.length; els.selectedConditions.hidden = !selected.length;
-    els.selectedConditions.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건의 교집합</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
+    els.selectedConditions.innerHTML = selected.length ? `<p><strong>선택한 조건</strong><span>${selected.length}개 조건 모두 충족</span></p><div>${selected.map(tag => `<button type="button" data-remove-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.label_ko)}<span aria-hidden="true">×</span></button>`).join('')}</div>` : '';
   }
 
   function normalizeConditionSearch(value) { return String(value || '').trim().toLocaleLowerCase('ko-KR'); }
@@ -754,14 +778,31 @@
     if (!state.selectedTagIds.length) return null;
     const mappingTable = species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
     const feedIdColumn = species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const includeManaged = state.selectedTagIds.includes(MANAGED_FILTER_ID);
+    const required = new Set(state.selectedTagIds.filter(id => id !== MANAGED_FILTER_ID));
+    const managed = new Set(includeManaged ? state.managedTagIds : []);
+    const queryTags = [...new Set([...required, ...managed])];
+    if (!queryTags.length) return [];
     const rows = [];
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await foodSb.from(mappingTable).select(`${feedIdColumn},tag_id`).in('tag_id', state.selectedTagIds).range(from, from + 999);
-      if (error) throw error; rows.push(...(data || [])); if (!data || data.length < 1000) break;
+      const { data, error } = await foodSb.from(mappingTable)
+        .select(`${feedIdColumn},tag_id`).in('tag_id', queryTags).range(from, from + 999);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < 1000) break;
     }
-    const required = new Set(state.selectedTagIds); const matches = new Map();
-    rows.forEach(row => { const id = String(row[feedIdColumn] || ''); const tag = String(row.tag_id || ''); if (!id || !required.has(tag)) return; if (!matches.has(id)) matches.set(id, new Set()); matches.get(id).add(tag); });
-    return [...matches].filter(([, tags]) => tags.size === required.size).map(([id]) => id);
+    const matches = new Map();
+    rows.forEach(row => {
+      const id = String(row[feedIdColumn] || '');
+      const tag = String(row.tag_id || '');
+      if (!id || !queryTags.includes(tag)) return;
+      if (!matches.has(id)) matches.set(id, new Set());
+      matches.get(id).add(tag);
+    });
+    return [...matches]
+      .filter(([, tags]) => [...required].every(id => tags.has(id))
+        && (!includeManaged || [...managed].some(id => tags.has(id))))
+      .map(([id]) => id);
   }
 
   function buildListQuery(species, from, to, withCount = false) {
@@ -848,7 +889,9 @@
     if (state.species !== 'all' && feed.species !== state.species) return false;
     if (state.type !== 'all' && feed.type !== state.type) return false;
     if (state.role !== 'all' && feed.완전식여부 !== state.role) return false;
-    return state.selectedTagIds.every(id => feed._tagIds?.has(String(id)));
+    return state.selectedTagIds.every(id => id === MANAGED_FILTER_ID
+      ? state.managedTagIds.some(tagId => feed._tagIds?.has(tagId))
+      : feed._tagIds?.has(String(id)));
   }
 
   async function searchAllProducts(query) {
