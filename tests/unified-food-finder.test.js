@@ -115,8 +115,9 @@ test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같
   assert.match(blob, /\.neq\('id', feedId\)/);
   assert.match(blob, /const hasMatches = Array\.isArray\(matches\) && matches\.length > 0/);
   assert.doesNotMatch(blob, /if \(!Array\.isArray\(matches\) \|\| !matches\.length\) return;/);
-  assert.match(blob, /\$\{hasMatches && conditions \?/);
-  assert.match(blob, /\$\{hasMatches \? `<p class="food-similar-foods__links">/);
+  assert.match(blob, /\$\{hasMatches \? `<div class="food-similar-foods__match-group">/);
+  assert.match(blob, /\$\{conditions \? `<p class="food-similar-foods__conditions">/);
+  assert.match(blob, /<p class="food-similar-foods__links">\$\{links\}<\/p>/);
   assert.match(blob, /<span>07<\/span><h2 id="foodSimilarFoodsHeading">비슷한 사료 보기<\/h2>/);
   assert.match(blob, /food-similar-foods__brand/);
   assert.match(blob, /food-similar-foods__brand-hub/);
@@ -124,6 +125,39 @@ test('비슷한 사료는 현재 Blob 대표 태그 slug 집합이 완전히 같
   assert.match(blob, /food-similar-foods__product/);
   assert.match(blob, /조건의 제품/);
   assert.match(css, /\.food-similar-foods__links/);
+});
+
+test('기능성 전체는 처방식 및 관리목적의 합집합으로 검색하고 다른 조건은 AND로 결합한다', async () => {
+  const source = await read('js/food-list.js');
+  assert.match(source, /const MANAGED_FILTER_ID = 'managed:all'/);
+  assert.match(source, /label_ko: '처방식·기능성 전체'/);
+  assert.match(source, /tag\.category === 'management_purpose'/);
+  assert.match(source, /tag\.slug === 'veterinary_diet'/);
+  assert.match(source, /\.in\('category', \[\.\.\.TAG_CATEGORY_ORDER, 'product_class'\]\)/);
+  assert.match(source, /const includeManaged = state\.selectedTagIds\.includes\(MANAGED_FILTER_ID\)/);
+  assert.match(source, /const required = new Set\(state\.selectedTagIds\.filter\(id => id !== MANAGED_FILTER_ID\)\)/);
+  assert.match(source, /const queryTags = \[\.\.\.new Set\(\[\.\.\.required, \.\.\.managed\]\)\]/);
+  assert.match(source, /tags\.has\(id\)/);
+  assert.match(source, /some\(id => tags\.has\(id\)\)/);
+  assert.match(source, /state\.managedTagIds\.some\(tagId => feed\._tagIds\?\.has\(tagId\)\)/);
+  assert.doesNotMatch(source, /\.in\('tag_id', state\.selectedTagIds\)/);
+});
+
+test('제품 기본정보에 확인된 처방식 여부와 개별 관리 목적을 표시한다', async () => {
+  const source = await read('js/food-list.js');
+  assert.match(source, /tag\.category === 'product_class' && tag\.slug === 'veterinary_diet'/);
+  assert.match(source, /tag\.category === 'management_purpose'/);
+  assert.match(source, /isVeterinary \? \['처방식'\] : \[\]/);
+  assert.match(source, /new Set\(\[\.\.\.\(isVeterinary \? \['처방식'\] : \[\]\), \.\.\.management, \.\.\.processLabels\]\)/);
+});
+
+test('비슷한 사료의 안내와 링크는 같은 그룹이며 브랜드 이동 링크와 간격이 분리된다', async () => {
+  const [blob, css] = await Promise.all([read('js/product-tag-blob.js'), read('css/food-list.css')]);
+  assert.match(blob, /class="food-similar-foods__match-group"/);
+  assert.match(blob, /<p class="food-similar-foods__conditions">/);
+  assert.match(blob, /<p class="food-similar-foods__links">/);
+  assert.match(css, /\.food-similar-foods__match-group \{\s*margin-top: 18px/);
+  assert.match(css, /\.food-similar-foods__conditions \{[\s\S]*?font-size: 15px/);
 });
 
 test('상세 화면 후처리는 공용 렌더 observer 하나를 재사용한다', async () => {
