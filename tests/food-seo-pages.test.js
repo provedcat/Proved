@@ -331,6 +331,70 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
   }
 });
 
+test('사이트맵은 실제 제품 변경일만 반영하고 재생성 시 기존 날짜를 보존한다', async () => {
+  const { buildFoodSitemap, buildProductPath, buildBrandPath, writeGeneratedPages } = await loadGenerator();
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-sitemap-lastmod-'));
+  const sitemapPath = path.join(tempRoot, 'sitemap-foods.xml');
+  const readSitemap = () => readFile(sitemapPath, 'utf8');
+  const findDate = (xml, path) => {
+    const loc = new URL(path, 'https://proved.kr').href;
+    const block = (xml.match(/<url>[\s\S]*?<\/url>/g) || []).find(x => x.includes('<loc>' + loc + '</loc>'));
+    assert.ok(block, path + ': missing sitemap entry');
+    return block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1] || null;
+  };
+
+  try {
+    await mkdir(path.join(tempRoot, 'food'), { recursive: true });
+    await copyFile(path.join(__dirname, '..', 'food', 'index.html'), path.join(tempRoot, 'food', 'index.html'));
+    const catPath = buildProductPath(CAT_FEED, 'cat');
+    const dogPath = buildProductPath(DOG_FEED, 'dog');
+    const brandPath = buildBrandPath(BRAND);
+    const input = { repoRoot: tempRoot, catFeeds: [CAT_FEED], dogFeeds: [DOG_FEED] };
+    await writeGeneratedPages({ ...input, sitemapDate: '2026-11-05' });
+    let xml = await readSitemap();
+    assert.equal((xml.match(/<url>/g) || []).length, 3);
+    assert.equal(findDate(xml, catPath), '2026-11-05');
+    assert.equal(findDate(xml, dogPath), '2026-11-05');
+    assert.equal(findDate(xml, brandPath), '2026-11-05');
+    assert.doesNotMatch(xml, /<changefreq>|<priority>/);
+
+    // Rewriting the same content must not reset every URL's lastmod.
+    await writeGeneratedPages({ ...input, sitemapDate: '2026-12-01' });
+    xml = await readSitemap();
+    assert.equal(findDate(xml, catPath), '2026-11-05');
+    assert.equal(findDate(xml, dogPath), '2026-11-05');
+    assert.equal(findDate(xml, brandPath), '2026-11-05');
+
+    // A CSS revision is not a substantive product or brand content edit.
+    const templatePath = path.join(tempRoot, 'food', 'index.html');
+    const oldTemplate = await readFile(templatePath, 'utf8');
+    await writeFile(templatePath, oldTemplate.replace('/css/proved-colors.css?', '/css/proved-colors.css?cachetest=1&'));
+    await writeGeneratedPages({ ...input, sitemapDate: '2026-12-02' });
+    xml = await readSitemap();
+    assert.equal(findDate(xml, catPath), '2026-11-05');
+    assert.equal(findDate(xml, dogPath), '2026-11-05');
+    assert.equal(findDate(xml, brandPath), '2026-11-05');
+
+    // Nutrition changes update the affected product and its brand index,
+    // but leave unrelated dog product modification dates unchanged.
+    await writeGeneratedPages({
+      ...input,
+      catFeeds: [{ ...CAT_FEED, final_me: 4210 }],
+      sitemapDate: '2026-12-03'
+    });
+    xml = await readSitemap();
+    assert.equal(findDate(xml, catPath), '2026-12-03');
+    assert.equal(findDate(xml, brandPath), '2026-12-03');
+    assert.equal(findDate(xml, dogPath), '2026-11-05');
+
+    assert.match(buildFoodSitemap([{ path: catPath }]), /<loc>/);
+    assert.doesNotMatch(buildFoodSitemap([{ path: catPath }]), /<lastmod>/);
+    assert.match(buildFoodSitemap([{ path: catPath, lastmod: '2026-11-05' }]), /<lastmod>2026-11-05<\/lastmod>/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('목록 결과는 크롤러가 따라갈 수 있는 제품 링크를 출력한다', async () => {
   const source = await readFile(path.join(__dirname, '..', 'js', 'food-list.js'), 'utf8');
   assert.match(source, /<a class="food-result" href="\$\{escapeHtml\(buildProductPath\(feed\)\)\}"/);

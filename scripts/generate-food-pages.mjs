@@ -1,4 +1,6 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import path from 'node:path';
 import { collectLegacyProductPaths, restoreLegacyProductUrls } from './food-legacy-urls.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -9,6 +11,7 @@ const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_XFFdz51FE3JyOucv1qHRpw_fnsP6N8I'
 const PAGE_SIZE = 1000;
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REPO_ROOT = path.resolve(SCRIPT_DIR, '..');
+const execFileAsync = promisify(execFile);
 
 const SELECT_COLUMNS = [
   'id', 'type', '제조사', '원산지', '제품명', '완전식여부', '메인단백질', '전성분',
@@ -586,12 +589,110 @@ function renderRelatedBrandLinks(feed, allFeeds, species) {
   return `<section class="food-detail-section food-brand-related" aria-labelledby="foodBrandRelatedHeading"><div class="food-section-heading"><span>+</span><h2 id="foodBrandRelatedHeading">${escapeHtml(label)}의 다른 사료</h2></div>${relatedLinks}<a class="food-brand-related__all" href="${escapeHtml(buildBrandPath(brand))}">${escapeHtml(label)} 브랜드 전체 제품 보기</a></section>`;
 }
 
+
+function validSitemapDate(value) {
+  return typeof value === 'string'
+    && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && !Number.isNaN(Date.parse(value + 'T00:00:00Z'));
+}
+
+// The date belongs to actual page changes, never to the date the sitemap was rebuilt.
+function sitemapContentSignature(html) {
+  const title = html.match(/<title>([\s\S]*?)<\/title>/)?.[1] || '';
+  const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1] || '';
+  const details = html.match(/<article class="food-detail-article">[\s\S]*?<\/article>/)?.[0]
+    || html.match(/<section id="brandStaticProducts">[\s\S]*?<\/section>/)?.[0];
+  return details ? [title, description, details].join('\n') : null;
+}
+
+async function previousSitemapDates(repoRoot) {
+  let sitemap = '';
+  try {
+    sitemap = await readFile(path.join(repoRoot, 'sitemap-foods.xml'), 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  const dates = new Map();
+  for (const block of sitemap.match(/<url>[\s\S]*?<\/url>/g) || []) {
+    const url = block.match(/<loc>([^<]+)<\/loc>/)?.[1];
+    const lastmod = block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1];
+    if (!url || !validSitemapDate(lastmod)) continue;
+    try {
+      const pathname = decodeURIComponent(new URL(url.replace(/&amp;/g, '&')).pathname);
+      dates.set(pathname, lastmod);
+    } catch {
+      // A malformed old URL must not break regeneration.
+    }
+  }
+  return dates;
+}
+
+async function previousContentSignatures(generatedRoots) {
+  const signatures = new Map();
+  for (const root of generatedRoots) {
+    let dirs;
+    try {
+      dirs = await readdir(root, { withFileTypes: true });
+    } catch (error) {
+      if (error.code === 'ENOENT') continue;
+      throw error;
+    }
+    for (const dir of dirs) {
+      if (!dir.isDirectory()) continue;
+      const filepath = path.join(root, dir.name, 'index.html');
+      let html;
+      try {
+        html = await readFile(filepath, 'utf8');
+      } catch (error) {
+        if (error.code === 'ENOENT') continue;
+        throw error;
+      }
+      const signature = sitemapContentSignature(html);
+      if (signature) signatures.set('/food/' + path.basename(root) + '/' + dir.name + '/', signature);
+    }
+  }
+  return signatures;
+}
+
+// Backfill known historical page dates from Git; never replace them with
+// "today" simply because this sitemap generator is being introduced.
+async function gitPageDates(repoRoot) {
+  const dates = new Map();
+  let stdout;
+  try {
+    ({ stdout } = await execFileAsync('git', [
+      '-c', 'core.quotePath=false', 'log', '--no-renames',
+      '--format=SITEMAP_COMMIT_DATE:%cs', '--name-only', '--',
+      'food/cat', 'food/dog', 'food/brand'
+    ], { cwd: repoRoot, maxBuffer: 32 * 1024 * 1024 }));
+  } catch {
+    // Small test fixtures and non-Git distributions have no commit history.
+    return dates;
+  }
+  let commitDate = '';
+  for (const line of stdout.split(/\r?\n/)) {
+    if (line.startsWith('SITEMAP_COMMIT_DATE:')) {
+      commitDate = line.slice('SITEMAP_COMMIT_DATE:'.length).trim();
+      continue;
+    }
+    if (!validSitemapDate(commitDate) || !/^food\/(cat|dog|brand)\/.+\/index\.html$/.test(line)) continue;
+    const urlPath = '/' + line.slice(0, -'index.html'.length);
+    if (!dates.has(urlPath)) dates.set(urlPath, commitDate);
+  }
+  return dates;
+}
+
 export function buildFoodSitemap(entries) {
   const urls = [...entries]
     .sort((a, b) => a.path.localeCompare(b.path, 'ko'))
-    .map(entry => `  <url>\n    <loc>${escapeXml(new URL(entry.path, SITE_ORIGIN).href)}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`)
+    .map(entry => {
+      const url = escapeXml(new URL(entry.path, SITE_ORIGIN).href);
+      const date = validSitemapDate(entry.lastmod) ? '\n    <lastmod>' + entry.lastmod + '</lastmod>' : '';
+      return '  <url>\n    <loc>' + url + '</loc>' + date + '\n  </url>';
+    })
     .join('\n');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + urls + '\n</urlset>\n';
 }
 
 async function fetchTable(table, supabaseUrl, publishableKey) {
@@ -628,7 +729,7 @@ function assertGeneratedRoot(repoRoot, target) {
   }
 }
 
-export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFeeds, dogFeeds }) {
+export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFeeds, dogFeeds, sitemapDate = new Date().toISOString().slice(0, 10) }) {
   // Capture previous URLs before deleting generated directories.
   const previousProductPaths = await collectLegacyProductPaths(repoRoot);
   const templatePath = path.join(repoRoot, 'food', 'index.html');
@@ -643,6 +744,17 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     path.join(repoRoot, 'food', 'brand')
   ];
   generatedRoots.forEach(target => assertGeneratedRoot(repoRoot, target));
+  if (!validSitemapDate(sitemapDate)) throw new Error('Invalid sitemap date');
+  const [oldDates, oldSignatures, gitDates] = await Promise.all([
+    previousSitemapDates(repoRoot),
+    previousContentSignatures(generatedRoots),
+    gitPageDates(repoRoot)
+  ]);
+  const pageLastmod = (urlPath, html) => {
+    const previous = oldSignatures.get(urlPath);
+    if (!previous || previous !== sitemapContentSignature(html)) return sitemapDate;
+    return oldDates.get(urlPath) || gitDates.get(urlPath) || null;
+  };
   for (const target of generatedRoots) {
     await rm(target, { recursive: true, force: true });
     await mkdir(target, { recursive: true });
@@ -658,8 +770,9 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
       seenPaths.add(productPath);
       const outputPath = path.join(repoRoot, productPath.replace(/^\//, ''), 'index.html');
       await mkdir(path.dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, renderProductPage(productTemplate, feed, species, feeds), 'utf8');
-      entries.push({ path: productPath, species, id: String(feed.id), kind: 'product' });
+      const html = renderProductPage(productTemplate, feed, species, feeds);
+      await writeFile(outputPath, html, 'utf8');
+      entries.push({ path: productPath, species, id: String(feed.id), kind: 'product', lastmod: pageLastmod(productPath, html) });
     }
   }
 
@@ -670,8 +783,9 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     seenPaths.add(brandPath);
     const outputPath = path.join(repoRoot, brandPath.replace(/^\//, ''), 'index.html');
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, renderBrandHub(brand, items, rawTemplate), 'utf8');
-    entries.push({ path: brandPath, id: brand.id || brand.slug, kind: 'brand' });
+    const html = renderBrandHub(brand, items, rawTemplate);
+    await writeFile(outputPath, html, 'utf8');
+    entries.push({ path: brandPath, id: brand.id || brand.slug, kind: 'brand', lastmod: pageLastmod(brandPath, html) });
   }
 
   const rootIndex = replaceBrandFinderContent(rawTemplate, renderBrandFinder(brandGroups));
