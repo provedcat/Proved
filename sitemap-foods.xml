@@ -31,12 +31,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://proved.kr/food/brand/%EB%9D%BC%EB%B9%84%EC%95%99%EB%8F%85/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://proved.kr/food/brand/%EB%A1%9C%EC%96%84%EC%BA%90%EB%8B%8C-royal-canin/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://proved.kr/food/brand/%EB%B2%A0%EB%9F%AC%ED%8E%AB/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/brand/%EC%82%AC%EC%A1%B0%EB%8F%99%EC%95%84%EC%9B%90/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -807,6 +817,21 @@
   </url>
   <url>
     <loc>https://proved.kr/food/cat/%EB%B2%A0%EB%9F%AC%ED%8E%AB-%EC%BA%A3%EB%83%A0-%EC%8A%B5%EC%8B%9D%EC%82%AC%EB%A3%8C-%ED%99%A9%ED%83%9C-mini-can--08739fa9/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EC%82%AC%EC%A1%B0%EB%8F%99%EC%95%84%EC%9B%90-%EC%82%AC%EC%A1%B0-%EB%B2%A4%ED%8B%B0-%EA%B7%A0%ED%98%95%EC%98%81%EC%96%91%EC%8B%9D-%ED%9D%B0%EC%82%B4%EC%B0%B8%EC%B9%98--d5a8324b/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EC%82%AC%EC%A1%B0%EB%8F%99%EC%95%84%EC%9B%90-%EC%82%AC%EC%A1%B0-%EB%B2%A4%ED%8B%B0-%EA%B7%A0%ED%98%95%EC%98%81%EC%96%91%EC%8B%9D-%ED%9D%B0%EC%82%B4%EC%B0%B8%EC%B9%98-and-%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4--ba2b1685/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/cat/%EC%82%AC%EC%A1%B0%EB%8F%99%EC%95%84%EC%9B%90-%EC%82%AC%EC%A1%B0-%EB%B2%A4%ED%8B%B0-%EA%B7%A0%ED%98%95%EC%98%81%EC%96%91%EC%8B%9D-%ED%9D%B0%EC%82%B4%EC%B0%B8%EC%B9%98-and-%EC%97%B0%EC%96%B4--19a635f6/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3042,6 +3067,16 @@
   </url>
   <url>
     <loc>https://proved.kr/food/dog/%EB%8F%84%EA%B7%B8%EB%9E%91-%EB%8F%84%EA%B7%B8%EB%9E%91-%ED%8C%A8%EB%B0%80%EB%A6%AC-%EC%A4%91%EC%86%8C%ED%98%95%EA%B2%AC-8kg--30b65d3a/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/dog/%EB%9D%BC%EB%B9%84%EC%95%99%EB%8F%85-%EB%9D%BC%EB%B9%84%EC%95%99%EB%8F%85-%EA%B8%B0%EC%96%B5%ED%94%84%EB%A6%AC-%EC%8A%A4%EB%AA%B0%EB%B8%8C%EB%A6%AC%EB%93%9C-%EC%96%B4%EB%8D%9C%ED%8A%B8--cb5bad44/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proved.kr/food/dog/%EB%9D%BC%EB%B9%84%EC%95%99%EB%8F%85-%EB%9D%BC%EB%B9%84%EC%95%99%EB%8F%85-%EA%B8%B0%EC%96%B5%ED%94%84%EB%A6%AC-%EC%98%AC%EB%B8%8C%EB%A6%AC%EB%93%9C-%EC%96%B4%EB%8D%9C%ED%8A%B8--28ff0394/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
