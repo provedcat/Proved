@@ -68,7 +68,7 @@ test('제품 HTML에 고유 canonical, 검색 설명, 본문과 구조화 데이
   const encodedUrl = new URL(buildProductPath(CAT_FEED, 'cat'), 'https://proved.kr').href;
 
   assert.match(html, new RegExp(`<link rel="canonical" href="${encodedUrl}">`));
-  assert.match(html, /<title>파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 | 100g당 420kcal | 프루브 \| 프루브<\/title>/);
+  assert.match(html, /<title>파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 \| 100g당 420kcal \| 프루브<\/title>/);
   assert.match(html, /<meta name="description" content="[^"]*100g당 420kcal[^"]*조단백 36%[^"]*">/);
   assert.match(html, /<meta property="og:type" content="product">/);
   assert.match(html, /<section id="foodListView"[^>]* hidden>/);
@@ -93,11 +93,11 @@ test('브랜드 중복을 제거하고 공식 칼로리를 100g당 값으로 검
     final_me: 3325
   };
   const html = renderProductPage(template, feed, 'cat');
-  assert.match(html, /<title>나인케어 키튼 칼로리 \\| 100g당 332\\.5kcal \\| 프루브<\\/title>/);
+  assert.match(html, /<title>나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브<\/title>/);
   assert.doesNotMatch(html, /나인케어 나인케어 키튼/);
-  assert.match(html, /<meta name="description" content="[^"]*100g당 332\\.5kcal[^"]*전성분·영양성분[^"]*">/);
-  assert.match(html, /<meta property="og:title" content="나인케어 키튼 칼로리 \\| 100g당 332\\.5kcal \\| 프루브">/);
-  assert.match(html, /<meta name="twitter:title" content="나인케어 키튼 칼로리 \\| 100g당 332\\.5kcal \\| 프루브">/);
+  assert.match(html, /<meta name="description" content="[^"]*100g당 332\.5kcal[^"]*전성분·영양성분[^"]*">/);
+  assert.match(html, /<meta property="og:title" content="나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브">/);
+  assert.match(html, /<meta name="twitter:title" content="나인케어 키튼 칼로리 \| 100g당 332\.5kcal \| 프루브">/);
   assert.match(html, /"name":"나인케어 키튼"/);
 });
 
@@ -106,7 +106,7 @@ test('추정 열량은 검색 제목에서 표시하고 검토 필요·미등록
   const template = await readFile(path.join(__dirname, '..', 'food', 'index.html'), 'utf8');
 
   const estimated = renderProductPage(template, { ...CAT_FEED, cal_source: 'estimated' }, 'cat');
-  assert.match(estimated, /칼로리 \\| 100g당 420kcal \\(추정\\) \\| 프루브/);
+  assert.match(estimated, /칼로리 \| 100g당 420kcal \(추정\) \| 프루브/);
   assert.match(estimated, /Proved 추정값/);
 
   for (const feed of [
@@ -117,7 +117,7 @@ test('추정 열량은 검색 제목에서 표시하고 검토 필요·미등록
     { ...CAT_FEED, cal_source: 'manual_review' }
   ]) {
     const html = renderProductPage(template, feed, 'cat');
-    assert.match(html, /<title>파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리·영양성분 \\| 프루브<\\/title>/);
+    assert.match(html, /<title>파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리·영양성분 \| 프루브<\/title>/);
     assert.match(html, /칼로리 확인 또는 검토 중/);
     assert.doesNotMatch(html, /<title>[^<]*100g당/);
   }
