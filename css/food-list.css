@@ -991,11 +991,11 @@ button { cursor: pointer; }
 
 /* The matching condition belongs with the products below, not the brand hub. */
 .food-similar-foods__match-group {
-  margin-top: 18px;
+  margin-top: 42px;
 }
 .food-similar-foods__conditions {
   margin: 0 0 10px;
-  color: var(--food-ink);
+  color: var(--food-muted);
   font-size: 15px;
   font-weight: 750;
   line-height: 1.7;
