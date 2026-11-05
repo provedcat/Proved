@@ -68,7 +68,7 @@
     'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
     'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
     'calorie_confidence', 'needs_calorie_review', 'calorie_note', 'calorie_source_url', 'source_urls', '쿠팡_링크', 'brand_id',
-    'brands(name,official_url)'
+    'brands(name,name_ko,official_url)'
   ].join(',');
   const detailColumnsWithoutCoupang = detailColumns
     .split(',')
@@ -464,8 +464,11 @@
 
   function getBrand(feed) {
     const relation = Array.isArray(feed?.brands) ? feed.brands[0] : feed?.brands;
+    const name = relation?.name || feed?.제조사 || '브랜드 정보 없음';
     return {
-      name: relation?.name || feed?.제조사 || '브랜드 정보 없음',
+      name,
+      nameKo: relation?.name_ko || '',
+      displayName: relation?.name_ko || name,
       officialUrl: safeHttpUrl(relation?.official_url)
     };
   }
@@ -1123,15 +1126,52 @@
     script.textContent = JSON.stringify(value).replace(/</g, '\\u003c');
   }
 
+  function seoProductName(feed, brand, product) {
+    const normalized = value => String(value || '').normalize('NFKC').toLocaleLowerCase('ko').replace(/[\s·_-]+/g, '');
+    const normalizedProduct = normalized(product.primary);
+    const brandNames = [brand.displayName, brand.nameKo, brand.name];
+    const hasBrandPrefix = brandNames.some(value => {
+      const prefix = normalized(value);
+      return prefix.length >= 2 && normalizedProduct.startsWith(prefix);
+    });
+    return hasBrandPrefix ? product.primary : `${brand.displayName} ${product.primary}`;
+  }
+
+  function seoCalorie(feed) {
+    if (feed?.needs_calorie_review === true || feed?.cal_source === 'manual_review') return null;
+    if (!isPresent(feed?.final_me) || Number(feed.final_me) <= 0) return null;
+    return {
+      per100g: formatNumber(Number(feed.final_me) / 10, 2),
+      perKg: formatNumber(feed.final_me, 1),
+      estimated: ['estimated', 'estimated_corrected'].includes(feed.cal_source)
+    };
+  }
+
+  function buildSeoTitle(feed, brand, product) {
+    const name = seoProductName(feed, brand, product);
+    const calorie = seoCalorie(feed);
+    return calorie
+      ? `${name} 칼로리 | 100g당 ${calorie.per100g}kcal${calorie.estimated ? ' (추정)' : ''} | 프루브`
+      : `${name} 칼로리·영양성분 | 프루브`;
+  }
+
   function buildSeoDescription(feed, brand, product) {
-    const parts = [
-      `${brand.name} ${product.primary} ${getSpeciesLabel()} ${getTypeLabel(feed.type)} 성분 정보.`,
-      isPresent(feed.final_me) ? `열량 ${formatNumber(feed.final_me, 1)} kcal/kg,` : '',
-      isPresent(feed.dm_단백) ? `DM 단백질 ${formatNumber(feed.dm_단백, 2)}%,` : '',
-      isPresent(feed.ca_p_ratio) ? `칼슘·인 비율 ${formatNumber(feed.ca_p_ratio, 2)}:1을` : '영양정보를',
-      '프루브에서 확인하세요.'
-    ].filter(Boolean).join(' ').replace(/,\s+프루브/, '을 프루브');
-    return parts.length > 160 ? `${parts.slice(0, 157).trim()}…` : parts;
+    const calorie = seoCalorie(feed);
+    const facts = [
+      calorie
+        ? `100g당 ${calorie.per100g}kcal (${calorie.perKg}kcal/kg, ${getCalorieSourceLabel(feed.cal_source)})`
+        : '칼로리 확인 또는 검토 중',
+      isPresent(feed.조단백) ? `조단백 ${formatNumber(feed.조단백, 2)}%` : '',
+      isPresent(feed.ca_p_ratio) ? `칼슘·인 비율 ${formatNumber(feed.ca_p_ratio, 2)}:1` : ''
+    ].filter(Boolean);
+    const available = [
+      feed.전성분 ? '전성분' : '',
+      ['조단백', '조지방', '수분', '칼슘', '인'].some(key => isPresent(feed[key])) ? '영양성분' : ''
+    ].filter(Boolean);
+    const details = available.length ? `${available.join('·')}을 확인하고 ` : '';
+    const typeLabel = feed.type === 'wet' ? '습식사료' : feed.type === 'dry' ? '건사료' : '사료';
+    const description = `${seoProductName(feed, brand, product)} ${getSpeciesLabel()} ${typeLabel}. ${facts.join(', ')}. ${details}급여량을 계산하세요. | 프루브`;
+    return description.length > 160 ? `${description.slice(0, 157).trim()}…` : description;
   }
 
   function updateListMetadata() {
@@ -1149,9 +1189,16 @@
   }
 
   function updateDetailMetadata(feed, brand, product) {
+    // Product HTML already carries verified SEO metadata. Do not overwrite it
+    // with client state during initial hydration (including its canonical/JSON-LD).
+    const prerenderedPage = window.__PROVED_FOOD_PAGE__;
+    if (prerenderedPage?.id === String(feed.id)
+      && prerenderedPage.path === normalizePathname(window.location.pathname)
+      && els.detailContent?.dataset.prerenderedFeedId === String(feed.id)) return;
+
     const path = buildProductPath(feed);
     const canonicalUrl = new URL(path, SITE_ORIGIN).href;
-    const title = `${brand.name} ${product.primary} 성분·칼로리 | 프루브`;
+    const title = buildSeoTitle(feed, brand, product);
     const description = buildSeoDescription(feed, brand, product);
     const additionalProperty = [
       ['대상', getSpeciesLabel()],
@@ -1183,11 +1230,11 @@
     setStructuredData({
       '@context': 'https://schema.org',
       '@type': 'Product',
-      name: `${brand.name} ${product.primary}`,
+      name: seoProductName(feed, brand, product),
       description,
       url: canonicalUrl,
       category: `${getSpeciesLabel()} ${getTypeLabel(feed.type)}`,
-      brand: { '@type': 'Brand', name: brand.name },
+      brand: { '@type': 'Brand', name: brand.displayName },
       additionalProperty
     });
   }
