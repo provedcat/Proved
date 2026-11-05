@@ -373,6 +373,14 @@ export function renderProductPage(template, feed, species, allFeeds = []) {
     '</head>',
     `  <script id="foodStructuredData" type="application/ld+json">${jsonForHtml(structuredData)}</script>\n  <script>window.__PROVED_FOOD_PAGE__=${jsonForHtml(pageConfig)};</script>\n</head>`
   );
+  // The Finder is hidden on a static product URL; do not emit a second H1.
+  // The browser restores the list H1 if the visitor navigates back to Finder.
+  html = replaceHeadValue(
+    html,
+    /<h1 id="foodListTitle">([^<]*)<\/h1>/,
+    '<h2 id="foodListTitle">$1</h2>',
+    '숨겨진 목록 제목'
+  );
   html = replaceHeadValue(
     html,
     /<section id="foodListView" class="food-list-view" aria-labelledby="foodListTitle">/,
