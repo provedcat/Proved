@@ -70,7 +70,7 @@ begin
       if not exists (select 1 from public.dog_feeds where id = v_content) then return false; end if;
     end if;
     v_key := 'product:' || v_species || ':' || v_content::text;
-    v_path := '/food/' || v_species || '/?id=' || v_content::text;
+    v_path := '/food/?species=' || v_species || '&id=' || v_content::text;
   else
     return false;
   end if;
