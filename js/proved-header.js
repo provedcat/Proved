@@ -25,6 +25,15 @@
   ensureColorSystem();
   ensureLayoutSystem();
 
+  // Shared tracking for editorial stories and product details.
+  // Product detail HTML is pre-generated; load once through the common header.
+  if (/^\/(?:editorial|food)\//.test(window.location.pathname)) {
+    var viewTracker = document.createElement('script');
+    viewTracker.src = '/js/content-view-tracker.js?v=20261110-1';
+    viewTracker.defer = true;
+    document.head.appendChild(viewTracker);
+  }
+
   const AUTH_STORAGE_KEY = 'sb-qpklvtgnhrdmzxzlstpp-auth-token';
 
   function getPersistedAuthSession() {
