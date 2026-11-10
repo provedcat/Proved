@@ -9,6 +9,7 @@
   var LAST_CONTENT_KEY = 'proved_last_content_view_v1';
   var IGNORE_KEY = 'proved_analytics_ignore';
   var timer = 0;
+  var submissionQueue = Promise.resolve();
   var lastAttempt = '';
   var lastAttemptAt = 0;
 
@@ -125,8 +126,7 @@
     } catch (_) {}
   }
 
-  async function record() {
-    var page = getPageInfo();
+  async function record(page) {
     if (!page) return;
     if (document.visibilityState === 'hidden') return;
 
@@ -170,7 +170,15 @@
 
   function schedule() {
     clearTimeout(timer);
-    timer = setTimeout(record, 550);
+    timer = setTimeout(function () {
+      var page = getPageInfo();
+      if (!page) return;
+      // Serialize RPC requests so rapid A -> B -> C navigation cannot be
+      // recorded in the wrong order when network timings differ.
+      submissionQueue = submissionQueue.then(function () {
+        return record(page);
+      }).catch(function () {});
+    }, 550);
   }
 
   // Product pages use client-side pushState, so navigation between products
