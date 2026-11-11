@@ -510,6 +510,7 @@ export function renderBrandFinder(brandGroups) {
       <button class="food-brand-range" type="button" data-brand-range-toggle="en" aria-expanded="false" aria-controls="foodBrandRangeEn">
         <span>A ~ Z</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
       </button>
+      <a class="food-brand-finder__all-link" href="/food/brands/">전체 브랜드 보기 <span aria-hidden="true">→</span></a>
     </div>
     <div id="foodBrandRangeKo" class="food-brand-finder__panel" data-brand-range-panel="ko" hidden>
       <div class="food-brand-finder__initials" aria-label="한글 초성">${renderInitialButtons(HANGUL_INITIALS, koGroups, 'ko')}</div>
