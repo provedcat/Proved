@@ -1411,6 +1411,7 @@
             ${metricCard('protein', '단백질 · DM', formatNumber(feed.dm_단백, 2), '%', proteinIcon())}
             ${metricCard('ratio', '칼슘 : 인', isPresent(feed.ca_p_ratio) ? formatNumber(feed.ca_p_ratio, 2) : '—', isPresent(feed.ca_p_ratio) ? ': 1' : '', ratioIcon())}
           </div>
+          ${window.ProvedFoodSummary?.render(feed, state.species, seoProductName(feed, brand, product)) || ''}
         </section>
 
         ${nutritionRows.length ? `
