@@ -51,7 +51,7 @@
       if (feed.type === 'wet' && feed.수분 !== null && feed.수분 !== undefined
         && feed.수분 !== '' && Number.isFinite(moisture) && moisture > 0 && moisture <= 100) {
         const moistureMl = Math.round(200 * 1000 / kcalPerKg * moisture / 100);
-        sublines.push('표시 수분 함량을 적용하면 수분량은 계산상 약 '
+        sublines.push(formatNumber(grams(200)) + 'g 급여 시 사료로부터 섭취 가능한 수분량은 약 '
           + formatNumber(moistureMl) + 'mL입니다.');
       }
       paragraphs.push(escapeHtml(amount)
