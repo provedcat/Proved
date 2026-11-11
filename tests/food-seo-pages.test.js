@@ -121,6 +121,11 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   const dryHtml = summary(orijen, 'cat', '오리젠 키튼');
   assert.match(dryHtml, /캐나다에서 제조된 고양이 주식 건사료/);
   assert.match(dryHtml, /오리젠 키튼은 캐나다에서/);
+  assert.match(dryHtml, /<div class="food-metric-summary"><p>오리젠 키튼은 캐나다에서 제조된 고양이 주식 건사료입니다\.<\/p><p>만약 하루/);
+  assert.match(dryHtml, /49g입니다\.<span class="food-metric-summary__subline">\(150kcal는 약 36g, 250kcal는 약 61g\)\.<\/span><\/p><p>등록된 칼슘:인/);
+  assert.match(dryHtml, /1\.3:1입니다\.<\/p><p>필요량은 개체마다 다릅니다\. <a href=/);
+  assert.doesNotMatch(dryHtml, /AAFCO.*비율 기준/);
+
   assert.match(dryHtml, /200kcal이고 이 제품만 급여한다면 약 49g입니다/);
   assert.match(dryHtml, /150kcal는 약 36g, 250kcal는 약 61g/);
   assert.match(dryHtml, /칼슘:인 비율은 1\.3:1/);
@@ -141,6 +146,9 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   assert.match(summary(acana, 'cat', '청크 85g'), /청크 85g 제품은 태국에서/);
   assert.match(wetHtml, /200kcal이고 이 제품만 급여한다면 약 275g입니다/);
   assert.match(wetHtml, /수분량은 계산상 약 229mL/);
+  assert.match(wetHtml, /275g입니다\.<span class="food-metric-summary__subline">표시 수분 함량을 적용하면 수분량은 계산상 약 229mL입니다\.<\/span>/);
+  assert.doesNotMatch(wetHtml, /AAFCO.*비율 기준/);
+
   assert.match(wetHtml, /칼슘:인 비율은 1\.25:1/);
   assert.doesNotMatch(wetHtml, /150kcal는/);
   assert.match(wetHtml, /href="\/cat-food-calculator\/\?feed=[^"]+&amp;type=wet"/);
@@ -148,6 +156,10 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   const estimated = summary({ ...orijen, cal_source: 'estimated_corrected' }, 'dog', '추정 열량 제품');
   assert.match(estimated, /약 49g\(추정 열량 기준\)/);
   assert.match(estimated, /href="\/dog-food-calculator\/\?feed=[^"]+&amp;type=dry"/);
+  assert.match(estimated, /AAFCO 강아지 사료의 칼슘:인 비율 기준\(1:1~2:1\)에 해당합니다/);
+  assert.doesNotMatch(summary({ ...orijen, ca_p_ratio: 2.1 }, 'dog', '비율 초과 제품'), /AAFCO.*비율 기준/);
+  assert.doesNotMatch(summary({ ...orijen, ca_p_ratio: 0.9 }, 'dog', '비율 미달 제품'), /AAFCO.*비율 기준/);
+
   for (const input of [
     { ...orijen, needs_calorie_review: true },
     { ...orijen, cal_source: 'manual_review' },
