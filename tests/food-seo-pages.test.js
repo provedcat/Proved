@@ -115,6 +115,7 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
 
   const orijen = {
     ...CAT_FEED, 제품명: '오리젠 키튼', 원산지: '캐나다',
+    brands: { ...BRAND, name: 'Orijen', name_ko: '오리젠', slug: 'orijen' },
     final_me: 4120, 수분: 10, ca_p_ratio: 1.3, cal_source: 'label'
   };
   const dryHtml = summary(orijen, 'cat', '오리젠 키튼');
