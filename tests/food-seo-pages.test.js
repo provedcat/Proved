@@ -145,8 +145,8 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   assert.match(summary(orijen, 'cat', '동결건조 돼지'), /동결건조 돼지는 캐나다에서/);
   assert.match(summary(acana, 'cat', '청크 85g'), /청크 85g 제품은 태국에서/);
   assert.match(wetHtml, /200kcal이고 이 제품만 급여한다면 약 275g입니다/);
-  assert.match(wetHtml, /수분량은 계산상 약 229mL/);
-  assert.match(wetHtml, /275g입니다\.<span class="food-metric-summary__subline">표시 수분 함량을 적용하면 수분량은 계산상 약 229mL입니다\.<\/span>/);
+  assert.match(wetHtml, /약 275g 급여 시 사료로부터 섭취 가능한 수분량은 표시 수분 함량 기준 약 229mL/);
+  assert.match(wetHtml, /275g입니다\.<span class="food-metric-summary__subline">약 275g 급여 시 사료로부터 섭취 가능한 수분량은 표시 수분 함량 기준 약 229mL입니다\.<\/span>/);
   assert.doesNotMatch(wetHtml, /AAFCO.*비율 기준/);
 
   assert.match(wetHtml, /칼슘:인 비율은 1\.25:1/);
