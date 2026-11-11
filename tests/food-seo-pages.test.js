@@ -312,7 +312,7 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 \| 100g당 420kcal \| 프루브/);
     assert.match(catHtml, /href="\/food\/brand\/farmina\/"/);
     assert.match(brandHtml, /<link rel="canonical" href="https:\/\/proved\.kr\/food\/brand\/farmina\/">/);
-    assert.match(brandHtml, /<title>파미나 사료 성분·칼로리 확인 \\| PROVED<\\/title>/);
+    assert.ok(brandHtml.includes('<title>파미나 사료 성분·칼로리 확인 | PROVED</title>'));
     const brandDescription = '파미나 고양이·강아지 사료 2종의 제품 정보와 칼로리를 확인해 보세요. 국내 유통 제품을 기준으로 정리한 반려동물 사료 정보.';
     assert.ok(brandHtml.includes(`<meta name="description" content="${brandDescription}">`));
     assert.ok(brandHtml.includes('<meta property="og:title" content="파미나 사료 성분·칼로리 확인 | PROVED">'));
