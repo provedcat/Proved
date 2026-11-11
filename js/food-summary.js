@@ -22,7 +22,12 @@
       ? country + '에서 제조된 ' : '';
     const meal = feed.완전식여부 === '주식' ? '주식 ' : feed.완전식여부 === '보조식' ? '보조식 ' : '';
     const form = feed.type === 'wet' ? '습식사료' : feed.type === 'dry' ? '건사료' : '사료';
-    const sentences = [name + '은 ' + origin + animal + ' ' + meal + form + '입니다.'];
+    const lastCharacter = name.slice(-1);
+    const isHangulEnding = /^[가-힣]$/.test(lastCharacter);
+    const topic = isHangulEnding
+      ? ((lastCharacter.charCodeAt(0) - 0xAC00) % 28 === 0 ? '는' : '은')
+      : ' 제품은';
+    const sentences = [name + topic + ' ' + origin + animal + ' ' + meal + form + '입니다.'];
 
     const kcalPerKg = Number(feed.final_me);
     const canCalculate = feed.완전식여부 === '주식'
