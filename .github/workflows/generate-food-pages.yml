@@ -15,6 +15,7 @@ on:
       - 'tests/unified-food-finder.test.js'
       - 'tests/food-search-fuzzy.test.js'
       - 'scripts/generate-food-pages.mjs'
+      - 'scripts/render-brand-directory.mjs'
       - 'scripts/food-legacy-urls.mjs'
       - 'tests/food-seo-pages.test.js'
       - 'supabase/migrations/20261013000000_create_food_zero_result_searches.sql'
@@ -35,6 +36,7 @@ on:
       - 'tests/unified-food-finder.test.js'
       - 'tests/food-search-fuzzy.test.js'
       - 'scripts/generate-food-pages.mjs'
+      - 'scripts/render-brand-directory.mjs'
       - 'scripts/food-legacy-urls.mjs'
       - 'tests/food-seo-pages.test.js'
       - 'supabase/migrations/20261013000000_create_food_zero_result_searches.sql'
@@ -89,7 +91,7 @@ jobs:
       - name: Commit generated pages when changed
         shell: bash
         run: |
-          git add -A -- food/index.html food/cat food/dog food/brand sitemap-foods.xml scripts/legacy-food-paths.json
+          git add -A -- food/index.html food/cat food/dog food/brand food/brands sitemap-foods.xml scripts/legacy-food-paths.json
           if git diff --cached --quiet; then
             echo "Food pages are already current."
             exit 0

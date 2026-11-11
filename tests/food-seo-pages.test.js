@@ -368,6 +368,56 @@ test('브랜드 설명의 대상 동물과 제품 수는 실제 브랜드 제품
   }
 });
 
+
+test('전체 브랜드 페이지는 JS 없이 이름과 유형별 등록 수, 실제 브랜드 링크를 제공한다', async () => {
+  const { writeGeneratedPages, buildBrandPath } = await loadGenerator();
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-brand-directory-'));
+  const mixedBrand = {
+    ...BRAND, id: 'cccccccc-2222-4333-8444-555555555555',
+    name: 'Royal Canin 로얄캐닌', name_ko: '로얄캐닌', slug: 'royal-canin'
+  };
+  const koreanOnly = {
+    ...BRAND, id: 'dddddddd-2222-4333-8444-555555555555',
+    name: '하림', name_ko: '하림', slug: 'harim'
+  };
+  const cat = [
+    CAT_FEED,
+    { ...CAT_FEED, id: '22222222-2222-4333-8444-555555555555', type: 'wet', 제품명: '습식 캔' },
+    { ...CAT_FEED, id: '33333333-2222-4333-8444-555555555555', type: 'wet', 제품명: '로얄캐닌 캔', brands: mixedBrand, brand_id: mixedBrand.id },
+    { ...CAT_FEED, id: '44444444-2222-4333-8444-555555555555', 제품명: '하림 건사료', brands: koreanOnly, brand_id: koreanOnly.id }
+  ];
+  try {
+    await mkdir(path.join(tempRoot, 'food'), { recursive: true });
+    await copyFile(path.join(__dirname, '..', 'food', 'index.html'), path.join(tempRoot, 'food', 'index.html'));
+    await writeGeneratedPages({ repoRoot: tempRoot, catFeeds: cat, dogFeeds: [DOG_FEED] });
+    const html = await readFile(path.join(tempRoot, 'food', 'brands', 'index.html'), 'utf8');
+    const sitemap = await readFile(path.join(tempRoot, 'sitemap-foods.xml'), 'utf8');
+
+    assert.ok(html.includes('<link rel="canonical" href="https://proved.kr/food/brands/">'));
+    assert.ok(html.includes('<h1>사료 브랜드 전체 목록</h1>'));
+    assert.ok(html.includes('href="/food/brand/farmina/"'));
+    assert.ok(html.includes('href="/food/brand/royal-canin/"'));
+    assert.ok(html.includes('href="/food/brand/harim/"'));
+    assert.ok(html.includes('brand-directory__name">Farmina</strong>'));
+    assert.ok(html.includes('brand-directory__name-ko">파미나</span>'));
+    assert.ok(html.includes('brand-directory__name">Royal Canin</strong>'));
+    assert.ok(html.includes('brand-directory__name-ko">로얄캐닌</span>'));
+    assert.ok(html.includes('brand-directory__name">하림</strong>'));
+    assert.doesNotMatch(html, /brand-directory__name-ko">하림/);
+    const farminaRow = html.match(/<li><a class="brand-directory__item" href="\/food\/brand\/farmina\/"[\s\S]*?<\/li>/)?.[0];
+    assert.ok(farminaRow);
+    assert.ok(farminaRow.includes('brand-directory__metric--dry'));
+    assert.ok(farminaRow.includes('brand-directory__metric--wet'));
+    assert.ok(farminaRow.includes('>2<span class="brand-directory__unit">개</span>'));
+    assert.ok(farminaRow.includes('>1<span class="brand-directory__unit">개</span>'));
+    assert.ok(sitemap.includes('<loc>https://proved.kr/food/brands/</loc>'));
+    const foodHtml = await readFile(path.join(tempRoot, 'food', 'index.html'), 'utf8');
+    assert.ok(foodHtml.includes('href="/food/brands/"'));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('사이트맵은 실제 제품 변경일만 반영하고 재생성 시 기존 날짜를 보존한다', async () => {
   const { buildFoodSitemap, buildProductPath, buildBrandPath, writeGeneratedPages } = await loadGenerator();
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-sitemap-lastmod-'));
@@ -389,7 +439,7 @@ test('사이트맵은 실제 제품 변경일만 반영하고 재생성 시 기�
     const input = { repoRoot: tempRoot, catFeeds: [CAT_FEED], dogFeeds: [DOG_FEED] };
     await writeGeneratedPages({ ...input, sitemapDate: '2026-11-05' });
     let xml = await readSitemap();
-    assert.equal((xml.match(/<url>/g) || []).length, 3);
+    assert.equal((xml.match(/<url>/g) || []).length, 4);
     assert.equal(findDate(xml, catPath), '2026-11-05');
     assert.equal(findDate(xml, dogPath), '2026-11-05');
     assert.equal(findDate(xml, brandPath), '2026-11-05');

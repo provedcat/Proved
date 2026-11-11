@@ -215,6 +215,7 @@
         <a href="/cat-food-calculator/">고양이 계산기</a>
         <a href="/dog-food-calculator/">강아지 계산기</a>
         <a href="/food/">사료</a>
+        <a href="/food/brands/">전체 브랜드</a>
         <a href="/food-ranking/">사료랭킹</a>
         <a href="/guide/calculation-method/">아카이브</a>
         <a href="/my/">MY</a>

@@ -3,6 +3,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
 import { collectLegacyProductPaths, restoreLegacyProductUrls } from './food-legacy-urls.mjs';
+import { renderBrandDirectoryHtml } from './render-brand-directory.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SITE_ORIGIN = 'https://proved.kr';
@@ -509,6 +510,7 @@ export function renderBrandFinder(brandGroups) {
       <button class="food-brand-range" type="button" data-brand-range-toggle="en" aria-expanded="false" aria-controls="foodBrandRangeEn">
         <span>A ~ Z</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
       </button>
+      <a class="food-brand-finder__all-link" href="/food/brands/">전체 브랜드 보기 <span aria-hidden="true">→</span></a>
     </div>
     <div id="foodBrandRangeKo" class="food-brand-finder__panel" data-brand-range-panel="ko" hidden>
       <div class="food-brand-finder__initials" aria-label="한글 초성">${renderInitialButtons(HANGUL_INITIALS, koGroups, 'ko')}</div>
@@ -804,6 +806,13 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     await writeFile(outputPath, html, 'utf8');
     entries.push({ path: brandPath, id: brand.id || brand.slug, kind: 'brand', lastmod: pageLastmod(brandPath, html) });
   }
+
+  // The plain HTML directory provides a visible, JS-independent path to every brand.
+  const directoryPath = '/food/brands/';
+  const directoryOutput = path.join(repoRoot, 'food', 'brands', 'index.html');
+  await mkdir(path.dirname(directoryOutput), { recursive: true });
+  await writeFile(directoryOutput, renderBrandDirectoryHtml(brandGroups, { buildBrandPath, escapeHtml }), 'utf8');
+  entries.push({ path: directoryPath, kind: 'directory' });
 
   const rootIndex = replaceBrandFinderContent(rawTemplate, renderBrandFinder(brandGroups));
   await writeFile(templatePath, rootIndex, 'utf8');
