@@ -27,7 +27,7 @@
     const topic = isHangulEnding
       ? ((lastCharacter.charCodeAt(0) - 0xAC00) % 28 === 0 ? '는' : '은')
       : ' 제품은';
-    const sentences = [name + topic + ' ' + origin + animal + ' ' + meal + form + '입니다.'];
+    const paragraphs = [escapeHtml(name + topic + ' ' + origin + animal + ' ' + meal + form + '입니다.')];
 
     const kcalPerKg = Number(feed.final_me);
     const canCalculate = feed.완전식여부 === '주식'
@@ -39,37 +39,46 @@
     if (canCalculate) {
       const grams = kcal => Math.round(kcal * 1000 / kcalPerKg);
       const estimated = estimatedSources.has(feed.cal_source) ? '(추정 열량 기준)' : '';
-      let amount = '하루 에너지 필요량이 200kcal이고 이 제품만 급여한다면 약 '
-        + formatNumber(grams(200)) + 'g' + estimated + '입니다';
+      const amount = '만약 하루 에너지 필요량이 200kcal이고 이 제품만 급여한다면 약 '
+        + formatNumber(grams(200)) + 'g' + estimated + '입니다.';
+      const sublines = [];
       if (feed.type === 'dry') {
-        amount += '(150kcal는 약 ' + formatNumber(grams(150)) + 'g, 250kcal는 약 '
-          + formatNumber(grams(250)) + 'g)';
+        sublines.push('(150kcal는 약 ' + formatNumber(grams(150)) + 'g, 250kcal는 약 '
+          + formatNumber(grams(250)) + 'g).');
       }
-      sentences.push(amount + '.');
 
       const moisture = Number(feed.수분);
       if (feed.type === 'wet' && feed.수분 !== null && feed.수분 !== undefined
         && feed.수분 !== '' && Number.isFinite(moisture) && moisture > 0 && moisture <= 100) {
         const moistureMl = Math.round(200 * 1000 / kcalPerKg * moisture / 100);
-        sentences.push('표시 수분 함량을 적용하면 수분량은 계산상 약 '
+        sublines.push('표시 수분 함량을 적용하면 수분량은 계산상 약 '
           + formatNumber(moistureMl) + 'mL입니다.');
       }
+      paragraphs.push(escapeHtml(amount)
+        + sublines.map(line => '<span class="food-metric-summary__subline">'
+          + escapeHtml(line) + '</span>').join(''));
     }
 
     const ratio = Number(feed.ca_p_ratio);
     if (feed.ca_p_ratio !== null && feed.ca_p_ratio !== undefined && feed.ca_p_ratio !== ''
       && Number.isFinite(ratio) && ratio > 0) {
-      sentences.push('등록된 칼슘:인 비율은 ' + formatNumber(ratio) + ':1입니다.');
+      let ratioText = '등록된 칼슘:인 비율은 ' + formatNumber(ratio) + ':1입니다.';
+      // AAFCO defines a Ca:P ratio for dog profiles, not cat profiles.
+      // Passing the ratio alone does not certify nutrient adequacy.
+      if (species === 'dog' && ratio >= 1 && ratio <= 2) {
+        ratioText += ' AAFCO 강아지 사료의 칼슘:인 비율 기준(1:1~2:1)에 해당합니다.';
+      }
+      paragraphs.push(escapeHtml(ratioText));
     }
 
-    sentences.push('필요량은 개체마다 다릅니다.');
     const calculator = species === 'dog' ? '/dog-food-calculator/' : '/cat-food-calculator/';
     const deepLink = canCalculate && feed.id && ['dry', 'wet'].includes(feed.type)
       ? '?feed=' + encodeURIComponent(String(feed.id)) + '&type=' + encodeURIComponent(feed.type)
       : '';
-    return '<p class="food-metric-summary">' + escapeHtml(sentences.join(' '))
-      + ' <a href="' + escapeHtml(calculator + deepLink)
-      + '">내 반려동물 급여량 계산하기 →</a></p>';
+    paragraphs.push('필요량은 개체마다 다릅니다. <a href="'
+      + escapeHtml(calculator + deepLink) + '">내 반려동물 급여량 계산하기 →</a>');
+    return '<div class="food-metric-summary">' + paragraphs.map(text => '<p>' + text + '</p>').join('')
+      + '</div>';
   }
 
   const api = { render };
