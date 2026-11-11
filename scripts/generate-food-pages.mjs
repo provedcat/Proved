@@ -4,6 +4,9 @@ import { promisify } from 'node:util';
 import path from 'node:path';
 import { collectLegacyProductPaths, restoreLegacyProductUrls } from './food-legacy-urls.mjs';
 import { renderBrandDirectoryHtml } from './render-brand-directory.mjs';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { render: renderFoodSummary } = require('../js/food-summary.js');
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SITE_ORIGIN = 'https://proved.kr';
@@ -264,6 +267,7 @@ function renderPrerenderedDetail(feed, species, allFeeds = []) {
             ${metricCard('protein', '단백질 · DM', formatNumber(feed.dm_단백, 2), '%')}
             ${metricCard('ratio', '칼슘 : 인', isPresent(feed.ca_p_ratio) ? formatNumber(feed.ca_p_ratio, 2) : '—', isPresent(feed.ca_p_ratio) ? ': 1' : '')}
           </div>
+          ${renderFoodSummary(feed, species, getProductSearchName(feed))}
         </section>
 
         ${nutritionRows.length ? `<section class="food-detail-section" aria-labelledby="foodNutritionHeading">
