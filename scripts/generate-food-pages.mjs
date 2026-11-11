@@ -3,6 +3,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
 import { collectLegacyProductPaths, restoreLegacyProductUrls } from './food-legacy-urls.mjs';
+import { renderBrandDirectoryHtml } from './render-brand-directory.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SITE_ORIGIN = 'https://proved.kr';
@@ -804,6 +805,13 @@ export async function writeGeneratedPages({ repoRoot = DEFAULT_REPO_ROOT, catFee
     await writeFile(outputPath, html, 'utf8');
     entries.push({ path: brandPath, id: brand.id || brand.slug, kind: 'brand', lastmod: pageLastmod(brandPath, html) });
   }
+
+  // The plain HTML directory provides a visible, JS-independent path to every brand.
+  const directoryPath = '/food/brands/';
+  const directoryOutput = path.join(repoRoot, 'food', 'brands', 'index.html');
+  await mkdir(path.dirname(directoryOutput), { recursive: true });
+  await writeFile(directoryOutput, renderBrandDirectoryHtml(brandGroups, { buildBrandPath, escapeHtml }), 'utf8');
+  entries.push({ path: directoryPath, kind: 'directory' });
 
   const rootIndex = replaceBrandFinderContent(rawTemplate, renderBrandFinder(brandGroups));
   await writeFile(templatePath, rootIndex, 'utf8');
