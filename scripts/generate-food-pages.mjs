@@ -744,6 +744,47 @@ async function fetchTable(table, supabaseUrl, publishableKey) {
   return rows;
 }
 
+// Attach the existing life-stage tags before rendering FEDIAF ratio comparisons.
+// Product names are only a fallback when a product has no life-stage tag.
+async function attachLifeStages(catFeeds, dogFeeds, supabaseUrl, publishableKey) {
+  const tagUrl = new URL('/rest/v1/food_tags', supabaseUrl);
+  tagUrl.searchParams.set('select', 'id,slug');
+  tagUrl.searchParams.set('category', 'eq.life_stage');
+  tagUrl.searchParams.set('is_active', 'eq.true');
+  const tagsResponse = await fetch(tagUrl, { headers: { apikey: publishableKey } });
+  if (!tagsResponse.ok) throw new Error('생애주기 태그 조회 실패: ' + tagsResponse.status);
+  const tagRows = await tagsResponse.json();
+  const slugs = new Map(tagRows.map(row => [String(row.id), String(row.slug)]));
+  if (!slugs.size) throw new Error('생애주기 태그가 없습니다.');
+  const wanted = 'in.(' + [...slugs.keys()].join(',') + ')';
+
+  async function mapping(species, feeds) {
+    const table = species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
+    const idColumn = species === 'dog' ? 'dog_feed_id' : 'feed_id';
+    const stagesByFeed = new Map();
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const url = new URL('/rest/v1/' + table, supabaseUrl);
+      url.searchParams.set('select', idColumn + ',tag_id');
+      url.searchParams.set('tag_id', wanted);
+      const response = await fetch(url, {
+        headers: { apikey: publishableKey, Range: from + '-' + (from + PAGE_SIZE - 1) }
+      });
+      if (!response.ok) throw new Error(table + ' 생애주기 연결 조회 실패: ' + response.status);
+      const rows = await response.json();
+      for (const row of rows) {
+        const slug = slugs.get(String(row.tag_id));
+        if (!slug || !row[idColumn]) continue;
+        const key = String(row[idColumn]);
+        if (!stagesByFeed.has(key)) stagesByFeed.set(key, []);
+        stagesByFeed.get(key).push(slug);
+      }
+      if (rows.length < PAGE_SIZE) break;
+    }
+    for (const feed of feeds) feed._lifeStageSlugs = stagesByFeed.get(String(feed.id)) || [];
+  }
+  await Promise.all([mapping('cat', catFeeds), mapping('dog', dogFeeds)]);
+}
+
 function assertGeneratedRoot(repoRoot, target) {
   const foodRoot = path.resolve(repoRoot, 'food');
   const resolvedTarget = path.resolve(target);
@@ -833,6 +874,7 @@ async function main() {
     fetchTable('feeds', supabaseUrl, publishableKey),
     fetchTable('dog_feeds', supabaseUrl, publishableKey)
   ]);
+  await attachLifeStages(catFeeds, dogFeeds, supabaseUrl, publishableKey);
   const entries = await writeGeneratedPages({ catFeeds, dogFeeds });
   process.stdout.write(`Generated ${entries.length} food pages (${catFeeds.length} cat, ${dogFeeds.length} dog).\n`);
 }

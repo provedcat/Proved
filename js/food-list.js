@@ -387,6 +387,7 @@
   }
 
   async function getDetailCharacteristicTags(feed) {
+    if (feed) feed._lifeStageSlugs = [];
     if (!feed?.id) return [];
     const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
     const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
@@ -398,7 +399,7 @@
 
     const tagIds = [...new Set(mappings.map(row => row.tag_id).filter(Boolean))];
     if (!tagIds.length) return feed.type === 'dry' ? ['익스트루전'] : [];
-    const categories = ['management_purpose', 'product_class', ...(feed.type === 'wet'
+    const categories = ['management_purpose', 'product_class', 'life_stage', ...(feed.type === 'wet'
       ? ['preparation_type', 'ingredient_condition']
       : ['processing_method'])];
     const { data: tags, error: tagError } = await foodSb
@@ -410,6 +411,7 @@
     if (tagError) return feed.type === 'dry' ? ['익스트루전'] : [];
 
     const sorted = (tags || []).sort(compareTags);
+    feed._lifeStageSlugs = sorted.filter(tag => tag.category === 'life_stage').map(tag => tag.slug);
     const isVeterinary = sorted.some(tag => tag.category === 'product_class' && tag.slug === 'veterinary_diet');
     const management = sorted.filter(tag => tag.category === 'management_purpose')
       .map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
