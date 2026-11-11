@@ -312,6 +312,15 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     assert.match(catHtml, /파미나 N&amp;D 엔세스트럴 그레인 캣 닭고기와 석류 칼로리 \| 100g당 420kcal \| 프루브/);
     assert.match(catHtml, /href="\/food\/brand\/farmina\/"/);
     assert.match(brandHtml, /<link rel="canonical" href="https:\/\/proved\.kr\/food\/brand\/farmina\/">/);
+    assert.match(brandHtml, /<title>파미나 사료 성분·칼로리 확인 \\| PROVED<\\/title>/);
+    const brandDescription = '파미나 고양이·강아지 사료 2종의 제품 정보와 칼로리를 확인해 보세요. 국내 유통 제품을 기준으로 정리한 반려동물 사료 정보.';
+    assert.ok(brandHtml.includes(`<meta name="description" content="${brandDescription}">`));
+    assert.ok(brandHtml.includes('<meta property="og:title" content="파미나 사료 성분·칼로리 확인 | PROVED">'));
+    assert.ok(brandHtml.includes(`<meta property="og:description" content="${brandDescription}">`));
+    assert.ok(brandHtml.includes('<meta property="og:url" content="https://proved.kr/food/brand/farmina/">'));
+    assert.ok(brandHtml.includes('<meta name="twitter:title" content="파미나 사료 성분·칼로리 확인 | PROVED">'));
+    assert.ok(brandHtml.includes(`<meta name="twitter:description" content="${brandDescription}">`));
+    assert.ok(brandHtml.includes('"name":"파미나 N&D 엔세스트럴 그레인 캣 닭고기와 석류"'));
     assert.equal((brandHtml.match(/<h1\b/g) || []).length, 1, '브랜드 허브에도 H1은 하나만');
     for (const id of ['foodSearchInput', 'foodSpeciesFilters', 'foodTypeFilters', 'foodRoleFilters', 'foodConditionFolders', 'foodSelectedConditions', 'foodLoadMore']) {
       assert.ok(brandHtml.includes(`id="${id}"`));
@@ -329,6 +338,31 @@ test('고양이·강아지 제품은 하나의 브랜드 허브로 묶이고 루
     assert.ok(sitemap.includes(new URL(catPath, 'https://proved.kr').href));
     assert.ok(sitemap.includes(new URL(dogPath, 'https://proved.kr').href));
     assert.ok(sitemap.includes(new URL(brandPath, 'https://proved.kr').href));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+
+test('브랜드 설명의 대상 동물과 제품 수는 실제 브랜드 제품 구성에 따른다', async () => {
+  const { writeGeneratedPages, buildBrandPath } = await loadGenerator();
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'proved-brand-snippets-'));
+  const brandPath = buildBrandPath(BRAND);
+  const descriptionOf = html => html.match(/<meta name="description" content="([^"]+)">/)?.[1];
+
+  try {
+    await mkdir(path.join(tempRoot, 'food'), { recursive: true });
+    await copyFile(path.join(__dirname, '..', 'food', 'index.html'), path.join(tempRoot, 'food', 'index.html'));
+
+    await writeGeneratedPages({ repoRoot: tempRoot, catFeeds: [CAT_FEED], dogFeeds: [] });
+    let html = await readFile(path.join(tempRoot, brandPath, 'index.html'), 'utf8');
+    assert.match(descriptionOf(html), /^파미나 고양이 사료 1종/);
+    assert.doesNotMatch(descriptionOf(html), /강아지/);
+
+    await writeGeneratedPages({ repoRoot: tempRoot, catFeeds: [], dogFeeds: [DOG_FEED] });
+    html = await readFile(path.join(tempRoot, brandPath, 'index.html'), 'utf8');
+    assert.match(descriptionOf(html), /^파미나 강아지 사료 1종/);
+    assert.doesNotMatch(descriptionOf(html), /고양이/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
