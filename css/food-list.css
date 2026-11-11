@@ -213,6 +213,21 @@ button { cursor: pointer; }
   gap: 8px;
   margin-top: 24px;
 }
+.food-brand-finder__all-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 0 8px;
+  color: var(--food-blue);
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.food-brand-finder__all-link:hover,
+.food-brand-finder__all-link:focus-visible { text-decoration: underline; }
 .food-brand-range {
   min-height: 38px;
   display: inline-flex;
