@@ -106,6 +106,63 @@ test('브랜드 중복을 제거하고 공식 칼로리를 100g당 값으로 검
   assert.match(html, /"name":"나인케어 키튼"/);
 });
 
+
+test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 개체차·계산기 링크를 명시한다', async () => {
+  const { render: summary } = require('../js/food-summary.js');
+  const { renderProductPage } = await loadGenerator();
+  const template = await readFile(path.join(__dirname, '..', 'food', 'index.html'), 'utf8');
+  const browser = await readFile(path.join(__dirname, '..', 'js', 'food-list.js'), 'utf8');
+
+  const orijen = {
+    ...CAT_FEED, 제품명: '오리젠 키튼', 원산지: '캐나다',
+    final_me: 4120, 수분: 10, ca_p_ratio: 1.3, cal_source: 'label'
+  };
+  const dryHtml = summary(orijen, 'cat', '오리젠 키튼');
+  assert.match(dryHtml, /캐나다에서 제조된 고양이 주식 건사료/);
+  assert.match(dryHtml, /200kcal이고 이 제품만 급여한다면 약 49g입니다/);
+  assert.match(dryHtml, /150kcal는 약 36g, 250kcal는 약 61g/);
+  assert.match(dryHtml, /칼슘:인 비율은 1\.3:1/);
+  assert.match(dryHtml, /필요량은 개체마다 다릅니다/);
+  assert.match(dryHtml, /href="\/cat-food-calculator\/\?feed=[^"]+&amp;type=dry"/);
+  assert.doesNotMatch(dryHtml, /추정 열량 기준|이상적/);
+  assert.ok(renderProductPage(template, orijen, 'cat').includes(dryHtml));
+
+  const acana = {
+    ...CAT_FEED, 제품명: '청크 인 브로스 살몬 앤 치킨 레시피 어덜트 캣 85g',
+    원산지: '태국', type: 'wet', final_me: 726, 수분: 83,
+    ca_p_ratio: 1.25, cal_source: 'official'
+  };
+  const wetHtml = summary(acana, 'cat', '아카나 청크 인 브로스 살몬 앤 치킨 레시피 어덜트 캣');
+  assert.match(wetHtml, /태국에서 제조된 고양이 주식 습식사료/);
+  assert.match(wetHtml, /200kcal이고 이 제품만 급여한다면 약 275g입니다/);
+  assert.match(wetHtml, /수분량은 계산상 약 229mL/);
+  assert.match(wetHtml, /칼슘:인 비율은 1\.25:1/);
+  assert.doesNotMatch(wetHtml, /150kcal는/);
+  assert.match(wetHtml, /href="\/cat-food-calculator\/\?feed=[^"]+&amp;type=wet"/);
+
+  const estimated = summary({ ...orijen, cal_source: 'estimated_corrected' }, 'dog', '추정 열량 제품');
+  assert.match(estimated, /약 49g\(추정 열량 기준\)/);
+  assert.match(estimated, /href="\/dog-food-calculator\/\?feed=[^"]+&amp;type=dry"/);
+  for (const input of [
+    { ...orijen, needs_calorie_review: true },
+    { ...orijen, cal_source: 'manual_review' },
+    { ...orijen, final_me: null },
+    { ...orijen, final_me: 0 },
+    { ...orijen, 완전식여부: '보조식' }
+  ]) {
+    const result = summary(input, 'cat', '검토 중 제품');
+    assert.doesNotMatch(result, /200kcal|150kcal|250kcal|수분량은 계산상/);
+    assert.match(result, /필요량은 개체마다 다릅니다/);
+    assert.match(result, /href="\/cat-food-calculator\/"/);
+  }
+
+  const escaped = summary({ ...orijen, 원산지: '<script>alert(1)</script>' }, 'cat', '공격 & 테스트');
+  assert.doesNotMatch(escaped, /<script>/);
+  assert.match(escaped, /공격 &amp; 테스트/);
+  assert.match(browser, /window\.ProvedFoodSummary\?\.render\(feed, state\.species, seoProductName\(feed, brand, product\)\)/);
+  assert.ok(template.indexOf('/js/food-summary.js') < template.indexOf('/js/food-list.js'));
+});
+
 test('추정 열량은 검색 제목에서 표시하고 검토 필요·미등록 값은 확정 숫자를 숨긴다', async () => {
   const { renderProductPage } = await loadGenerator();
   const template = await readFile(path.join(__dirname, '..', 'food', 'index.html'), 'utf8');
