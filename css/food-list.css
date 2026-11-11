@@ -889,6 +889,10 @@ button { cursor: pointer; }
   line-height: 1.85;
   overflow-wrap: anywhere;
 }
+.food-metric-summary p { margin: 0; }
+.food-metric-summary p + p { margin-top: 16px; }
+.food-metric-summary__subline { display: block; }
+
 .food-metric-summary a {
   color: var(--food-blue);
   font-weight: 750;
