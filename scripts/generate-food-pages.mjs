@@ -541,8 +541,12 @@ function renderBrandHub(brand, items, template) {
   const sortedItems = [...items].sort((a, b) => {
     return String(a.feed.제품명 || '').localeCompare(String(b.feed.제품명 || ''), 'ko');
   });
-  const title = `${label} 사료 성분·칼로리·급여량 | 프루브`;
-  const description = `프루브에 등록된 ${label} 고양이·강아지 사료 ${items.length}종의 칼로리, 성분, DM 영양정보와 급여량 계산 정보를 확인하세요.`;
+  const animalTypes = new Set(items.map(({ species }) => species));
+  const speciesText = animalTypes.has('cat') && animalTypes.has('dog')
+    ? '고양이·강아지'
+    : animalTypes.has('cat') ? '고양이' : animalTypes.has('dog') ? '강아지' : '반려동물';
+  const title = `${label} 사료 성분·칼로리 확인 | PROVED`;
+  const description = `${label} ${speciesText} 사료 ${items.length}종의 제품 정보와 칼로리를 확인해 보세요. 국내 유통 제품을 기준으로 정리한 반려동물 사료 정보.`;
   const cards = sortedItems.map(({ feed, species }) => {
     const product = splitProductName(feed.제품명);
     return `<li><a class="brand-food-card" href="${escapeHtml(buildProductPath(feed, species))}"><strong>${escapeHtml(product.primary)}</strong><span>${escapeHtml(speciesLabel(species))} · ${escapeHtml(typeLabel(feed.type))} · ${escapeHtml(formatNumber(feed.final_me, 1))} kcal/kg</span></a></li>`;
@@ -560,7 +564,7 @@ function renderBrandHub(brand, items, template) {
       itemListElement: sortedItems.map(({ feed, species }, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        name: `${label} ${splitProductName(feed.제품명).primary}`,
+        name: getProductSearchName(feed),
         url: new URL(buildProductPath(feed, species), SITE_ORIGIN).href
       }))
     }
@@ -571,6 +575,11 @@ function renderBrandHub(brand, items, template) {
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeHtml(description)}">`)
     .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`)
+    .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeHtml(title)}">`)
+    .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeHtml(description)}">`)
+    .replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}">`)
+    .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeHtml(title)}">`)
+    .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${escapeHtml(description)}">`)
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script id="brandStructuredData" type="application/ld+json">${jsonForHtml(structuredData)}</script>`)
     .replace(/<div class="food-list-hero">[\s\S]*?<\/div>/, hero)
     .replace(/<section id="foodBrandFinder"[\s\S]*?<\/section>/, '')
