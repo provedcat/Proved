@@ -1,0 +1,87 @@
+{
+  "total": 20,
+  "passed": 20,
+  "failed": 0,
+  "reports": [
+    {
+      "name": "P0 1061 historical attempts blocked before search or Gemini",
+      "passed": true
+    },
+    {
+      "name": "P0 future retry never searches, calls, or rewrites wait",
+      "passed": true
+    },
+    {
+      "name": "P0 Retry-After and fractional RetryInfo honor longer delay",
+      "passed": true
+    },
+    {
+      "name": "P0 HTTP-date Retry-After and daily quota identification",
+      "passed": true
+    },
+    {
+      "name": "P0 unknown 429 stays unknown; auth/model/5xx distinct",
+      "passed": true
+    },
+    {
+      "name": "P1 durably queued product error allows next feed",
+      "passed": true
+    },
+    {
+      "name": "P1 durable storage failure holds checkpoint",
+      "passed": true
+    },
+    {
+      "name": "P1 execution deadline preserves last completed product",
+      "passed": true
+    },
+    {
+      "name": "P1 overlapping entry returns busy",
+      "passed": true
+    },
+    {
+      "name": "P1 concurrent stop is preserved at checkpoint",
+      "passed": true
+    },
+    {
+      "name": "P1 resume preserves cursor and counters",
+      "passed": true
+    },
+    {
+      "name": "P1 rules continue while Gemini unavailable and normal price stays mandatory",
+      "passed": true
+    },
+    {
+      "name": "P1 deferred queue advances after first product failure",
+      "passed": true
+    },
+    {
+      "name": "P2 quota circuit deferral records zero calls and zero attempt consumption",
+      "passed": true
+    },
+    {
+      "name": "P2 missing project quotas fail closed without HTTP",
+      "passed": true
+    },
+    {
+      "name": "P2 stable identity fingerprint ignores price, trace URL, candidate order",
+      "passed": true
+    },
+    {
+      "name": "P2 DB cache bypasses circuit and HTTP with calls zero",
+      "passed": true
+    },
+    {
+      "name": "P2 reservation failure cannot cause unmetered HTTP",
+      "passed": true
+    },
+    {
+      "name": "P2 exhausted monthly budget blocks HTTP and automatic recovery",
+      "passed": true
+    },
+    {
+      "name": "P3 preview only reads classification view",
+      "passed": true
+    }
+  ]
+}

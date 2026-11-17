@@ -1,0 +1,8 @@
+PASS: original database regression suite
+PASS: historical 1061 attempts preserved, terminal queue state
+PASS: bounded backoff, server wait priority, quota deferral, call totals
+PASS: reservations, concurrency, rolling RPM, RPD, daily/unknown 429 circuit
+PASS: crash lease expires, reserved failed calls remain counted
+PASS: validated fingerprint cache bypasses exhausted quota without a new reservation
+PASS: Pacific daily reset handles 23/25-hour DST days
+PASS: triage separates missing data and conflicts, preserves records, denies anon

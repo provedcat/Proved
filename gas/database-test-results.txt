@@ -1,0 +1,104 @@
+CREATE ROLE
+CREATE ROLE
+CREATE ROLE
+GRANT
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+GRANT
+GRANT
+BEGIN
+CREATE TABLE
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE TABLE
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE VIEW
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+COMMIT
+INSERT 0 2
+INSERT 0 1
+SET
+  action  |                  id                  |   source_type   | source_pack_price_krw | source_pack_count | unit_weight_g | price_per_100g_krw 
+----------+--------------------------------------+-----------------+-----------------------+-------------------+---------------+--------------------
+ inserted | fdabfefa-aafc-4855-a85b-98dd91108367 | coupang_general |                 12000 |                 6 |            85 |            2352.94
+(1 row)
+
+             action             |                  id                  |   source_type   | source_pack_price_krw | source_pack_count | unit_weight_g | price_per_100g_krw 
+--------------------------------+--------------------------------------+-----------------+-----------------------+-------------------+---------------+--------------------
+ kept_existing_collection_phase | fdabfefa-aafc-4855-a85b-98dd91108367 | coupang_general |                 12000 |                 6 |            85 |            2352.94
+(1 row)
+
+DO
+ proved_save_coupang_job 
+-------------------------
+ 
+(1 row)
+
+ proved_save_coupang_job 
+-------------------------
+ 
+(1 row)
+
+DO
+RESET
+INSERT 0 1
+SELECT 1
+SET
+        action        |                  id                  |  source_type   | source_pack_price_krw | source_pack_count | unit_weight_g | price_per_100g_krw 
+----------------------+--------------------------------------+----------------+-----------------------+-------------------+---------------+--------------------
+ kept_higher_priority | 27bf5e6d-1951-495b-b20a-9897ac6d644d | brand_official |                 30000 |                 1 |          1000 |            3000.00
+(1 row)
+
+RESET
+DO
+INSERT 0 1
+SET
+DO
+RESET
+UPDATE 1
+SET
+DO
+RESET
+SET
+DO
+RESET
+                                                             result                                                              
+---------------------------------------------------------------------------------------------------------------------------------
+ PASS: insert, duplicate, normalization, wrong seller, NULL proof, job upsert, official protection, routing/history, anon denial
+(1 row)
+
+INSERT 0 1
+SET
+  action  
+----------
+ inserted
+(1 row)
+
+SET
+             action             
+--------------------------------
+ kept_existing_collection_phase
+(1 row)
+
+DO
+                       result                        
+-----------------------------------------------------
+ PASS: concurrent RPCs produce exactly one reference
+(1 row)
+
