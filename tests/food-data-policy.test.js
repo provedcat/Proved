@@ -15,7 +15,7 @@ test('국내 젤리 값: Ca:P·차감 NFE·기존 습식계수로 계산하고 �
   assert.equal(missing.needs_calorie_review, true);
   assert.equal(missing.dm_단백, null);
   assert.equal(missing.eb_단백, null);
-  assert.equal(rows(missing)[0][1], '검수 완료');
+  assert.match(rows(missing)[0][1], /^검수 완료/);
 });
 test('음수 NFE는 크기에 상관없이 0: 이전 -2% 차단조건은 적용하지 않는다', () => {
   const result = calculate({ ...domestic, 조단백: 10.14, 조지방: 7.47, 조회분: 3, 조섬유: .1, 수분: 85 });
@@ -41,7 +41,8 @@ test('국내 열량·유럽 성분 예외를 출처별로 구분하고 자유 �
   const html = render(feed);
   assert.match(html, /해외 공식 성분 기준/);
   assert.match(html, /국내 공식 값/);
-  assert.match(html, /국내 유통 구판 기준/);
+  assert.equal(rows(feed).length, 2);
+  assert.doesNotMatch(html, /칼슘:인 비율|탄수화물|건물 기준|등록 경로|주식·보조식|제품 판본/);
   assert.doesNotMatch(html, /확정 불가로 비워둠/);
 });
 

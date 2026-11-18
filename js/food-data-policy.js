@@ -79,23 +79,15 @@
     return '표시 열량 · 출처 구분 확인 필요';
   }
   function rows(feed) {
-    const source = ingredientBasis(feed), metadata = basis(feed);
-    const ratio = number(feed.ca_p_ratio);
-    const nfe = number(feed.nfe);
-    const editions = { domestic_legacy: '국내 유통 구판 기준', domestic_current: '국내 공식 신판 기준', overseas_current: '해외 공식 신판 기준', hold: '판본 불일치 · 확인 보류' };
-    const list = [
-      ['성분 검수', complete(feed) ? '검수 완료' : '검수 전'],
-      ['성분 출처', source],
-      ['열량 기준', calorieLabel(feed)],
-      ['칼슘:인 비율', ratio !== null ? '등록 성분의 칼슘 ÷ 인 · ' + ratio.toFixed(2) + ':1' : '칼슘·인 정보 부족'],
-      ['탄수화물(NFE)', nfe !== null ? '성분 합계에서 차감 · 음수는 0 처리' : '계산에 필요한 성분 미공개'],
-      ['건물 기준(DM)', number(feed.수분) === null ? '수분 미공개 · 계산 불가' : source + '으로 환산']
+    const state = complete(feed) ? '검수 완료' : '검수 전';
+    const calories = !(number(feed.final_me) > 0) ? '미입력'
+      : feed.cal_source === 'estimated_corrected' ? '추정값 · 습식 보정'
+      : feed.cal_source === 'estimated' ? '추정값'
+      : calorieLabel(feed).replace('표시 열량 · 출처 구분 확인 필요', '표시값 · 출처 확인 필요');
+    return [
+      ['등록 정보', state + ' · ' + ingredientBasis(feed)],
+      ['열량', calories]
     ];
-    if (feed.needs_calorie_review === true || !(number(feed.final_me) > 0)) list.push(['열량 확인', '추가 확인 필요']);
-    if (feed.submission_method === 'admin_bulk' || feed.uploaded_by === 'admin') list.push(['등록 경로', '관리자 등록']);
-    if (['주식', '보조식'].includes(feed.완전식여부)) list.push(['주식·보조식', metadata.adequacy_basis === 'manufacturer' ? '제조사 완전식 문구 기준' : metadata.adequacy_basis === 'reviewer' ? '검수자 확인 기준' : '등록 분류 기준 · 판단 근거 확인 필요']);
-    list.push(['제품 판본', editions[metadata.edition_basis] || '국내 실제 유통 판본 우선']);
-    return list;
   }
   const escapeHtml = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   function render(feed) {

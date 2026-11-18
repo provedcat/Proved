@@ -1387,6 +1387,13 @@
             <p class="food-detail-brand">${escapeHtml(brand.name)}${isProvisional(feed) ? '<span class="food-review-badge">검수 전</span>' : ''}</p>
             ${officialLink}
           </div>
+          <button class="food-source-favorite${favorite ? ' is-selected' : ''}" type="button"
+                  data-favorite-feed-id="${escapeHtml(feed.id)}" data-favorite-species="${escapeHtml(state.species)}"
+                  aria-pressed="${favorite ? 'true' : 'false'}" aria-label="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
+                  title="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
+                  ${favoriteHeartIcon()}
+                  <span data-favorite-label>${favorite ? '저장됨' : '저장하지 않음'}</span>
+                </button>
           <h1 id="foodDetailTitle">${escapeHtml(product.primary)}</h1>
           ${product.secondary ? `<p class="food-detail-hero__secondary">${escapeHtml(product.secondary)}</p>` : ''}
           <div class="food-detail-hero__actions">
@@ -1438,7 +1445,7 @@
           <div class="food-mineral-grid">
             ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), isPresent(feed.eb_칼슘) ? `${formatNumber(feed.eb_칼슘, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
             ${mineralCard('P · 인', formatPercent(feed.인, 3), isPresent(feed.eb_인) ? `${formatNumber(feed.eb_인, 2)} g / 1,000 kcal` : '열량 기준 정보 없음')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '인을 1로 둔 칼슘과 인의 등록 수치 비율')}
+            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '등록 성분 기준')}
           </div>
         </section>` : ''}
 
@@ -1456,21 +1463,10 @@
           ${sectionHeading(feed.전성분 ? '06' : '05', '정보 상태', 'foodSourceHeading')}
           <dl class="food-source-list">
             ${window.ProvedFoodDataPolicy.render(feed)}
-            <div class="food-source-row"><dt>제품별 근거</dt><dd>${sourceLinks || '등록된 온라인 근거 링크 없음'}</dd></div>
-            <div class="food-source-row">
-              <dt>즐겨찾기</dt>
-              <dd>
-                <button class="food-source-favorite${favorite ? ' is-selected' : ''}" type="button"
-                  data-favorite-feed-id="${escapeHtml(feed.id)}" data-favorite-species="${escapeHtml(state.species)}"
-                  aria-pressed="${favorite ? 'true' : 'false'}" aria-label="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
-                  title="${favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
-                  ${favoriteHeartIcon()}
-                  <span data-favorite-label>${favorite ? '저장됨' : '저장하지 않음'}</span>
-                </button>
-              </dd>
-            </div>
+            ${sourceLinks ? `<div class="food-source-row"><dt>근거</dt><dd>${sourceLinks}</dd></div>` : ''}
+
           </dl>
-          <p class="food-table-note">등록 상태는 외부 영양 인증을 뜻하지 않습니다. 브랜드 홈페이지도 제품별 영양 근거와는 다릅니다. <a href="/guide/feed-reading/sources/">출처·검수 기준 보기 →</a></p>
+
         </section>
         ${coupangCta}
       </article>`;

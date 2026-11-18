@@ -303,9 +303,9 @@ test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 
     calorie_source_url: 'https://example.com/calorie'
   };
   const html = renderProductPage(template, feed, 'cat', [feed]);
-  assert.match(html, /성분 검수<\/dt><dd>검수 전/);
-  assert.match(html, /보증성분 추정값 · 습식 주식 보정 적용/);
-  assert.match(html, /열량 확인<\/dt><dd>추가 확인 필요/);
+  assert.match(html, /등록 정보<\/dt><dd>검수 전/);
+  assert.match(html, /추정값 · 습식 보정/);
+  assert.doesNotMatch(html, /<dt>열량 확인<\/dt>/);
   assert.match(html, /href="https:\/\/example.com\/food\?name=cat&amp;lang=ko"/);
   assert.match(html, /href="https:\/\/example.com\/calorie"/);
   assert.doesNotMatch(html, /href="javascript:|href="https:\/\/%"/);
@@ -317,7 +317,7 @@ test('실시간 상세와 계산기는 출처 필드를 읽고 추정 열량 구
   const search = await readFile(path.join(__dirname, '..', 'js', 'feed-search.js'), 'utf8');
   assert.match(detail, /'source_urls'/);
   assert.match(detail, /'calorie_source_url'/);
-  assert.match(detail, /등록된 온라인 근거 링크 없음/);
+  assert.doesNotMatch(detail, /등록된 온라인 근거 링크 없음/);
   assert.match(search, /estimatedCalories: \['estimated', 'estimated_corrected'\]\.includes\(feedData\.cal_source\)/);
 });
 

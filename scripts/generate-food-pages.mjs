@@ -285,7 +285,7 @@ function renderPrerenderedDetail(feed, species, allFeeds = []) {
           <div class="food-mineral-grid">
             ${mineralCard('Ca · 칼슘', formatPercent(feed.칼슘, 3), '제품 등록 수치')}
             ${mineralCard('P · 인', formatPercent(feed.인, 3), '제품 등록 수치')}
-            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '칼슘과 인의 등록 수치 비율')}
+            ${mineralCard('Ca:P', formatRatio(feed.ca_p_ratio), '등록 성분 기준')}
           </div>
         </section>` : ''}
 
@@ -299,9 +299,9 @@ function renderPrerenderedDetail(feed, species, allFeeds = []) {
           ${sectionHeading(feed.전성분 ? '06' : '05', '정보 상태', 'foodSourceHeading')}
           <dl class="food-source-list">
             ${foodDataPolicy.render(feed)}
-            <div class="food-source-row"><dt>제품별 근거</dt><dd>${sourceLinks || '등록된 온라인 근거 링크 없음'}</dd></div>
+            ${sourceLinks ? `<div class="food-source-row"><dt>근거</dt><dd>${sourceLinks}</dd></div>` : ''}
           </dl>
-          <p class="food-table-note">등록 상태는 외부 영양 인증을 뜻하지 않습니다. 브랜드 홈페이지도 제품별 영양 근거와는 다릅니다. <a href="/guide/feed-reading/sources/">출처·검수 기준 보기 →</a></p>
+
         </section>
         ${renderRelatedBrandLinks(feed, allFeeds, species)}
       </article>`;
