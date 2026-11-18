@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20261001-shared-token-search-v1';
+const CACHE_NAME = 'proved-pwa-20261118-food-policy-v1';
 const CORE_ASSETS = [
   './',
   './manifest.json',
@@ -19,6 +19,7 @@ const CORE_ASSETS = [
   './js/pwa-install.js',
   './js/calculator.js',
   './js/feed-search.js',
+  './js/food-data-policy.js',
   './js/food-list.js',
   './js/food-compare.js',
   './js/food-detail-refinements.js',

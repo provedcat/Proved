@@ -91,7 +91,7 @@
                 </div>
               </div>
 
-              <div class="ed-formula">NFE = 100 − (조단백 + 조지방 + 조섬유 + 수분 + 조회분)</div>
+              <div class="ed-formula">NFE = max(0, 100 − (조단백 + 조지방 + 조섬유 + 수분 + 조회분))</div>
             </figure>
 
             <p><strong>NFE는 탄수화물을 직접 측정한 숫자가 아닙니다.</strong> 알고 있는 영양성분을 모두 빼고 남은 값을 계산한 것입니다.</p>
@@ -137,7 +137,10 @@
             </div>
 
             <p style="margin-top:22px"><button type="button" class="ed-term" data-ed-term="guaranteedAnalysis">보증성분</button>에서 ‘10% 이상’은 단백질이 정확히 10.00%라는 뜻이 아닙니다. 최소한 그만큼을 보증한다는 의미입니다.</p>
-            <p>이 숫자로 NFE를 만들고 다시 열량을 계산하면 결과 역시 실제 제품의 측정 열량과 차이가 날 수 있습니다. 회분처럼 필요한 값이 공개되지 않은 경우에는 추정의 불확실성이 더 커질 수도 있습니다.</p>
+            <p>이 숫자로 NFE를 만들고 다시 열량을 계산하면 결과 역시 실제 제품의 측정 열량과 차이가 날 수 있습니다. 차감 결과가 음수면 0으로 처리합니다. 회분·수분처럼 계산에 필요한 값이 공개되지 않으면 추정 열량을 비웁니다.</p>
+            <p>습식 주식에는 아래 기존 보정계수를 적용합니다. 공식 표시 열량이 있는 제품에는 보정하지 않습니다.</p>
+            <table><thead><tr><th>등록 수분</th><th>지방 2% 이하</th><th>지방 2% 초과</th></tr></thead><tbody><tr><td>85% 이상</td><td>×1.82</td><td>×1.26</td></tr><tr><td>82% 이상~85% 미만</td><td>×1.41</td><td>×1.22</td></tr><tr><td>82% 미만</td><td>×1.33</td><td>×1.28</td></tr></tbody></table>
+            <p>이 보정은 PROVED의 추정 계산 방식이며 제조사 공식 열량이나 영양 인증이 아닙니다.</p>
           </section>
 
           <section class="ed-section" aria-labelledby="proved-use">

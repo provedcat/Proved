@@ -282,7 +282,7 @@ test('정적 제품 HTML과 JS 상세 화면의 SEO 제목·설명 규칙이 일
   assert.match(browserSource, /brands\(name,name_ko,official_url\)/);
   assert.match(browserSource, /prerenderedPage\.path === normalizePathname\(window\.location\.pathname\)/);
   assert.match(browserSource, /els\.detailContent\?\.dataset\.prerenderedFeedId === String\(feed\.id\)/);
-  assert.match(template, /food-list\.js\?v=20261118-newest-v1/);
+  assert.match(template, /food-list\.js\?v=20261118-policy-v1/);
 });
 
 test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 출력하지 않는다', async () => {
@@ -303,9 +303,9 @@ test('제품별 근거 링크와 등록 상태를 구분하고 위험한 URL은 
     calorie_source_url: 'https://example.com/calorie'
   };
   const html = renderProductPage(template, feed, 'cat', [feed]);
-  assert.match(html, /등록 상태<\/dt><dd class="is-review">검수 전/);
-  assert.match(html, /Proved 추정값 · 습식 보정/);
-  assert.match(html, /열량 재검토<\/dt><dd class="is-review">추가 확인 필요/);
+  assert.match(html, /성분 검수<\/dt><dd>검수 전/);
+  assert.match(html, /보증성분 추정값 · 습식 주식 보정 적용/);
+  assert.match(html, /열량 확인<\/dt><dd>추가 확인 필요/);
   assert.match(html, /href="https:\/\/example.com\/food\?name=cat&amp;lang=ko"/);
   assert.match(html, /href="https:\/\/example.com\/calorie"/);
   assert.doesNotMatch(html, /href="javascript:|href="https:\/\/%"/);
