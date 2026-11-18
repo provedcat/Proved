@@ -44,7 +44,8 @@ on:
       - 'supabase/migrations/20261013000000_create_food_zero_result_searches.sql'
       - '.github/workflows/generate-food-pages.yml'
   schedule:
-    - cron: '20 18 * * *'
+    # Refresh database approvals in product pages and both brand directories together.
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
 permissions:
