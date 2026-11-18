@@ -250,7 +250,7 @@ test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 �
     read('js/feed-registration.js'), read('feed-registration/index.html')
   ]);
   assert.match(html, /food-search-fuzzy\.js\?v=20261014-search-alias-v1/);
-  assert.match(html, /food-list\.js\?v=20261118-policy-v1/);
+  assert.match(html, /food-list\.js\?v=20261118-compact-v1/);
   assert.match(source, /ProvedFoodSearchFuzzy\?\.suggestFoods/);
   assert.match(source, /혹시 이 사료를 찾으셨나요\?/);
   assert.match(source, /이 사료를 찾아주세요/);

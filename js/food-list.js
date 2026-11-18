@@ -1538,7 +1538,7 @@
     if (!window.ProvedFoodDataPolicy) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = '/js/food-data-policy.js?v=20261118-policy-v1';
+        script.src = '/js/food-data-policy.js?v=20261118-compact-v1';
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
