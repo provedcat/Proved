@@ -231,7 +231,7 @@ function showTextWait() {
   textWaitTimers.push(window.setTimeout(() => {
     const alert = document.getElementById('feedTextRequestAlert');
     if (alert) alert.textContent = '조금만 더 기다려 주세요.';
-    setTextWaitStage('제품 정보를 꼼꼼히 확인하고 있습니다', '완료될 때까지 이 창을 그대로 두세요.');
+    setTextWaitStage('제품 정보를 꼼꼼히 확인하고 있습니다', '예상보다 오래 걸리고 있어요. 완료될 때까지 이 창을 그대로 두세요.');
   }, 30000));
 }
 
@@ -333,7 +333,10 @@ async function submitImageRegistration() {
   input.disabled = true;
   button.classList.remove('is-visible');
   fileLabel?.classList.add('is-busy');
-  renderMessage('uploadMsg', '라벨 정보를 분석하고 있습니다.');
+  const photoWait = document.getElementById('uploadWait');
+  photoWait?.classList.add('is-visible');
+  photoWait?.setAttribute('aria-hidden', 'false');
+  renderMessage('uploadMsg', '라벨 정보를 분석하고 있습니다. 보통 30초에서 1분 정도 걸려요.');
   try {
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -345,6 +348,14 @@ async function submitImageRegistration() {
       method:'POST',
       body:JSON.stringify({ action:'upload', base64Data:base64, mimeType:file.type, fileName:file.name, type:registrationState.type, species:registrationState.species })
     }));
+    if (result.중복) {
+      const calculable = await isRegisteredFeedCalculable(result);
+      renderMessage('uploadMsg', calculable
+        ? `이미 등록된 제품입니다. ${getRegisteredProductName(result)}`.trim()
+        : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+      showReturnNotice({ result, searchable: calculable });
+      return;
+    }
     if (!result.성공) throw new Error(result.안내 || result.오류 || '등록하지 못했습니다.');
     const calculable = await isRegisteredFeedCalculable(result);
     renderMessage('uploadMsg', calculable
@@ -359,6 +370,8 @@ async function submitImageRegistration() {
     renderMessage('uploadMsg', error.message || '네트워크 또는 분석 서버 오류가 발생했습니다.', 'error');
     button.classList.add('is-visible');
   } finally {
+    photoWait?.classList.remove('is-visible');
+    photoWait?.setAttribute('aria-hidden', 'true');
     registrationState.busy = false;
     button.disabled = false;
     input.disabled = false;
