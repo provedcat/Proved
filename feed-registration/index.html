@@ -796,6 +796,11 @@
           <input type="file" id="uploadInput" accept="image/*" class="hidden">
         </label>
         <button id="uploadFeedBtn" type="button" class="registration-retry">다시 분석하기</button>
+        <div id="uploadWait" class="registration-wait" role="status" aria-live="polite" aria-hidden="true">
+          <p class="registration-wait__alert">사진을 분석하고 있습니다. 창을 닫거나 다시 선택하지 마세요.</p>
+          <p class="registration-wait__stage"><span class="registration-wait__spinner" aria-hidden="true"></span><span>제품과 영양정보 확인 중</span></p>
+          <p class="registration-wait__detail">보통 30초에서 1분 정도 걸려요. 오래 걸려도 결과가 나올 때까지 기다려 주세요.</p>
+        </div>
         <div id="uploadMsg" aria-live="polite"></div>
       </article>
     </section>
