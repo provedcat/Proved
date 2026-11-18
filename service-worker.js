@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proved-pwa-20261118-food-policy-v1';
+const CACHE_NAME = 'proved-pwa-20261118-registration-endpoint-v2';
 const CORE_ASSETS = [
   './',
   './manifest.json',

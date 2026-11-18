@@ -46,7 +46,7 @@
 
 const SUPABASE_URL = 'https://qpklvtgnhrdmzxzlstpp.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwa2x2dGduaHJkbXp4emxzdHBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjE1MjIsImV4cCI6MjA5MTUzNzUyMn0.6nI4uEp9H9gVn3Sjm4Qhs5XXFvhUhfGBf6e0Nqce1EM';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQog8PhiP_DQnDwg1b9u_JVoKnxUrcTfS944QOYwJFn7hO4TKNjkzMQrtHU-enpGTFdA/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYQE9j1b9TKlzmHVxoA6IpEWGB-IJKHWJzySN-49unHCJhp_QsHYOsWq0ZhW6swIqg/exec';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const PROVED_PENDING_REGISTERED_FEED_KEY = 'proved.pendingRegisteredFeed.v1';
@@ -128,24 +128,40 @@ function getRegisteredFeedId(result) {
 // Check the persisted row instead of assuming registration implies calculability.
 async function isRegisteredFeedCalculable(result) {
   const feedId = getRegisteredFeedId(result);
-  if (!feedId) return false;
-  const table = registrationState.species === 'dog' ? 'dog_feeds' : 'feeds';
+  if (!feedId) { result.calculation_unavailable_reason = 'missing_id'; return false; }
+  const table = ['feeds', 'dog_feeds'].includes(result.테이블) ? result.테이블
+    : registrationState.species === 'dog' ? 'dog_feeds' : 'feeds';
   try {
     const { data, error } = await sb.from(table)
-      .select('id,final_me,verified,searchable_before_review')
+      .select('id,type,final_me,verified,searchable_before_review')
       .eq('id', feedId)
       .maybeSingle();
-    if (error || !data) return false;
-    return Number(data.final_me) > 0 &&
-      (data.verified === true || data.searchable_before_review === true);
+    if (error || !data) { result.calculation_unavailable_reason = 'lookup_failed'; return false; }
+    result.type = data.type;
+    result.species = table === 'dog_feeds' ? 'dog' : 'cat';
+    const hasCalories = Number.isFinite(Number(data.final_me)) && Number(data.final_me) > 0;
+    const visible = data.verified === true || data.searchable_before_review === true;
+    result.calculation_unavailable_reason = !hasCalories ? 'no_calories' : !visible ? 'not_visible' : null;
+    return hasCalories && visible;
   } catch (error) {
     console.warn('Could not confirm feed calculator availability.', error);
+    result.calculation_unavailable_reason = 'lookup_failed';
     return false;
   }
 }
 
 const PENDING_NUTRITION_MESSAGE =
-  '제품은 등록되었지만 급여량 계산에 필요한 정보를 확인 중입니다. 관리자 검수 후 정상등록 됩니다.';
+  '제품을 저장했습니다. 표시 열량 또는 열량 추정에 필요한 성분이 없어 아직 급여량을 계산할 수 없습니다.';
+
+function getRegistrationPendingMessage(result) {
+  if (['lookup_failed', 'missing_id'].includes(result.calculation_unavailable_reason)) {
+    return '등록 결과를 계산기에서 불러올 수 있는지 확인하지 못했습니다. 잠시 후 계산기에서 제품을 찾아 주세요.';
+  }
+  if (result.calculation_unavailable_reason === 'not_visible') {
+    return '제품은 저장되었지만 아직 계산기 검색에 표시되지 않습니다.';
+  }
+  return PENDING_NUTRITION_MESSAGE;
+}
 
 function getRegisteredProductName(result, fallbackName = '') {
   const value = Array.isArray(result?.제품명) ? result.제품명[0] : result?.제품명;
@@ -155,8 +171,8 @@ function getRegisteredProductName(result, fallbackName = '') {
 function savePendingRegisteredFeed(result, fallbackName) {
   const pending = {
     version: 1,
-    species: registrationState.species,
-    type: registrationState.type,
+    species: ['cat', 'dog'].includes(result.species) ? result.species : registrationState.species,
+    type: ['dry', 'wet'].includes(result.type) ? result.type : registrationState.type,
     slotIndex: registrationState.slotIndex,
     feedId: getRegisteredFeedId(result),
     productName: getRegisteredProductName(result, fallbackName),
@@ -187,8 +203,12 @@ function showReturnNotice({ result = {}, fallbackName = '', searchable = false }
     if (calculatorReturnTimer) window.clearTimeout(calculatorReturnTimer);
     calculatorReturnTimer = null;
     try { sessionStorage.removeItem(PROVED_PENDING_REGISTERED_FEED_KEY); } catch (_) { /* optional storage */ }
-    message.textContent = PENDING_NUTRITION_MESSAGE;
-    button.hidden = true;
+    message.textContent = result.calculation_unavailable_reason === 'no_calories'
+      ? '열량이 보이는 라벨 사진으로 제품 정보를 보완할 수 있습니다.'
+      : '계산기로 돌아가 다른 사료를 선택하거나 나중에 이 제품을 다시 찾아볼 수 있습니다.';
+    button.hidden = false;
+    button.textContent = '계산기로 돌아가기';
+    button.onclick = returnToCalculator;
     complete.classList.add('is-visible');
     complete.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
@@ -294,7 +314,7 @@ async function submitTextRegistration() {
       const calculable = await isRegisteredFeedCalculable(result);
       renderMessage('feedTextRequestMsg', calculable
         ? `이미 등록된 제품입니다. ${result.제품명 || ''}`.trim()
-        : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+        : getRegistrationPendingMessage(result), calculable ? 'success' : 'warning');
       showReturnNotice({ result, fallbackName: query, searchable: calculable });
       return;
     }
@@ -303,7 +323,7 @@ async function submitTextRegistration() {
     const calculable = await isRegisteredFeedCalculable(result);
     renderMessage('feedTextRequestMsg', calculable
       ? `${names} 등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.`
-      : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+      : getRegistrationPendingMessage(result), calculable ? 'success' : 'warning');
     input.value = '';
     showReturnNotice({ result, fallbackName: names, searchable: calculable });
   } catch (error) {
@@ -352,7 +372,7 @@ async function submitImageRegistration() {
       const calculable = await isRegisteredFeedCalculable(result);
       renderMessage('uploadMsg', calculable
         ? `이미 등록된 제품입니다. ${getRegisteredProductName(result)}`.trim()
-        : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+        : getRegistrationPendingMessage(result), calculable ? 'success' : 'warning');
       showReturnNotice({ result, searchable: calculable });
       return;
     }
@@ -360,7 +380,7 @@ async function submitImageRegistration() {
     const calculable = await isRegisteredFeedCalculable(result);
     renderMessage('uploadMsg', calculable
       ? '등록 완료 — 계산기에서 ‘검수 전’ 표시로 검색할 수 있습니다.'
-      : PENDING_NUTRITION_MESSAGE, calculable ? 'success' : 'warning');
+      : getRegistrationPendingMessage(result), calculable ? 'success' : 'warning');
     document.getElementById('uploadInput').value = '';
     registrationState.imageFile = null;
     document.getElementById('uploadPrompt').textContent = calculable ? '분석 완료' : '검수 대기';

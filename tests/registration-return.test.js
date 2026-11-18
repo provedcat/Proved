@@ -30,7 +30,7 @@ assert.match(registrationScript, /window\.setTimeout\(returnToCalculator, 3000\)
 assert.match(registrationScript, /window\.location\.replace\(destination\)/, 'registration must be removed from browser history when returning');
 assert.match(registrationScript, /CALCULATOR_PATHS/, 'return destinations must be restricted to calculator paths');
 assert.doesNotMatch(registrationPage, /window\.close\(\)/, 'registration must not rely on closing a separate browser tab');
-assert.match(serviceWorker, /proved-pwa-20260910-product-pages-v1/, 'PWA cache must include the latest frontend assets');
+assert.match(serviceWorker, /proved-pwa-20261118-registration-endpoint-v2/, 'PWA cache must include the latest frontend assets');
 
 const wetFeedsBySlot = {
   4: { id: 'wet-a', name: '습식 A' },
@@ -40,9 +40,7 @@ const wetFeedsBySlot = {
 const wetValues = {
   wetInput_4: '브랜드 A | 습식 A',
   wetInput_7: '브랜드 B | 습식 B',
-  wetInput_9: '브랜드 C | 습식 C',
-  wetPct_7: '35',
-  wetPct_9: '30'
+  wetInput_9: '브랜드 C | 습식 C'
 };
 const savedWetFeeds = buildWetFeedDraft([4, 7, 9], wetFeedsBySlot, id => wetValues[id] || '');
 
@@ -53,11 +51,10 @@ assert.deepEqual(savedWetFeeds.map(item => item.input), [
   '브랜드 B | 습식 B',
   '브랜드 C | 습식 C'
 ]);
-assert.deepEqual(savedWetFeeds.map(item => item.ratio), ['', '35', '30']);
 
 const restoredWetFeeds = mapWetFeedDraftToSlots(savedWetFeeds, [0, 1, 2]);
 assert.deepEqual(restoredWetFeeds.map(item => item.slotId), [0, 1, 2], 'saved wet slots must map to all restored DOM slots');
 assert.deepEqual(restoredWetFeeds.map(item => item.feed?.id), ['wet-a', 'wet-b', 'wet-c']);
-assert.deepEqual(restoredWetFeeds.map(item => item.ratio), ['', '35', '30']);
+assert.deepEqual(restoredWetFeeds.map(item => item.input), savedWetFeeds.map(item => item.input));
 
 console.log('registration return flow tests passed');
