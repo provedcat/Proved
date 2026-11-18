@@ -318,7 +318,7 @@
   .condition-toolbar { align-items: flex-start; gap: 18px; }
   .condition-scope-controls { gap: 24px 32px; }
   .condition-folders {
-    --front-height: min(540px, 62vh);
+    --front-height: clamp(280px, 40vh, 360px);
     height: calc(var(--front-height) + 38px);
     padding-top: 38px;
   }

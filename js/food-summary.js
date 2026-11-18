@@ -79,12 +79,7 @@
       ? country + '에서 제조된 ' : '';
     const meal = feed.완전식여부 === '주식' ? '주식 ' : feed.완전식여부 === '보조식' ? '보조식 ' : '';
     const form = feed.type === 'wet' ? '습식사료' : feed.type === 'dry' ? '건사료' : '사료';
-    const lastCharacter = name.slice(-1);
-    const isHangulEnding = /^[가-힣]$/.test(lastCharacter);
-    const topic = isHangulEnding
-      ? ((lastCharacter.charCodeAt(0) - 0xAC00) % 28 === 0 ? '는' : '은')
-      : ' 제품은';
-    const paragraphs = [escapeHtml(name + topic + ' ' + origin + animal + ' ' + meal + form + '입니다.')];
+    const paragraphs = [escapeHtml(origin + animal + ' ' + meal + form + '입니다.')];
 
     const kcalPerKg = Number(feed.final_me);
     const canCalculate = feed.완전식여부 === '주식'
@@ -124,7 +119,7 @@
       ratioText += ' ' + fediafRatioText(feed, species, name, ratio);
       const ratioHtml = escapeHtml(ratioText).replace('FEDIAF(2025)',
         '<a href="https://www.europeanpetfood.org/wp-content/uploads/2025/09/FEDIAF-Nutritional-Guidelines_2025.pdf" target="_blank" rel="noopener noreferrer">FEDIAF(2025)</a>');
-      paragraphs.push(ratioHtml + '<span class="food-metric-summary__subline">비율만 비교한 결과이며 칼슘·인의 절대 함량이나 전체 영양 적합성을 의미하지 않습니다.</span>');
+      paragraphs.push(ratioHtml);
     }
 
     const calculator = species === 'dog' ? '/dog-food-calculator/' : '/cat-food-calculator/';

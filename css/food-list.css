@@ -1276,7 +1276,8 @@ button { cursor: pointer; }
   .food-metric__value { font-size: 25px; }
   .food-nutrition-table th,
   .food-nutrition-table td { padding: 14px 6px; }
-  .food-mineral-grid { grid-template-columns: 1fr; }
+  .food-mineral-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .food-mineral-item:last-child { grid-column: 1 / -1; }
   .food-mineral-item { min-height: 120px; }
   .food-additive-row,
   .food-source-row { grid-template-columns: 1fr; gap: 7px; }

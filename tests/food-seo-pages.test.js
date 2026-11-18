@@ -120,13 +120,13 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   };
   const dryHtml = summary(orijen, 'cat', '오리젠 키튼');
   assert.match(dryHtml, /캐나다에서 제조된 고양이 주식 건사료/);
-  assert.match(dryHtml, /오리젠 키튼은 캐나다에서/);
-  assert.match(dryHtml, /<div class="food-metric-summary"><p>오리젠 키튼은 캐나다에서 제조된 고양이 주식 건사료입니다\.<\/p><p>만약 하루/);
+  assert.match(dryHtml, /캐나다에서/);
+  assert.match(dryHtml, /<div class="food-metric-summary"><p>캐나다에서 제조된 고양이 주식 건사료입니다\.<\/p><p>만약 하루/);
   assert.match(dryHtml, /49g입니다\.<span class="food-metric-summary__subline">\(150kcal는 약 36g, 250kcal는 약 61g\)\.<\/span><\/p><p>등록된 칼슘:인/);
   assert.match(dryHtml, /1\.3:1입니다\. <a href="https:\/\/www\.europeanpetfood\.org\/wp-content\/uploads\/2025\/09\/FEDIAF-Nutritional-Guidelines_2025\.pdf"/);
   assert.match(dryHtml, /키튼\(1:1~1\.5:1\) 및 어덜트\(1:1~2:1\) 칼슘:인 비율 기준을 충족합니다/);
-  assert.match(dryHtml, /비율만 비교한 결과이며 칼슘·인의 절대 함량이나 전체 영양 적합성을 의미하지 않습니다/);
-  assert.match(dryHtml, /<\/span><\/p><p>필요량은 개체마다 다릅니다\. <a href=/);
+  assert.doesNotMatch(dryHtml, /비율만 비교한 결과이며/);
+  assert.match(dryHtml, /<\/p><p>필요량은 개체마다 다릅니다\. <a href=/);
   assert.doesNotMatch(dryHtml, /AAFCO.*비율 기준/);
 
   assert.match(dryHtml, /200kcal이고 이 제품만 급여한다면 약 49g입니다/);
@@ -144,9 +144,9 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
   };
   const wetHtml = summary(acana, 'cat', '아카나 청크 인 브로스 살몬 앤 치킨 레시피 어덜트 캣');
   assert.match(wetHtml, /태국에서 제조된 고양이 주식 습식사료/);
-  assert.match(wetHtml, /아카나 청크 인 브로스 살몬 앤 치킨 레시피 어덜트 캣은 태국에서/);
-  assert.match(summary(orijen, 'cat', '동결건조 돼지'), /동결건조 돼지는 캐나다에서/);
-  assert.match(summary(acana, 'cat', '청크 85g'), /청크 85g 제품은 태국에서/);
+  assert.match(wetHtml, /태국에서/);
+  assert.match(summary(orijen, 'cat', '동결건조 돼지'), /캐나다에서/);
+  assert.match(summary(acana, 'cat', '청크 85g'), /태국에서/);
   assert.match(wetHtml, /200kcal이고 이 제품만 급여한다면 약 275g입니다/);
   assert.match(wetHtml, /약 275g 급여 시 사료로부터 섭취 가능한 수분량은 표시 수분 함량 기준 약 229mL/);
   assert.match(wetHtml, /275g입니다\.<span class="food-metric-summary__subline">약 275g 급여 시 사료로부터 섭취 가능한 수분량은 표시 수분 함량 기준 약 229mL입니다\.<\/span>/);
@@ -201,7 +201,7 @@ test('핵심 수치 설명은 검증된 열량으로 급여량을 계산하고 �
 
   const escaped = summary({ ...orijen, 원산지: '<script>alert(1)</script>' }, 'cat', '공격 & 테스트');
   assert.doesNotMatch(escaped, /<script>/);
-  assert.match(escaped, /공격 &amp; 테스트/);
+  assert.doesNotMatch(escaped, /공격 &amp; 테스트/);
   assert.match(browser, /window\.ProvedFoodSummary\?\.render\(feed, state\.species, seoProductName\(feed, brand, product\)\)/);
   assert.match(browser, /'product_class', 'life_stage'/);
   assert.match(browser, /feed\._lifeStageSlugs = sorted\.filter\(tag => tag\.category === 'life_stage'\)/);
