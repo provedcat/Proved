@@ -60,7 +60,7 @@
   };
 
   const listColumns = [
-    'id', 'type', '제조사', '제품명', '완전식여부', '메인단백질',
+    'id', 'created_at', 'type', '제조사', '제품명', '완전식여부', '메인단백질',
     'final_me', 'ca_p_ratio', 'verified', 'verification_status',
     'searchable_before_review', 'brand_id', 'brands(name,name_ko,search_aliases,official_url)'
   ].join(',');
@@ -503,7 +503,7 @@
     state.species = detailRoute?.species || normalizeEnum(params.get('species'), ['cat', 'dog'], 'all');
     state.type = normalizeEnum(params.get('type'), ['all', 'dry', 'wet'], 'all');
     state.role = normalizeEnum(params.get('role'), ['all', '주식', '보조식'], 'all');
-    state.sort = brandScope ? 'product' : normalizeEnum(params.get('sort'), ['brand', 'product'], 'brand');
+    state.sort = brandScope ? normalizeEnum(params.get('sort'), ['product', 'newest'], 'product') : normalizeEnum(params.get('sort'), ['brand', 'product', 'newest'], 'brand');
     state.query = String(params.get('q') || '').trim().slice(0, 120);
     state.selectedTagIds = [...new Set(String(params.get('tags') || '').split(',').map(value => value.trim()).filter(Boolean))].slice(0, 20);
     state.loaded = Math.max(PAGE_SIZE, Number(history.state?.foodFinder?.loaded) || PAGE_SIZE);
@@ -586,7 +586,7 @@
     els.speciesFilters.addEventListener('click', event => setButtonFilter(event, 'species'));
     els.typeFilters.addEventListener('click', event => setButtonFilter(event, 'type'));
     els.roleFilters.addEventListener('click', event => setButtonFilter(event, 'role'));
-    els.sortSelect.addEventListener('change', () => { state.sort = normalizeEnum(els.sortSelect.value, ['brand', 'product'], 'brand'); updateFinder(true); });
+    els.sortSelect.addEventListener('change', () => { state.sort = normalizeEnum(els.sortSelect.value, ['brand', 'product', 'newest'], brandScope ? 'product' : 'brand'); updateFinder(true); });
     els.conditionFolders?.addEventListener('input', event => {
       const input = event.target.closest('[data-condition-search]');
       if (!input) return;
@@ -814,7 +814,8 @@
     if (state.role !== 'all') query = query.eq('완전식여부', state.role);
     const ids = state.matchingFeedIds[species];
     if (Array.isArray(ids)) query = ids.length ? query.in('id', ids) : query.eq('id', '00000000-0000-0000-0000-000000000000');
-    if (state.sort === 'product') query = query.order('제품명').order('제조사').order('id');
+    if (state.sort === 'newest') query = query.order('created_at', { ascending: false, nullsFirst: false }).order('id');
+    else if (state.sort === 'product') query = query.order('제품명').order('제조사').order('id');
     else query = query.order('제조사').order('제품명').order('id');
     return query.range(from, to);
   }
@@ -900,10 +901,10 @@
     const products = await loadSearchCatalog();
     const matches = products.filter(feed => matchesFoodSearch(feed, query));
     const filtered = matches.filter(matchesCurrentFilters).sort((a, b) =>
-      (brandScope ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b)
+      (brandScope || state.sort === 'newest' ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b)
     );
     const outside = filtered.length ? [] : matches.filter(feed => !matchesCurrentFilters(feed))
-      .sort((a, b) => (brandScope ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b));
+      .sort((a, b) => (brandScope || state.sort === 'newest' ? 0 : foodSearchRelevance(b, query) - foodSearchRelevance(a, query)) || compareFeedRows(a, b));
     const suggestions = matches.length ? [] : (window.ProvedFoodSearchFuzzy?.suggestFoods(
       products, query, feed => feed._searchText, 3
     ) || []);
@@ -926,7 +927,7 @@
     const matches = rows
       .filter(row => matchesFoodSearch(row, state.query))
       .sort((a, b) =>
-        foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query)
+        (state.sort === 'newest' ? 0 : foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query))
         || compareFeedRows(a, b)
       );
 
@@ -966,7 +967,7 @@
       const failed = responses.find(response => response.error); if (failed) throw failed.error;
       const combined = responses.flatMap((response, index) => (response.data || []).map(row => ({ ...row, species: speciesList[index] })));
       combined.sort(state.query
-        ? (a, b) => foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query) || compareFeedRows(a, b)
+        ? (a, b) => (state.sort === 'newest' ? 0 : foodSearchRelevance(b, state.query) - foodSearchRelevance(a, state.query)) || compareFeedRows(a, b)
         : compareFeedRows);
       state.rows = combined.slice(0, state.loaded); state.total = responses.reduce((sum, response) => sum + (Number(response.count) || 0), 0);
       state.suggestions = [];
@@ -979,6 +980,11 @@
   }
 
   function compareFeedRows(a, b) {
+    if (state.sort === 'newest') {
+      const time = row => Number.isFinite(Date.parse(row.created_at)) ? Date.parse(row.created_at) : -Infinity;
+      const aTime = time(a), bTime = time(b);
+      return (aTime === bTime ? 0 : aTime > bTime ? -1 : 1) || String(a.id).localeCompare(String(b.id));
+    }
     const primaryA = state.sort === 'product' ? String(a.제품명 || '') : getBrand(a).name;
     const primaryB = state.sort === 'product' ? String(b.제품명 || '') : getBrand(b).name;
     const secondaryA = state.sort === 'product' ? getBrand(a).name : String(a.제품명 || '');

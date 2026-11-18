@@ -250,7 +250,7 @@ test('검색 결과 0건에서 오타 후보와 사료 등록 요청을 함께 �
     read('js/feed-registration.js'), read('feed-registration/index.html')
   ]);
   assert.match(html, /food-search-fuzzy\.js\?v=20261014-search-alias-v1/);
-  assert.match(html, /food-list\.js\?v=20261105-managed-filters-v1/);
+  assert.match(html, /food-list\.js\?v=20261118-newest-v1/);
   assert.match(source, /ProvedFoodSearchFuzzy\?\.suggestFoods/);
   assert.match(source, /혹시 이 사료를 찾으셨나요\?/);
   assert.match(source, /이 사료를 찾아주세요/);
@@ -316,6 +316,7 @@ test('브랜드 Finder는 검색·필터 해제·URL 복원에서도 브랜드 �
     URLSearchParams, Set, Map, console
   };
   context.window.history = context.history;
+  context.window.history = context.history;
   vm.createContext(context);
   vm.runInContext(source.slice(0, source.indexOf('  foodSb.auth.onAuthStateChange')) + '\n globalThis.finder = { state, readStateFromUrl, writeListStateToUrl, buildListQuery, matchesCurrentFilters, fetchPagedSearchRows };\n})();', context);
   const { finder } = context;
@@ -330,4 +331,29 @@ test('브랜드 Finder는 검색·필터 해제·URL 복원에서도 브랜드 �
   finder.state.species = finder.state.type = finder.state.role = 'all';
   assert.equal(finder.matchesCurrentFilters({ brand_id: 'other-brand' }), false);
   assert.equal(finder.matchesCurrentFilters({ brand_id: scope.id }), true);
+});
+
+
+test('최신 등록순은 종 통합·검색·브랜드 URL에서 등록 시각 내림차순을 유지한다', async () => {
+  const source = await read('js/food-list.js');
+  const calls = [];
+  const query = new Proxy({}, { get: (_, method) => (...args) => { calls.push([method, ...args]); return query; } });
+  const context = {
+    window: { supabase: { createClient: () => ({ from: () => query }) }, location: { pathname: '/food/', search: '?sort=newest' } },
+    document: { getElementById: () => null }, history: { state: null }, URLSearchParams, Set, Map, console
+  };
+  context.window.history = context.history;
+  vm.createContext(context);
+  vm.runInContext(source.slice(0, source.indexOf('  foodSb.auth.onAuthStateChange')) + '\n globalThis.finder = { state, readStateFromUrl, buildListQuery, compareFeedRows };\n})();', context);
+  const { finder } = context;
+  finder.readStateFromUrl();
+  assert.equal(finder.state.sort, 'newest');
+  finder.buildListQuery('cat', 0, 23);
+  assert.ok(calls.some(([method, column, options]) => method === 'order' && column === 'created_at' && options.ascending === false && options.nullsFirst === false));
+  const rows = [
+    { id: 'old', species: 'cat', created_at: '2026-11-01T00:00:00Z' },
+    { id: 'unknown', species: 'cat', created_at: null },
+    { id: 'new', species: 'dog', created_at: '2026-11-18T00:00:00Z' }
+  ];
+  assert.deepEqual(rows.sort(finder.compareFeedRows).map(row => row.id), ['new', 'old', 'unknown']);
 });
