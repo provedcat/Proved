@@ -22,7 +22,7 @@ const SELECT_COLUMNS = [
   'id', 'type', '제조사', '원산지', '제품명', '완전식여부', '메인단백질', '전성분',
   '조단백', '조지방', '조회분', '조섬유', '수분', '칼슘', '인', 'ca_p_ratio',
   'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
-  'final_me', 'cal_source', 'calorie_note', 'calorie_source_url', 'source_urls',
+  'final_me', 'nfe', 'cal_source', 'calorie_note', 'calorie_source_url', 'source_urls',
   'needs_calorie_review', 'verified', 'verification_status', 'source_region', 'source_level', 'submission_method', 'searchable_before_review',
   'brand_id', 'brands(id,name,name_ko,official_url,slug,logo_url,search_aliases)'
 ].join(',');

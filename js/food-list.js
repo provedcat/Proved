@@ -69,7 +69,7 @@
     'id', 'type', '제조사', '원산지', '제품명', '완전식여부', '메인단백질', '전성분',
     '조단백', '조지방', '조회분', '조섬유', '수분', '칼슘', '인', 'ca_p_ratio',
     'dm_단백', 'dm_지방', 'dm_회분', 'dm_섬유', 'dm_칼슘', 'dm_인', '겔화제',
-    'final_me', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
+    'final_me', 'nfe', 'cal_unit', 'cal_source', 'eb_단백', 'eb_지방', 'eb_탄수화물',
     'eb_칼슘', 'eb_인', 'verified', 'verification_status', 'searchable_before_review',
     'source_region', 'source_level', 'submission_method', 'calorie_confidence', 'needs_calorie_review', 'calorie_note', 'calorie_source_url', 'source_urls', '쿠팡_링크', 'brand_id',
     'brands(name,name_ko,official_url)'

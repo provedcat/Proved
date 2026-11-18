@@ -9,8 +9,10 @@ test('국내 젤리 값: Ca:P·차감 NFE·기존 습식계수로 계산하고 �
   assert.equal(result.base_estimated_me, 492);
   assert.equal(result.final_me, 693.7);
   assert.equal(result.cal_source, 'estimated_corrected');
+  assert.equal(result.needs_calorie_review, false);
   const missing = calculate({ ...domestic, 수분: null });
   assert.equal(missing.final_me, null);
+  assert.equal(missing.needs_calorie_review, true);
   assert.equal(missing.dm_단백, null);
   assert.equal(missing.eb_단백, null);
   assert.equal(rows(missing)[0][1], '검수 완료');
@@ -41,4 +43,12 @@ test('국내 열량·유럽 성분 예외를 출처별로 구분하고 자유 �
   assert.match(html, /국내 공식 값/);
   assert.match(html, /국내 유통 구판 기준/);
   assert.doesNotMatch(html, /확정 불가로 비워둠/);
+});
+
+test('제품 HTML과 동적 상세 조회가 NFE 필드를 요청한다', () => {
+  const fs = require('node:fs');
+  for (const path of ['js/food-list.js', 'scripts/generate-food-pages.mjs']) {
+    const source = fs.readFileSync(require('node:path').join(__dirname, '..', path), 'utf8');
+    assert.match(source, /'final_me', 'nfe'/);
+  }
 });

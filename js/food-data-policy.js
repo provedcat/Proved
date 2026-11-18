@@ -42,6 +42,7 @@
       out.corrected_me = null;
       out.cal_source = 'manual_review';
     }
+    out.needs_calorie_review = !(out.final_me > 0);
     for (const [raw, target] of [['조단백','eb_단백'], ['조지방','eb_지방'], ['nfe','eb_탄수화물'], ['칼슘','eb_칼슘'], ['인','eb_인']]) {
       const value = number(out[raw]);
       out[target] = out.final_me > 0 && value !== null ? rounded(value * 10000 / out.final_me) : null;

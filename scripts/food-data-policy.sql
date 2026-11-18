@@ -35,7 +35,7 @@ begin
    else me := base; source := 'estimated'; end if;
  else source := 'manual_review'; end if;
  patch := jsonb_build_object('nfe',nfe,'ca_p_ratio',case when ca>=0 and phosphorus>0 then round(ca/phosphorus,2) else null end,
- 'base_estimated_me',base,'corrected_me',corrected,'final_me',me,'cal_source',source);
+ 'base_estimated_me',base,'corrected_me',corrected,'final_me',me,'cal_source',source,'needs_calorie_review',me is null);
  foreach pair slice 1 in array array[['조단백','dm_단백'],['조지방','dm_지방'],['조회분','dm_회분'],['조섬유','dm_섬유'],['칼슘','dm_칼슘'],['인','dm_인']] loop
    value := (f->>pair[1])::numeric;
    patch := patch || jsonb_build_object(pair[2],case when dm is not null and value is not null then round(value*dm,case when pair[1] in ('칼슘','인') then 3 else 2 end) else null end);
