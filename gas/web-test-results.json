@@ -1,0 +1,106 @@
+[
+  {
+    "file": "about-reference-layout.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "calculator-diet-handoff.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "calculator-mobile-flow.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "calculator-plan-adjust.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "cat-calculator.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "design-rules.test.js",
+    "passed": false,
+    "failures": [
+      "✖ DESIGN.md is byte-for-byte identical to the generated inventory artifact (23.1643ms)",
+      "✖ failing tests:",
+      "✖ DESIGN.md is byte-for-byte identical to the generated inventory artifact (23.1643ms)"
+    ]
+  },
+  {
+    "file": "dog-calculator.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "food-coupang-cta.test.js",
+    "passed": false,
+    "failures": [
+      "AssertionError [ERR_ASSERTION]: detail SELECT must include the stored Coupang link"
+    ]
+  },
+  {
+    "file": "food-coupang-desktop-style.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "food-search-fuzzy.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "food-seo-pages.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "food-tag-taxonomy.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "layout-contract.test.js",
+    "passed": false,
+    "failures": [
+      "AssertionError [ERR_ASSERTION]: food/conditions/index.html must load the shared header/layout entrypoint"
+    ]
+  },
+  {
+    "file": "my-pet-weight.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "pet-avatar.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "proved-about-support.test.js",
+    "passed": true,
+    "failures": []
+  },
+  {
+    "file": "registration-return.test.js",
+    "passed": false,
+    "failures": [
+      "AssertionError [ERR_ASSERTION]: PWA cache must include the latest frontend assets"
+    ]
+  },
+  {
+    "file": "unified-food-finder.test.js",
+    "passed": false,
+    "failures": [
+      "✖ 사료 하위 메뉴는 사료 찾기와 등록 요청만 노출한다 (0.739ms)",
+      "✖ failing tests:",
+      "✖ 사료 하위 메뉴는 사료 찾기와 등록 요청만 노출한다 (0.739ms)"
+    ]
+  }
+]
