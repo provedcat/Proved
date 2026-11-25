@@ -119,7 +119,39 @@ function searchCalorie(feed) {
   };
 }
 
+function seoCategory(feed) {
+  const slugs = new Set([...(feed?._lifeStageSlugs || []), ...(feed?._seoTagSlugs || [])]);
+  const growth = slugs.has('kitten') || slugs.has('puppy');
+  const single = slugs.has('single_animal_protein');
+  return growth && single ? 'growth_single' : growth ? 'growth' : single ? 'single' : null;
+}
+
+function specializedSeoTitle(feed, species) {
+  const category = seoCategory(feed);
+  if (!category) return null;
+  const name = getProductSearchName(feed);
+  const topic = category === 'growth' ? '성장기 영양 기준·급여량'
+    : category === 'single' ? '단일단백질·칼로리·급여량'
+    : '성장기 영양 기준·단일단백질·급여량';
+  const calorie = searchCalorie(feed);
+  const verifiedCalorie = calorie && !calorie.estimated;
+  return `${name} | ${topic}${verifiedCalorie ? ` | ${calorie.per100g}kcal/100g` : ''}`;
+}
+
+function specializedSeoDescription(feed, species) {
+  const category = seoCategory(feed);
+  if (!category) return null;
+  const growth = category === 'growth' || category === 'growth_single';
+  const subject = species === 'dog' ? '강아지' : '고양이';
+  const text = growth
+    ? `성장기 ${subject}에게 필요한 영양 기준을 충족하는지 확인하고, 제품의 칼로리를 바탕으로 하루 급여량을 계산하세요.`
+    : '단일단백질 제품입니다. 동물성 단백질원과 영양성분을 확인하고 하루 급여량을 계산하세요.';
+  return category === 'growth_single' ? `단일단백질 제품입니다. ${text}` : text;
+}
+
 function buildSearchTitle(feed) {
+  const specialized = specializedSeoTitle(feed);
+  if (specialized) return specialized;
   const name = getProductSearchName(feed);
   const calorie = searchCalorie(feed);
   return calorie
@@ -160,6 +192,8 @@ function formatRatio(value) {
 }
 
 function buildDescription(feed, species) {
+  const specialized = specializedSeoDescription(feed, species);
+  if (specialized) return specialized;
   const calorie = searchCalorie(feed);
   const facts = [
     calorie
@@ -742,18 +776,17 @@ async function fetchTable(table, supabaseUrl, publishableKey) {
   return rows;
 }
 
-// Attach the existing life-stage tags before rendering FEDIAF ratio comparisons.
-// Product names are only a fallback when a product has no life-stage tag.
+// Attach life-stage and single-animal-protein tags for SEO; keep life-stage tags for FEDIAF comparisons.
 async function attachLifeStages(catFeeds, dogFeeds, supabaseUrl, publishableKey) {
   const tagUrl = new URL('/rest/v1/food_tags', supabaseUrl);
   tagUrl.searchParams.set('select', 'id,slug');
-  tagUrl.searchParams.set('category', 'eq.life_stage');
+  tagUrl.searchParams.set('or', '(category.eq.life_stage,slug.eq.single_animal_protein)');
   tagUrl.searchParams.set('is_active', 'eq.true');
   const tagsResponse = await fetch(tagUrl, { headers: { apikey: publishableKey } });
   if (!tagsResponse.ok) throw new Error('생애주기 태그 조회 실패: ' + tagsResponse.status);
   const tagRows = await tagsResponse.json();
   const slugs = new Map(tagRows.map(row => [String(row.id), String(row.slug)]));
-  if (!slugs.size) throw new Error('생애주기 태그가 없습니다.');
+  if (!slugs.size) throw new Error('SEO 대상 태그가 없습니다.');
   const wanted = 'in.(' + [...slugs.keys()].join(',') + ')';
 
   async function mapping(species, feeds) {
@@ -778,7 +811,11 @@ async function attachLifeStages(catFeeds, dogFeeds, supabaseUrl, publishableKey)
       }
       if (rows.length < PAGE_SIZE) break;
     }
-    for (const feed of feeds) feed._lifeStageSlugs = stagesByFeed.get(String(feed.id)) || [];
+    for (const feed of feeds) {
+      const matches = stagesByFeed.get(String(feed.id)) || [];
+      feed._lifeStageSlugs = matches.filter(slug => slug !== 'single_animal_protein');
+      feed._seoTagSlugs = matches;
+    }
   }
   await Promise.all([mapping('cat', catFeeds), mapping('dog', dogFeeds)]);
 }
