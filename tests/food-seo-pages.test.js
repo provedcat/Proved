@@ -657,3 +657,23 @@ test('과거 제품 주소는 동일 UUID 제품으로 복구하고 변경 주�
     await rm(tempRoot, { recursive: true, force: true });
   }
 });
+
+
+test('성장기·단일단백질 태그는 검증된 열량과 전용 검색 설명을 사용한다', async () => {
+  const { renderProductPage } = await loadGenerator();
+  const template = await readFile(path.join(__dirname, '..', 'food', 'index.html'), 'utf8');
+  const growth = renderProductPage(template, { ...CAT_FEED, _lifeStageSlugs: ['kitten'] }, 'cat');
+  assert.match(growth, /<title>[^<]*성장기 영양 기준·급여량 \| 420kcal\/100g<\/title>/);
+  assert.match(growth, /성장기 고양이에게 필요한 영양 기준을 충족하는지 확인하고/);
+  const single = renderProductPage(template, { ...CAT_FEED, _seoTagSlugs: ['single_animal_protein'] }, 'cat');
+  assert.match(single, /<title>[^<]*단일단백질·칼로리·급여량 \| 420kcal\/100g<\/title>/);
+  assert.match(single, /단일단백질 제품입니다. 동물성 단백질원/);
+  const both = renderProductPage(template, { ...CAT_FEED, _lifeStageSlugs: ['kitten'], _seoTagSlugs: ['single_animal_protein'] }, 'cat');
+  assert.match(both, /성장기 영양 기준·단일단백질·급여량/);
+  const estimated = renderProductPage(template, { ...CAT_FEED, _lifeStageSlugs: ['kitten'], cal_source: 'estimated' }, 'cat');
+  assert.doesNotMatch(estimated.match(/<title>(.*?)<\/title>/)?.[1] || '', /kcal\/100g/);
+  const pending = renderProductPage(template, { ...CAT_FEED, _seoTagSlugs: ['single_animal_protein'], needs_calorie_review: true }, 'cat');
+  assert.doesNotMatch(pending.match(/<title>(.*?)<\/title>/)?.[1] || '', /kcal\/100g/);
+  const adult = renderProductPage(template, CAT_FEED, 'cat');
+  assert.match(adult, /칼로리 \| 100g당 420kcal/);
+});
