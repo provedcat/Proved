@@ -49,3 +49,12 @@ Table Editor에서 다음을 확인한다.
 - 제품 UUID 기반 기록 및 정상적인 상세 페이지 딥링크 확인 (트랜잭션 롤백)
 - 임시 관리자 UUID를 등록한 트랜잭션에서 서버가 조회 제외하는 것 확인 (롤백)
 - 로그/집계 뷰는 일반 사용자 조회 불가
+
+## 2026-11-25 방문자 진단 v2
+- 기존 visitor UUID 키 유지. localStorage 저장 후 읽기 검증, 실패하면 sessionStorage 시도. 인증 상태를 읽을 수 없는 경우 기존 관리자 제외 정책에 따라 전송하지 않음.
+- `content_view_log_kst`에 session_id(추적이 시작된 탭 단위), visitor_id_status(new/reused), storage_type, user_agent(서버 요청 헤더), referrer_domain(탭 첫 추적 시점의 유입 도메인), landing_path(첫 추적 경로), page_path(실제 조회 경로), webdriver_reported, traffic_type, classification_reason, engagement_seconds, interaction_observed 추가.
+- 기존 24h 중복 방지 및 기존 행 보존. 기존 RPC를 사용하는 캐시된 클라이언트의 데이터도 유지되며 진단 누락 행은 unknown/legacy_no_diagnostics.
+- suspected_bot: WebDriver 또는 UA 자동화 패턴. human_estimated: 자동화 의심 신호 없이 가시 시간 10초 이상 및 신뢰 이벤트 보고. 나머지 unknown. 자동화 가능성 판단용이며 사람/검색봇 검증이 아님. verified_bot 분류는 서버/CDN IP 검증 도입 전 사용하지 않음.
+- 가시 시간은 최대 30분 내 보고된 초, 포커스/독서의 증거가 아님. 이벤트 입력값이나 전체 URL/query, IP 원문 수집 없음. SPA 전환 및 새 탭에서 세션의 의미가 다를 수 있음. 이탈 시 전송 실패 가능.
+- 기존 기록 조회 권한 비공개 유지. 보관 기간 및 삭제 정책은 별도 운영 결정 필요.
+- opt-out: /editorial/?proved_ignore_views=1; opt-in: /editorial/?proved_ignore_views=0.
