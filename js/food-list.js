@@ -387,7 +387,7 @@
   }
 
   async function getDetailCharacteristicTags(feed) {
-    if (feed) feed._lifeStageSlugs = [];
+    if (feed) { feed._lifeStageSlugs = []; feed._seoTagSlugs = []; }
     if (!feed?.id) return [];
     const mappingTable = state.species === 'dog' ? 'dog_feed_food_tags' : 'feed_food_tags';
     const feedIdColumn = state.species === 'dog' ? 'dog_feed_id' : 'feed_id';
@@ -401,7 +401,7 @@
     if (!tagIds.length) return feed.type === 'dry' ? ['익스트루전'] : [];
     const categories = ['management_purpose', 'product_class', 'life_stage', ...(feed.type === 'wet'
       ? ['preparation_type', 'ingredient_condition']
-      : ['processing_method'])];
+      : ['processing_method', 'ingredient_condition'])];
     const { data: tags, error: tagError } = await foodSb
       .from('food_tags')
       .select('id,slug,label_ko,category,sort_order,is_active')
@@ -412,6 +412,7 @@
 
     const sorted = (tags || []).sort(compareTags);
     feed._lifeStageSlugs = sorted.filter(tag => tag.category === 'life_stage').map(tag => tag.slug);
+    feed._seoTagSlugs = sorted.filter(tag => tag.slug === 'single_animal_protein').map(tag => tag.slug);
     const isVeterinary = sorted.some(tag => tag.category === 'product_class' && tag.slug === 'veterinary_diet');
     const management = sorted.filter(tag => tag.category === 'management_purpose')
       .map(tag => String(tag.label_ko || '').trim()).filter(Boolean);
@@ -1198,7 +1199,38 @@
     };
   }
 
+  function seoCategory(feed) {
+    const slugs = new Set([...(feed?._lifeStageSlugs || []), ...(feed?._seoTagSlugs || [])]);
+    const growth = slugs.has('kitten') || slugs.has('puppy');
+    const single = slugs.has('single_animal_protein');
+    return growth && single ? 'growth_single' : growth ? 'growth' : single ? 'single' : null;
+  }
+
+  function specializedSeoTitle(feed, brand, product) {
+    const category = seoCategory(feed);
+    if (!category) return null;
+    const name = seoProductName(feed, brand, product);
+    const topic = category === 'growth' ? '성장기 영양 기준·급여량'
+      : category === 'single' ? '단일단백질·칼로리·급여량'
+      : '성장기 영양 기준·단일단백질·급여량';
+    const calorie = seoCalorie(feed);
+    return `${name} | ${topic}${calorie && !calorie.estimated ? ` | ${calorie.per100g}kcal/100g` : ''}`;
+  }
+
+  function specializedSeoDescription(feed, species) {
+    const category = seoCategory(feed);
+    if (!category) return null;
+    const growth = category === 'growth' || category === 'growth_single';
+    const subject = species === 'dog' ? '강아지' : '고양이';
+    const text = growth
+      ? `성장기 ${subject}에게 필요한 영양 기준을 충족하는지 확인하고, 제품의 칼로리를 바탕으로 하루 급여량을 계산하세요.`
+      : '단일단백질 제품입니다. 동물성 단백질원과 영양성분을 확인하고 하루 급여량을 계산하세요.';
+    return category === 'growth_single' ? `단일단백질 제품입니다. ${text}` : text;
+  }
+
   function buildSeoTitle(feed, brand, product) {
+    const specialized = specializedSeoTitle(feed, brand, product);
+    if (specialized) return specialized;
     const name = seoProductName(feed, brand, product);
     const calorie = seoCalorie(feed);
     return calorie
@@ -1207,6 +1239,8 @@
   }
 
   function buildSeoDescription(feed, brand, product) {
+    const specialized = specializedSeoDescription(feed, getSpeciesLabel() === '강아지' ? 'dog' : 'cat');
+    if (specialized) return specialized;
     const calorie = seoCalorie(feed);
     const facts = [
       calorie
