@@ -1,0 +1,155 @@
+{
+  "total": 37,
+  "passed": 37,
+  "failed": 0,
+  "reports": [
+    {
+      "name": "existing matching fixtures",
+      "passed": true
+    },
+    {
+      "name": "existing compatibility price fixtures",
+      "passed": true
+    },
+    {
+      "name": "existing Gemini evidence fixtures",
+      "passed": true
+    },
+    {
+      "name": "1 GI Biome and GI Biome Stress are blocked both directions",
+      "passed": true
+    },
+    {
+      "name": "2 cat Ziwi and dog Ziwi remain distinct",
+      "passed": true
+    },
+    {
+      "name": "3 explicit 185g single wins across eligible scores",
+      "passed": true
+    },
+    {
+      "name": "4 85g six pack selected before 24; total weight and unit calculation",
+      "passed": true
+    },
+    {
+      "name": "5 missing and weight-only alternatives block smallest bundle",
+      "passed": true
+    },
+    {
+      "name": "6 unknown brands are not matched; clear mismatch cannot use AI",
+      "passed": true
+    },
+    {
+      "name": "7 samples, repacks and gifts excluded",
+      "passed": true
+    },
+    {
+      "name": "8 bonus count 6+6 is 12 and 85g x6 is 510g",
+      "passed": true
+    },
+    {
+      "name": "9 model rate limit routes retryable without human queue",
+      "passed": true
+    },
+    {
+      "name": "10 selling price alone never persists a normal price",
+      "passed": true
+    },
+    {
+      "name": "11 official/importer reference remains protected",
+      "passed": true
+    },
+    {
+      "name": "12 repeated reference persistence uses atomic RPC and no PATCH",
+      "passed": true
+    },
+    {
+      "name": "model considers all identical options; code chooses single",
+      "passed": true
+    },
+    {
+      "name": "model cannot hide unknown competing option",
+      "passed": true
+    },
+    {
+      "name": "hallucinated ID and coercible confidence rejected",
+      "passed": true
+    },
+    {
+      "name": "schema rejects omitted/duplicate entries and invented package",
+      "passed": true
+    },
+    {
+      "name": "unknown alias can receive semantic identity review",
+      "passed": true
+    },
+    {
+      "name": "all explicit hard blocks survive high-confidence model",
+      "passed": true
+    },
+    {
+      "name": "unknown package never becomes a single, including dry",
+      "passed": true
+    },
+    {
+      "name": "dry policy prefers 1-2kg then nearest under 5kg",
+      "passed": true
+    },
+    {
+      "name": "multi-weight ambiguity and metadata bonus conflict route to human",
+      "passed": true
+    },
+    {
+      "name": "cached insufficient evidence skips model but changed title re-runs",
+      "passed": true
+    },
+    {
+      "name": "normal evidence tied to exact seller, title, pack, expiry",
+      "passed": true
+    },
+    {
+      "name": "partial search failure routes retry rather than choosing incomplete results",
+      "passed": true
+    },
+    {
+      "name": "GAS timeout and format errors do not enter human queue",
+      "passed": true
+    },
+    {
+      "name": "reprocess does not advance cursor after retryable failure",
+      "passed": true
+    },
+    {
+      "name": "reprocess deduplicates feed and records before/after",
+      "passed": true
+    },
+    {
+      "name": "cached semantic identity is reapplied when normal evidence becomes available",
+      "passed": true
+    },
+    {
+      "name": "competing verified normal prices route manual review",
+      "passed": true
+    },
+    {
+      "name": "irrelevant conflicting package does not create a human review item",
+      "passed": true
+    },
+    {
+      "name": "whole write path accepts proven normal price through RPC only",
+      "passed": true
+    },
+    {
+      "name": "whole write path queues missing normal price as evidence only",
+      "passed": true
+    },
+    {
+      "name": "write failure is persisted for operational retry",
+      "passed": true
+    },
+    {
+      "name": "Gemini request emits complete JSON schema and classifies HTTP/JSON failure",
+      "passed": true
+    }
+  ]
+}
