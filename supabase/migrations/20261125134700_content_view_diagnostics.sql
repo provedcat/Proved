@@ -77,10 +77,24 @@ begin
     return false;
   end if;
 
-  -- Request UA is observed by the server, but remains spoofable.
-  v_ua := left(nullif(current_setting('request.headers',true),'')::jsonb->>'user-agent', 256);
+  -- User-Agent is observed by the server but remains spoofable.
+  v_ua := left(nullif(current_setting('request.headers',true),'')::jsonb->>'user-agent',256);
   v_ref := lower(left(p_context->>'referrer_domain',253));
-  if v_ref !~ '^[a-z0-9.-]+
+  if v_ref !~ '^[a-z0-9.-]+$' then v_ref := null; end if;
+  if (p_context->>'session_id') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' then
+    v_session := (p_context->>'session_id')::uuid;
+  end if;
+  v_storage := case when p_context->>'storage_type' in ('localStorage','sessionStorage') then p_context->>'storage_type' end;
+  v_status := case when p_context->>'visitor_id_status' in ('new','reused') then p_context->>'visitor_id_status' end;
+  v_landing := left(p_context->>'landing_path',300);
+  v_actual := left(p_context->>'page_path',300);
+  if v_landing !~ '^/(?:food|editorial|cat-food-calculator|dog-food-calculator|guide|about|feed-registration)(?:/[[:alnum:]_%.-]+)*/?$|^/$' then v_landing := null; end if;
+  if v_actual !~ '^/(?:food|editorial)(?:/[[:alnum:]_%.-]+)*/?$' then v_actual := null; end if;
+  v_webdriver := p_context->'webdriver' = 'true'::jsonb;
+  v_suspect := coalesce(v_webdriver,false) or coalesce(v_ua ~* '(bot|crawler|spider|headless|phantomjs|slurp|python-requests|curl/|wget/)',false);
+  -- Also retain the old per-content lock for interoperability with cached clients.
+  perform pg_advisory_xact_lock(hashtextextended(p_visitor_id::text,0));
+  perform pg_advisory_xact_lock(hashtextextended(p_visitor_id::text || ':' || v_key,0));
   if exists (
     select 1 from public.content_view_events
     where visitor_id = p_visitor_id and content_key = v_key
@@ -93,114 +107,20 @@ begin
 
   insert into public.content_view_events
     (visitor_id,content_type,content_key,content_path,content_title,previous_content_key,
-     event_token, session_id, visitor_id_status, storage_type, user_agent, referrer_domain, landing_path, page_path,
-     webdriver_reported, traffic_type, classification_reason, engagement_seconds, interaction_observed)
+     event_token,session_id,visitor_id_status,storage_type,user_agent,referrer_domain,landing_path,page_path,
+     webdriver_reported,traffic_type,classification_reason,engagement_seconds,interaction_observed)
   values
     (p_visitor_id,p_content_type,v_key,v_path,left(coalesce(nullif(btrim(p_content_title),''),v_key),180),
      case when length(p_previous_content_key) <= 160 then p_previous_content_key else null end,
-     p_event_token, v_session, v_status, v_storage, v_ua, v_ref, v_landing, v_actual,
-     v_webdriver, case when v_suspect then 'suspected_bot' else 'unknown' end,
+     p_event_token,v_session,v_status,v_storage,v_ua,v_ref,v_landing,v_actual,
+     v_webdriver,case when v_suspect then 'suspected_bot' else 'unknown' end,
      case when coalesce(v_webdriver,false) then 'client_webdriver'
-          when v_suspect then 'user_agent_pattern' else 'insufficient_signal' end, 0, false)
+          when v_suspect then 'user_agent_pattern' else 'insufficient_signal' end,0,false)
   on conflict (event_token) do nothing;
   if not found then return false; end if;
   return true;
 end;
 $$;
-
- then v_ref := null; end if;
-  if (p_context->>'session_id') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
-  if exists (
-    select 1 from public.content_view_events
-    where visitor_id = p_visitor_id and content_key = v_key
-      and viewed_at > now() - interval '24 hours'
-  ) then return false; end if;
-  if (
-    select count(*) from public.content_view_events
-    where visitor_id = p_visitor_id and viewed_at > now() - interval '24 hours'
-  ) >= 300 then return false; end if;
-
-  insert into public.content_view_events
-    (visitor_id,content_type,content_key,content_path,content_title,previous_content_key)
-  values
-    (p_visitor_id,p_content_type,v_key,v_path,left(coalesce(nullif(btrim(p_content_title),''),v_key),180),
-     case when length(p_previous_content_key) <= 160 then p_previous_content_key else null end);
-  return true;
-end;
-$$;
-
- then
-    v_session := (p_context->>'session_id')::uuid;
-  end if;
-  v_storage := case when p_context->>'storage_type' in ('localStorage','sessionStorage') then p_context->>'storage_type' end;
-  v_status := case when p_context->>'visitor_id_status' in ('new','reused') then p_context->>'visitor_id_status' end;
-  v_landing := left(p_context->>'landing_path',300);
-  v_actual := left(p_context->>'page_path',300);
-  if v_landing !~ '^/(?:food|editorial|cat-food-calculator|dog-food-calculator|guide|about|feed-registration)(?:/[[:alnum:]_%.-]+)*/?$|^/
-  if exists (
-    select 1 from public.content_view_events
-    where visitor_id = p_visitor_id and content_key = v_key
-      and viewed_at > now() - interval '24 hours'
-  ) then return false; end if;
-  if (
-    select count(*) from public.content_view_events
-    where visitor_id = p_visitor_id and viewed_at > now() - interval '24 hours'
-  ) >= 300 then return false; end if;
-
-  insert into public.content_view_events
-    (visitor_id,content_type,content_key,content_path,content_title,previous_content_key)
-  values
-    (p_visitor_id,p_content_type,v_key,v_path,left(coalesce(nullif(btrim(p_content_title),''),v_key),180),
-     case when length(p_previous_content_key) <= 160 then p_previous_content_key else null end);
-  return true;
-end;
-$$;
-
- then v_landing := null; end if;
-  if v_actual !~ '^/(?:food|editorial)(?:/[[:alnum:]_%.-]+)*/?
-  if exists (
-    select 1 from public.content_view_events
-    where visitor_id = p_visitor_id and content_key = v_key
-      and viewed_at > now() - interval '24 hours'
-  ) then return false; end if;
-  if (
-    select count(*) from public.content_view_events
-    where visitor_id = p_visitor_id and viewed_at > now() - interval '24 hours'
-  ) >= 300 then return false; end if;
-
-  insert into public.content_view_events
-    (visitor_id,content_type,content_key,content_path,content_title,previous_content_key)
-  values
-    (p_visitor_id,p_content_type,v_key,v_path,left(coalesce(nullif(btrim(p_content_title),''),v_key),180),
-     case when length(p_previous_content_key) <= 160 then p_previous_content_key else null end);
-  return true;
-end;
-$$;
-
- then v_actual := null; end if;
-  v_webdriver := p_context->'webdriver' = 'true'::jsonb;
-  v_suspect := coalesce(v_webdriver,false) or coalesce(v_ua ~* '(bot|crawler|spider|headless|phantomjs|slurp|python-requests|curl/|wget/)',false);
-  -- Serialize per visitor, including the 300/day cap.
-  perform pg_advisory_xact_lock(hashtextextended(p_visitor_id::text, 0));
-  if exists (
-    select 1 from public.content_view_events
-    where visitor_id = p_visitor_id and content_key = v_key
-      and viewed_at > now() - interval '24 hours'
-  ) then return false; end if;
-  if (
-    select count(*) from public.content_view_events
-    where visitor_id = p_visitor_id and viewed_at > now() - interval '24 hours'
-  ) >= 300 then return false; end if;
-
-  insert into public.content_view_events
-    (visitor_id,content_type,content_key,content_path,content_title,previous_content_key)
-  values
-    (p_visitor_id,p_content_type,v_key,v_path,left(coalesce(nullif(btrim(p_content_title),''),v_key),180),
-     case when length(p_previous_content_key) <= 160 then p_previous_content_key else null end);
-  return true;
-end;
-$$;
-
 
 revoke all on function public.record_content_view_v2(uuid,text,text,text,text,uuid,jsonb) from public;
 grant execute on function public.record_content_view_v2(uuid,text,text,text,text,uuid,jsonb) to anon,authenticated;
