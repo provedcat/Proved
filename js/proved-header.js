@@ -29,7 +29,7 @@
   // Product detail HTML is pre-generated; load once through the common header.
   if (/^\/(?:editorial|food)\//.test(window.location.pathname)) {
     var viewTracker = document.createElement('script');
-    viewTracker.src = '/js/content-view-tracker.js?v=20261110-1';
+    viewTracker.src = '/js/content-view-tracker.js?v=20261125-diagnostics-v2';
     viewTracker.defer = true;
     document.head.appendChild(viewTracker);
   }
